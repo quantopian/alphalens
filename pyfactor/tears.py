@@ -1,27 +1,11 @@
-def create_factor_tear_sheet(factor_cls,
-                             factor_name='factor',
-                             start_date='2015-10-1',
-                             end_date='2016-2-1',
-                             top_liquid=1000,
+def create_factor_tear_sheet(factor_and_fp,
+                             sector_adjust=False,
                              sector_names=None,
                              days=[1, 5, 10],
                              nquantiles = 10,
                              ret_type='normal' # normal, market_excess or beta_excess
                             ):
-    # number of days to plot before and after each factor
-    days_before=5
-    days_after=max(days)+3
 
-    factor = construct_factor_history(factor_cls, start_date=start_date, end_date=end_date,
-                                      factor_name=factor_name, top_liquid=top_liquid,
-                                      sector_names=sector_names)
-    daily_perc_ret = get_daily_returns(factor, start_date, end_date, extra_days_before=days_before,
-                                       extra_days_after=days_after, ret_type=ret_type)
-    #
-    # Pass comulative returns to add_forward_price_movement, in this way we can possible
-    # use market excess returns or beta excess returns for the full factor analysis
-    #
-    factor_and_fp = add_forward_price_movement(factor, days=days, prices=(daily_perc_ret+1.0).cumprod())
     adj_factor_and_fp = sector_adjust_forward_price_moves(factor_and_fp)
 
     # What is the sector-netural rolling mean IC for our different forward price windows?

@@ -1,7 +1,4 @@
 
-
-
-
 def factor_spearman_rank_IC(factor_and_fp, time_rule=None, by_sector=True, factor_name='factor'):
     """
     Computes sector neutral Spearman Rank Correlation based Information Coefficient between
@@ -140,6 +137,7 @@ def quantile_bucket_mean_daily_return(quantile_factor, by_sector=False):
             g_by)[pc_cols].apply(daily_mean_ret)
 
     return mean_ret_by_quantile
+
 
 def quantile_turnover(quantile_factor, quantile):
     """

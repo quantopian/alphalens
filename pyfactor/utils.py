@@ -1,4 +1,4 @@
-def add_forward_price_movement(daily_factor, days=[1, 5, 10], prices=None):
+def add_forward_price_movement(daily_factor, prices, days=[1, 5, 10]):
     """
     Adds N day forward price movements (as percent change) to a factor value
     DataFrame.
@@ -13,7 +13,7 @@ def add_forward_price_movement(daily_factor, days=[1, 5, 10], prices=None):
         Number of days forward to project price movement. One column will be added for each value.
     prices : pd.DataFrame, optional
         Pricing data to use in forward price calculation. Equities as columns, dates as index.
-        If no value is passed, get pricing will be called.
+
 
     Returns
     -------
@@ -26,18 +26,6 @@ def add_forward_price_movement(daily_factor, days=[1, 5, 10], prices=None):
     factor_and_fp = daily_factor.copy()
     if not isinstance(factor_and_fp.index, pd.core.index.MultiIndex):
         factor_and_fp = factor_and_fp.set_index(['date', 'equity'])
-
-    if prices is None:
-        start_date = factor_and_fp.index.levels[0].values.min()
-        end_date = factor_and_fp.index.levels[0].values.max()
-
-        equities = factor_and_fp.index.levels[1].unique()
-
-        time_buffer = pd.Timedelta(days=max(days)+5)
-        prices = get_pricing(equities,
-                             start_date=start_date,
-                             end_date=end_date+time_buffer,
-                             fields='open_price')
 
     col_n = '%s_day_fwd_price_change'
     for i in days:
