@@ -1,4 +1,16 @@
-def plot_daily_ic(factor_and_fp, factor_name='factor'):
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+import matplotlib.pyplot as plt
+
+from performance import *
+import performance as perf
+import utils
+from itertools import izip
+
+
+def plot_daily_ic(daily_ic, return_axes=False):
     """
     Plots Spearman Rank Information Coefficient and IC moving average for a given factor.
     Sector neturalization of forward price movements with sector_adjust_forward_price_moves is
@@ -11,25 +23,131 @@ def plot_daily_ic(factor_and_fp, factor_name='factor'):
     factor_name : string
         Name of factor column on which to compute IC.
     """
+    num_plots = len(daily_ic.columns)
 
-    daily_ic, _ = factor_spearman_rank_IC(factor_and_fp, by_sector=False,
-                                          factor_name=factor_name)
-    ic_cols = get_ic_cols(daily_ic)
-    for col in ic_cols:
-        mean_ic = daily_ic[col].mean()
-        std_ic = daily_ic[col].std()
-        fp_ic = pd.DataFrame(daily_ic[col])
-        fp_ic['1 month moving avg'] = pd.rolling_mean(fp_ic[col], 22)
-        fp_ic.plot(title= "{} {} (sector adjusted)".format(factor_name, col), figsize=(20,10))
-        print('{} mean: {}'.format(col, mean_ic))
-        print('{} stdev: {}'.format(col, std_ic))
-        print('{} mean/stdev: {}'.format(col, mean_ic/std_ic))
-        plt.ylabel('IC')
-        plt.xlabel('date')
-        plt.show()
-        sns.distplot(daily_ic[col].replace(np.nan, 0) ,norm_hist=True)
-        plt.show()
+    f, axes = plt.subplots(num_plots, 1, figsize=(28, num_plots * 12))
+    axes = (a for a in axes.flatten())
 
+    for ax, (days_num, ic) in izip(axes, daily_ic.iteritems()):
+        title = "{} day IC {}".format(days_num,
+                   "(sector adjusted)" if is_sector_adjusted else "")
+        mean_ic = ic.mean()
+        std_ic = ic.std()
+        ic_df = (pd.DataFrame(ic.rename("{} day IC".format(days_num)))
+                 .assign(**{'1 month moving avg': ic.rolling(22).mean()})
+                 .plot(title=title, alpha=0.7, ax=ax))
+        ax.text(.01, .95, 'mean: {0:.4f}'.format(mean_ic),
+            ha='left', va='center', transform=ax.transAxes)
+        ax.text(.01, .91, 'stdev: {0:.4f}'.format(std_ic),
+            ha='left', va='center', transform=ax.transAxes)
+        ax.text(.01, .87, 'mean/stdev: {0:.4f}'.format(mean_ic/std_ic),
+            ha='left', va='center', transform=ax.transAxes)
+        ax.set(ylabel='IC', xlabel='date')
+    plt.show()
+
+    v_spaces = num_plots // 3
+    f, axes = plt.subplots(v_spaces, 3, figsize=(28, v_spaces * 8))
+    axes = (a for a in axes.flatten())
+
+    for ax, (days_num, ic) in izip(axes, daily_ic.iteritems()):
+        sns.distplot(ic.replace(np.nan, 0), norm_hist=True, ax=ax)
+        ax.set(title="%s day IC" % days_num, xlabel='IC')
+    plt.show()
+
+
+
+def plot_quantile_returns(factor_and_fp, by_sector=True, quantiles=5, factor_name='factor'):
+    """
+    Plots sector-wise mean daily returns for factor quantiles
+    across provided forward price movement columns.
+
+    Parameters
+    ----------
+    factor_and_fp : pd.DataFrame
+        DataFrame with date, equity, factor, and forward price movement columns.
+    by_sector : boolean
+        Disagregate figures by sector.
+    quantiles : integer
+        Number of quantiles buckets to use in factor bucketing.
+    factor_name : string
+        Name of factor column on which to compute IC.
+    """
+    decile_factor = quantile_bucket_factor(factor_and_fp, by_sector=by_sector, quantiles=quantiles,
+                                           factor_name=factor_name)
+    print decile_factor
+    mean_ret_by_q = quantile_mean_daily_return(decile_factor, by_sector=by_sector)
+
+    if by_sector:
+        f, axes = plt.subplots(6,2, sharex=False, sharey=True, figsize=(20,45))
+        axes = axes.flatten()
+        i = 0
+        for sc, cor in mean_ret_by_q.groupby(level='sector_code'):
+            cor = cor.reset_index().drop('sector_code', axis=1).set_index('factor_quantile')
+            cor.plot(kind='bar', title=sc, ax=axes[i])
+            axes[i].set_xlabel('factor quantile')
+            axes[i].set_ylabel('mean price % change')
+            i+=1
+        fig = plt.gcf()
+        fig.suptitle(factor_name + ": Mean Return By Factor Quantile", fontsize=24, x=.5, y=.93)
+
+    else:
+        mean_ret_by_q.plot(kind='bar',
+                           title="Mean Return By Factor Quantile (sector adjusted)")
+        plt.xlabel('factor quantile')
+        plt.ylabel('mean daily price % change')
+
+    plt.show()
+
+def plot_quantile_returns_box(factor_and_fp, by_sector=True, quantiles=5, factor_name='factor'):
+    """
+    Plots sector-wise mean daily returns as boxplot for factor quantiles
+    across provided forward price movement columns.
+
+    Parameters
+    ----------
+    factor_and_fp : pd.DataFrame
+        DataFrame with date, equity, factor, and forward price movement columns.
+    by_sector : boolean
+        Disagregate figures by sector.
+    quantiles : integer
+        Number of quantiles buckets to use in factor bucketing.
+    factor_name : string
+        Name of factor column on which to compute IC.
+    """
+    decile_factor = quantile_bucket_factor(factor_and_fp, by_sector=by_sector, quantiles=quantiles,
+                                           factor_name=factor_name)
+    fwd_days, pc_cols = utils.get_price_move_cols(decile_factor)
+
+    if by_sector:
+        f, axes = plt.subplots(6,2, sharex=False, sharey=True, figsize=(20,45))
+        axes = axes.flatten()
+        i = 0
+        for sc, cor in decile_factor.groupby(by='sector_code'):
+            cor_box_plot = pd.melt(cor, var_name='fwd_days_price', value_name='%_price_change',
+                                             id_vars=['factor_quantile'], value_vars=pc_cols)
+            # boxplot doesn't sort 'x' by itself
+            cor_box_plot = cor_box_plot.sort(columns='factor_quantile', ascending=True)
+            sns.boxplot(ax=axes[i], x="factor_quantile", y="%_price_change", hue="fwd_days_price", data=cor_box_plot)
+            axes[i].set_xlabel('factor quantile')
+            axes[i].set_ylabel('mean price % change')
+            axes[i].set_title(sc)
+            i+=1
+        fig = plt.gcf()
+        fig.suptitle(factor_name + ": Mean Return By Factor Quantile", fontsize=24, x=.5, y=.93)
+
+    else:
+
+        decile_factor_box_plot = pd.melt(decile_factor, var_name='fwd_days_price', value_name='%_price_change',
+                                 id_vars=['factor_quantile'], value_vars=pc_cols)
+        # boxplot doesn't sort 'x' by itself
+        decile_factor_box_plot = decile_factor_box_plot.sort(columns='factor_quantile', ascending=True)
+        sns.boxplot(x="factor_quantile", y="%_price_change", hue="fwd_days_price", data=decile_factor_box_plot)
+
+        plt.title("Mean Return By Factor Quantile (sector adjusted)")
+        plt.xlabel('factor quantile')
+        plt.ylabel('mean price % change')
+
+    plt.show()
 
 
 def plot_ic_by_sector(factor_and_fp, factor_name='factor'):
@@ -46,7 +164,7 @@ def plot_ic_by_sector(factor_and_fp, factor_name='factor'):
     """
     ic_sector, err_sector = factor_spearman_rank_IC(factor_and_fp, factor_name=factor_name)
 
-    ic_sector.plot(kind='bar' ) #yerr=err_sector
+    ic_sector.plot(kind='bar') #yerr=err_sector
     fig = plt.gcf()
     fig.suptitle("Information Coefficient by Sector", fontsize=16, x=.5, y=.93)
     plt.show()
@@ -85,99 +203,6 @@ def plot_ic_by_sector_over_time(factor_and_fp, time_rule=None, factor_name='fact
     fig = plt.gcf()
     fig.suptitle("Monthly Information Coefficient by Sector", fontsize=16, x=.5, y=.93)
     plt.show()
-
-def plot_quantile_returns(factor_and_fp, by_sector=True, quantiles=5, factor_name='factor'):
-    """
-    Plots sector-wise mean daily returns for factor quantiles
-    across provided forward price movement columns.
-
-    Parameters
-    ----------
-    factor_and_fp : pd.DataFrame
-        DataFrame with date, equity, factor, and forward price movement columns.
-    by_sector : boolean
-        Disagregate figures by sector.
-    quantiles : integer
-        Number of quantiles buckets to use in factor bucketing.
-    factor_name : string
-        Name of factor column on which to compute IC.
-    """
-    decile_factor = quantile_bucket_factor(factor_and_fp, by_sector=by_sector, quantiles=quantiles,
-                                           factor_name=factor_name)
-    mean_ret_by_q = quantile_bucket_mean_daily_return(decile_factor, by_sector=by_sector)
-
-    if by_sector:
-        f, axes = plt.subplots(6,2, sharex=False, sharey=True, figsize=(20,45))
-        axes = axes.flatten()
-        i = 0
-        for sc, cor in mean_ret_by_q.groupby(level='sector_code'):
-            cor = cor.reset_index().drop('sector_code', axis=1).set_index('factor_bucket')
-            cor.plot(kind='bar', title=sc, ax=axes[i])
-            axes[i].set_xlabel('factor quantile')
-            axes[i].set_ylabel('mean price % change')
-            i+=1
-        fig = plt.gcf()
-        fig.suptitle(factor_name + ": Mean Return By Factor Quantile", fontsize=24, x=.5, y=.93)
-
-    else:
-        mean_ret_by_q.plot(kind='bar',
-                           title="Mean Return By Factor Quantile (sector adjusted)")
-        plt.xlabel('factor quantile')
-        plt.ylabel('mean daily price % change')
-
-    plt.show()
-
-def plot_quantile_returns_box(factor_and_fp, by_sector=True, quantiles=5, factor_name='factor'):
-    """
-    Plots sector-wise mean daily returns as boxplot for factor quantiles
-    across provided forward price movement columns.
-
-    Parameters
-    ----------
-    factor_and_fp : pd.DataFrame
-        DataFrame with date, equity, factor, and forward price movement columns.
-    by_sector : boolean
-        Disagregate figures by sector.
-    quantiles : integer
-        Number of quantiles buckets to use in factor bucketing.
-    factor_name : string
-        Name of factor column on which to compute IC.
-    """
-    decile_factor = quantile_bucket_factor(factor_and_fp, by_sector=by_sector, quantiles=quantiles,
-                                           factor_name=factor_name)
-    fwd_days, pc_cols = get_price_move_cols(decile_factor)
-
-    if by_sector:
-        f, axes = plt.subplots(6,2, sharex=False, sharey=True, figsize=(20,45))
-        axes = axes.flatten()
-        i = 0
-        for sc, cor in decile_factor.groupby(by='sector_code'):
-            cor_box_plot = pd.melt(cor, var_name='fwd_days_price', value_name='%_price_change',
-                                             id_vars=['factor_bucket'], value_vars=pc_cols)
-            # boxplot doesn't sort 'x' by itself
-            cor_box_plot = cor_box_plot.sort(columns='factor_bucket', ascending=True)
-            sns.boxplot(ax=axes[i], x="factor_bucket", y="%_price_change", hue="fwd_days_price", data=cor_box_plot)
-            axes[i].set_xlabel('factor quantile')
-            axes[i].set_ylabel('mean price % change')
-            axes[i].set_title(sc)
-            i+=1
-        fig = plt.gcf()
-        fig.suptitle(factor_name + ": Mean Return By Factor Quantile", fontsize=24, x=.5, y=.93)
-
-    else:
-
-        decile_factor_box_plot = pd.melt(decile_factor, var_name='fwd_days_price', value_name='%_price_change',
-                                 id_vars=['factor_bucket'], value_vars=pc_cols)
-        # boxplot doesn't sort 'x' by itself
-        decile_factor_box_plot = decile_factor_box_plot.sort(columns='factor_bucket', ascending=True)
-        sns.boxplot(x="factor_bucket", y="%_price_change", hue="fwd_days_price", data=decile_factor_box_plot)
-
-        plt.title("Mean Return By Factor Quantile (sector adjusted)")
-        plt.xlabel('factor quantile')
-        plt.ylabel('mean price % change')
-
-    plt.show()
-
 
 def plot_factor_rank_auto_correlation(daily_factor, time_rule='W', factor_name='factor'):
     """
@@ -295,7 +320,7 @@ def plot_quantile_cumulative_return(factor_and_fp, daily_perc_ret, quantiles=5, 
 
     cumulative_returns = {}
 
-    for fb, cor in decile_factor.groupby(by='factor_bucket'):
+    for fb, cor in decile_factor.groupby(by='factor_quantile'):
         cumulative_returns[fb] = build_cumulative_returns_series(cor, daily_perc_ret, days_before, days_after, day_zero_align)
 
     palette = sns.color_palette("coolwarm", len(cumulative_returns))
