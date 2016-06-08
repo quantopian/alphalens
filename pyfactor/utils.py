@@ -1,3 +1,7 @@
+import pandas as pd
+import numpy as np
+
+
 def add_forward_price_movement(daily_factor, prices, days=[1, 5, 10]):
     """
     Adds N day forward price movements (as percent change) to a factor value
@@ -23,16 +27,17 @@ def add_forward_price_movement(daily_factor, prices, days=[1, 5, 10]):
         price movement columns.
 
     """
-    factor_and_fp = daily_factor.copy()
-    if not isinstance(factor_and_fp.index, pd.core.index.MultiIndex):
-        factor_and_fp = factor_and_fp.set_index(['date', 'equity'])
+    if isinstance(daily_factor, pd.Series):
+    	factor_and_fp = pd.DataFrame(daily_factor)
+    elif not isinstance(daily_factor.index, pd.core.index.MultiIndex):
+        factor_and_fp = daily_factor.set_index(['date', 'equity'])
+    else:
+    	factor_and_fp = daily_factor.copy()
 
     col_n = '%s_day_fwd_price_change'
     for i in days:
         delta = prices.pct_change(i).shift(-i)
         factor_and_fp[col_n%i] = delta.stack()
-
-    factor_and_fp = factor_and_fp.reset_index()
 
     return factor_and_fp
 
