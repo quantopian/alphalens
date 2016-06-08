@@ -62,12 +62,12 @@ def sector_adjust_forward_price_moves(prices):
         price movement columns, each normalized by sector.
 
     """
-    adj_factor_and_fp = factor_and_fp.copy()
+    adj_prices = prices.copy()
 
-    adj_factor_and_fp[pc_cols] = factor_and_fp.groupby(['date', 'sector_code'])[pc_cols].apply(
+    adj_prices = factor_and_fp.groupby(levels=['date', 'sector_code']).apply(
              lambda x: x - x.mean())
 
-    return adj_factor_and_fp
+    return adj_prices
 
 def build_cumulative_returns_series(factor_and_fp, daily_perc_ret, days_before, days_after, day_zero_align=False):
     """
