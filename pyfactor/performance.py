@@ -1,5 +1,9 @@
 
-def factor_spearman_rank_IC(factor_and_fp, time_rule=None, by_sector=True, factor_name='factor'):
+import pandas as pd
+import numpy as np
+import scipy as sp
+
+def factor_spearman_rank_IC(factor, forward_prices, time_rule=None, by_sector=True):
     """
     Computes sector neutral Spearman Rank Correlation based Information Coefficient between
     factor values and N day forward price movements.
@@ -27,23 +31,25 @@ def factor_spearman_rank_IC(factor_and_fp, time_rule=None, by_sector=True, facto
         MultiIndex of date, sector.
 
     """
-    def src_ic(x):
-        cn = "%s_day_IC"
-        ic = pd.Series()
-        for days, col in zip(fwd_days, pc_cols):
-            ic[cn%days] = sp.stats.spearmanr(x[factor_name], x[col])[0]
-        ic['obs_count'] = len(x)
+    def src_ic(group):
+        ic = pd.Series(index=forward_prices.columns.values)
+        f = group.pop('factor')
+        for days in forward_prices.columns.values:
+            ic[days] = sp.stats.spearmanr(f, group[days])[0]
+        ic['obs_count'] = len(f)
 
         return ic
 
     def src_std_error(rho, n):
         return np.sqrt((1-rho**2)/(n-2))
 
+    factor_and_fp = pd.merge(pd.DataFrame(factor.rename('factor')),
+    					     forward_prices, how='left', left_index=True,
+    					     right_index=True)
 
-    fwd_days, pc_cols = get_price_move_cols(factor_and_fp)
+    grouper = ['date', 'sector_code'] if by_sector else ['date']
 
-    grpr = ['date', 'sector_code'] if by_sector else ['date']
-    ic = factor_and_fp.groupby(grpr).apply(src_ic)
+    ic = factor_and_fp.groupby(level=grouper).apply(src_ic)
 
     obs_count = ic.pop('obs_count')
     err = ic.apply(lambda x: src_std_error(x, obs_count))
@@ -66,13 +72,13 @@ def factor_spearman_rank_IC(factor_and_fp, time_rule=None, by_sector=True, facto
     return ic, err
 
 
-def quantile_bucket_factor(factor_and_fp, by_sector=True, quantiles=5, factor_name='factor'):
+def quantile_bucket_factor(factor, by_sector=True, quantiles=5):
     """
     Computes daily factor quantiles.
 
     Parameters
     ----------
-    factor_and_fp : pd.DataFrame
+    factor_and_fp : pd.Series
         DataFrame with date, equity, factor, and forward price movement columns.
         Index should be integer. See add_forward_price_movement for more detail.
     by_sector : boolean
@@ -89,20 +95,19 @@ def quantile_bucket_factor(factor_and_fp, by_sector=True, quantiles=5, factor_na
     """
 
     g_by = ['date', 'sector_code'] if by_sector else ['date']
-    factor_and_fp_ = factor_and_fp.copy()
 
-    factor_and_fp_['factor_percentile'] = factor_and_fp_.groupby(
-                g_by)[factor_name].rank(pct=True)
+    factor_percentile = factor.groupby(
+                level=g_by).rank(pct=True)
 
     q_int_width = 1. / quantiles
-    factor_and_fp_['factor_bucket'] = factor_and_fp_.factor_percentile.apply(
+    factor_quantile = factor_percentile.apply(
         lambda x: ((x - .000000001) // q_int_width) + 1)
 
 
-    return factor_and_fp_
+    return factor_quantile
 
 
-def quantile_bucket_mean_daily_return(quantile_factor, by_sector=False):
+def quantile_mean_daily_return(factor_quantile, forward_prices, by_sector=False):
     """
     Computes mean daily returns for factor quantiles across provided forward
     price movement columns.
@@ -123,7 +128,6 @@ def quantile_bucket_mean_daily_return(quantile_factor, by_sector=False):
     mean_returns_by_quantile : pd.DataFrame
         Sector-wise mean daily returns by specified factor quantile.
     """
-    fwd_days, pc_cols = get_price_move_cols(quantile_factor)
 
     def daily_mean_ret(x):
         mean_ret = pd.Series()
@@ -132,7 +136,7 @@ def quantile_bucket_mean_daily_return(quantile_factor, by_sector=False):
 
         return mean_ret
 
-    g_by = ['sector_code', 'factor_bucket'] if by_sector else ['factor_bucket']
+    g_by = ['sector_code', 'factor_quantile'] if by_sector else ['factor_quantile']
     mean_ret_by_quantile = quantile_factor.groupby(
             g_by)[pc_cols].apply(daily_mean_ret)
 
@@ -158,7 +162,7 @@ def quantile_turnover(quantile_factor, quantile):
         Period by period turnover for that quantile.
     """
 
-    quant_names = quantile_factor[quantile_factor.factor_bucket == quantile]
+    quant_names = quantile_factor[quantile_factor.factor_quantile == quantile]
 
     quant_name_sets = quant_names.groupby(['date']).equity.apply(set)
     new_names = (quant_name_sets - quant_name_sets.shift(1)).dropna()
@@ -204,12 +208,3 @@ def factor_rank_autocorrelation(daily_factor, time_rule='W', factor_name='factor
 
     return autocorr
 
-
-def get_price_move_cols(x):
-    pc_cols = [col for col in x.columns.values if 'fwd_price_change' in col]
-    fwd_days = map(lambda x: int(x.split('_')[0]), pc_cols)
-
-    return fwd_days, pc_cols
-
-def get_ic_cols(x):
-    return [col for col in x.columns.values if 'day_IC' in col]
