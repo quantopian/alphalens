@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 
-def add_forward_price_movement(daily_factor, prices, days=[1, 5, 10]):
+def compute_forward_price_movement(prices, days=[1, 5, 10]):
     """
     Adds N day forward price movements (as percent change) to a factor value
     DataFrame.
@@ -27,23 +27,17 @@ def add_forward_price_movement(daily_factor, prices, days=[1, 5, 10]):
         price movement columns.
 
     """
-    if isinstance(daily_factor, pd.Series):
-    	factor_and_fp = pd.DataFrame(daily_factor)
-    elif not isinstance(daily_factor.index, pd.core.index.MultiIndex):
-        factor_and_fp = daily_factor.set_index(['date', 'equity'])
-    else:
-    	factor_and_fp = daily_factor.copy()
 
-    col_n = '%s_day_fwd_price_change'
+    forward_prices = pd.DataFrame(index=pd.MultiIndex.from_product(
+        [prices.index.values, prices.columns.values], names=['date', 'equity']))
     for i in days:
         delta = prices.pct_change(i).shift(-i)
-        factor_and_fp[col_n%i] = delta.stack()
+        forward_prices[i] = delta.stack()
 
-    return factor_and_fp
+    return forward_prices
 
 
-
-def sector_adjust_forward_price_moves(factor_and_fp):
+def sector_adjust_forward_price_moves(prices):
     """
     Convert forward price movements to price movements relative to mean sector price movements.
     This normalization incorperates the assumption of a sector neutral portfolio constraint
@@ -69,7 +63,6 @@ def sector_adjust_forward_price_moves(factor_and_fp):
 
     """
     adj_factor_and_fp = factor_and_fp.copy()
-    pc_cols = [col for col in factor_and_fp.columns.values if 'fwd_price_change' in col]
 
     adj_factor_and_fp[pc_cols] = factor_and_fp.groupby(['date', 'sector_code'])[pc_cols].apply(
              lambda x: x - x.mean())
@@ -114,3 +107,13 @@ def build_cumulative_returns_series(factor_and_fp, daily_perc_ret, days_before, 
         ret_df -= ret_df.iloc[days_before,:]
 
     return ret_df
+
+
+def get_price_move_cols(x):
+    pc_cols = [col for col in x.columns.values if 'fwd_price_change' in col]
+    fwd_days = map(lambda x: int(x.split('_')[0]), pc_cols)
+
+    return fwd_days, pc_cols
+
+def get_ic_cols(x):
+    return [col for col in x.columns.values if 'day_IC' in col]
