@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from IPython.display import display
 
 
 def compute_forward_price_movement(prices, days=[1, 5, 10]):
@@ -109,11 +110,35 @@ def build_cumulative_returns_series(factor_and_fp, daily_perc_ret, days_before, 
     return ret_df
 
 
-def get_price_move_cols(x):
-    pc_cols = [col for col in x.columns.values if 'fwd_price_change' in col]
-    fwd_days = map(lambda x: int(x.split('_')[0]), pc_cols)
+def print_table(table, name=None, fmt=None):
+    """Pretty print a pandas DataFrame.
 
-    return fwd_days, pc_cols
+    Uses HTML output if running inside Jupyter Notebook, otherwise
+    formatted text output.
 
-def get_ic_cols(x):
-    return [col for col in x.columns.values if 'day_IC' in col]
+    Parameters
+    ----------
+    table : pandas.Series or pandas.DataFrame
+        Table to pretty-print.
+    name : str, optional
+        Table name to display in upper left corner.
+    fmt : str, optional
+        Formatter to use for displaying table elements.
+        E.g. '{0:.2f}%' for displaying 100 as '100.00%'.
+        Restores original setting after displaying.
+
+    """
+    if isinstance(table, pd.Series):
+        table = pd.DataFrame(table)
+
+    if fmt is not None:
+        prev_option = pd.get_option('display.float_format')
+        pd.set_option('display.float_format', lambda x: fmt.format(x))
+
+    if name is not None:
+        table.columns.name = name
+
+    display(table)
+
+    if fmt is not None:
+        pd.set_option('display.float_format', prev_option)
