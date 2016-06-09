@@ -4,13 +4,14 @@ import seaborn as sns
 
 import matplotlib.pyplot as plt
 
-from performance import *
 import performance as perf
 import utils
 from itertools import izip
 
 
-def plot_daily_ic(daily_ic, return_axes=False):
+#### Begin Refactored ####
+
+def plot_daily_ic_ts(daily_ic, return_ax=False, is_sector_adjusted=False):
     """
     Plots Spearman Rank Information Coefficient and IC moving average for a given factor.
     Sector neturalization of forward price movements with sector_adjust_forward_price_moves is
@@ -28,35 +29,46 @@ def plot_daily_ic(daily_ic, return_axes=False):
     f, axes = plt.subplots(num_plots, 1, figsize=(28, num_plots * 12))
     axes = (a for a in axes.flatten())
 
+    summary_stats = pd.DataFrame(columns=['mean', 'std'])
     for ax, (days_num, ic) in izip(axes, daily_ic.iteritems()):
         title = "{} day IC {}".format(days_num,
                    "(sector adjusted)" if is_sector_adjusted else "")
-        mean_ic = ic.mean()
-        std_ic = ic.std()
+        summary_stats.loc["%i day IC" % days_num] = [ic.mean(), ic.std()]
+
         ic_df = (pd.DataFrame(ic.rename("{} day IC".format(days_num)))
                  .assign(**{'1 month moving avg': ic.rolling(22).mean()})
                  .plot(title=title, alpha=0.7, ax=ax))
-        ax.text(.01, .95, 'mean: {0:.4f}'.format(mean_ic),
-            ha='left', va='center', transform=ax.transAxes)
-        ax.text(.01, .91, 'stdev: {0:.4f}'.format(std_ic),
-            ha='left', va='center', transform=ax.transAxes)
-        ax.text(.01, .87, 'mean/stdev: {0:.4f}'.format(mean_ic/std_ic),
-            ha='left', va='center', transform=ax.transAxes)
+        # ax.text(.01, .95, 'mean: {0:.4f}'.format(mean_ic),
+        #     ha='left', va='center', transform=ax.transAxes)
+        # ax.text(.01, .91, 'stdev: {0:.4f}'.format(std_ic),
+        #     ha='left', va='center', transform=ax.transAxes)
+        # ax.text(.01, .87, 'mean/stdev: {0:.4f}'.format(mean_ic/std_ic),
+        #     ha='left', va='center', transform=ax.transAxes)
         ax.set(ylabel='IC', xlabel='date')
+
+    summary_stats['mean/std'] = summary_stats['mean'] / summary_stats['std']
+    utils.print_table(summary_stats)
     plt.show()
+
+    if return_ax:
+        return axes
+
+def plot_daily_ic_hist(daily_ic, return_ax=False):
+    num_plots = len(daily_ic.columns)
 
     v_spaces = num_plots // 3
     f, axes = plt.subplots(v_spaces, 3, figsize=(28, v_spaces * 8))
     axes = (a for a in axes.flatten())
 
     for ax, (days_num, ic) in izip(axes, daily_ic.iteritems()):
-        sns.distplot(ic.replace(np.nan, 0), norm_hist=True, ax=ax)
+        sns.distplot(ic.replace(np.nan, 0.), norm_hist=True, ax=ax)
         ax.set(title="%s day IC" % days_num, xlabel='IC')
     plt.show()
 
+    if return_ax:
+        return axes
 
-
-def plot_quantile_returns(factor_and_fp, by_sector=True, quantiles=5, factor_name='factor'):
+def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, quantiles=5):
     """
     Plots sector-wise mean daily returns for factor quantiles
     across provided forward price movement columns.
@@ -72,31 +84,73 @@ def plot_quantile_returns(factor_and_fp, by_sector=True, quantiles=5, factor_nam
     factor_name : string
         Name of factor column on which to compute IC.
     """
-    decile_factor = quantile_bucket_factor(factor_and_fp, by_sector=by_sector, quantiles=quantiles,
-                                           factor_name=factor_name)
-    print decile_factor
-    mean_ret_by_q = quantile_mean_daily_return(decile_factor, by_sector=by_sector)
-
     if by_sector:
         f, axes = plt.subplots(6,2, sharex=False, sharey=True, figsize=(20,45))
         axes = axes.flatten()
-        i = 0
-        for sc, cor in mean_ret_by_q.groupby(level='sector_code'):
+
+        for i, (sc, cor) in enumerate(mean_ret_by_q.groupby(level='sector_code')):
             cor = cor.reset_index().drop('sector_code', axis=1).set_index('factor_quantile')
             cor.plot(kind='bar', title=sc, ax=axes[i])
             axes[i].set_xlabel('factor quantile')
             axes[i].set_ylabel('mean price % change')
-            i+=1
+
         fig = plt.gcf()
         fig.suptitle(factor_name + ": Mean Return By Factor Quantile", fontsize=24, x=.5, y=.93)
 
     else:
+        f, ax = plt.subplots(1,1, figsize=(28,12))
         mean_ret_by_q.plot(kind='bar',
-                           title="Mean Return By Factor Quantile (sector adjusted)")
-        plt.xlabel('factor quantile')
-        plt.ylabel('mean daily price % change')
+                           title="Mean Return By Factor Quantile",
+                           ax=ax)
+        ax.set(xlabel='factor quantile', ylabel='mean daily price % change')
 
     plt.show()
+
+
+def plot_quantile_cumulative_return(cum_ret_by_q):
+    """
+    Plots sector-wise mean daily returns for factor quantiles
+    across provided forward price movement columns.
+
+    Parameters
+    ----------
+    factor_and_fp : pd.DataFrame
+        DataFrame with date, equity, factor, and forward price movement columns.
+    daily_perc_ret : pd.DataFrame
+        Pricing data to use in cumulative return calculation. Equities as columns, dates as index.
+    quantiles : integer
+        Number of quantiles buckets to use in factor bucketing.
+    by_quantile : boolean
+        Disagregate figures by quantile.
+    factor_name : string
+        Name of factor column on which to compute IC.
+    days_before : int
+        How many days to plot before the factor is calculated
+    days_after  : int
+        How many days to plot after the factor is calculated
+    day_zero_align : boolean
+         Aling returns at day 0 (timeseries is 0 at day 0)
+    std_bar : boolean
+        Plot standard deviation plot
+    """
+
+    palette = sns.color_palette("coolwarm", len(cum_ret_by_q.columns))
+
+    f, ax = plt.subplots(1,1, figsize=(28,12))
+    for i, (quantile, cum_returns) in enumerate(cum_ret_by_q.iteritems()):
+        label = 'Quantile ' + str(quantile)
+        sns.tsplot(ax=ax, data=cum_returns.values, condition=label,
+                        legend=True, color=palette[i], time=cum_returns.index)
+
+    # mark day zero with a vertical line
+    ax.axvline(x=0, color='k', linestyle='--')
+    plt.xlabel('Days')
+    plt.ylabel('% return')
+    plt.title("Cumulative returns by quantile")
+
+    plt.show()
+
+#### End Refactored #####
 
 def plot_quantile_returns_box(factor_and_fp, by_sector=True, quantiles=5, factor_name='factor'):
     """
@@ -287,85 +341,4 @@ def plot_factor_vs_fwdprice_distribution(factor_and_fp, factor_name='factor', re
 
 
 
-def plot_quantile_cumulative_return(factor_and_fp, daily_perc_ret, quantiles=5, by_quantile = False,
-                                    factor_name='factor', days_before = 15, days_after = 15,
-                                    day_zero_align = True, std_bar = True):
-    """
-    Plots sector-wise mean daily returns for factor quantiles
-    across provided forward price movement columns.
 
-    Parameters
-    ----------
-    factor_and_fp : pd.DataFrame
-        DataFrame with date, equity, factor, and forward price movement columns.
-    daily_perc_ret : pd.DataFrame
-        Pricing data to use in cumulative return calculation. Equities as columns, dates as index.
-    quantiles : integer
-        Number of quantiles buckets to use in factor bucketing.
-    by_quantile : boolean
-        Disagregate figures by quantile.
-    factor_name : string
-        Name of factor column on which to compute IC.
-    days_before : int
-        How many days to plot before the factor is calculated
-    days_after  : int
-        How many days to plot after the factor is calculated
-    day_zero_align : boolean
-         Aling returns at day 0 (timeseries is 0 at day 0)
-    std_bar : boolean
-        Plot standard deviation plot
-    """
-    decile_factor = quantile_bucket_factor(factor_and_fp, by_sector=False, quantiles=quantiles,
-                                           factor_name=factor_name)
-
-    cumulative_returns = {}
-
-    for fb, cor in decile_factor.groupby(by='factor_quantile'):
-        cumulative_returns[fb] = build_cumulative_returns_series(cor, daily_perc_ret, days_before, days_after, day_zero_align)
-
-    palette = sns.color_palette("coolwarm", len(cumulative_returns))
-
-    if by_quantile:
-        nrows=int(round(len(cumulative_returns)/2.0))
-        ncols=2
-        fig, axes = plt.subplots(nrows, ncols, figsize=(20,45))
-        axes = axes.flatten()
-        i = 0
-        for fb, ret_df in cumulative_returns.iteritems():
-            # plot cumulative returs
-            label = 'Quantile ' + str(fb)
-            sns.tsplot(ax=axes[i], data=ret_df.T.values, condition=label, legend=True, color=palette[i], time=ret_df.index)
-                       # , err_style="unit_traces") for single traces
-            axes[i].set_ylabel('% return')
-            # plot std dev bars
-            if std_bar:
-                mean = ret_df.mean(axis=1)
-                std  = ret_df.std(axis=1)
-                axes[i].errorbar(ret_df.index, mean, yerr=std, fmt='-o', color=palette[i])
-            # mark day zero with a vertical line
-            axes[i].axvline(x=0, color='k', linestyle='--')
-            i+=1
-        fig = plt.gcf()
-        fig.suptitle("Cumulative returns by quantile", fontsize=24, x=.5, y=.93)
-
-    else:
-        # plot cumulative returs
-        ax = None
-        i = 0
-        for fb, ret_df in cumulative_returns.iteritems():
-            label = 'Quantile ' + str(fb)
-            ax = sns.tsplot(ax=ax, data=ret_df.T.values, condition=label, legend=True, color=palette[i], time=ret_df.index)
-                            # , err_style="unit_traces") for single traces
-            # plot std dev bars
-            if std_bar:
-                mean = ret_df.mean(axis=1)
-                std  = ret_df.std(axis=1)
-                ax.errorbar(ret_df.index, mean, yerr=std, fmt='-o', color=palette[i])
-            i+=1
-        # mark day zero with a vertical line
-        ax.axvline(x=0, color='k', linestyle='--')
-        plt.xlabel('Days')
-        plt.ylabel('% return')
-        plt.title("Cumulative returns by quantile")
-
-    plt.show()
