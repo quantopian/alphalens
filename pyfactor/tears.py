@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
-
 import utils
 from plotting import *
 import performance as perf
+
 
 def create_factor_tear_sheet(factor,
                              prices,
@@ -23,7 +23,7 @@ def create_factor_tear_sheet(factor,
 
     forward_prices = utils.compute_forward_price_movement(prices, days=days)
 
-    daily_ic, _ = perf.factor_spearman_rank_IC(factor, forward_prices, by_sector=False)
+    daily_ic, _ = perf.factor_information_coefficient(factor, forward_prices, by_sector=False)
 
     quantile_factor = perf.quantize_factor(factor, by_sector=sector_adjust,
                                            quantiles=nquantiles)
