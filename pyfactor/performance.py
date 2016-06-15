@@ -13,7 +13,8 @@ def factor_information_coefficient(factor, forward_returns, time_rule=None, by_s
     factor : pandas.Series - MultiIndex
         A list of equities and their factor values indexed by date.
     forward_returns : pandas.DataFrame - MultiIndex
-        A list of equities and their N day forward returns where each column is N days
+        A list of equities and their N day forward returns where each column contains
+        the N day forward returns
     time_rule : string, optional
         Time span to use in Pandas DateTimeIndex grouping reduction.
         See http://pandas.pydata.org/pandas-docs/stable/timeseries.html for available options.

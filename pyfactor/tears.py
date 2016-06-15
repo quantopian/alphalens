@@ -21,7 +21,7 @@ def create_factor_tear_sheet(factor,
     if sector_adjust:
         pricing = utils.sector_adjust_forward_price_moves(prices)
 
-    forward_prices = utils.compute_forward_price_movement(prices, days=days)
+    forward_prices = utils.compute_forward_returns(prices, days=days)
 
     daily_ic, _ = perf.factor_information_coefficient(factor, forward_prices, by_sector=False)
 

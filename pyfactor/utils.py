@@ -3,39 +3,29 @@ import numpy as np
 from IPython.display import display
 
 
-def compute_forward_price_movement(prices, days=[1, 5, 10]):
+def compute_forward_returns(prices, days=[1, 5, 10]):
     """
-    Adds N day forward price movements (as percent change) to a factor value
-    DataFrame.
-
+    Finds the N day forward returns (as percent change) for each equity provided.
     Parameters
     ----------
-    daily_factor : pd.DataFrame
-        DataFrame with, at minimum, date, equity, factor, columns. Index can be integer or
-        date/equity multiIndex.
-        See construct_factor_history for more detail.
+    prices : pd.DataFrame
+        Pricing data to use in forward price calculation. Equities as columns, dates as index.
     days : list
         Number of days forward to project price movement. One column will be added for each value.
-    prices : pd.DataFrame, optional
-        Pricing data to use in forward price calculation. Equities as columns, dates as index.
-
-
     Returns
     -------
-    factor_and_fp : pd.DataFrame
-        DataFrame with integer index and date, equity, factor, sector
-        code columns with and an arbitary number of N day forward percentage
-        price movement columns.
-
+    forward_returns : pd.DataFrame - MultiIndex
+        DataFrame containg the N day forward returns for a security.
     """
 
-    forward_prices = pd.DataFrame(index=pd.MultiIndex.from_product(
+    forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
         [prices.index.values, prices.columns.values], names=['date', 'equity']))
-    for i in days:
-        delta = prices.pct_change(i).shift(-i)
-        forward_prices[i] = delta.stack()
+    for day in days:
+        delta = prices.pct_change(day).shift(-day)
+        delta.index.tz = None
+        forward_returns[day] = delta.stack()
 
-    return forward_prices
+    return forward_returns
 
 
 def sector_adjust_forward_price_moves(prices):
