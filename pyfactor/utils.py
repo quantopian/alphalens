@@ -127,3 +127,45 @@ def print_table(table, name=None, fmt=None):
 
     if fmt is not None:
         pd.set_option('display.float_format', prev_option)
+
+
+def format_for_sector_data(factor, forward_returns, sectors):
+    """
+    Formats the factor data, forward returns, and sector mappings into DataFrames and Series that
+    contain aligned MultiIndex indices containing date, equity, and sector.
+    ----------
+    ----------
+    factor : pandas.Series - MultiIndex
+        A list of equities and their factor values indexed by date.
+    forward_returns : pandas.DataFrame - MultiIndex
+        A list of equities and their N day forward returns where each column contains
+        the N day forward returns
+    sectors : pd.Series - MultiIndex
+        A list of equities and their sectors
+    Returns
+    -------
+    sector_factor : pd.Series
+        A list of equities and their factor values indexed by date, equity, and sector.
+    forward_returns : pd.DataFrame - MultiIndex
+        A DataFrame of equities and their forward returns indexed by date, equity, and sector.
+        Note: this is the same index as the sector_factor index
+    """
+    merged_forward_returns_data = pd.merge(pd.DataFrame(sectors),
+                                           pd.DataFrame(forward_returns),
+                                           how='left',
+                                           left_index=True,
+                                           right_index=True)
+    merged_data = pd.merge(pd.DataFrame(factor),
+                           merged_forward_returns_data,
+                           how='left',
+                           left_index=True,
+                           right_index=True)
+
+    merged_data = merged_data.set_index([merged_data.index, merged_data["sector"]])
+    merged_data = merged_data.drop("sector", 1)
+    merged_data = merged_data.dropna()
+
+    sector_factor = merged_data.pop("factor")
+    sector_forward_returns = merged_data
+
+    return sector_factor, sector_forward_returns

@@ -63,13 +63,11 @@ def factor_information_coefficient(factor, forward_returns, time_rule=None, by_s
 
         grpr = [pd.TimeGrouper(time_rule), 'sector'] if by_sector else [pd.TimeGrouper(time_rule)]
         ic = ic.groupby(grpr).mean()
-        err = err.groupby(grpr).agg(
-            lambda x: np.sqrt((np.sum(np.power(x, 2)) / len(x))))
+        err = err.groupby(grpr).agg(lambda x: np.sqrt((np.sum(np.power(x, 2)) / len(x))))
     else:
         if by_sector:
             ic = ic.reset_index().groupby(['sector']).mean()
-            err = err.reset_index().groupby(['sector']).agg(
-                lambda x: np.sqrt((np.sum(np.power(x, 2)) / len(x))))
+            err = err.reset_index().groupby(['sector']).agg(lambda x: np.sqrt((np.sum(np.power(x, 2)) / len(x))))
 
     return ic, err
 
@@ -89,8 +87,8 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
 
     Returns
     -------
-    factor_and_fp_ : pd.DataFrame
-        Factor and forward price movements with additional factor quantile column.
+    factor_quantile : pd.Series
+        A list of equities and the quantile the value of their factor falls into.
     """
 
     g_by = ['date', 'sector'] if by_sector else ['date']
@@ -125,7 +123,9 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_prices, by_se
         Sector-wise mean daily returns by specified factor quantile.
     """
     quant_factor_fp = pd.merge(pd.DataFrame(quantized_factor.rename('quantile')),
-                               forward_prices, how='left', left_index=True,
+                               forward_prices,
+                               how='left',
+                               left_index=True,
                                right_index=True)
 
     quant_factor_fp = quant_factor_fp.reset_index().set_index(
@@ -204,16 +204,16 @@ def quantile_turnover(quantile_factor, quantile):
         Period by period turnover for that quantile.
     """
 
-    quant_names = quantile_factor[quantile_factor.factor_quantile == quantile]
-
-    quant_name_sets = quant_names.groupby(['date']).equity.apply(set)
+    quant_names = quantile_factor[quantile_factor == quantile]
+    print quant_names
+    quant_name_sets = quant_names.groupby(level=['date']).equity.apply(set)
     new_names = (quant_name_sets - quant_name_sets.shift(1)).dropna()
     quant_turnover = new_names.apply(lambda x: len(x)) / quant_name_sets.apply(lambda x: len(x))
 
     return quant_turnover
 
 
-def factor_rank_autocorrelation(daily_factor, time_rule='W', factor_name='factor'):
+def factor_rank_autocorrelation(daily_factor, time_rule='W', by_sector=False, factor_name='factor'):
     """
     Computes autocorrelation of mean factor ranks in specified timespans.
     We must compare week to week factor ranks rather than factor values to account for
@@ -238,8 +238,9 @@ def factor_rank_autocorrelation(daily_factor, time_rule='W', factor_name='factor
         Rolling 1 period (defined by time_rule) autocorrelation of factor values.
 
     """
+    g_by = ['date', 'sector'] if by_sector else ['date']
     daily_ranks = daily_factor.copy()
-    daily_ranks[factor_name] = daily_factor.groupby(['date', 'sector'])[factor_name].apply(
+    daily_ranks[factor_name] = daily_factor.groupby(level=g_by)[factor_name].apply(
         lambda x: x.rank(ascending=True))
 
     equity_factor = daily_ranks.pivot(index='date', columns='equity', values=factor_name)
