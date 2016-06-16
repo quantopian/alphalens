@@ -10,8 +10,10 @@ def compute_forward_returns(prices, days=[1, 5, 10]):
     ----------
     prices : pd.DataFrame
         Pricing data to use in forward price calculation. Equities as columns, dates as index.
+        Pricing data must span the factor analysis time period plus an additional buffer window
+        that is greater than the maximum number of expected days in the forward returns calculations.
     days : list
-        Number of days forward to project price movement. One column will be added for each value.
+        Number of days forward to project returns. One column will be added for each value.
     Returns
     -------
     forward_returns : pd.DataFrame - MultiIndex
@@ -57,6 +59,7 @@ def sector_adjust_forward_price_moves(prices):
     adj_prices = factor_and_fp.groupby(levels=['date', 'sector_code']).apply(lambda x: x - x.mean())
 
     return adj_prices
+
 
 def build_cumulative_returns_series(factor_and_fp, daily_perc_ret, days_before, days_after, day_zero_align=False):
     """

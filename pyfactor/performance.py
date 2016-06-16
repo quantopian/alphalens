@@ -33,9 +33,9 @@ def factor_information_coefficient(factor, forward_returns, time_rule=None, by_s
     """
 
     def src_ic(group):
-        ic = pd.Series(index=forward_returns.columns.values)
+        ic = pd.Series(index=forward_returns.columns)
         f = group.pop('factor')
-        for days in forward_returns.columns.values:
+        for days in forward_returns.columns:
             ic[days] = sp.stats.spearmanr(f, group[days])[0]
         ic['obs_count'] = len(f)
 
@@ -105,7 +105,6 @@ def quantize_factor(factor, by_sector=False, quantiles=5):
     factor_quantile = factor_percentile.apply(
         lambda x: ((x - .000000001) // q_int_width) + 1)
 
-
     return factor_quantile
 
 
@@ -140,7 +139,7 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_prices, by_se
 
 
     def daily_mean_ret(group):
-        mean_ret = pd.Series(index=group.columns.values)
+        mean_ret = pd.Series(index=group.columns)
         for day_num, returns in group.iteritems():
             mean_ret[day_num] = returns.mean() / day_num
 
@@ -153,8 +152,7 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_prices, by_se
     return mean_ret_by_quantile
 
 
-def surrounding_cumulative_returns_by_quantile(quantized_factor, prices,
-									days_before, days_after, day_zero_align=True):
+def surrounding_cumulative_returns_by_quantile(quantized_factor, prices, days_before, days_after, day_zero_align=True):
     """
     An equity and date pair is extracted from each row in the input dataframe and for each of
     these pairs a cumulative return time series is built starting 'days_before' days
@@ -172,7 +170,7 @@ def surrounding_cumulative_returns_by_quantile(quantized_factor, prices,
     window = days_before + days_after
 
     surrounding_rets = pd.DataFrame(index=pd.MultiIndex.from_product(
-            [prices.index.values, prices.columns.values], names=['date', 'equity']))
+            [prices.index, prices.columns], names=['date', 'equity']))
     for i in range(-days_before, days_after):
         delta = prices.shift(-i).pct_change(1).shift(-1)
         surrounding_rets[i] = delta.stack()
@@ -258,4 +256,3 @@ def factor_rank_autocorrelation(daily_factor, time_rule='W', factor_name='factor
     autocorr = equity_factor.corrwith(equity_factor.shift(1), axis=1)
 
     return autocorr
-
