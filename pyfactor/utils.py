@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 from IPython.display import display
 
 
@@ -92,11 +91,11 @@ def build_cumulative_returns_series(factor_and_fp, daily_perc_ret, days_before, 
     ret_df.index = range(-days_before, days_after)
 
     # From daily percent returns to comulative returns
-    ret_df = (ret_df  + 1).cumprod() - 1
+    ret_df = (ret_df + 1).cumprod() - 1
 
     # Make returns be 0 at day 0
     if day_zero_align:
-        ret_df -= ret_df.iloc[days_before,:]
+        ret_df -= ret_df.iloc[days_before, :]
 
     return ret_df
 

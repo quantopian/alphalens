@@ -1,8 +1,7 @@
-import pandas as pd
-import numpy as np
-import utils
 from plotting import *
 import performance as perf
+import utils
+import pandas as pd
 
 
 def create_factor_tear_sheet(factor,

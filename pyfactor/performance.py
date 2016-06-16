@@ -42,7 +42,7 @@ def factor_information_coefficient(factor, forward_returns, time_rule=None, by_s
         return _ic
 
     def src_std_error(rho, n):
-        return np.sqrt((1-rho**2)/(n-2))
+        return np.sqrt((1 - rho ** 2) / (n - 2))
 
     factor_and_fp = pd.merge(pd.DataFrame(factor.rename('factor')),
                              forward_returns,
@@ -64,12 +64,12 @@ def factor_information_coefficient(factor, forward_returns, time_rule=None, by_s
         grpr = [pd.TimeGrouper(time_rule), 'sector_code'] if by_sector else [pd.TimeGrouper(time_rule)]
         ic = ic.groupby(grpr).mean()
         err = err.groupby(grpr).agg(
-            lambda x: np.sqrt((np.sum(np.power(x, 2))/len(x))))
+            lambda x: np.sqrt((np.sum(np.power(x, 2)) / len(x))))
     else:
         if by_sector:
             ic = ic.reset_index().groupby(['sector_code']).mean()
             err = err.reset_index().groupby(['sector_code']).agg(
-                lambda x: np.sqrt((np.sum(np.power(x, 2))/len(x))))
+                lambda x: np.sqrt((np.sum(np.power(x, 2)) / len(x))))
 
     return ic, err
 
@@ -136,7 +136,6 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_prices, by_se
     quant_factor_fp = quant_factor_fp.reset_index().set_index(
         ['date', 'equity', 'sector_code', 'quantile'] if by_sector
         else ['date', 'equity', 'quantile'])
-
 
     def daily_mean_ret(group):
         mean_ret = pd.Series(index=group.columns)

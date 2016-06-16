@@ -2,3 +2,7 @@
 *.xml
 
 *.iml
+
+*.pyc
+
+*.ipynb

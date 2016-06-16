@@ -97,7 +97,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, quantiles=5):
         fig.suptitle(factor_name + ": Mean Return By Factor Quantile", fontsize=24, x=.5, y=.93)
 
     else:
-        f, ax = plt.subplots(1, 1, figsize=(28,12))
+        f, ax = plt.subplots(1, 1, figsize=(28, 12))
         mean_ret_by_q.plot(kind='bar',
                            title="Mean Return By Factor Quantile",
                            ax=ax)
@@ -223,7 +223,7 @@ def plot_ic_by_sector(factor_and_fp, factor_name='factor'):
     factor_name : string
         Name of factor column on which to compute IC.
     """
-    ic_sector, err_sector = factor_spearman_rank_IC(factor_and_fp, factor_name=factor_name)
+    ic_sector, err_sector = perf.factor_information_coefficient(factor_and_fp, factor_name=factor_name)
 
     ic_sector.plot(kind='bar') #yerr=err_sector
     fig = plt.gcf()
@@ -246,7 +246,7 @@ def plot_ic_by_sector_over_time(factor_and_fp, time_rule=None, factor_name='fact
     factor_name : string
         Name of factor column on which to compute IC.
     """
-    ic_time, err_time = factor_spearman_rank_IC(factor_and_fp, time_rule=time_rule,
+    ic_time, err_time = perf.factor_information_coefficient(factor_and_fp, time_rule=time_rule,
                                                 factor_name=factor_name)
     ic_time = ic_time.reset_index()
     err_time = err_time.reset_index()
@@ -281,7 +281,7 @@ def plot_factor_rank_auto_correlation(daily_factor, time_rule='W', factor_name='
         Name of factor column on which to compute IC.
     """
 
-    fa = factor_rank_autocorrelation(daily_factor, time_rule=time_rule, factor_name=factor_name)
+    fa = perf.factor_rank_autocorrelation(daily_factor, time_rule=time_rule, factor_name=factor_name)
     print "Mean rank autocorrelation: " + str(fa.mean())
     fa.plot(title='Week-to-Week Factor Rank Autocorrelation')
     plt.ylabel('autocorrelation coefficient')
