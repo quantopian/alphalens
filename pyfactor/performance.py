@@ -3,7 +3,7 @@ import numpy as np
 import scipy as sp
 
 
-def factor_information_coefficient(factor, forward_returns, time_rule=None, by_sector=True):
+def factor_information_coefficient(factor, forward_returns, time_rule=None, by_sector=False):
     """
     Computes sector neutral Spearman Rank Correlation based Information Coefficient between
     factor values and N day forward returns.
@@ -74,21 +74,18 @@ def factor_information_coefficient(factor, forward_returns, time_rule=None, by_s
     return ic, err
 
 
-def quantize_factor(factor, by_sector=False, quantiles=5):
+def quantize_factor(factor, quantiles=5, by_sector=False):
     """
     Computes daily factor quantiles.
 
     Parameters
     ----------
-    factor_and_fp : pd.Series
-        DataFrame with date, equity, factor, and forward price movement columns.
-        Index should be integer. See add_forward_price_movement for more detail.
-    by_sector : boolean
-        If True, compute quantile buckets separately for each sector.
+    factor : pandas.Series - MultiIndex
+        A list of equities and their factor values indexed by date.
     quantiles : integer
         Number of quantiles buckets to use in factor bucketing.
-    factor_name : string
-        Name of factor column on which to compute quantiles.
+    by_sector : boolean
+        If True, compute quantile buckets separately for each sector.
 
     Returns
     -------
@@ -96,14 +93,12 @@ def quantize_factor(factor, by_sector=False, quantiles=5):
         Factor and forward price movements with additional factor quantile column.
     """
 
-    g_by = ['date', 'sector_code'] if by_sector else ['date']
+    g_by = ['date', 'sector'] if by_sector else ['date']
 
-    factor_percentile = factor.groupby(
-                level=g_by).rank(pct=True)
+    factor_percentile = factor.groupby(level=g_by).rank(pct=True)
 
     q_int_width = 1. / quantiles
-    factor_quantile = factor_percentile.apply(
-        lambda x: ((x - .000000001) // q_int_width) + 1)
+    factor_quantile = factor_percentile.apply(lambda x: ((x - .000000001) // q_int_width) + 1)
 
     return factor_quantile
 
@@ -134,7 +129,7 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_prices, by_se
                                right_index=True)
 
     quant_factor_fp = quant_factor_fp.reset_index().set_index(
-        ['date', 'equity', 'sector_code', 'quantile'] if by_sector
+        ['date', 'equity', 'sector', 'quantile'] if by_sector
         else ['date', 'equity', 'quantile'])
 
     def daily_mean_ret(group):
@@ -144,7 +139,7 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_prices, by_se
 
         return mean_ret
 
-    g_by = ['sector_code', 'quantile'] if by_sector else ['quantile']
+    g_by = ['sector', 'quantile'] if by_sector else ['quantile']
     mean_ret_by_quantile = quant_factor_fp.groupby(level=g_by).apply(daily_mean_ret)
 
     return mean_ret_by_quantile
@@ -244,7 +239,7 @@ def factor_rank_autocorrelation(daily_factor, time_rule='W', factor_name='factor
 
     """
     daily_ranks = daily_factor.copy()
-    daily_ranks[factor_name] = daily_factor.groupby(['date', 'sector_code'])[factor_name].apply(
+    daily_ranks[factor_name] = daily_factor.groupby(['date', 'sector'])[factor_name].apply(
         lambda x: x.rank(ascending=True))
 
     equity_factor = daily_ranks.pivot(index='date', columns='equity', values=factor_name)
