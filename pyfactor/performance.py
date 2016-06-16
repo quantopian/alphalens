@@ -50,7 +50,7 @@ def factor_information_coefficient(factor, forward_returns, time_rule=None, by_s
                              left_index=True,
                              right_index=True)
 
-    grouper = ['date', 'sector_code'] if by_sector else ['date']
+    grouper = ['date', 'sector'] if by_sector else ['date']
 
     ic = factor_and_fp.groupby(level=grouper).apply(src_ic)
 
@@ -61,14 +61,14 @@ def factor_information_coefficient(factor, forward_returns, time_rule=None, by_s
         ic = ic.reset_index().set_index('date')
         err = err.reset_index().set_index('date')
 
-        grpr = [pd.TimeGrouper(time_rule), 'sector_code'] if by_sector else [pd.TimeGrouper(time_rule)]
+        grpr = [pd.TimeGrouper(time_rule), 'sector'] if by_sector else [pd.TimeGrouper(time_rule)]
         ic = ic.groupby(grpr).mean()
         err = err.groupby(grpr).agg(
             lambda x: np.sqrt((np.sum(np.power(x, 2)) / len(x))))
     else:
         if by_sector:
-            ic = ic.reset_index().groupby(['sector_code']).mean()
-            err = err.reset_index().groupby(['sector_code']).agg(
+            ic = ic.reset_index().groupby(['sector']).mean()
+            err = err.reset_index().groupby(['sector']).agg(
                 lambda x: np.sqrt((np.sum(np.power(x, 2)) / len(x))))
 
     return ic, err

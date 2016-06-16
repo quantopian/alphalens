@@ -18,7 +18,7 @@ def create_factor_tear_sheet(factor,
     end_date = factor.index.levels[0].max()
 
     if sector_adjust:
-        pricing = utils.sector_adjust_forward_price_moves(prices)
+        pricing = utils.sector_adjust_forward_returns(prices)
 
     forward_prices = utils.compute_forward_returns(prices, days=days)
 

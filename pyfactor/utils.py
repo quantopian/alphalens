@@ -28,7 +28,7 @@ def compute_forward_returns(prices, days=(1, 5, 10)):
     return forward_returns
 
 
-def sector_adjust_forward_price_moves(prices):
+def sector_adjust_forward_returns(forward_returns):
     """
     Convert forward price movements to price movements relative to mean sector price movements.
     This normalization incorporates the assumption of a sector neutral portfolio constraint
@@ -41,23 +41,18 @@ def sector_adjust_forward_price_moves(prices):
 
     Parameters
     ----------
-    factor_and_fp : pd.DataFrame
-        DataFrame with date, equity, factor, and forward price movement columns. Index should be integer.
-        See add_forward_price_movement for more detail.
+    forward_returns : pd.DataFrame - MultiIndex
+        DataFrame with date, equity, sector, and forward returns columns.
+        See compute_forward_returns for more detail.
 
     Returns
     -------
-    adj_factor_and_fp : pd.DataFrame
-        DataFrame with integer index and date, equity, factor, sector
-        code columns with and an arbitary number of N day forward percentage
-        price movement columns, each normalized by sector.
+    adjusted_forward_returns : pd.DataFrame - MultiIndex
+        DataFrame of the same format as the input, but with each security's returns normalized by sector.
 
     """
-    adj_prices = prices.copy()
 
-    adj_prices = factor_and_fp.groupby(levels=['date', 'sector_code']).apply(lambda x: x - x.mean())
-
-    return adj_prices
+    return forward_returns.groupby(level=['date', 'sector']).apply(lambda x: x - x.mean())
 
 
 def build_cumulative_returns_series(factor_and_fp, daily_perc_ret, days_before, days_after, day_zero_align=False):
