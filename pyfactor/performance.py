@@ -33,13 +33,13 @@ def factor_information_coefficient(factor, forward_returns, time_rule=None, by_s
     """
 
     def src_ic(group):
-        ic = pd.Series(index=forward_returns.columns)
+        _ic = pd.Series(index=forward_returns.columns)
         f = group.pop('factor')
         for days in forward_returns.columns:
-            ic[days] = sp.stats.spearmanr(f, group[days])[0]
-        ic['obs_count'] = len(f)
+            _ic[days] = sp.stats.spearmanr(f, group[days])[0]
+        _ic['obs_count'] = len(f)
 
-        return ic
+        return _ic
 
     def src_std_error(rho, n):
         return np.sqrt((1-rho**2)/(n-2))
@@ -61,7 +61,7 @@ def factor_information_coefficient(factor, forward_returns, time_rule=None, by_s
         ic = ic.reset_index().set_index('date')
         err = err.reset_index().set_index('date')
 
-        grpr = [pd.TimeGrouper(time_rule),'sector_code'] if by_sector else [pd.TimeGrouper(time_rule)]
+        grpr = [pd.TimeGrouper(time_rule), 'sector_code'] if by_sector else [pd.TimeGrouper(time_rule)]
         ic = ic.groupby(grpr).mean()
         err = err.groupby(grpr).agg(
             lambda x: np.sqrt((np.sum(np.power(x, 2))/len(x))))
@@ -130,11 +130,11 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_prices, by_se
         Sector-wise mean daily returns by specified factor quantile.
     """
     quant_factor_fp = pd.merge(pd.DataFrame(quantized_factor.rename('quantile')),
-                                   forward_prices, how='left', left_index=True,
-                                   right_index=True)
+                               forward_prices, how='left', left_index=True,
+                               right_index=True)
 
     quant_factor_fp = quant_factor_fp.reset_index().set_index(
-        ['date', 'equity', 'sector_code', 'quantile'] if by_sector \
+        ['date', 'equity', 'sector_code', 'quantile'] if by_sector
         else ['date', 'equity', 'quantile'])
 
 
@@ -146,8 +146,7 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_prices, by_se
         return mean_ret
 
     g_by = ['sector_code', 'quantile'] if by_sector else ['quantile']
-    mean_ret_by_quantile = quant_factor_fp.groupby(level=
-            g_by).apply(daily_mean_ret)
+    mean_ret_by_quantile = quant_factor_fp.groupby(level=g_by).apply(daily_mean_ret)
 
     return mean_ret_by_quantile
 

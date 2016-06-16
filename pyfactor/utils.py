@@ -3,7 +3,7 @@ import numpy as np
 from IPython.display import display
 
 
-def compute_forward_returns(prices, days=[1, 5, 10]):
+def compute_forward_returns(prices, days=(1, 5, 10)):
     """
     Finds the N day forward returns (as percent change) for each equity provided.
     Parameters
@@ -83,16 +83,16 @@ def build_cumulative_returns_series(factor_and_fp, daily_perc_ret, days_before, 
         timestamp, equity = row['date'], row['equity']
         timestamp_idx = daily_perc_ret.index.get_loc(timestamp)
         start = timestamp_idx - days_before
-        end   = timestamp_idx + days_after
+        end = timestamp_idx + days_after
         series = daily_perc_ret.ix[start:end, equity]
-        ret_df = pd.concat( [ret_df, series], axis=1, ignore_index=True)
+        ret_df = pd.concat([ret_df, series], axis=1, ignore_index=True)
 
     # Reset index to have the same starting point (from datetime to day offset)
-    ret_df = ret_df.apply(lambda x : x.dropna().reset_index(drop=True), axis=0)
+    ret_df = ret_df.apply(lambda x: x.dropna().reset_index(drop=True), axis=0)
     ret_df.index = range(-days_before, days_after)
 
     # From daily percent returns to comulative returns
-    ret_df  = (ret_df  + 1).cumprod() - 1
+    ret_df = (ret_df  + 1).cumprod() - 1
 
     # Make returns be 0 at day 0
     if day_zero_align:

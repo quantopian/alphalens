@@ -11,7 +11,7 @@ def create_factor_tear_sheet(factor,
                              sector_plots=True,
                              sector_adjust=False,
                              sector_names=None,
-                             days=[1, 5, 10],
+                             days=(1, 5, 10),
                              nquantiles = 10,
                              ret_type='normal' # normal, market_excess or beta_excess
                             ):
