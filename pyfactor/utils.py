@@ -19,10 +19,9 @@ def compute_forward_returns(prices, days=[1, 5, 10]):
     """
 
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
-        [prices.index.values, prices.columns.values], names=['date', 'equity']))
+        [prices.index, prices.columns], names=['date', 'equity']))
     for day in days:
         delta = prices.pct_change(day).shift(-day)
-        delta.index.tz = None
         forward_returns[day] = delta.stack()
 
     return forward_returns
@@ -31,7 +30,7 @@ def compute_forward_returns(prices, days=[1, 5, 10]):
 def sector_adjust_forward_price_moves(prices):
     """
     Convert forward price movements to price movements relative to mean sector price movements.
-    This normalization incorperates the assumption of a sector neutral portfolio constraint
+    This normalization incorporates the assumption of a sector neutral portfolio constraint
     and thus allows allows the factor to be evaluated across sectors.
 
     For example, if AAPL 5 day return is 0.1% and mean 5 day return for the Technology stocks
@@ -55,8 +54,7 @@ def sector_adjust_forward_price_moves(prices):
     """
     adj_prices = prices.copy()
 
-    adj_prices = factor_and_fp.groupby(levels=['date', 'sector_code']).apply(
-             lambda x: x - x.mean())
+    adj_prices = factor_and_fp.groupby(levels=['date', 'sector_code']).apply(lambda x: x - x.mean())
 
     return adj_prices
 
