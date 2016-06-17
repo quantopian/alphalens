@@ -28,7 +28,7 @@ def compute_forward_returns(prices, days=(1, 5, 10)):
     return forward_returns
 
 
-def sector_adjust_forward_returns(forward_returns):
+def demean_forward_returns_by_sector(forward_returns):
     """
     Convert forward price movements to price movements relative to mean sector price movements.
     This normalization incorporates the assumption of a sector neutral portfolio constraint
