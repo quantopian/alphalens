@@ -7,6 +7,22 @@ long_description = ''
 if 'upload' in sys.argv:
     with open('README.md') as f:
         long_description = f.read()
+
+install_reqs = [
+    'funcsigs>=0.4',
+    'matplotlib>=1.4.0',
+    'mock>=1.1.2',
+    'numpy>=1.9.1',
+    'pandas>=0.18.0',
+    'pyparsing>=2.0.3',
+    'python-dateutil>=2.4.2',
+    'pytz>=2014.10',
+    'scipy>=0.14.0',
+    'seaborn>=0.6.0',
+    'pandas-datareader>=0.2',
+    'scikit-learn>=0.17',
+]
+
 if __name__ == "__main__":
     setup(
         name='pyfactor',
@@ -29,5 +45,5 @@ if __name__ == "__main__":
             'Topic :: Utilities',
         ],
         url='https://github.com/quantopian/pyfactor',
-        install_requires=()
+        install_requires=install_reqs
     )

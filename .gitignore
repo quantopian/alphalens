@@ -1,0 +1,8 @@
+
+*.xml
+
+*.iml
+
+*.pyc
+
+*.ipynb
