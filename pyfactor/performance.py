@@ -205,8 +205,7 @@ def quantile_turnover(quantile_factor, quantile):
     """
 
     quant_names = quantile_factor[quantile_factor == quantile]
-    print quant_names
-    quant_name_sets = quant_names.groupby(level=['date']).equity.apply(set)
+    quant_name_sets = quant_names.groupby(level=['date']).apply(lambda x: set(x.index.get_level_values('equity')))
     new_names = (quant_name_sets - quant_name_sets.shift(1)).dropna()
     quant_turnover = new_names.apply(lambda x: len(x)) / quant_name_sets.apply(lambda x: len(x))
 
