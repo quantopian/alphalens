@@ -129,43 +129,50 @@ def print_table(table, name=None, fmt=None):
         pd.set_option('display.float_format', prev_option)
 
 
-def format_for_sector_data(factor, forward_returns, sectors):
+def format_input_data(factor, prices, sectors=None, days=(1, 5, 10)):
     """
-    Formats the factor data, forward returns, and sector mappings into DataFrames and Series that
+    Formats the factor data, pricing data, and sector mappings into DataFrames and Series that
     contain aligned MultiIndex indices containing date, equity, and sector.
     ----------
     ----------
     factor : pandas.Series - MultiIndex
         A list of equities and their factor values indexed by date.
-    forward_returns : pandas.DataFrame - MultiIndex
-        A list of equities and their N day forward returns where each column contains
-        the N day forward returns
+    prices : pd.DataFrame
+        Pricing data to use in forward price calculation. Equities as columns, dates as index.
+        Pricing data must span the factor analysis time period plus an additional buffer window
+        that is greater than the maximum number of expected days in the forward returns calculations.
     sectors : pd.Series - MultiIndex
         A list of equities and their sectors
+    days : list
+        Number of days forward to project returns. One column will be added for each value.
     Returns
     -------
-    sector_factor : pd.Series
-        A list of equities and their factor values indexed by date, equity, and sector.
+    factor : pd.Series
+        A list of equities and their factor values indexed by date, equity, and optionally sector.
     forward_returns : pd.DataFrame - MultiIndex
-        A DataFrame of equities and their forward returns indexed by date, equity, and sector.
-        Note: this is the same index as the sector_factor index
+        A DataFrame of equities and their forward returns indexed by date, equity, and optionally sector.
+        Note: this is the same index as the factor index
     """
-    merged_forward_returns_data = pd.merge(pd.DataFrame(sectors),
-                                           pd.DataFrame(forward_returns),
-                                           how='left',
-                                           left_index=True,
-                                           right_index=True)
+
+    forward_returns = compute_forward_returns(prices, days)
+
     merged_data = pd.merge(pd.DataFrame(factor),
-                           merged_forward_returns_data,
+                           forward_returns,
                            how='left',
                            left_index=True,
                            right_index=True)
+    if sectors is not None:
+        merged_data = pd.merge(pd.DataFrame(sectors),
+                               merged_data,
+                               how='left',
+                               left_index=True,
+                               right_index=True)
+        merged_data = merged_data.set_index([merged_data.index, merged_data["sector"]])
+        merged_data = merged_data.drop("sector", 1)
 
-    merged_data = merged_data.set_index([merged_data.index, merged_data["sector"]])
-    merged_data = merged_data.drop("sector", 1)
     merged_data = merged_data.dropna()
 
-    sector_factor = merged_data.pop("factor")
-    sector_forward_returns = merged_data
+    factor = merged_data.pop("factor")
+    forward_returns = merged_data
 
-    return sector_factor, sector_forward_returns
+    return factor, forward_returns

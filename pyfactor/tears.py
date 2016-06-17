@@ -6,32 +6,31 @@ import pandas as pd
 
 def create_factor_tear_sheet(factor,
                              prices,
-                             factor_name='factor',
+                             sectors=None,
                              sector_plots=True,
-                             sector_adjust=False,
                              sector_names=None,
                              days=(1, 5, 10),
                              nquantiles = 10,
                              ret_type='normal' # normal, market_excess or beta_excess
                             ):
-    start_date = factor.index.levels[0].min()
-    end_date = factor.index.levels[0].max()
+    # start_date = factor.index.levels[0].min()
+    # end_date = factor.index.levels[0].max()
+
+    factor, forward_returns = utils.format_input_data(factor, prices, sectors, days)
+
+    sector_adjust = sectors is not None
 
     if sector_adjust:
-        pricing = utils.sector_adjust_forward_returns(prices)
+        forward_returns = utils.sector_adjust_forward_returns(forward_returns)
 
-    forward_prices = utils.compute_forward_returns(prices, days=days)
+    daily_ic, _ = perf.factor_information_coefficient(factor, forward_returns, by_sector=sector_adjust)
 
-    daily_ic, _ = perf.factor_information_coefficient(factor, forward_prices, by_sector=False)
+    quantile_factor = perf.quantize_factor(factor, by_sector=sector_adjust, quantiles=nquantiles)
 
-    quantile_factor = perf.quantize_factor(factor, by_sector=sector_adjust,
-                                           quantiles=nquantiles)
+    mean_ret_by_q = perf.mean_daily_return_by_factor_quantile(quantile_factor, forward_returns, by_sector=sector_adjust)
 
-    mean_ret_by_q = perf.mean_daily_return_by_factor_quantile(quantile_factor, forward_prices,
-                                                         by_sector=sector_adjust)
-
-    cum_ret_by_q = perf.surrounding_cumulative_returns_by_quantile(quantile_factor, prices,
-        days_before=5, days_after=10)
+    # cum_ret_by_q = perf.surrounding_cumulative_returns_by_quantile(quantile_factor, prices,
+    #     days_before=5, days_after=10)
 
     # What is the sector-netural rolling mean IC for our different forward price windows?
     plot_daily_ic_ts(daily_ic, is_sector_adjusted=sector_adjust)
@@ -41,7 +40,7 @@ def create_factor_tear_sheet(factor,
     plot_quantile_returns_bar(mean_ret_by_q, by_sector=False)
 
     # Plot comulative returns over time for each quantile
-    plot_quantile_cumulative_return(cum_ret_by_q)
+    # plot_quantile_cumulative_return(cum_ret_by_q)
 
 
 

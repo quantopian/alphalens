@@ -101,21 +101,21 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
     return factor_quantile
 
 
-def mean_daily_return_by_factor_quantile(quantized_factor, forward_prices, by_sector=False):
+def mean_daily_return_by_factor_quantile(quantized_factor, forward_returns, by_sector=False):
     """
     Computes mean daily returns for factor quantiles across provided forward
-    price movement columns.
+    returns columns.
 
     Parameters
     ----------
-    quantile_factor : pd.DataFrame
-        DataFrame with date, equity, factor, factor quantile, and forward price movement columns.
-        Index should be integer. See quantile_bucket_factor for more detail.
+    quantized_factor : pd.DataFrame
+        DataFrame with date, equity index and factor quantile as a column.
+        See quantile_bucket_factor for more detail.
+    forward_returns : pandas.DataFrame - MultiIndex
+        A list of equities and their N day forward returns where each column contains
+        the N day forward returns
     by_sector : boolean
-        If True, compute quintile bucket returns separately for each sector
-    quantiles : integer
-        Number of quantiles buckets to use in factor bucketing.
-
+        If True, compute quantile bucket returns separately for each sector
 
     Returns
     -------
@@ -123,7 +123,7 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_prices, by_se
         Sector-wise mean daily returns by specified factor quantile.
     """
     quant_factor_fp = pd.merge(pd.DataFrame(quantized_factor.rename('quantile')),
-                               forward_prices,
+                               forward_returns,
                                how='left',
                                left_index=True,
                                right_index=True)
