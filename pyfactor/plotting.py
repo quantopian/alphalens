@@ -8,7 +8,7 @@ from itertools import izip
 
 
 # DONE
-def plot_daily_ic_ts(daily_ic, return_ax=False, is_sector_adjusted=False):
+def plot_daily_ic_ts(daily_ic, return_ax=False):
     """
     Plots Spearman Rank Information Coefficient and IC moving average for a given factor.
     Sector neturalization of forward price movements with sector_adjust_forward_price_moves is
@@ -28,18 +28,12 @@ def plot_daily_ic_ts(daily_ic, return_ax=False, is_sector_adjusted=False):
 
     summary_stats = pd.DataFrame(columns=['mean', 'std'])
     for ax, (days_num, ic) in izip(axes, daily_ic.iteritems()):
-        title = "{} day IC {}".format(days_num, "(sector adjusted)" if is_sector_adjusted else "")
+        title = "{} day IC {}".format(days_num)
         summary_stats.loc["%i day IC" % days_num] = [ic.mean(), ic.std()]
 
         ic_df = (pd.DataFrame(ic.rename("{} day IC".format(days_num)))
                  .assign(**{'1 month moving avg': ic.rolling(22).mean()})
                  .plot(title=title, alpha=0.7, ax=ax))
-        # ax.text(.01, .95, 'mean: {0:.4f}'.format(mean_ic),
-        #     ha='left', va='center', transform=ax.transAxes)
-        # ax.text(.01, .91, 'stdev: {0:.4f}'.format(std_ic),
-        #     ha='left', va='center', transform=ax.transAxes)
-        # ax.text(.01, .87, 'mean/stdev: {0:.4f}'.format(mean_ic/std_ic),
-        #     ha='left', va='center', transform=ax.transAxes)
         ax.set(ylabel='IC', xlabel='date')
 
     summary_stats['mean/std'] = summary_stats['mean'] / summary_stats['std']
@@ -98,110 +92,6 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
                            title="Mean Return By Factor Quantile",
                            ax=ax)
         ax.set(xlabel='factor quantile', ylabel='mean daily price % change')
-
-    plt.show()
-
-
-
-# def plot_quantile_cumulative_return(cum_ret_by_q):
-#     """
-#     Plots sector-wise mean daily returns for factor quantiles
-#     across provided forward price movement columns.
-#
-#     Parameters
-#     ----------
-#     factor_and_fp : pd.DataFrame
-#         DataFrame with date, equity, factor, and forward price movement columns.
-#     daily_perc_ret : pd.DataFrame
-#         Pricing data to use in cumulative return calculation. Equities as columns, dates as index.
-#     quantiles : integer
-#         Number of quantiles buckets to use in factor bucketing.
-#     by_quantile : boolean
-#         Disagregate figures by quantile.
-#     factor_name : string
-#         Name of factor column on which to compute IC.
-#     days_before : int
-#         How many days to plot before the factor is calculated
-#     days_after  : int
-#         How many days to plot after the factor is calculated
-#     day_zero_align : boolean
-#          Aling returns at day 0 (timeseries is 0 at day 0)
-#     std_bar : boolean
-#         Plot standard deviation plot
-#     """
-#
-#     palette = sns.color_palette("coolwarm", len(cum_ret_by_q.columns))
-#
-#     f, ax = plt.subplots(1, 1, figsize=(28, 12))
-#     for i, (quantile, cum_returns) in enumerate(cum_ret_by_q.iteritems()):
-#         label = 'Quantile ' + str(quantile)
-#         sns.tsplot(ax=ax, data=cum_returns.values, condition=label,
-#                    legend=True, color=palette[i], time=cum_returns.index)
-#
-#     # mark day zero with a vertical line
-#     ax.axvline(x=0, color='k', linestyle='--')
-#     plt.xlabel('Days')
-#     plt.ylabel('% return')
-#     plt.title("Cumulative returns by quantile")
-#
-#     plt.show()
-
-
-def plot_quantile_returns_box(factor_and_fp, by_sector=True, quantiles=5):
-    """
-    Plots sector-wise mean daily returns as boxplot for factor quantiles
-    across provided forward price movement columns.
-
-    Parameters
-    ----------
-    factor_and_fp : pd.DataFrame
-        DataFrame with date, equity, factor, and forward price movement columns.
-    by_sector : boolean
-        Disagregate figures by sector.
-    quantiles : integer
-        Number of quantiles buckets to use in factor bucketing.
-    factor_name : string
-        Name of factor column on which to compute IC.
-    """
-    decile_factor = quantile_bucket_factor(factor_and_fp, by_sector=by_sector, quantiles=quantiles,
-                                           factor_name=factor_name)
-    fwd_days, pc_cols = utils.get_price_move_cols(decile_factor)
-
-    if by_sector:
-        f, axes = plt.subplots(6, 2, sharex=False, sharey=True, figsize=(20, 45))
-        axes = axes.flatten()
-        i = 0
-        for sc, cor in decile_factor.groupby(by='sector'):
-            cor_box_plot = pd.melt(cor,
-                                   var_name='fwd_days_price',
-                                   value_name='%_price_change',
-                                   id_vars=['factor_quantile'],
-                                   value_vars=pc_cols)
-
-            # boxplot doesn't sort 'x' by itself
-            cor_box_plot = cor_box_plot.sort(columns='factor_quantile', ascending=True)
-            sns.boxplot(ax=axes[i], x="factor_quantile", y="%_price_change", hue="fwd_days_price", data=cor_box_plot)
-            axes[i].set_xlabel('factor quantile')
-            axes[i].set_ylabel('mean price % change')
-            axes[i].set_title(sc)
-            i += 1
-        fig = plt.gcf()
-        fig.suptitle(factor_name + ": Mean Return By Factor Quantile", fontsize=24, x=.5, y=.93)
-
-    else:
-
-        decile_factor_box_plot = pd.melt(decile_factor,
-                                         var_name='fwd_days_price',
-                                         value_name='%_price_change',
-                                         id_vars=['factor_quantile'],
-                                         value_vars=pc_cols)
-        # boxplot doesn't sort 'x' by itself
-        decile_factor_box_plot = decile_factor_box_plot.sort(columns='factor_quantile', ascending=True)
-        sns.boxplot(x="factor_quantile", y="%_price_change", hue="fwd_days_price", data=decile_factor_box_plot)
-
-        plt.title("Mean Return By Factor Quantile (sector adjusted)")
-        plt.xlabel('factor quantile')
-        plt.ylabel('mean price % change')
 
     plt.show()
 
@@ -283,7 +173,7 @@ def plot_factor_rank_auto_correlation(daily_factor, time_rule='W', factor_name='
     plt.show()
 
 # DONE
-def plot_top_bottom_quantile_turnover(factor, quantiles=5):
+def plot_top_bottom_quantile_turnover(quantized_factor):
     """
     Plots daily top and bottom quantile factor turnover.
 
@@ -294,47 +184,13 @@ def plot_top_bottom_quantile_turnover(factor, quantiles=5):
     quantiles : integer
         Number of quantiles to use in quantile bucketing.
     """
-
-    quint_buckets = perf.quantize_factor(factor, quantiles=quantiles)
+    max_quantile = quantized_factor.values.max()
     turnover = pd.DataFrame()
-    turnover['top quintile turnover'] = perf.quantile_turnover(quint_buckets, quantiles)
-    turnover['bottom quintile turnover'] = perf.quantile_turnover(quint_buckets, 1)
+    turnover['top quintile turnover'] = perf.quantile_turnover(quantized_factor, max_quantile)
+    turnover['bottom quintile turnover'] = perf.quantile_turnover(quantized_factor, 1)
 
     turnover.plot(title='Top and Bottom Quintile Turnover')
     plt.ylabel('proportion of names not present in quantile in previous period')
     plt.show()
 
 
-def plot_factor_vs_fwdprice_distribution(factor_and_fp, factor_name='factor', remove_outliers=False):
-    """
-    Plots distribuion of factor vs forward price.
-    This is useful to visually spot linear or non linear relationship between factor and fwd prices
-
-    Parameters
-    ----------
-    factor_and_fp : pd.DataFrame
-        DataFrame with date, equity, factor, and forward price movement columns.
-    factor_name : string
-        Name of factor column
-    remove_outliers : boolean
-        Remove outliers before plotting the distribution
-    """
-    fwd_days, pc_cols = get_price_move_cols(factor_and_fp)
-    for col in pc_cols:
-
-        if remove_outliers:
-            data = factor_and_fp[ ~is_outlier(factor_and_fp[factor_name].values) & \
-                                  ~is_outlier(factor_and_fp[col].values)]
-        else:
-            data = factor_and_fp
-
-        jg = sns.jointplot(data[factor_name], data[col], kind="kde")
-        jg.fig.suptitle('Factor/returns kernel density estimation' +
-                        (' NO OUTLIERS' if remove_outliers else ''))
-        plt.show()
-
-        jg = sns.jointplot(data[factor_name], data[col], kind="reg")
-        jg.fig.suptitle('Factor/returns regression' +
-                        (' NO OUTLIERS' if remove_outliers else ''))
-
-        plt.show()
