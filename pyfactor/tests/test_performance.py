@@ -120,30 +120,18 @@ class PerformanceTestCase(TestCase):
         assert_frame_equal(ic, expected_ic_df)
         assert_frame_equal(err, expected_err_df)
 
+    @parameterized.expand([(factor, 4, False,
+                            [1., 2., 3., 4., 4., 3., 2., 1.]),
+                           (factor, 2, False,
+                            [1., 1., 2., 2., 2., 2., 1., 1.]),
+                           (factor, 2, True,
+                            [1., 2., 1., 2., 2., 1., 2., 1.])])
+    def test_quantize_factor(self, factor, quantiles,
+                             by_sector, expected_vals):
+        quantized_factor = quantize_factor(
+            factor, quantiles=quantiles, by_sector=by_sector)
 
-    @parameterized.expand([(factor, 4, False, [1., 2., 3., 4., 4., 3., 2., 1.]),
-                           (factor, 2, False, [1., 1., 2., 2., 2., 2., 1., 1.]),
-                           (factor, 2, True, [1., 2., 1., 2., 2., 1., 2., 1.])])
-    def test_quantize_factor(self, factor, quantiles, by_sector, expected_vals):
-        quantized_factor = quantize_factor(factor, quantiles=quantiles, by_sector=by_sector)
-
-        expected = Series(index=factor.index, data=expected_vals, name='quantile')
+        expected = Series(
+            index=factor.index, data=expected_vals, name='quantile')
 
         assert_series_equal(quantized_factor, expected)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
