@@ -4,29 +4,31 @@ import scipy as sp
 
 import utils
 
-def factor_information_coefficient(factor, forward_returns, sector_adjust=False, by_sector=False):
+
+def factor_information_coefficient(factor, forward_returns,
+								   sector_adjust=False, by_sector=False):
     """
-    Computes Spearman Rank Correlation based Information Coefficient (IC) between
-    factor values and N day forward returns. If a time_rule is passed, returns
-    the mean IC for those
+    Computes Spearman Rank Correlation based Information Coefficient (IC)
+    between factor values and N day forward returns for each day in
+    the factor index.
 
     Parameters
     ----------
     factor : pandas.Series - MultiIndex
-        A list of equities and their factor values indexed by date.
+        Factor values indexed by date and symbol.
     forward_returns : pandas.DataFrame - MultiIndex
-        A list of equities and their N day forward returns where each column contains
-        the N day forward returns
-    time_rule : string (pandas time_rule), optional
-        Time delta to use in mean IC grouping reduction.
-        See http://pandas.pydata.org/pandas-docs/stable/timeseries.html for available options.
+        Daily forward returns in indexed by date and symbol.
+        Separate column for each forward return window.
+    sector_adjust : boolean
+        Demean forward returns by sector before computing IC.
     by_sector : boolean
-        If True, compute ic separately for each sector
+        If True, compute daily IC separately for each sector.
 
     Returns
     -------
     ic : pd.DataFrame
-        Spearman Rank correlation between factor and provided forward price movement columns.
+        Spearman Rank correlation between factor and
+        provided forward price movement windows.
 
     err : pd.DataFrame
         Standard error of computed IC.
@@ -46,8 +48,10 @@ def factor_information_coefficient(factor, forward_returns, sector_adjust=False,
         return np.sqrt((1 - rho ** 2) / (n - 2))
 
     forward_returns_ = forward_returns.copy()
+
     if sector_adjust:
-    	forward_returns_ = utils.sector_adjust_forward_returns(forward_returns_)
+    	forward_returns_ = utils.demean_forward_returns(forward_returns_,
+    													by_sector=True)
 
     factor_and_fp = pd.merge(pd.DataFrame(factor.rename('factor')),
                              forward_returns_,
@@ -65,9 +69,37 @@ def factor_information_coefficient(factor, forward_returns, sector_adjust=False,
     return ic, err
 
 
-def mean_information_coefficient(factor, forward_returns, by_time=None, by_sector=False):
+def mean_information_coefficient(factor, forward_returns,
+							     by_time=None, by_sector=False):
 	"""
 	Get the mean information coefficient of specified groups.
+	Answers questions like:
+	What is the mean IC for each month?
+	What is the mean IC for each sector for our whole timerange?
+	What is the mean IC for for each sector, each week?
+
+    Parameters
+    ----------
+    factor : pandas.Series - MultiIndex
+        Factor values indexed by date and symbol.
+    forward_returns : pandas.DataFrame - MultiIndex
+        Daily forward returns in indexed by date and symbol.
+        Separate column for each forward return window.
+    by_time : string (pandas time_rule), optional
+        Time window to use when taking mean IC.
+        See http://pandas.pydata.org/pandas-docs/stable/timeseries.html
+        for available options.
+    by_sector : boolean
+        If True, take the mean IC for each sector.
+
+    Returns
+    -------
+    ic : pd.DataFrame
+        Mean Spearman Rank correlation between factor and provided
+        forward price movement windows.
+
+    err : pd.DataFrame
+        Standard error of computed IC.
 	"""
     ic, err = factor_information_coefficient(factor, forward_returns, by_sector=False)
 
