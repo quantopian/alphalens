@@ -96,7 +96,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
     plt.show()
 
 
-def plot_ic_by_sector(factor_and_fp, factor_name='factor'):
+def plot_ic_by_sector(ic_sector, factor_name='factor'):
     """
     Plots Spearman Rank Information Coefficient for a given factor over provided forward price
     movement windows. Separates by sector.
@@ -108,15 +108,13 @@ def plot_ic_by_sector(factor_and_fp, factor_name='factor'):
     factor_name : string
         Name of factor column on which to compute IC.
     """
-    ic_sector, err_sector = perf.factor_information_coefficient(factor_and_fp, factor_name=factor_name)
-
     ic_sector.plot(kind='bar') #yerr=err_sector
     fig = plt.gcf()
     fig.suptitle("Information Coefficient by Sector", fontsize=16, x=.5, y=.93)
     plt.show()
 
 
-def plot_ic_by_sector_over_time(factor_and_fp, time_rule=None, factor_name='factor'):
+def plot_ic_by_sector_over_time(ic_time):
     """
     Plots sector-wise time window mean daily Spearman Rank Information Coefficient
     for a given factor over provided forward price movement windows.
@@ -131,8 +129,7 @@ def plot_ic_by_sector_over_time(factor_and_fp, time_rule=None, factor_name='fact
     factor_name : string
         Name of factor column on which to compute IC.
     """
-    ic_time, err_time = perf.factor_information_coefficient(factor_and_fp, time_rule=time_rule,
-                                                factor_name=factor_name)
+
     ic_time = ic_time.reset_index()
     err_time = err_time.reset_index()
 
@@ -151,7 +148,7 @@ def plot_ic_by_sector_over_time(factor_and_fp, time_rule=None, factor_name='fact
     plt.show()
 
 
-def plot_factor_rank_auto_correlation(daily_factor, time_rule='W', factor_name='factor'):
+def plot_factor_rank_auto_correlation(daily_factor, time_rule='W'):
     """
     Plots factor rank autocorrelation over time. See factor_rank_autocorrelation for more details.
 
@@ -166,7 +163,7 @@ def plot_factor_rank_auto_correlation(daily_factor, time_rule='W', factor_name='
         Name of factor column on which to compute IC.
     """
 
-    fa = perf.factor_rank_autocorrelation(daily_factor, time_rule=time_rule, factor_name=factor_name)
+    fa = perf.factor_rank_autocorrelation(daily_factor, time_rule=time_rule)
     print "Mean rank autocorrelation: " + str(fa.mean())
     fa.plot(title='Week-to-Week Factor Rank Autocorrelation')
     plt.ylabel('autocorrelation coefficient')
