@@ -246,15 +246,17 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
         Rolling 1 period (defined by time_rule) autocorrelation of factor values.
 
     """
+    factor = factor.rename('factor')
     grouper = ['date', 'sector'] if by_sector else ['date']
-    daily_ranks = factor.copy()
-    daily_ranks[factor_name] = daily_factor.groupby(level=grouper)[factor_name].apply(
+
+    daily_ranks = factor.groupby(level=grouper).apply(
         lambda x: x.rank(ascending=True))
 
-    equity_factor = daily_ranks.pivot(index='date', columns='equity', values=factor_name)
+    equity_factor_rank = pd.DataFrame(daily_ranks).reset_index().pivot(
+        index='date', columns='equity', values='factor')
     if time_rule is not None:
-        equity_factor = equity_factor.resample(time_rule, how='mean')
+        equity_factor_rank = equity_factor_rank.resample(time_rule).mean()
 
-    autocorr = equity_factor.corrwith(equity_factor.shift(1), axis=1)
+    autocorr = equity_factor_rank.corrwith(equity_factor_rank.shift(1), axis=1)
 
     return autocorr
