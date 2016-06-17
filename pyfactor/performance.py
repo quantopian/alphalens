@@ -160,10 +160,11 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
     return factor_quantile
 
 
-def mean_daily_return_by_factor_quantile(quantized_factor, forward_returns, by_sector=False):
+def mean_daily_return_by_factor_quantile(quantized_factor, forward_returns,
+                                         by_sector=False):
     """
-    Computes mean daily returns for factor quantiles across provided forward
-    returns columns.
+    Computes mean daily demeaned returns for factor quantiles across
+    provided forward returns columns.
 
     Parameters
     ----------
@@ -174,13 +175,17 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_returns, by_s
         A list of equities and their N day forward returns where each column contains
         the N day forward returns
     by_sector : boolean
-        If True, compute quantile bucket returns separately for each sector
+        If True, compute quantile bucket returns separately for each sector.
+        Returns demeaning will occur on the sector level.
 
     Returns
     -------
     mean_returns_by_quantile : pd.DataFrame
         Sector-wise mean daily returns by specified factor quantile.
     """
+
+    demeaned_forward_returns = utils.demean_forward_returns(forward_returns,
+                                                            by_sector=by_sector)
 
     forward_returns = forward_returns.set_index([forward_returns.index, quantized_factor])
     g_by = ['sector', 'quantile'] if by_sector else ['quantile']
@@ -216,7 +221,7 @@ def quantile_turnover(quantile_factor, quantile):
     return quant_turnover
 
 
-def factor_rank_autocorrelation(daily_factor, time_rule='W', by_sector=False, factor_name='factor'):
+def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
     """
     Computes autocorrelation of mean factor ranks in specified timespans.
     We must compare week to week factor ranks rather than factor values to account for
@@ -241,9 +246,9 @@ def factor_rank_autocorrelation(daily_factor, time_rule='W', by_sector=False, fa
         Rolling 1 period (defined by time_rule) autocorrelation of factor values.
 
     """
-    g_by = ['date', 'sector'] if by_sector else ['date']
-    daily_ranks = daily_factor.copy()
-    daily_ranks[factor_name] = daily_factor.groupby(level=g_by)[factor_name].apply(
+    grouper = ['date', 'sector'] if by_sector else ['date']
+    daily_ranks = factor.copy()
+    daily_ranks[factor_name] = daily_factor.groupby(level=grouper)[factor_name].apply(
         lambda x: x.rank(ascending=True))
 
     equity_factor = daily_ranks.pivot(index='date', columns='equity', values=factor_name)
