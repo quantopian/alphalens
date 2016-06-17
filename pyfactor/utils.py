@@ -30,12 +30,15 @@ def compute_forward_returns(prices, days=(1, 5, 10)):
 
 def demean_forward_returns(forward_returns, by_sector=False):
     """
-    Convert forward price movements to price movements relative to mean sector price movements.
-    This normalization incorporates the assumption of a sector neutral portfolio constraint
-    and thus allows allows the factor to be evaluated across sectors.
+    Convert forward price movements to price movements relative to mean
+    daily all-universe or sector price movements.
+    Sector-wise normalization incorporates the assumption of a
+    sector neutral portfolio constraint and thus allows allows the
+    factor to be evaluated across sectors.
 
-    For example, if AAPL 5 day return is 0.1% and mean 5 day return for the Technology stocks
-    in our universe was 0.5% in the same period, the sector adjusted 5 day return for AAPL
+    For example, if AAPL 5 day return is 0.1% and mean 5 day
+    return for the Technology stocks in our universe was 0.5% in the
+     same period, the sector adjusted 5 day return for AAPL
     in this period is -0.4%.
 
 
