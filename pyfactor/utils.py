@@ -52,8 +52,7 @@ def demean_forward_returns(forward_returns, by_sector=False):
         security's returns normalized by sector.
 
     """
-    grouper = ['date', 'sector'] if by_sector else:
-        ['date']
+    grouper = ['date', 'sector'] if by_sector else ['date']
 
     return forward_returns.groupby(level=grouper).apply(lambda x: x - x.mean())
 
