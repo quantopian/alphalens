@@ -29,9 +29,6 @@ def create_factor_tear_sheet(factor,
 
     mean_ret_by_q = perf.mean_daily_return_by_factor_quantile(quantile_factor, forward_returns, by_sector=by_sector)
 
-    # cum_ret_by_q = perf.surrounding_cumulative_returns_by_quantile(quantile_factor, prices,
-    #     days_before=5, days_after=10)
-
     # What is the sector-netural rolling mean IC for our different forward price windows?
     plot_daily_ic_ts(daily_ic, is_sector_adjusted=by_sector)
     plot_daily_ic_hist(daily_ic)
@@ -39,14 +36,8 @@ def create_factor_tear_sheet(factor,
     # What are the sector-neutral factor quantile mean returns for our different forward price windows?
     plot_quantile_returns_bar(mean_ret_by_q, by_sector=by_sector)
 
-    # Plot comulative returns over time for each quantile
-    # plot_quantile_cumulative_return(cum_ret_by_q)
-
-
-
-    # # Plot comulative returns over time, one plot for each quantile
-    # plot_quantile_cumulative_return(factor_and_fp, daily_perc_ret, quantiles=nquantiles, by_quantile=True,
-    #                 factor_name=factor_name, days_before=days_before, days_after=days_after, std_bar=True)
+    # # How much is the contents of the the top and bottom quintile changing each day?
+    plot_top_bottom_quantile_turnover(factor, quantiles=nquantiles)
 
 
 
@@ -56,9 +47,6 @@ def create_factor_tear_sheet(factor,
     # let's have a look at the relationship between factor and returns
     # plot_factor_vs_fwdprice_distribution(factor_and_fp, factor_name=factor_name)
     # plot_factor_vs_fwdprice_distribution(factor_and_fp, factor_name=factor_name, remove_outliers=True)
-
-    # # How much is the contents of the the top and bottom quintile changing each day?
-    plot_top_bottom_quantile_turnover(factor, num_quantiles=5)
 
     # # What is the autocorrelation in factor rank? Should this be autocorrelation in sector-neutralized
     # # factor value?

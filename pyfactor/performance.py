@@ -71,8 +71,7 @@ def factor_information_coefficient(factor, forward_returns, time_rule=None, by_s
 
     return ic, err
 
-#DONE
-#DONE FOR SECTORS
+
 def quantize_factor(factor, quantiles=5, by_sector=False):
     """
     Computes daily factor quantiles.
@@ -102,8 +101,7 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
 
     return factor_quantile
 
-# DONE
-# DONE FOR SECTORS
+
 def mean_daily_return_by_factor_quantile(quantized_factor, forward_returns, by_sector=False):
     """
     Computes mean daily returns for factor quantiles across provided forward
@@ -133,47 +131,6 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_returns, by_s
     return mean_ret_by_quantile
 
 
-# def surrounding_cumulative_returns_by_quantile(quantized_factor, prices, days_before, days_after, day_zero_align=True):
-#     """
-#     An equity and date pair is extracted from each row in the input dataframe and for each of
-#     these pairs a cumulative return time series is built starting 'days_before' days
-#     before and ending 'days_after' days after the date specified in the pair
-#
-#     Parameters
-#     ----------
-#     factor_and_fp : pd.DataFrame
-#         DataFrame with at least date and equity columns.
-#     daily_perc_ret : pd.DataFrame
-#         Pricing data to use in cumulative return calculation. Equities as columns, dates as index.
-#     day_zero_align : boolean
-#          Aling returns at day 0 (timeseries is 0 at day 0)
-#     """
-#     window = days_before + days_after
-#
-#     surrounding_rets = pd.DataFrame(index=pd.MultiIndex.from_product(
-#             [prices.index, prices.columns], names=['date', 'equity']))
-#     for i in range(-days_before, days_after):
-#         delta = prices.shift(-i).pct_change(1).shift(-1)
-#         surrounding_rets[i] = delta.stack()
-#
-#     mean_cum_returns_by_quant = (pd.merge(pd.DataFrame(
-#         quantized_factor.rename('quantile')),
-#         surrounding_rets, how='left', left_index=True, right_index=True)
-#         .reset_index()
-#         .set_index(['date', 'equity', 'quantile'])
-#         .groupby(level='quantile')
-#         .mean()
-#         .T.add(1).cumprod().add(-1)
-#         )
-#
-#     # Make returns be 0 at day 0
-#     if day_zero_align:
-#         mean_cum_returns_by_quant -= mean_cum_returns_by_quant.loc[0]
-#
-#     return mean_cum_returns_by_quant
-
-#DONE
-#DONE FOR SECTORS
 def quantile_turnover(quantile_factor, quantile):
     """
     Computes the proportion of names in a factor quantile that were

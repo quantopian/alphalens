@@ -102,6 +102,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
     plt.show()
 
 
+
 # def plot_quantile_cumulative_return(cum_ret_by_q):
 #     """
 #     Plots sector-wise mean daily returns for factor quantiles
@@ -282,7 +283,7 @@ def plot_factor_rank_auto_correlation(daily_factor, time_rule='W', factor_name='
     plt.show()
 
 # DONE
-def plot_top_bottom_quantile_turnover(factor, num_quantiles=5):
+def plot_top_bottom_quantile_turnover(factor, quantiles=5):
     """
     Plots daily top and bottom quantile factor turnover.
 
@@ -290,13 +291,13 @@ def plot_top_bottom_quantile_turnover(factor, num_quantiles=5):
     ----------
     factor : pd.DataFrame
         DataFrame with date, equity, and factor value columns.
-    num_quantiles : integer
+    quantiles : integer
         Number of quantiles to use in quantile bucketing.
     """
 
-    quint_buckets = perf.quantize_factor(factor, quantiles=num_quantiles)
+    quint_buckets = perf.quantize_factor(factor, quantiles=quantiles)
     turnover = pd.DataFrame()
-    turnover['top quintile turnover'] = perf.quantile_turnover(quint_buckets, num_quantiles)
+    turnover['top quintile turnover'] = perf.quantile_turnover(quint_buckets, quantiles)
     turnover['bottom quintile turnover'] = perf.quantile_turnover(quint_buckets, 1)
 
     turnover.plot(title='Top and Bottom Quintile Turnover')
