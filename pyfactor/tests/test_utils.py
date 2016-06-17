@@ -14,13 +14,13 @@ from pandas import (
 from pandas.util.testing import (assert_frame_equal,
                                  assert_series_equal)
 
-from utils import (compute_forward_price_movement,
-                   sector_adjust_forward_price_moves)
+from utils import (compute_forward_returns,
+                   sector_adjust_forward_returns)
 
 
 class UtilsTestCase(TestCase):
 
-    def test_compute_forward_price_movement(self):
+    def test_compute_forward_returns(self):
         dr = date_range(start='2015-1-1', end='2015-1-3')
         prices = DataFrame(index=dr, columns=['A', 'B'],
                            data=[[1, 1], [1, 2], [2, 1]])
