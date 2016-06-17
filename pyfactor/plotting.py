@@ -7,8 +7,7 @@ import utils
 from itertools import izip
 
 
-#### Begin Refactored ####
-
+# DONE
 def plot_daily_ic_ts(daily_ic, return_ax=False, is_sector_adjusted=False):
     """
     Plots Spearman Rank Information Coefficient and IC moving average for a given factor.
@@ -50,7 +49,7 @@ def plot_daily_ic_ts(daily_ic, return_ax=False, is_sector_adjusted=False):
     if return_ax:
         return axes
 
-
+# DONE
 def plot_daily_ic_hist(daily_ic, return_ax=False):
     num_plots = len(daily_ic.columns)
 
@@ -66,35 +65,32 @@ def plot_daily_ic_hist(daily_ic, return_ax=False):
     if return_ax:
         return axes
 
-
-def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, quantiles=5):
+#DONE
+#DONE FOR SECTORS
+def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
     """
     Plots sector-wise mean daily returns for factor quantiles
     across provided forward price movement columns.
 
     Parameters
     ----------
-    factor_and_fp : pd.DataFrame
+    mean_ret_by_q : pd.DataFrame
         DataFrame with date, equity, factor, and forward price movement columns.
     by_sector : boolean
         Disagregate figures by sector.
-    quantiles : integer
-        Number of quantiles buckets to use in factor bucketing.
-    factor_name : string
-        Name of factor column on which to compute IC.
     """
+
     if by_sector:
         f, axes = plt.subplots(6, 2, sharex=False, sharey=True, figsize=(20, 45))
         axes = axes.flatten()
 
-        for i, (sc, cor) in enumerate(mean_ret_by_q.groupby(level='sector_code')):
-            cor = cor.reset_index().drop('sector_code', axis=1).set_index('factor_quantile')
+        for i, (sc, cor) in enumerate(mean_ret_by_q.groupby(level='sector')):
             cor.plot(kind='bar', title=sc, ax=axes[i])
             axes[i].set_xlabel('factor quantile')
             axes[i].set_ylabel('mean price % change')
 
         fig = plt.gcf()
-        fig.suptitle(factor_name + ": Mean Return By Factor Quantile", fontsize=24, x=.5, y=.93)
+        fig.suptitle("Mean Return By Factor Quantile", fontsize=24, x=.5, y=.93)
 
     else:
         f, ax = plt.subplots(1, 1, figsize=(28, 12))
@@ -106,53 +102,52 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, quantiles=5):
     plt.show()
 
 
-def plot_quantile_cumulative_return(cum_ret_by_q):
-    """
-    Plots sector-wise mean daily returns for factor quantiles
-    across provided forward price movement columns.
 
-    Parameters
-    ----------
-    factor_and_fp : pd.DataFrame
-        DataFrame with date, equity, factor, and forward price movement columns.
-    daily_perc_ret : pd.DataFrame
-        Pricing data to use in cumulative return calculation. Equities as columns, dates as index.
-    quantiles : integer
-        Number of quantiles buckets to use in factor bucketing.
-    by_quantile : boolean
-        Disagregate figures by quantile.
-    factor_name : string
-        Name of factor column on which to compute IC.
-    days_before : int
-        How many days to plot before the factor is calculated
-    days_after  : int
-        How many days to plot after the factor is calculated
-    day_zero_align : boolean
-         Aling returns at day 0 (timeseries is 0 at day 0)
-    std_bar : boolean
-        Plot standard deviation plot
-    """
+# def plot_quantile_cumulative_return(cum_ret_by_q):
+#     """
+#     Plots sector-wise mean daily returns for factor quantiles
+#     across provided forward price movement columns.
+#
+#     Parameters
+#     ----------
+#     factor_and_fp : pd.DataFrame
+#         DataFrame with date, equity, factor, and forward price movement columns.
+#     daily_perc_ret : pd.DataFrame
+#         Pricing data to use in cumulative return calculation. Equities as columns, dates as index.
+#     quantiles : integer
+#         Number of quantiles buckets to use in factor bucketing.
+#     by_quantile : boolean
+#         Disagregate figures by quantile.
+#     factor_name : string
+#         Name of factor column on which to compute IC.
+#     days_before : int
+#         How many days to plot before the factor is calculated
+#     days_after  : int
+#         How many days to plot after the factor is calculated
+#     day_zero_align : boolean
+#          Aling returns at day 0 (timeseries is 0 at day 0)
+#     std_bar : boolean
+#         Plot standard deviation plot
+#     """
+#
+#     palette = sns.color_palette("coolwarm", len(cum_ret_by_q.columns))
+#
+#     f, ax = plt.subplots(1, 1, figsize=(28, 12))
+#     for i, (quantile, cum_returns) in enumerate(cum_ret_by_q.iteritems()):
+#         label = 'Quantile ' + str(quantile)
+#         sns.tsplot(ax=ax, data=cum_returns.values, condition=label,
+#                    legend=True, color=palette[i], time=cum_returns.index)
+#
+#     # mark day zero with a vertical line
+#     ax.axvline(x=0, color='k', linestyle='--')
+#     plt.xlabel('Days')
+#     plt.ylabel('% return')
+#     plt.title("Cumulative returns by quantile")
+#
+#     plt.show()
 
-    palette = sns.color_palette("coolwarm", len(cum_ret_by_q.columns))
 
-    f, ax = plt.subplots(1, 1, figsize=(28, 12))
-    for i, (quantile, cum_returns) in enumerate(cum_ret_by_q.iteritems()):
-        label = 'Quantile ' + str(quantile)
-        sns.tsplot(ax=ax, data=cum_returns.values, condition=label,
-                   legend=True, color=palette[i], time=cum_returns.index)
-
-    # mark day zero with a vertical line
-    ax.axvline(x=0, color='k', linestyle='--')
-    plt.xlabel('Days')
-    plt.ylabel('% return')
-    plt.title("Cumulative returns by quantile")
-
-    plt.show()
-
-#### End Refactored #####
-
-
-def plot_quantile_returns_box(factor_and_fp, by_sector=True, quantiles=5, factor_name='factor'):
+def plot_quantile_returns_box(factor_and_fp, by_sector=True, quantiles=5):
     """
     Plots sector-wise mean daily returns as boxplot for factor quantiles
     across provided forward price movement columns.
@@ -176,7 +171,7 @@ def plot_quantile_returns_box(factor_and_fp, by_sector=True, quantiles=5, factor
         f, axes = plt.subplots(6, 2, sharex=False, sharey=True, figsize=(20, 45))
         axes = axes.flatten()
         i = 0
-        for sc, cor in decile_factor.groupby(by='sector_code'):
+        for sc, cor in decile_factor.groupby(by='sector'):
             cor_box_plot = pd.melt(cor,
                                    var_name='fwd_days_price',
                                    value_name='%_price_change',
@@ -254,9 +249,9 @@ def plot_ic_by_sector_over_time(factor_and_fp, time_rule=None, factor_name='fact
     f, axes = plt.subplots(6, 2, sharex=False, sharey=True, figsize=(20, 45))
     axes = axes.flatten()
     i = 0
-    for sc, data in ic_time.groupby(['sector_code']):
-        e = err_time[err_time.sector_code == sc].set_index('date')
-        data.drop('sector_code', axis=1).set_index('date').plot(kind='bar',
+    for sc, data in ic_time.groupby(['sector']):
+        e = err_time[err_time.sector == sc].set_index('date')
+        data.drop('sector', axis=1).set_index('date').plot(kind='bar',
                                                                 title=sc,
                                                                 ax=axes[i],
                                                                 ) # yerr=e
@@ -287,29 +282,25 @@ def plot_factor_rank_auto_correlation(daily_factor, time_rule='W', factor_name='
     plt.ylabel('autocorrelation coefficient')
     plt.show()
 
-
-def plot_top_bottom_quantile_turnover(daily_factor, num_quantiles=5, factor_name='factor'):
+# DONE
+def plot_top_bottom_quantile_turnover(factor, quantiles=5):
     """
-    Plots daily top and bottom quantile factor turnover. See quantile_bucket_factor for more
-    details.
+    Plots daily top and bottom quantile factor turnover.
 
     Parameters
     ----------
-    daily_factor : pd.DataFrame
+    factor : pd.DataFrame
         DataFrame with date, equity, and factor value columns.
-    num_quantiles : integer
+    quantiles : integer
         Number of quantiles to use in quantile bucketing.
-    factor_name : string
-        Name of factor column on which to compute IC.
     """
 
-    quint_buckets = quantile_bucket_factor(daily_factor, by_sector=True,
-                                           quantiles=5, factor_name=factor_name)
+    quint_buckets = perf.quantize_factor(factor, quantiles=quantiles)
     turnover = pd.DataFrame()
-    turnover['top quintile turnover'] = quantile_turnover(quint_buckets, num_quantiles)
-    turnover['bottom quintile turnover'] = quantile_turnover(quint_buckets, 1)
+    turnover['top quintile turnover'] = perf.quantile_turnover(quint_buckets, quantiles)
+    turnover['bottom quintile turnover'] = perf.quantile_turnover(quint_buckets, 1)
 
-    turnover.plot(title='Top and Bottom Quintile Turnover (Quantiles Computed by Sector)')
+    turnover.plot(title='Top and Bottom Quintile Turnover')
     plt.ylabel('proportion of names not present in quantile in previous period')
     plt.show()
 
