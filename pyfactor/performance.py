@@ -65,6 +65,27 @@ def factor_information_coefficient(factor, forward_returns, sector_adjust=False,
     return ic, err
 
 
+def mean_information_coefficient(factor, forward_returns, by_time=None, by_sector=False):
+	"""
+	Get the mean information coefficient of specified groups.
+	"""
+    ic, err = factor_information_coefficient(factor, forward_returns, by_sector=False)
+
+    grouper = []
+    if by_sector:
+    	grouper.append('sector')
+    if time_rule is not None:
+    	grouper.append(pd.TimeGrouper(time_rule))
+
+    ic = ic.reset_index().set_index('date')
+    err = err.reset_index().set_index('date')
+
+    ic = ic.groupby(level=grouper).mean()
+    err = err.groupby(level=grouper).agg(lambda x: np.sqrt((np.sum(np.power(x, 2)) / len(x))))
+
+    return ic, err
+
+
 def quantize_factor(factor, quantiles=5, by_sector=False):
     """
     Computes daily factor quantiles.
