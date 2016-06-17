@@ -1,47 +1,37 @@
 import pandas as pd
-import numpy as np
 from IPython.display import display
 
 
-def compute_forward_price_movement(prices, days=[1, 5, 10]):
+def compute_forward_returns(prices, days=(1, 5, 10)):
     """
-    Adds N day forward price movements (as percent change) to a factor value
-    DataFrame.
-
+    Finds the N day forward returns (as percent change) for each equity provided.
     Parameters
     ----------
-    daily_factor : pd.DataFrame
-        DataFrame with, at minimum, date, equity, factor, columns. Index can be integer or
-        date/equity multiIndex.
-        See construct_factor_history for more detail.
-    days : list
-        Number of days forward to project price movement. One column will be added for each value.
-    prices : pd.DataFrame, optional
+    prices : pd.DataFrame
         Pricing data to use in forward price calculation. Equities as columns, dates as index.
-
-
+        Pricing data must span the factor analysis time period plus an additional buffer window
+        that is greater than the maximum number of expected days in the forward returns calculations.
+    days : list
+        Number of days forward to project returns. One column will be added for each value.
     Returns
     -------
-    factor_and_fp : pd.DataFrame
-        DataFrame with integer index and date, equity, factor, sector
-        code columns with and an arbitary number of N day forward percentage
-        price movement columns.
-
+    forward_returns : pd.DataFrame - MultiIndex
+        DataFrame containg the N day forward returns for a security.
     """
 
-    forward_prices = pd.DataFrame(index=pd.MultiIndex.from_product(
-        [prices.index.values, prices.columns.values], names=['date', 'equity']))
-    for i in days:
-        delta = prices.pct_change(i).shift(-i)
-        forward_prices[i] = delta.stack()
+    forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
+        [prices.index, prices.columns], names=['date', 'equity']))
+    for day in days:
+        delta = prices.pct_change(day).shift(-day)
+        forward_returns[day] = delta.stack()
 
-    return forward_prices
+    return forward_returns
 
 
-def sector_adjust_forward_price_moves(prices):
+def sector_adjust_forward_returns(forward_returns):
     """
     Convert forward price movements to price movements relative to mean sector price movements.
-    This normalization incorperates the assumption of a sector neutral portfolio constraint
+    This normalization incorporates the assumption of a sector neutral portfolio constraint
     and thus allows allows the factor to be evaluated across sectors.
 
     For example, if AAPL 5 day return is 0.1% and mean 5 day return for the Technology stocks
@@ -51,24 +41,19 @@ def sector_adjust_forward_price_moves(prices):
 
     Parameters
     ----------
-    factor_and_fp : pd.DataFrame
-        DataFrame with date, equity, factor, and forward price movement columns. Index should be integer.
-        See add_forward_price_movement for more detail.
+    forward_returns : pd.DataFrame - MultiIndex
+        DataFrame with date, equity, sector, and forward returns columns.
+        See compute_forward_returns for more detail.
 
     Returns
     -------
-    adj_factor_and_fp : pd.DataFrame
-        DataFrame with integer index and date, equity, factor, sector
-        code columns with and an arbitary number of N day forward percentage
-        price movement columns, each normalized by sector.
+    adjusted_forward_returns : pd.DataFrame - MultiIndex
+        DataFrame of the same format as the input, but with each security's returns normalized by sector.
 
     """
-    adj_prices = prices.copy()
 
-    adj_prices = factor_and_fp.groupby(levels=['date', 'sector_code']).apply(
-             lambda x: x - x.mean())
+    return forward_returns.groupby(level=['date', 'sector']).apply(lambda x: x - x.mean())
 
-    return adj_prices
 
 def build_cumulative_returns_series(factor_and_fp, daily_perc_ret, days_before, days_after, day_zero_align=False):
     """
@@ -92,20 +77,20 @@ def build_cumulative_returns_series(factor_and_fp, daily_perc_ret, days_before, 
         timestamp, equity = row['date'], row['equity']
         timestamp_idx = daily_perc_ret.index.get_loc(timestamp)
         start = timestamp_idx - days_before
-        end   = timestamp_idx + days_after
+        end = timestamp_idx + days_after
         series = daily_perc_ret.ix[start:end, equity]
-        ret_df = pd.concat( [ret_df, series], axis=1, ignore_index=True)
+        ret_df = pd.concat([ret_df, series], axis=1, ignore_index=True)
 
     # Reset index to have the same starting point (from datetime to day offset)
-    ret_df = ret_df.apply(lambda x : x.dropna().reset_index(drop=True), axis=0)
+    ret_df = ret_df.apply(lambda x: x.dropna().reset_index(drop=True), axis=0)
     ret_df.index = range(-days_before, days_after)
 
     # From daily percent returns to comulative returns
-    ret_df  = (ret_df  + 1).cumprod() - 1
+    ret_df = (ret_df + 1).cumprod() - 1
 
     # Make returns be 0 at day 0
     if day_zero_align:
-        ret_df -= ret_df.iloc[days_before,:]
+        ret_df -= ret_df.iloc[days_before, :]
 
     return ret_df
 
@@ -142,3 +127,45 @@ def print_table(table, name=None, fmt=None):
 
     if fmt is not None:
         pd.set_option('display.float_format', prev_option)
+
+
+def format_for_sector_data(factor, forward_returns, sectors):
+    """
+    Formats the factor data, forward returns, and sector mappings into DataFrames and Series that
+    contain aligned MultiIndex indices containing date, equity, and sector.
+    ----------
+    ----------
+    factor : pandas.Series - MultiIndex
+        A list of equities and their factor values indexed by date.
+    forward_returns : pandas.DataFrame - MultiIndex
+        A list of equities and their N day forward returns where each column contains
+        the N day forward returns
+    sectors : pd.Series - MultiIndex
+        A list of equities and their sectors
+    Returns
+    -------
+    sector_factor : pd.Series
+        A list of equities and their factor values indexed by date, equity, and sector.
+    forward_returns : pd.DataFrame - MultiIndex
+        A DataFrame of equities and their forward returns indexed by date, equity, and sector.
+        Note: this is the same index as the sector_factor index
+    """
+    merged_forward_returns_data = pd.merge(pd.DataFrame(sectors),
+                                           pd.DataFrame(forward_returns),
+                                           how='left',
+                                           left_index=True,
+                                           right_index=True)
+    merged_data = pd.merge(pd.DataFrame(factor),
+                           merged_forward_returns_data,
+                           how='left',
+                           left_index=True,
+                           right_index=True)
+
+    merged_data = merged_data.set_index([merged_data.index, merged_data["sector"]])
+    merged_data = merged_data.drop("sector", 1)
+    merged_data = merged_data.dropna()
+
+    sector_factor = merged_data.pop("factor")
+    sector_forward_returns = merged_data
+
+    return sector_factor, sector_forward_returns

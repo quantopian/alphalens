@@ -1,9 +1,8 @@
-import pandas as pd
-import numpy as np
-
-import utils
 from plotting import *
 import performance as perf
+import utils
+import pandas as pd
+
 
 def create_factor_tear_sheet(factor,
                              prices,
@@ -11,7 +10,7 @@ def create_factor_tear_sheet(factor,
                              sector_plots=True,
                              sector_adjust=False,
                              sector_names=None,
-                             days=[1, 5, 10],
+                             days=(1, 5, 10),
                              nquantiles = 10,
                              ret_type='normal' # normal, market_excess or beta_excess
                             ):
@@ -19,11 +18,11 @@ def create_factor_tear_sheet(factor,
     end_date = factor.index.levels[0].max()
 
     if sector_adjust:
-        pricing = utils.sector_adjust_forward_price_moves(prices)
+        pricing = utils.sector_adjust_forward_returns(prices)
 
-    forward_prices = utils.compute_forward_price_movement(prices, days=days)
+    forward_prices = utils.compute_forward_returns(prices, days=days)
 
-    daily_ic, _ = perf.factor_spearman_rank_IC(factor, forward_prices, by_sector=False)
+    daily_ic, _ = perf.factor_information_coefficient(factor, forward_prices, by_sector=False)
 
     quantile_factor = perf.quantize_factor(factor, by_sector=sector_adjust,
                                            quantiles=nquantiles)

@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd
 import seaborn as sns
-
 import matplotlib.pyplot as plt
-
 import performance as perf
 import utils
 from itertools import izip
@@ -31,8 +29,7 @@ def plot_daily_ic_ts(daily_ic, return_ax=False, is_sector_adjusted=False):
 
     summary_stats = pd.DataFrame(columns=['mean', 'std'])
     for ax, (days_num, ic) in izip(axes, daily_ic.iteritems()):
-        title = "{} day IC {}".format(days_num,
-                   "(sector adjusted)" if is_sector_adjusted else "")
+        title = "{} day IC {}".format(days_num, "(sector adjusted)" if is_sector_adjusted else "")
         summary_stats.loc["%i day IC" % days_num] = [ic.mean(), ic.std()]
 
         ic_df = (pd.DataFrame(ic.rename("{} day IC".format(days_num)))
@@ -53,6 +50,7 @@ def plot_daily_ic_ts(daily_ic, return_ax=False, is_sector_adjusted=False):
     if return_ax:
         return axes
 
+
 def plot_daily_ic_hist(daily_ic, return_ax=False):
     num_plots = len(daily_ic.columns)
 
@@ -67,6 +65,7 @@ def plot_daily_ic_hist(daily_ic, return_ax=False):
 
     if return_ax:
         return axes
+
 
 def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, quantiles=5):
     """
@@ -85,7 +84,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, quantiles=5):
         Name of factor column on which to compute IC.
     """
     if by_sector:
-        f, axes = plt.subplots(6,2, sharex=False, sharey=True, figsize=(20,45))
+        f, axes = plt.subplots(6, 2, sharex=False, sharey=True, figsize=(20, 45))
         axes = axes.flatten()
 
         for i, (sc, cor) in enumerate(mean_ret_by_q.groupby(level='sector_code')):
@@ -98,7 +97,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, quantiles=5):
         fig.suptitle(factor_name + ": Mean Return By Factor Quantile", fontsize=24, x=.5, y=.93)
 
     else:
-        f, ax = plt.subplots(1,1, figsize=(28,12))
+        f, ax = plt.subplots(1, 1, figsize=(28, 12))
         mean_ret_by_q.plot(kind='bar',
                            title="Mean Return By Factor Quantile",
                            ax=ax)
@@ -136,11 +135,11 @@ def plot_quantile_cumulative_return(cum_ret_by_q):
 
     palette = sns.color_palette("coolwarm", len(cum_ret_by_q.columns))
 
-    f, ax = plt.subplots(1,1, figsize=(28,12))
+    f, ax = plt.subplots(1, 1, figsize=(28, 12))
     for i, (quantile, cum_returns) in enumerate(cum_ret_by_q.iteritems()):
         label = 'Quantile ' + str(quantile)
         sns.tsplot(ax=ax, data=cum_returns.values, condition=label,
-                        legend=True, color=palette[i], time=cum_returns.index)
+                   legend=True, color=palette[i], time=cum_returns.index)
 
     # mark day zero with a vertical line
     ax.axvline(x=0, color='k', linestyle='--')
@@ -151,6 +150,7 @@ def plot_quantile_cumulative_return(cum_ret_by_q):
     plt.show()
 
 #### End Refactored #####
+
 
 def plot_quantile_returns_box(factor_and_fp, by_sector=True, quantiles=5, factor_name='factor'):
     """
@@ -173,26 +173,33 @@ def plot_quantile_returns_box(factor_and_fp, by_sector=True, quantiles=5, factor
     fwd_days, pc_cols = utils.get_price_move_cols(decile_factor)
 
     if by_sector:
-        f, axes = plt.subplots(6,2, sharex=False, sharey=True, figsize=(20,45))
+        f, axes = plt.subplots(6, 2, sharex=False, sharey=True, figsize=(20, 45))
         axes = axes.flatten()
         i = 0
         for sc, cor in decile_factor.groupby(by='sector_code'):
-            cor_box_plot = pd.melt(cor, var_name='fwd_days_price', value_name='%_price_change',
-                                             id_vars=['factor_quantile'], value_vars=pc_cols)
+            cor_box_plot = pd.melt(cor,
+                                   var_name='fwd_days_price',
+                                   value_name='%_price_change',
+                                   id_vars=['factor_quantile'],
+                                   value_vars=pc_cols)
+
             # boxplot doesn't sort 'x' by itself
             cor_box_plot = cor_box_plot.sort(columns='factor_quantile', ascending=True)
             sns.boxplot(ax=axes[i], x="factor_quantile", y="%_price_change", hue="fwd_days_price", data=cor_box_plot)
             axes[i].set_xlabel('factor quantile')
             axes[i].set_ylabel('mean price % change')
             axes[i].set_title(sc)
-            i+=1
+            i += 1
         fig = plt.gcf()
         fig.suptitle(factor_name + ": Mean Return By Factor Quantile", fontsize=24, x=.5, y=.93)
 
     else:
 
-        decile_factor_box_plot = pd.melt(decile_factor, var_name='fwd_days_price', value_name='%_price_change',
-                                 id_vars=['factor_quantile'], value_vars=pc_cols)
+        decile_factor_box_plot = pd.melt(decile_factor,
+                                         var_name='fwd_days_price',
+                                         value_name='%_price_change',
+                                         id_vars=['factor_quantile'],
+                                         value_vars=pc_cols)
         # boxplot doesn't sort 'x' by itself
         decile_factor_box_plot = decile_factor_box_plot.sort(columns='factor_quantile', ascending=True)
         sns.boxplot(x="factor_quantile", y="%_price_change", hue="fwd_days_price", data=decile_factor_box_plot)
@@ -216,7 +223,7 @@ def plot_ic_by_sector(factor_and_fp, factor_name='factor'):
     factor_name : string
         Name of factor column on which to compute IC.
     """
-    ic_sector, err_sector = factor_spearman_rank_IC(factor_and_fp, factor_name=factor_name)
+    ic_sector, err_sector = perf.factor_information_coefficient(factor_and_fp, factor_name=factor_name)
 
     ic_sector.plot(kind='bar') #yerr=err_sector
     fig = plt.gcf()
@@ -239,12 +246,12 @@ def plot_ic_by_sector_over_time(factor_and_fp, time_rule=None, factor_name='fact
     factor_name : string
         Name of factor column on which to compute IC.
     """
-    ic_time, err_time = factor_spearman_rank_IC(factor_and_fp, time_rule=time_rule,
+    ic_time, err_time = perf.factor_information_coefficient(factor_and_fp, time_rule=time_rule,
                                                 factor_name=factor_name)
     ic_time = ic_time.reset_index()
     err_time = err_time.reset_index()
 
-    f, axes = plt.subplots(6,2, sharex=False, sharey=True, figsize=(20,45))
+    f, axes = plt.subplots(6, 2, sharex=False, sharey=True, figsize=(20, 45))
     axes = axes.flatten()
     i = 0
     for sc, data in ic_time.groupby(['sector_code']):
@@ -253,10 +260,11 @@ def plot_ic_by_sector_over_time(factor_and_fp, time_rule=None, factor_name='fact
                                                                 title=sc,
                                                                 ax=axes[i],
                                                                 ) # yerr=e
-        i+=1
+        i += 1
     fig = plt.gcf()
     fig.suptitle("Monthly Information Coefficient by Sector", fontsize=16, x=.5, y=.93)
     plt.show()
+
 
 def plot_factor_rank_auto_correlation(daily_factor, time_rule='W', factor_name='factor'):
     """
@@ -273,11 +281,12 @@ def plot_factor_rank_auto_correlation(daily_factor, time_rule='W', factor_name='
         Name of factor column on which to compute IC.
     """
 
-    fa = factor_rank_autocorrelation(daily_factor, time_rule=time_rule, factor_name=factor_name)
+    fa = perf.factor_rank_autocorrelation(daily_factor, time_rule=time_rule, factor_name=factor_name)
     print "Mean rank autocorrelation: " + str(fa.mean())
     fa.plot(title='Week-to-Week Factor Rank Autocorrelation')
     plt.ylabel('autocorrelation coefficient')
     plt.show()
+
 
 def plot_top_bottom_quantile_turnover(daily_factor, num_quantiles=5, factor_name='factor'):
     """
@@ -305,7 +314,7 @@ def plot_top_bottom_quantile_turnover(daily_factor, num_quantiles=5, factor_name
     plt.show()
 
 
-def plot_factor_vs_fwdprice_distribution(factor_and_fp, factor_name='factor', remove_outliers = False):
+def plot_factor_vs_fwdprice_distribution(factor_and_fp, factor_name='factor', remove_outliers=False):
     """
     Plots distribuion of factor vs forward price.
     This is useful to visually spot linear or non linear relationship between factor and fwd prices
@@ -330,15 +339,11 @@ def plot_factor_vs_fwdprice_distribution(factor_and_fp, factor_name='factor', re
 
         jg = sns.jointplot(data[factor_name], data[col], kind="kde")
         jg.fig.suptitle('Factor/returns kernel density estimation' +
-                        (' NO OUTLIERS' if remove_outliers else '') )
+                        (' NO OUTLIERS' if remove_outliers else ''))
         plt.show()
 
         jg = sns.jointplot(data[factor_name], data[col], kind="reg")
         jg.fig.suptitle('Factor/returns regression' +
-                        (' NO OUTLIERS' if remove_outliers else '') )
+                        (' NO OUTLIERS' if remove_outliers else ''))
 
         plt.show()
-
-
-
-
