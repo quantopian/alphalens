@@ -145,15 +145,16 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
     Returns
     -------
     factor_quantile : pd.Series
-        A list of equities and the quantile the value of their factor falls into.
+        Factor quantiles indexed by date and symbol.
     """
 
-    g_by = ['date', 'sector'] if by_sector else ['date']
+    grouper = ['date', 'sector'] if by_sector else ['date']
 
-    factor_percentile = factor.groupby(level=g_by).rank(pct=True)
+    factor_percentile = factor.groupby(level=grouper).rank(pct=True)
 
-    q_int_width = 1. / quantiles
-    factor_quantile = factor_percentile.apply(lambda x: ((x - .000000001) // q_int_width) + 1)
+    q_width = 1. / quantiles
+    factor_quantile = factor_percentile.apply(
+        lambda x: ((x - .000000001) // q_width) + 1)
     factor_quantile.name = 'quantile'
 
     return factor_quantile
