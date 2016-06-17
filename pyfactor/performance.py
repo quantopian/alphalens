@@ -44,7 +44,7 @@ def factor_information_coefficient(factor, forward_returns, time_rule=None, by_s
     def src_std_error(rho, n):
         return np.sqrt((1 - rho ** 2) / (n - 2))
 
-    factor_and_fp = pd.merge(pd.DataFrame(factor.rename('factor')),
+    factor_and_fp = pd.merge(pd.DataFrame(factor),
                              forward_returns,
                              how='left',
                              left_index=True,
@@ -126,17 +126,9 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_returns, by_s
         Sector-wise mean daily returns by specified factor quantile.
     """
 
-    quant_factor_fp = pd.merge(pd.DataFrame(quantized_factor),
-                               forward_returns,
-                               how='left',
-                               left_index=True,
-                               right_index=True)
-
-    quant_factor_fp = quant_factor_fp.set_index([quant_factor_fp.index, quant_factor_fp['quantile']])
-    quant_factor_fp = quant_factor_fp.drop('quantile', 1)
-
+    forward_returns = forward_returns.set_index([forward_returns.index, quantized_factor])
     g_by = ['sector', 'quantile'] if by_sector else ['quantile']
-    mean_ret_by_quantile = quant_factor_fp.groupby(level=g_by).mean()
+    mean_ret_by_quantile = forward_returns.groupby(level=g_by).mean()
 
     return mean_ret_by_quantile
 
