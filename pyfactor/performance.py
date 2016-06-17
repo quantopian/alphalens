@@ -154,6 +154,7 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
 
     q_int_width = 1. / quantiles
     factor_quantile = factor_percentile.apply(lambda x: ((x - .000000001) // q_int_width) + 1)
+    factor_quantile.name = 'quantile'
 
     return factor_quantile
 
@@ -165,7 +166,7 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_returns, by_s
 
     Parameters
     ----------
-    quantized_factor : pd.DataFrame
+    quantized_factor : pd.Series - MultiIndex
         DataFrame with date, equity index and factor quantile as a column.
         See quantile_bucket_factor for more detail.
     forward_returns : pandas.DataFrame - MultiIndex
@@ -179,67 +180,12 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_returns, by_s
     mean_returns_by_quantile : pd.DataFrame
         Sector-wise mean daily returns by specified factor quantile.
     """
-    quant_factor_fp = pd.merge(pd.DataFrame(quantized_factor.rename('quantile')),
-                               forward_returns,
-                               how='left',
-                               left_index=True,
-                               right_index=True)
 
-    quant_factor_fp = quant_factor_fp.reset_index().set_index(
-        ['date', 'equity', 'sector', 'quantile'] if by_sector
-        else ['date', 'equity', 'quantile'])
-
-    def daily_mean_ret(group):
-        mean_ret = pd.Series(index=group.columns)
-        for day_num, returns in group.iteritems():
-            mean_ret[day_num] = returns.mean() / day_num
-
-        return mean_ret
-
+    forward_returns = forward_returns.set_index([forward_returns.index, quantized_factor])
     g_by = ['sector', 'quantile'] if by_sector else ['quantile']
-    mean_ret_by_quantile = quant_factor_fp.groupby(level=g_by).apply(daily_mean_ret)
+    mean_ret_by_quantile = forward_returns.groupby(level=g_by).mean()
 
     return mean_ret_by_quantile
-
-
-def surrounding_cumulative_returns_by_quantile(quantized_factor, prices, days_before, days_after, day_zero_align=True):
-    """
-    An equity and date pair is extracted from each row in the input dataframe and for each of
-    these pairs a cumulative return time series is built starting 'days_before' days
-    before and ending 'days_after' days after the date specified in the pair
-
-    Parameters
-    ----------
-    factor_and_fp : pd.DataFrame
-        DataFrame with at least date and equity columns.
-    daily_perc_ret : pd.DataFrame
-        Pricing data to use in cumulative return calculation. Equities as columns, dates as index.
-    day_zero_align : boolean
-         Aling returns at day 0 (timeseries is 0 at day 0)
-    """
-    window = days_before + days_after
-
-    surrounding_rets = pd.DataFrame(index=pd.MultiIndex.from_product(
-            [prices.index, prices.columns], names=['date', 'equity']))
-    for i in range(-days_before, days_after):
-        delta = prices.shift(-i).pct_change(1).shift(-1)
-        surrounding_rets[i] = delta.stack()
-
-    mean_cum_returns_by_quant = (pd.merge(pd.DataFrame(
-        quantized_factor.rename('quantile')),
-        surrounding_rets, how='left', left_index=True, right_index=True)
-        .reset_index()
-        .set_index(['date', 'equity', 'quantile'])
-        .groupby(level='quantile')
-        .mean()
-        .T.add(1).cumprod().add(-1)
-        )
-
-    # Make returns be 0 at day 0
-    if day_zero_align:
-        mean_cum_returns_by_quant -= mean_cum_returns_by_quant.loc[0]
-
-    return mean_cum_returns_by_quant
 
 
 def quantile_turnover(quantile_factor, quantile):
