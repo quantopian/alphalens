@@ -120,8 +120,11 @@ def mean_information_coefficient(factor, forward_returns,
     err : pd.DataFrame
         Standard error of computed IC.
     """
+
     ic, err = factor_information_coefficient(factor,
-                                             forward_returns, sector_adjust=sector_adjust, by_sector=by_sector)
+                                             forward_returns, ]
+                                             sector_adjust=sector_adjust,
+                                             by_sector=by_sector)
 
     grouper = []
     if by_time is not None:
@@ -201,6 +204,7 @@ def mean_return_by_factor_quantile(quantized_factor, forward_returns,
 
     demeaned_fr = utils.demean_forward_returns(forward_returns,
                                                by_sector=by_sector)
+
     quantized_factor = quantized_factor.rename('quantile')
     forward_returns_quantile = (pd.DataFrame(quantized_factor)
                                 .merge(demeaned_fr, how='left',
@@ -249,9 +253,8 @@ def quantile_turnover(quantile_factor, quantile):
 
     Parameters
     ----------
-    quantile_factor : pd.DataFrame
-        DataFrame with date, equity, factor, factor quantile, and forward price movement columns.
-        Index should be integer. See quantile_bucket_factor for more detail.
+    quantile_factor : pd.Series
+        DataFrame with date, equity and factor quantile.
     quantile : integer
         Quantile on which to perform turnover analysis.
 
@@ -281,14 +284,13 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
 
     Parameters
     ----------
-    daily_factor : pd.DataFrame
-        DataFrame with integer index and date, equity, factor, and sector
-        code columns.
+    factor : pd.Series
+        Series with date and equity index. Values are factor values.
     time_rule : string, optional
         Time span to use in factor grouping mean reduction.
         See http://pandas.pydata.org/pandas-docs/stable/timeseries.html for available options.
-    factor_name : string
-        Name of factor column on which to compute IC.
+    by_sector : boolean
+        If True, compute autocorrelation separately for each sector.
 
     Returns
     -------
@@ -296,6 +298,7 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
         Rolling 1 period (defined by time_rule) autocorrelation of factor values.
 
     """
+
     factor = factor.rename('factor')
     grouper = ['date', 'sector'] if by_sector else ['date']
 

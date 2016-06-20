@@ -47,6 +47,8 @@ def demean_forward_returns(forward_returns, by_sector=False):
     forward_returns : pd.DataFrame - MultiIndex
         DataFrame with date, equity, sector, and forward returns columns.
         See compute_forward_returns for more detail.
+    by_sector : boolean
+        If True, demean according to sector.
 
     Returns
     -------
@@ -58,7 +60,6 @@ def demean_forward_returns(forward_returns, by_sector=False):
     grouper = ['date', 'sector'] if by_sector else ['date']
 
     return forward_returns.groupby(level=grouper).apply(lambda x: x - x.mean())
-
 
 
 def print_table(table, name=None, fmt=None):
