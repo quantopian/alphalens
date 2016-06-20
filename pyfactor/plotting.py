@@ -7,6 +7,8 @@ import utils
 from itertools import izip
 
 
+sns.set(font_scale=2)
+
 # DONE
 def plot_daily_ic_ts(daily_ic, return_ax=False):
     """
@@ -22,7 +24,6 @@ def plot_daily_ic_ts(daily_ic, return_ax=False):
         Name of factor column on which to compute IC.
     """
     num_plots = len(daily_ic.columns)
-
     f, axes = plt.subplots(num_plots, 1, figsize=(28, num_plots * 12))
     axes = (a for a in axes.flatten())
 
@@ -34,11 +35,13 @@ def plot_daily_ic_ts(daily_ic, return_ax=False):
         ic_df = (pd.DataFrame(ic.rename("{} day IC".format(days_num)))
                  .assign(**{'1 month moving avg': ic.rolling(22).mean()})
                  .plot(title=title, alpha=0.7, ax=ax))
-        ax.set(ylabel='IC', xlabel='date')
+        ax.set(ylabel='IC', xlabel="")
+        ax.set_ylim([-1, 1])
 
     summary_stats['mean/std'] = summary_stats['mean'] / summary_stats['std']
     utils.print_table(summary_stats)
     plt.show()
+
 
     if return_ax:
         return axes
@@ -54,6 +57,7 @@ def plot_daily_ic_hist(daily_ic, return_ax=False):
     for ax, (days_num, ic) in izip(axes, daily_ic.iteritems()):
         sns.distplot(ic.replace(np.nan, 0.), norm_hist=True, ax=ax)
         ax.set(title="%s day IC" % days_num, xlabel='IC')
+        ax.set_xlim([-1, 1])
     plt.show()
 
     if return_ax:
@@ -94,7 +98,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
         mean_ret_by_q.plot(kind='bar',
                            title="Mean Return By Factor Quantile",
                            ax=ax)
-        ax.set(xlabel='factor quantile', ylabel='mean daily price % change')
+        ax.set(xlabel='', ylabel='mean daily price % change')
 
     plt.show()
 
@@ -188,12 +192,12 @@ def plot_top_bottom_quantile_turnover(quantized_factor):
     """
     max_quantile = quantized_factor.values.max()
     turnover = pd.DataFrame()
-    turnover['top quintile turnover'] = perf.quantile_turnover(quantized_factor, max_quantile)
-    turnover['bottom quintile turnover'] = perf.quantile_turnover(quantized_factor, 1)
+    turnover['top quantile turnover'] = perf.quantile_turnover(quantized_factor, max_quantile)
+    turnover['bottom quantile turnover'] = perf.quantile_turnover(quantized_factor, 1)
 
     f, ax = plt.subplots(1, 1, figsize=(28, 12))
-    turnover.plot(title='Top and Bottom Quintile Turnover', ax=ax)
-    ax.set(ylabel='proportion of names not present in quantile in previous period')
+    turnover.plot(title='Top and Bottom Quantile Turnover', ax=ax)
+    ax.set(ylabel='proportion of names not present in quantile in previous period', xlabel="")
     plt.show()
 
 
