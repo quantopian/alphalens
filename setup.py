@@ -19,8 +19,6 @@ install_reqs = [
     'pytz>=2014.10',
     'scipy>=0.14.0',
     'seaborn>=0.6.0',
-    'pandas-datareader>=0.2',
-    'scikit-learn>=0.17',
 ]
 
 if __name__ == "__main__":

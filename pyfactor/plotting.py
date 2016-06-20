@@ -1,3 +1,18 @@
+#
+# Copyright 2016 Quantopian, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -89,7 +104,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
 
     if by_sector:
         num_sector = len(mean_ret_by_q.index.levels[2].unique())
-        v_spaces = num_sector // 2
+        v_spaces = (num_sector + 1) // 2
 
         f, axes = plt.subplots(v_spaces, 2, sharex=False, sharey=True, figsize=(20, 5*v_spaces))
         axes = axes.flatten()
@@ -112,7 +127,34 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
     plt.show()
 
 
+
+def plot_mean_quintile_returns_spread_time_series(mean_returns_spread, std=None,
+        title='Top Quintile - Bottom Quantile Mean Return'):
+    if isinstance(mean_returns_spread, pd.DataFrame):
+        for name, fr_column in mean_returns_spread.iteritems():
+            stdn = None if std is None else std[name]
+            plot_mean_quintile_returns_spread_time_series(fr_column, std=stdn,
+                title=str(name) + " Day Forward Return " + title)
+        return
+
+    f, ax = plt.subplots(figsize=(20, 8))
+    (pd.DataFrame(mean_returns_spread.rename('mean_return_spread'))
+        .assign(**{'1 month moving avg': mean_returns_spread.rolling(22).mean()})
+        .plot(alpha=0.7, ax=ax))
+    mean_returns_spread.rolling(22).mean()
+    if std is not None:
+        upper = mean_returns_spread.values + std
+        lower = mean_returns_spread.values - std
+        ax.fill_between(mean_returns_spread.index, lower, upper, alpha=0.3)
+
+    ax.set(ylabel='Difference in Quantile Mean Return')
+    ax.set(title=title)
+
+    plt.show()
+
+
 def plot_ic_by_sector(ic_sector):
+
     """
     Plots Spearman Rank Information Coefficient for a given factor over provided forward price
     movement windows. Separates by sector.
@@ -195,3 +237,4 @@ def plot_top_bottom_quantile_turnover(quantized_factor):
     turnover.plot(title='Top and Bottom Quantile Turnover', ax=ax)
     ax.set(ylabel='proportion of names not present in quantile in previous period', xlabel="")
     plt.show()
+
