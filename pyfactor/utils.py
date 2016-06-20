@@ -28,14 +28,17 @@ def compute_forward_returns(prices, days=(1, 5, 10)):
     return forward_returns
 
 
-def sector_adjust_forward_returns(forward_returns):
+def demean_forward_returns(forward_returns, by_sector=False):
     """
-    Convert forward price movements to price movements relative to mean sector price movements.
-    This normalization incorporates the assumption of a sector neutral portfolio constraint
-    and thus allows allows the factor to be evaluated across sectors.
+    Convert forward price movements to price movements relative to mean
+    daily all-universe or sector price movements.
+    Sector-wise normalization incorporates the assumption of a
+    sector neutral portfolio constraint and thus allows allows the
+    factor to be evaluated across sectors.
 
-    For example, if AAPL 5 day return is 0.1% and mean 5 day return for the Technology stocks
-    in our universe was 0.5% in the same period, the sector adjusted 5 day return for AAPL
+    For example, if AAPL 5 day return is 0.1% and mean 5 day
+    return for the Technology stocks in our universe was 0.5% in the
+     same period, the sector adjusted 5 day return for AAPL
     in this period is -0.4%.
 
 
@@ -48,11 +51,14 @@ def sector_adjust_forward_returns(forward_returns):
     Returns
     -------
     adjusted_forward_returns : pd.DataFrame - MultiIndex
-        DataFrame of the same format as the input, but with each security's returns normalized by sector.
+        DataFrame of the same format as the input, but with each
+        security's returns normalized by sector.
 
     """
+    grouper = ['date', 'sector'] if by_sector else ['date']
 
-    return forward_returns.groupby(level=['date', 'sector']).apply(lambda x: x - x.mean())
+    return forward_returns.groupby(level=grouper).apply(lambda x: x - x.mean())
+
 
 
 def print_table(table, name=None, fmt=None):
@@ -127,7 +133,8 @@ def format_input_data(factor, prices, sectors=None, days=(1, 5, 10)):
                                how='left',
                                left_index=True,
                                right_index=True)
-        merged_data = merged_data.set_index([merged_data.index, merged_data["sector"]])
+        merged_data = merged_data.set_index(
+            [merged_data.index, merged_data["sector"]])
         merged_data = merged_data.drop("sector", 1)
 
     merged_data = merged_data.dropna()
