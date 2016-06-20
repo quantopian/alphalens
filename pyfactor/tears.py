@@ -9,7 +9,25 @@ def create_factor_tear_sheet(factor,
                              sectors=None,
                              sector_plots=True,
                              days=(1, 5, 10)
-                            ):
+                             ):
+    """
+
+    Creates a full tear sheet for analysis and evaluating single return predicting (alpha) factors.
+
+    Parameters
+    ----------
+    factor : pd.Series - MultiIndex
+        A MultiIndex Series indexed by date and equity, containing the values for a single alpha factor.
+    prices : pd.DataFrame
+        A long form Pandas DataFrame indexed by date with equities in the columns.
+    sectors : pd.Series - MultiIndex
+        A MultiIndex Series indexed by date and equity, containing the sector codes for each equity.
+    sector_plots : boolean
+        If True create sector specific plots.
+    days: list
+        Days to compute forward returns on.
+
+    """
 
     can_sector_adjust = sectors is not None
     factor, forward_returns = utils.format_input_data(factor, prices, sectors, days)
@@ -25,8 +43,8 @@ def create_factor_tear_sheet(factor,
                                                                      forward_returns,
                                                                      by_sector=False)
     mean_ret_by_decile = perf.mean_daily_return_by_factor_quantile(decile_factor,
-                                                                     forward_returns,
-                                                                     by_sector=False)
+                                                                   forward_returns,
+                                                                   by_sector=False)
 
     # What is the sector-netural rolling mean IC for our different forward price windows?
     plot_daily_ic_ts(daily_ic)
