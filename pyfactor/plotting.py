@@ -113,6 +113,31 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
     plt.show()
 
 
+def plot_mean_quintile_returns_spread_time_series(mean_returns_spread, std=None,
+        title='Top Quintile - Bottom Quantile Mean Return'):
+    if isinstance(mean_returns_spread, pd.DataFrame):
+        for name, fr_column in mean_returns_spread.iteritems():
+            stdn = None if std is None else std[name]
+            plot_mean_quintile_returns_spread_time_series(fr_column, std=stdn,
+                title=str(name) + " Day Forward Return " + title)
+        return
+
+    f, ax = plt.subplots(figsize=(20, 8))
+    (pd.DataFrame(mean_returns_spread.rename('mean_return_spread'))
+        .assign(**{'1 month moving avg': mean_returns_spread.rolling(22).mean()})
+        .plot(alpha=0.7, ax=ax))
+    mean_returns_spread.rolling(22).mean()
+    if std is not None:
+        upper = mean_returns_spread.values + std
+        lower = mean_returns_spread.values - std
+        ax.fill_between(mean_returns_spread.index, lower, upper, alpha=0.3)
+
+    ax.set(ylabel='Difference in Quantile Mean Return')
+    ax.set(title=title)
+
+    plt.show()
+
+
 def plot_ic_by_sector(ic_sector, factor_name='factor'):
     """
     Plots Spearman Rank Information Coefficient for a given factor over provided forward price
@@ -209,5 +234,7 @@ def plot_top_bottom_quantile_turnover(quantized_factor):
     turnover.plot(title='Top and Bottom Quintile Turnover', ax=ax)
     ax.set(ylabel='proportion of names not present in quantile in previous period')
     plt.show()
+
+
 
 
