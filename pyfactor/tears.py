@@ -38,12 +38,23 @@ def create_factor_tear_sheet(factor,
         factor, by_sector=False, quantiles=5)
     decile_factor = perf.quantize_factor(factor, by_sector=False, quantiles=10)
 
-    mean_ret_by_quintile = perf.mean_daily_return_by_factor_quantile(quintile_factor,
-                                                                     forward_returns,
-                                                                     by_sector=False)
-    mean_ret_by_decile = perf.mean_daily_return_by_factor_quantile(decile_factor,
-                                                                   forward_returns,
-                                                                   by_sector=False)
+    mean_ret_quintile, std_quintile = perf.mean_return_by_factor_quantile(quintile_factor,
+                                                                          forward_returns,
+                                                                          by_sector=False,
+                                                                          std=True)
+
+    mean_ret_quintile_daily, std_quintile_daily = perf.mean_return_by_factor_quantile(quintile_factor,
+                                                                                      forward_returns,
+                                                                                      by_time='D',
+                                                                                      by_sector=False,
+                                                                                      std=True)
+
+    mean_ret_spread_quintile, std_spread_quintile = perf.compute_mean_returns_spread(
+        mean_ret_quintile_daily, 5, 1, std=std_quintile_daily)
+
+    mean_ret_by_decile = perf.mean_return_by_factor_quantile(decile_factor,
+                                                             forward_returns,
+                                                             by_sector=False)
 
     # What is the sector-netural rolling mean IC for our different forward
     # price windows?
@@ -52,7 +63,12 @@ def create_factor_tear_sheet(factor,
 
     # What are the sector-neutral factor quantile mean returns for our
     # different forward price windows?
-    plot_quantile_returns_bar(mean_ret_by_quintile, by_sector=False)
+    plot_quantile_returns_bar(mean_ret_quintile, by_sector=False)
+    # What is the difference between top quintile mean return and bottom?
+    plot_mean_quintile_returns_spread_time_series(mean_ret_spread_quintile,
+                                                  std=std_spread_quintile,
+                                                  title="Top Quintile - Bottom Quintile Mean Return (1 std. error band)")
+
     plot_quantile_returns_bar(mean_ret_by_decile, by_sector=False)
 
     # How much are the contents of the the top and bottom quintile changing
