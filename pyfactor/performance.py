@@ -176,7 +176,7 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
 
 
 def mean_return_by_factor_quantile(quantized_factor, forward_returns,
-                                   by_time=None, by_sector=False):
+                                   by_time=None, by_sector=False, std=False):
     """
     Computes mean demeaned returns for factor quantiles across
     provided forward returns columns.
@@ -217,9 +217,29 @@ def mean_return_by_factor_quantile(quantized_factor, forward_returns,
 
     grouper.append(forward_returns_quantile.index.get_level_values('quantile'))
 
-    mean_ret_by_quantile = forward_returns_quantile.groupby(grouper).mean()
+    mean_std = forward_returns_quantile.groupby(grouper).agg(['mean', 'std'])
 
-    return mean_ret_by_quantile
+    mean_ret = mean_std.T.xs('mean', level=1).T
+    std_ret = mean_std.T.xs('std', level=1).T
+
+    if std:
+        return mean_ret, std_ret
+
+    return mean_ret
+
+
+def compute_mean_returns_spread(mean_returns, upper_quant, lower_quant, std=None):
+    mean_return_difference = mean_returns.xs(upper_quant, level='quantile') - \
+        mean_returns.xs(lower_quant, level='quantile')
+
+    if std is not None:
+        std1 = std.xs(upper_quant, level='quantile')
+        std2 = mean_returns.xs(lower_quant, level='quantile')
+        joint_std = np.sqrt(std1**2 + std2**2)
+
+        return mean_return_difference, joint_std
+
+    return mean_returns
 
 
 def quantile_turnover(quantile_factor, quantile):
