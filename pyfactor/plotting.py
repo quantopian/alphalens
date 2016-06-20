@@ -1,3 +1,18 @@
+#
+# Copyright 2016 Quantopian, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -7,7 +22,7 @@ import utils
 from itertools import izip
 
 
-# DONE
+
 def plot_daily_ic_ts(daily_ic, return_ax=False):
     """
     Plots Spearman Rank Information Coefficient and IC moving average for a given factor.
@@ -43,7 +58,7 @@ def plot_daily_ic_ts(daily_ic, return_ax=False):
     if return_ax:
         return axes
 
-# DONE
+
 def plot_daily_ic_hist(daily_ic, return_ax=False):
     num_plots = len(daily_ic.columns)
 
@@ -59,8 +74,7 @@ def plot_daily_ic_hist(daily_ic, return_ax=False):
     if return_ax:
         return axes
 
-#DONE
-#DONE FOR SECTORS
+
 def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
     """
     Plots sector-wise mean daily returns for factor quantiles
@@ -76,7 +90,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
 
     if by_sector:
         num_sector = len(mean_ret_by_q.index.levels[2].unique())
-        v_spaces = num_sector // 2
+        v_spaces = (num_sector + 1) // 2
 
         f, axes = plt.subplots(v_spaces, 2, sharex=False, sharey=True, figsize=(20, 5*v_spaces))
         axes = axes.flatten()
@@ -174,7 +188,7 @@ def plot_factor_rank_auto_correlation(daily_factor, time_rule='W'):
     ax.set(ylabel='autocorrelation coefficient')
     plt.show()
 
-# DONE
+
 def plot_top_bottom_quantile_turnover(quantized_factor):
     """
     Plots daily top and bottom quantile factor turnover.
