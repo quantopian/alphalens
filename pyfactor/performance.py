@@ -121,7 +121,7 @@ def mean_information_coefficient(factor, forward_returns,
         Standard error of computed IC.
     """
     ic, err = factor_information_coefficient(factor,
-        forward_returns, sector_adjust=sector_adjust, by_sector=by_sector)
+                                             forward_returns, sector_adjust=sector_adjust, by_sector=by_sector)
 
     grouper = []
     if by_time is not None:
@@ -134,9 +134,9 @@ def mean_information_coefficient(factor, forward_returns,
           .groupby(grouper)
           .mean())
     err = (err.reset_index()
-          .set_index('date')
-          .groupby(grouper)
-          .agg(lambda x: np.sqrt(np.sum(np.power(x, 2)) / len(x))))
+           .set_index('date')
+           .groupby(grouper)
+           .agg(lambda x: np.sqrt(np.sum(np.power(x, 2)) / len(x))))
 
     ic.columns = pd.Int64Index(ic.columns)
     err.columns = pd.Int64Index(err.columns)
@@ -175,10 +175,10 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
     return factor_quantile
 
 
-def mean_daily_return_by_factor_quantile(quantized_factor, forward_returns,
-                                         by_sector=False):
+def mean_return_by_factor_quantile(quantized_factor, forward_returns,
+                                   by_time=None, by_sector=False):
     """
-    Computes mean daily demeaned returns for factor quantiles across
+    Computes mean demeaned returns for factor quantiles across
     provided forward returns columns.
 
     Parameters
@@ -199,12 +199,25 @@ def mean_daily_return_by_factor_quantile(quantized_factor, forward_returns,
         Sector-wise mean daily returns by specified factor quantile.
     """
 
-    demeaned_forward_returns = utils.demean_forward_returns(forward_returns,
-                                                            by_sector=by_sector)
+    demeaned_fr = utils.demean_forward_returns(forward_returns,
+                                               by_sector=by_sector)
+    quantized_factor = quantized_factor.rename('quantile')
+    forward_returns_quantile = (pd.DataFrame(quantized_factor)
+                                .merge(demeaned_fr, how='left',
+                                       left_index=True, right_index=True)
+                                .set_index('quantile', append=True))
 
-    forward_returns = forward_returns.set_index([forward_returns.index, quantized_factor])
-    g_by = ['sector', 'quantile'] if by_sector else ['quantile']
-    mean_ret_by_quantile = forward_returns.groupby(level=g_by).mean()
+    grouper = []
+    if by_time is not None:
+        grouper.append(pd.TimeGrouper(by_time, level='date'))
+
+    if by_sector:
+        grouper.append(
+            forward_returns_quantile.index.get_level_values('sector'))
+
+    grouper.append(forward_returns_quantile.index.get_level_values('quantile'))
+
+    mean_ret_by_quantile = forward_returns_quantile.groupby(grouper).mean()
 
     return mean_ret_by_quantile
 
@@ -229,9 +242,11 @@ def quantile_turnover(quantile_factor, quantile):
     """
 
     quant_names = quantile_factor[quantile_factor == quantile]
-    quant_name_sets = quant_names.groupby(level=['date']).apply(lambda x: set(x.index.get_level_values('equity')))
+    quant_name_sets = quant_names.groupby(level=['date']).apply(
+        lambda x: set(x.index.get_level_values('equity')))
     new_names = (quant_name_sets - quant_name_sets.shift(1)).dropna()
-    quant_turnover = new_names.apply(lambda x: len(x)) / quant_name_sets.apply(lambda x: len(x))
+    quant_turnover = new_names.apply(
+        lambda x: len(x)) / quant_name_sets.apply(lambda x: len(x))
 
     return quant_turnover
 
