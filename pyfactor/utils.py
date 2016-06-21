@@ -23,7 +23,7 @@ def compute_forward_returns(prices, days=(1, 5, 10)):
         [prices.index, prices.columns], names=['date', 'equity']))
     for day in days:
         delta = prices.pct_change(day).shift(-day)
-        forward_returns[day] = delta.stack()
+        forward_returns[day] = delta.stack() / day
 
     return forward_returns
 

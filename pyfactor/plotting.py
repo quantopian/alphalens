@@ -103,19 +103,22 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
     """
 
     if by_sector:
-        num_sector = len(mean_ret_by_q.index.levels[2].unique())
-        v_spaces = (num_sector + 1) // 2
+        num_sector = len(mean_ret_by_q.index.get_level_values('sector').unique())
+        v_spaces = (num_sector) // 3
 
-        f, axes = plt.subplots(v_spaces, 2, sharex=False, sharey=True, figsize=(20, 5*v_spaces))
+        f, axes = plt.subplots(v_spaces, 2, sharex=False, sharey=True, figsize=(20, 8*v_spaces))
         axes = axes.flatten()
 
         for i, (sc, cor) in enumerate(mean_ret_by_q.groupby(level='sector')):
-            cor.plot(kind='bar', title=sc, ax=axes[i])
+            cor.xs(sc, level='sector').plot(kind='bar', title=sc, ax=axes[i])
             axes[i].set_xlabel('factor quantile')
             axes[i].set_ylabel('mean price % change')
 
+        if i < len(axes):
+            axes[-1] = None
+
         fig = plt.gcf()
-        fig.suptitle("Mean Return By Factor Quantile", fontsize=24, x=.5, y=.93)
+        fig.suptitle("Mean Return By Factor Quantile By Sector", x=.5, y=.96)
 
     else:
         f, ax = plt.subplots(1, 1, figsize=(28, 12))

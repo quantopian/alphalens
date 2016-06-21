@@ -99,9 +99,13 @@ def create_factor_tear_sheet(factor,
     if can_sector_adjust and sector_plots:
         ic_by_sector, _ = perf.mean_information_coefficient(
             factor, forward_returns, by_sector=True)
+
         quintile_factor_by_sector = perf.quantize_factor(
             factor, by_sector=True, quantiles=5)
 
+        mean_return_quintile_sector = perf.mean_return_by_factor_quantile(
+            quintile_factor, forward_returns, by_sector=True)
+
         plot_ic_by_sector(ic_by_sector)
 
-        plot_quantile_returns_bar(quintile_factor_by_sector, by_sector=True)
+        plot_quantile_returns_bar(mean_return_quintile_sector, by_sector=True)
