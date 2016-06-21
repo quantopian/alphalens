@@ -122,7 +122,7 @@ def mean_information_coefficient(factor, forward_returns,
     """
 
     ic, err = factor_information_coefficient(factor,
-                                             forward_returns, ]
+                                             forward_returns,
                                              sector_adjust=sector_adjust,
                                              by_sector=by_sector)
 
