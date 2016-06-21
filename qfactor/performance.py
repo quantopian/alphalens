@@ -299,12 +299,12 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
 
     """
 
-    factor = factor.rename('factor')
     grouper = ['date', 'sector'] if by_sector else ['date']
 
     daily_ranks = factor.groupby(level=grouper).apply(
         lambda x: x.rank(ascending=True))
 
+    daily_ranks.name = 'factor'
     equity_factor_rank = pd.DataFrame(daily_ranks).reset_index().pivot(
         index='date', columns='equity', values='factor')
     if time_rule is not None:
