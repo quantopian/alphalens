@@ -80,6 +80,9 @@ def create_factor_tear_sheet(factor,
     plot_daily_ic_ts(daily_ic)
     plot_daily_ic_hist(daily_ic)
 
+    mean_monthly_ic, _ = perf.mean_information_coefficient(factor, forward_returns, by_time="M")
+    plot_monthly_ic_heatmap(mean_monthly_ic)
+
     # What are the sector-neutral factor quantile mean returns for our
     # different forward price windows?
     plot_quantile_returns_bar(mean_ret_quintile, by_sector=False)
@@ -94,6 +97,7 @@ def create_factor_tear_sheet(factor,
     # each day?
     plot_top_bottom_quantile_turnover(quintile_factor)
     plot_factor_rank_auto_correlation(factor)
+
 
     # Sector Specific Breakdown
     if can_sector_adjust and sector_plots:
