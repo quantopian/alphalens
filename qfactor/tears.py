@@ -18,7 +18,7 @@ import performance as perf
 import utils
 import pandas as pd
 
-
+@plotting_context
 def create_factor_tear_sheet(factor,
                              prices,
                              sectors=None,
