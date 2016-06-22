@@ -304,3 +304,48 @@ def plot_top_bottom_quantile_turnover(quantized_factor):
     ax.set(ylabel='proportion of names new to quantile', xlabel="")
     plt.show()
 
+
+def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None, **kwargs):
+    """
+    Plots a heatmap of returns by month.
+    Parameters
+    ----------
+    mean_ic : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to seaborn plotting function.
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+
+    # if ax is None:
+    #     ax = plt.gca()
+
+    num_plots = len(mean_monthly_ic.columns)
+
+    v_spaces = num_plots // 3
+    f, axes = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
+    axes = (a for a in axes.flatten())
+
+    for current_subplot, (days_num, ic) in zip(axes, mean_monthly_ic.iteritems()):
+
+        formatted_ic = pd.Series(index=pd.MultiIndex.from_product([np.unique(ic.index.year), np.unique(ic.index.month)],
+                                                     names=["year", "month"])[:len(ic)], data=ic.values)
+
+        sns.heatmap(
+            formatted_ic.unstack().round(3),
+            annot=True,
+            alpha=1.0,
+            center=0.0,
+            annot_kws={"size": 9},
+            cbar=False,
+            ax=current_subplot)
+        current_subplot.set_ylabel("Year")
+        current_subplot.set_xlabel("Month")
+        current_subplot.set_title("Monthly Mean %s Day IC" % days_num)
+
