@@ -71,7 +71,7 @@ def context(context='notebook', font_scale=1.5, rc=None):
     --------
     For more information, see seaborn.plotting_context().
 
-"""
+    """
     if rc is None:
         rc = {}
 
@@ -118,7 +118,6 @@ def plot_daily_ic_ts(daily_ic, return_ax=False):
 
     summary_stats['mean/std'] = summary_stats['mean'] / summary_stats['std']
     utils.print_table(summary_stats)
-    plt.show()
 
     if return_ax:
         return axes
@@ -147,7 +146,6 @@ def plot_daily_ic_hist(daily_ic, return_ax=False):
         sns.distplot(ic.replace(np.nan, 0.), norm_hist=True, ax=ax)
         ax.set(title="%s day IC" % days_num, xlabel='IC')
         ax.set_xlim([-1, 1])
-    plt.show()
 
     if return_ax:
         return axes
@@ -190,9 +188,6 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
                            ax=ax)
         ax.set(xlabel='', ylabel='mean daily price % change')
 
-    plt.show()
-
-
 
 def plot_mean_quintile_returns_spread_time_series(mean_returns_spread, std=None,
         title='Top Quintile - Bottom Quantile Mean Return'):
@@ -216,8 +211,6 @@ def plot_mean_quintile_returns_spread_time_series(mean_returns_spread, std=None,
     ax.set(ylabel='Difference in Quantile Mean Return')
     ax.set(title=title, ylim=(-0.05, 0.05))
 
-    plt.show()
-
 
 def plot_ic_by_sector(ic_sector):
 
@@ -234,8 +227,7 @@ def plot_ic_by_sector(ic_sector):
     ic_sector.plot(kind='bar', ax=ax)
 
     ax.set(title="Information Coefficient by Sector")
-    plt.show()
-
+    
 
 def plot_ic_by_sector_over_time(ic_time):
     """
@@ -260,8 +252,7 @@ def plot_ic_by_sector_over_time(ic_time):
         i += 1
     fig = plt.gcf()
     fig.suptitle("Monthly Information Coefficient by Sector", fontsize=16, x=.5, y=.93)
-    plt.show()
-
+    
 
 def plot_factor_rank_auto_correlation(daily_factor, time_rule='W'):
     """
@@ -281,8 +272,7 @@ def plot_factor_rank_auto_correlation(daily_factor, time_rule='W'):
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
     fa.plot(title='Factor Rank Autocorrelation', ax=ax)
     ax.set(ylabel='autocorrelation coefficient')
-    plt.show()
-
+    
 
 def plot_top_bottom_quantile_turnover(quantized_factor):
     """
@@ -302,5 +292,37 @@ def plot_top_bottom_quantile_turnover(quantized_factor):
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
     turnover.plot(title='Top and Bottom Quantile Daily Turnover', ax=ax)
     ax.set(ylabel='proportion of names new to quantile', xlabel="")
-    plt.show()
+    
+
+def plot_monthly_ic_heatmap(mean_monthly_ic):
+    """
+    Plots a heatmap of the information coefficient by month.
+    Parameters
+    ----------
+    mean_monthly_ic : pd.DataFrame
+        The mean monthly IC for N days forward.
+    """
+
+    num_plots = len(mean_monthly_ic.columns)
+
+    v_spaces = num_plots // 3
+    f, axes = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
+    axes = (a for a in axes.flatten())
+
+    for current_subplot, (days_num, ic) in zip(axes, mean_monthly_ic.iteritems()):
+
+        formatted_ic = pd.Series(index=pd.MultiIndex.from_product([np.unique(ic.index.year), np.unique(ic.index.month)],
+                                                     names=["year", "month"])[:len(ic)], data=ic.values)
+
+        sns.heatmap(
+            formatted_ic.unstack().round(3),
+            annot=True,
+            alpha=1.0,
+            center=0.0,
+            annot_kws={"size": 9},
+            cbar=False,
+            ax=current_subplot)
+        current_subplot.set_ylabel("Year")
+        current_subplot.set_xlabel("Month")
+        current_subplot.set_title("Monthly Mean %s Day IC" % days_num)
 
