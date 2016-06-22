@@ -20,10 +20,73 @@ import matplotlib.pyplot as plt
 import performance as perf
 import utils
 from itertools import izip
+from functools import wraps
 
 
-sns.set(font_scale=2)
+def plotting_context(func):
+    """Decorator to set plotting context during function call."""
+    @wraps(func)
+    def call_w_context(*args, **kwargs):
+        set_context = kwargs.pop('set_context', True)
+        if set_context:
+            with context():
+                # sns.set_style("whitegrid")
+                sns.despine(left=True)
+                return func(*args, **kwargs)
+        else:
+            return func(*args, **kwargs)
+    return call_w_context
 
+
+def context(context='notebook', font_scale=1.5, rc=None):
+    """Create pyfolio default plotting style context.
+
+    Under the hood, calls and returns seaborn.plotting_context() with
+    some custom settings. Usually you would use in a with-context.
+
+    Parameters
+    ----------
+    context : str, optional
+        Name of seaborn context.
+    font_scale : float, optional
+        Scale font by factor font_scale.
+    rc : dict, optional
+        Config flags.
+        By default, {'lines.linewidth': 1.5,
+                     'axes.facecolor': '0.995',
+                     'figure.facecolor': '0.97'}
+        is being used and will be added to any
+        rc passed in, unless explicitly overriden.
+
+    Returns
+    -------
+    seaborn plotting context
+
+    Example
+    -------
+    >>> with pyfolio.plotting.context(font_scale=2):
+    >>>    pyfolio.create_full_tear_sheet()
+
+    See also
+    --------
+    For more information, see seaborn.plotting_context().
+
+"""
+    if rc is None:
+        rc = {}
+
+    rc_default = {'lines.linewidth': 1.5,
+                  # 'axes.facecolor': '0.995',
+                  'axes.facecolor': 'white',
+                  'axes.edgecolor': '1',
+                  'figure.facecolor': '0.97'}
+
+    # Add defaults if they do not exist
+    for name, val in rc_default.items():
+        rc.setdefault(name, val)
+
+    return sns.plotting_context(context=context, font_scale=font_scale,
+                                rc=rc)
 
 def plot_daily_ic_ts(daily_ic, return_ax=False):
     """
@@ -39,7 +102,7 @@ def plot_daily_ic_ts(daily_ic, return_ax=False):
     """
 
     num_plots = len(daily_ic.columns)
-    f, axes = plt.subplots(num_plots, 1, figsize=(18, num_plots * 6))
+    f, axes = plt.subplots(num_plots, 1, figsize=(18, num_plots * 7))
     axes = (a for a in axes.flatten())
 
     summary_stats = pd.DataFrame(columns=['mean', 'std'])
@@ -111,7 +174,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
 
         for i, (sc, cor) in enumerate(mean_ret_by_q.groupby(level='sector')):
             cor.xs(sc, level='sector').plot(kind='bar', title=sc, ax=axes[i])
-            axes[i].set_xlabel('factor quantile')
+            axes[i].set_xlabel('')
             axes[i].set_ylabel('mean price % change')
 
         if i < len(axes):
@@ -121,7 +184,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
         fig.suptitle("Mean Return By Factor Quantile By Sector", x=.5, y=.96)
 
     else:
-        f, ax = plt.subplots(1, 1, figsize=(18, 9))
+        f, ax = plt.subplots(1, 1, figsize=(18, 6))
         mean_ret_by_q.plot(kind='bar',
                            title="Mean Return By Factor Quantile",
                            ax=ax)
@@ -140,7 +203,7 @@ def plot_mean_quintile_returns_spread_time_series(mean_returns_spread, std=None,
                 title=str(name) + " Day Forward Return " + title)
         return
 
-    f, ax = plt.subplots(figsize=(18, 8))
+    f, ax = plt.subplots(figsize=(18, 6))
     (pd.DataFrame(mean_returns_spread.rename('mean_return_spread'))
         .assign(**{'1 month moving avg': mean_returns_spread.rolling(22).mean()})
         .plot(alpha=0.7, ax=ax))
@@ -169,8 +232,8 @@ def plot_ic_by_sector(ic_sector):
     """
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
     ic_sector.plot(kind='bar', ax=ax)
-    fig = plt.gcf()
-    fig.suptitle("Information Coefficient by Sector", fontsize=16, x=.5, y=.93)
+
+    ax.set(title="Information Coefficient by Sector")
     plt.show()
 
 
@@ -237,7 +300,7 @@ def plot_top_bottom_quantile_turnover(quantized_factor):
     turnover['bottom quantile turnover'] = perf.quantile_turnover(quantized_factor, 1)
 
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
-    turnover.plot(title='Top and Bottom Quantile Turnover', ax=ax)
-    ax.set(ylabel='proportion of names not present in quantile in previous period', xlabel="")
+    turnover.plot(title='Top and Bottom Quantile Daily Turnover', ax=ax)
+    ax.set(ylabel='proportion of names new to quantile', xlabel="")
     plt.show()
 
