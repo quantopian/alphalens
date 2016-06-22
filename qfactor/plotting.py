@@ -55,7 +55,7 @@ def plot_daily_ic_ts(daily_ic, return_ax=False):
 
     summary_stats['mean/std'] = summary_stats['mean'] / summary_stats['std']
     utils.print_table(summary_stats)
-    plt.show()
+    
 
     if return_ax:
         return axes
@@ -84,7 +84,7 @@ def plot_daily_ic_hist(daily_ic, return_ax=False):
         sns.distplot(ic.replace(np.nan, 0.), norm_hist=True, ax=ax)
         ax.set(title="%s day IC" % days_num, xlabel='IC')
         ax.set_xlim([-1, 1])
-    plt.show()
+    
 
     if return_ax:
         return axes
@@ -127,10 +127,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
                            ax=ax)
         ax.set(xlabel='', ylabel='mean daily price % change')
 
-    plt.show()
-
-
-
+    
 def plot_mean_quintile_returns_spread_time_series(mean_returns_spread, std=None,
         title='Top Quintile - Bottom Quantile Mean Return'):
     if isinstance(mean_returns_spread, pd.DataFrame):
@@ -153,8 +150,6 @@ def plot_mean_quintile_returns_spread_time_series(mean_returns_spread, std=None,
     ax.set(ylabel='Difference in Quantile Mean Return')
     ax.set(title=title, ylim=(-0.05, 0.05))
 
-    plt.show()
-
 
 def plot_ic_by_sector(ic_sector):
 
@@ -171,8 +166,7 @@ def plot_ic_by_sector(ic_sector):
     ic_sector.plot(kind='bar', ax=ax)
     fig = plt.gcf()
     fig.suptitle("Information Coefficient by Sector", fontsize=16, x=.5, y=.93)
-    plt.show()
-
+    
 
 def plot_ic_by_sector_over_time(ic_time):
     """
@@ -197,7 +191,6 @@ def plot_ic_by_sector_over_time(ic_time):
         i += 1
     fig = plt.gcf()
     fig.suptitle("Monthly Information Coefficient by Sector", fontsize=16, x=.5, y=.93)
-    plt.show()
 
 
 def plot_factor_rank_auto_correlation(daily_factor, time_rule='W'):
@@ -218,7 +211,7 @@ def plot_factor_rank_auto_correlation(daily_factor, time_rule='W'):
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
     fa.plot(title='Factor Rank Autocorrelation', ax=ax)
     ax.set(ylabel='autocorrelation coefficient')
-    plt.show()
+    
 
 
 def plot_top_bottom_quantile_turnover(quantized_factor):
@@ -239,7 +232,7 @@ def plot_top_bottom_quantile_turnover(quantized_factor):
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
     turnover.plot(title='Top and Bottom Quantile Turnover', ax=ax)
     ax.set(ylabel='proportion of names not present in quantile in previous period', xlabel="")
-    plt.show()
+    
 
 
 def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None, **kwargs):
