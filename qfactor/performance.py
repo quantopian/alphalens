@@ -50,26 +50,24 @@ def factor_information_coefficient(factor, forward_returns,
 
     """
 
-    def src_ic(group):
-        _ic = pd.Series(index=forward_returns.columns)
-        f = group.pop('factor')
-        for days in forward_returns.columns:
-            _ic[days] = sp.stats.spearmanr(f, group[days])[0]
-        _ic['obs_count'] = len(f)
+    def spearman(x, y):
+        return sp.stats.spearmanr(x, y)[0]
 
+    def src_ic(group):
+        f = group.pop('factor')
+        _ic = group.apply(spearman, args=(f,))
+        _ic['obs_count'] = len(f)
         return _ic
 
     def src_std_error(rho, n):
         return np.sqrt((1 - rho ** 2) / (n - 2))
 
-    forward_returns_ = forward_returns.copy()
-
     if sector_adjust:
-        forward_returns_ = utils.demean_forward_returns(forward_returns_,
+        forward_returns = utils.demean_forward_returns(forward_returns,
                                                         by_sector=True)
 
     factor_and_fp = pd.merge(pd.DataFrame(factor.rename('factor')),
-                             forward_returns_,
+                             forward_returns,
                              how='left',
                              left_index=True,
                              right_index=True)
@@ -79,7 +77,6 @@ def factor_information_coefficient(factor, forward_returns,
     ic = factor_and_fp.groupby(level=grouper).apply(src_ic)
 
     obs_count = ic.pop('obs_count')
-    ic.columns = pd.Int64Index(ic.columns)
     err = ic.apply(lambda x: src_std_error(x, obs_count))
 
     return ic, err
