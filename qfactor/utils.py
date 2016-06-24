@@ -98,7 +98,7 @@ def print_table(table, name=None, fmt=None):
         pd.set_option('display.float_format', prev_option)
 
 
-def format_input_data(factor, prices, sectors=None, days=(1, 5, 10)):
+def format_input_data(factor, prices, filter_zscore=20, sectors=None, days=(1, 5, 10)):
     """
     Formats the factor data, pricing data, and sector mappings into DataFrames and Series that
     contain aligned MultiIndex indices containing date, equity, and sector.
@@ -123,13 +123,20 @@ def format_input_data(factor, prices, sectors=None, days=(1, 5, 10)):
         Note: this is the same index as the factor index
     """
 
-    forward_returns = compute_forward_returns(prices, days)
+    forward_returns = qfactor.utils.compute_forward_returns(prices, days)
 
     merged_data = pd.merge(pd.DataFrame(factor),
                            forward_returns,
                            how='left',
                            left_index=True,
                            right_index=True)
+
+    if filter_zscore is not None:
+        min_days = min(days)
+        zscore = lambda x: (x - x.mean()) / x.std()
+        fr_z = merged_data[min_days].groupby(level='date').transform(zscore)
+        merged_data = merged_data[
+            (fr_z < filter_zscore) | (fr_z > -filter_zscore)]
 
     if sectors is not None:
         merged_data = pd.merge(pd.DataFrame(sectors),
@@ -138,8 +145,7 @@ def format_input_data(factor, prices, sectors=None, days=(1, 5, 10)):
                                left_index=True,
                                right_index=True)
 
-        merged_data = merged_data.set_index([merged_data.index, merged_data["sector"]])
-        merged_data = merged_data.drop("sector", 1)
+        merged_data = merged_data.set_index('sector', append=True)
 
     merged_data = merged_data.dropna()
 
