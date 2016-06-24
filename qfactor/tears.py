@@ -79,7 +79,9 @@ def create_factor_tear_sheet(factor,
                                                              forward_returns,
                                                              by_sector=False)
 
-    # summary_stats(daily_ic)
+    autocorrelation_data = perf.factor_rank_autocorrelation(factor, time_rule='W')
+
+    summary_stats(daily_ic, quintile_factor, mean_ret_quintile_daily, autocorrelation_data)
 
     # What is the sector-netural rolling mean IC for our different forward
     # price windows?
@@ -103,7 +105,7 @@ def create_factor_tear_sheet(factor,
     # How much are the contents of the the top and bottom quintile changing
     # each day?
     plot_top_bottom_quantile_turnover(quintile_factor)
-    # plot_factor_rank_auto_correlation(factor)
+    plot_factor_rank_auto_correlation(autocorrelation_data)
 
     # Sector Specific Breakdown
     if can_sector_adjust and sector_plots:
