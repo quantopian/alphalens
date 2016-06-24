@@ -236,7 +236,7 @@ def plot_mean_quintile_returns_spread_time_series(mean_returns_spread, std=None,
         lower = mean_returns_spread.values - std
         ax.fill_between(mean_returns_spread.index, lower, upper, alpha=0.3)
 
-    ax.set(ylabel='Difference in Quantile Mean Return')
+    ax.set(ylabel='Difference in Quantile Mean Return (%)')
     ax.set(title=title, ylim=(-0.05, 0.05))
 
 
@@ -316,7 +316,7 @@ def plot_top_bottom_quantile_turnover(quantized_factor):
     turnover['bottom quantile turnover'] = perf.quantile_turnover(quantized_factor, 1)
 
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
-    turnover.plot(title='Top and Bottom Quantile Daily Turnover', ax=ax)
+    turnover.plot(title='Top and Bottom Quantile Daily Turnover', ax=ax, alpha=0.6)
     ax.set(ylabel='proportion of names new to quantile', xlabel="")
     
 
