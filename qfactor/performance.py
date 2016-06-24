@@ -63,8 +63,7 @@ def factor_information_coefficient(factor, forward_returns,
         return np.sqrt((1 - rho ** 2) / (n - 2))
 
     if sector_adjust:
-        forward_returns = utils.demean_forward_returns(forward_returns,
-                                                        by_sector=True)
+        forward_returns = utils.demean_forward_returns(forward_returns, by_sector=True)
 
     factor_and_fp = pd.merge(pd.DataFrame(factor.rename('factor')),
                              forward_returns,
@@ -296,13 +295,16 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
 
     """
 
-    factor = factor.rename('factor')
+
     grouper = ['date', 'sector'] if by_sector else ['date']
 
     daily_ranks = factor.groupby(level=grouper).apply(
         lambda x: x.rank(ascending=True))
 
-    equity_factor_rank = pd.DataFrame(daily_ranks).reset_index().pivot(
+    daily_ranks.name = "factor"
+    daily_ranks = pd.DataFrame(daily_ranks)
+
+    equity_factor_rank = daily_ranks.reset_index().pivot(
         index='date', columns='equity', values='factor')
     if time_rule is not None:
         equity_factor_rank = equity_factor_rank.resample(time_rule).mean()
