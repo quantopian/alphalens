@@ -31,9 +31,10 @@ from pandas import (
 from pandas.util.testing import (assert_frame_equal,
                                  assert_series_equal)
 
+
 from .. performance import (factor_information_coefficient,
-                         mean_information_coefficient,
-                         quantize_factor, quantile_turnover)
+                            mean_information_coefficient,
+                            quantize_factor, quantile_turnover)
 
 
 class PerformanceTestCase(TestCase):
