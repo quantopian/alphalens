@@ -239,7 +239,7 @@ def compute_mean_returns_spread(mean_returns, upper_quant, lower_quant, std=None
 
         return mean_return_difference, joint_std
 
-    return mean_returns
+    return mean_return_difference
 
 
 def quantile_turnover(quantile_factor, quantile):
