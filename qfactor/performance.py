@@ -50,12 +50,9 @@ def factor_information_coefficient(factor, forward_returns,
 
     """
 
-    def spearman(x, y):
-        return sp.stats.spearmanr(x, y)[0]
-
     def src_ic(group):
         f = group.pop('factor')
-        _ic = group.apply(spearman, args=(f,))
+        _ic = group.apply(lambda x: sp.stats.spearmanr(x, f)[0])
         _ic['obs_count'] = len(f)
         return _ic
 
@@ -76,6 +73,8 @@ def factor_information_coefficient(factor, forward_returns,
     ic = factor_and_fp.groupby(level=grouper).apply(src_ic)
 
     obs_count = ic.pop('obs_count')
+    ic.columns = pd.Int64Index(ic.columns)
+
     err = ic.apply(lambda x: src_std_error(x, obs_count))
 
     return ic, err

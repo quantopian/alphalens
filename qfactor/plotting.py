@@ -90,7 +90,7 @@ def context(context='notebook', font_scale=1.5, rc=None):
                                 rc=rc)
 
 
-def summary_stats(ic_data, quantized_factor, mean_ret_quantile_daily, autocorrelation_data):
+def summary_stats(ic_data, quantized_factor, mean_ret_quantile_daily, autocorrelation_data, mean_ret_spread_quantile):
     ic_summary_table = pd.DataFrame()
     ic_summary_table["IC Mean"] = ic_data.mean()
     ic_summary_table["IC Std."] = ic_data.std()
@@ -112,9 +112,7 @@ def summary_stats(ic_data, quantized_factor, mean_ret_quantile_daily, autocorrel
     auto_corr = pd.Series()
     auto_corr["Mean Factor Rank Autocorrelation"] = autocorrelation_data.mean()
 
-    returns_table["Mean Daily Spread"] = perf.compute_mean_returns_spread(mean_ret_quantile_daily,
-                                                                          min_quantile,
-                                                                          max_quantile).mean()
+    returns_table["Mean Daily Spread"] = mean_ret_spread_quantile.mean()
 
     print "Information Coefficient Analysis"
     utils.print_table(ic_summary_table.round(3).T)
@@ -286,7 +284,7 @@ def plot_ic_by_sector_over_time(ic_time):
     fig.suptitle("Monthly Information Coefficient by Sector", fontsize=16, x=.5, y=.93)
     
 
-def plot_factor_rank_auto_correlation(fa):
+def plot_factor_rank_auto_correlation(factor_autocorrelation):
     """
     Plots factor rank autocorrelation over time. See factor_rank_autocorrelation for more details.
 
@@ -300,7 +298,7 @@ def plot_factor_rank_auto_correlation(fa):
     """
 
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
-    fa.plot(title='Factor Rank Autocorrelation', ax=ax)
+    factor_autocorrelation.plot(title='Factor Rank Autocorrelation', ax=ax)
     ax.set(ylabel='autocorrelation coefficient')
     
 
