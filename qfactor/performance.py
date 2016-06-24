@@ -18,6 +18,7 @@ import numpy as np
 import scipy as sp
 
 import utils
+from collections import defaultdict
 
 
 def factor_information_coefficient(factor, forward_returns,
@@ -143,6 +144,52 @@ def mean_information_coefficient(factor, forward_returns,
 
     return ic, err
 
+def factor_returns(factor, forward_returns):
+    """
+    Computes daily returns for portfolio weighted by factor
+    values. Weights are computed by demeaning factors and dividing
+    by their range.
+
+    Parameters
+    ----------
+    factor : pandas.Series - MultiIndex
+        A list of equities and their factor values indexed by date.
+    forward_returns : pandas.DataFrame - MultiIndex
+        Daily forward returns in indexed by date and symbol.
+        Separate column for each forward return window.
+
+    Returns
+    -------
+    factor_daily_returns : pd.Series
+        Daily returns of dollar neutral portfolio weighted by factor value.
+    """
+
+    def to_weights(group):
+        return (group - group.mean()) / (group.max() - group.min())
+
+    weights = factor.groupby(level=['date']).apply(to_weights)
+    weighted_returns = forward_returns.mulitply(weights).dropna()
+
+    factor_daily_returns = weighted_returns.groupby(level='date').mean()
+
+    return factor_daily_returns
+
+
+def factor_alpha_beta(factor, forward_returns):
+    factor_daily_returns = factor_returns(factor, forward_returns)
+    market_daily_ret = forward_price.groupby(level='date').mean()
+
+    alpha_beta = pd.DataFrame()
+    for days, factor_ret, _, market_ret in zip(factor_daily_ret.iteritems(),
+                                               market_daily_ret.iteritems()):
+        beta, alpha = sp.stats.linregress(
+            market_ret.loc[factor_daily_ret.index].values,
+            factor_ret.values)[:2]
+
+        alpha_beta.loc['alpha', days] = alpha
+        alpha_beta.loc['beta', days] = beta
+
+    return alpha_beta
 
 def quantize_factor(factor, quantiles=5, by_sector=False):
     """
