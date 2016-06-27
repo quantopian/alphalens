@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 import scipy as sp
 import seaborn as sns
+import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import performance as perf
 import utils
@@ -122,7 +123,7 @@ def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
     print auto_corr.round(3)
 
 
-def plot_daily_ic_ts(daily_ic, return_ax=False):
+def plot_daily_ic_ts(daily_ic):
     """
     Plots Spearman Rank Information Coefficient and IC moving average for a given factor.
     Sector neutralization of forward returns is recommended.
@@ -140,19 +141,19 @@ def plot_daily_ic_ts(daily_ic, return_ax=False):
     axes = (a for a in axes.flatten())
 
     for ax, (days_num, ic) in izip(axes, daily_ic.iteritems()):
-        title = "{} day IC".format(days_num)
 
-        ic_df = (pd.DataFrame(ic.rename("{} day IC".format(days_num)))
-                 .assign(**{'1 month moving avg': ic.rolling(22).mean()})
-                 .plot(title=title, alpha=0.7, ax=ax))
+        ic.plot(alpha=0.7, ax=ax, lw=0.7, color='steelblue')
+        ic.rolling(22).mean().plot(ax=ax,
+                                   color='forestgreen', lw=2, alpha=0.8)
+
         ax.set(ylabel='IC', xlabel="")
         ax.set_ylim([-0.25, 0.25])
+        ax.set_title("{} Day Information Coefficient (IC)".format(days_num))
+        ax.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
+        ax.legend(['IC', '1 month moving avg'], loc='upper right')
 
-    if return_ax:
-        return axes
 
-
-def plot_daily_ic_hist(daily_ic, return_ax=False):
+def plot_daily_ic_hist(daily_ic):
     """
     Plots Spearman Rank Information Coefficient histogram for a given factor.
     Sector neutralization of forward returns is recommended.
@@ -175,9 +176,6 @@ def plot_daily_ic_hist(daily_ic, return_ax=False):
         sns.distplot(ic.replace(np.nan, 0.), norm_hist=True, ax=ax)
         ax.set(title="%s day IC" % days_num, xlabel='IC')
         ax.set_xlim([-1, 1])
-
-    if return_ax:
-        return axes
 
 
 def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
@@ -218,8 +216,25 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
         ax.set(xlabel='', ylabel='mean daily price % change')
 
 
-def plot_mean_quintile_returns_spread_time_series(mean_returns_spread, std=None,
+def plot_mean_quintile_returns_spread_time_series(mean_returns_spread,
+                                                  std=None, bandwidth=0.5,
         title='Top Quintile - Bottom Quantile Mean Return'):
+    """
+    Plots mean daily returns for factor quantiles.
+
+    Parameters
+    ----------
+    mean_returns_spread : pd.DataFrame
+        DataFrame with difference between quantile mean returns by day.
+    std : pd.DataFrame
+        DataFrame with standard devation of difference between quantile
+        mean returns each day
+    bandwidth : float
+        Width of displayed error bands in standard deviations
+    title : string
+        plot title
+    """
+
     if isinstance(mean_returns_spread, pd.DataFrame):
         for name, fr_column in mean_returns_spread.iteritems():
             stdn = None if std is None else std[name]
@@ -228,17 +243,19 @@ def plot_mean_quintile_returns_spread_time_series(mean_returns_spread, std=None,
         return
 
     f, ax = plt.subplots(figsize=(18, 6))
-    (pd.DataFrame(mean_returns_spread.rename('mean_return_spread'))
-        .assign(**{'1 month moving avg': mean_returns_spread.rolling(22).mean()})
-        .plot(alpha=0.7, ax=ax))
-    mean_returns_spread.rolling(22).mean()
+    mean_returns_spread.rename('mean_return_spread').plot(
+        alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
+    mean_returns_spread.rolling(22).mean().plot(color='orangered', alpha=0.7)
+    ax.legend(['mean returns spread', '1 month moving avg'], loc='upper right')
+
     if std is not None:
-        upper = mean_returns_spread.values + std
-        lower = mean_returns_spread.values - std
-        ax.fill_between(mean_returns_spread.index, lower, upper, alpha=0.3)
+        upper = mean_returns_spread.values + (std * bandwidth)
+        lower = mean_returns_spread.values - (std * bandwidth)
+        ax.fill_between(mean_returns_spread.index, lower, upper, alpha=0.3, color='steelblue')
 
     ax.set(ylabel='Difference in Quantile Mean Return (%)')
     ax.set(title=title, ylim=(-0.05, 0.05))
+    ax.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
 
 
 def plot_ic_by_sector(ic_sector):
@@ -299,6 +316,7 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation):
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
     factor_autocorrelation.plot(title='Factor Rank Autocorrelation', ax=ax)
     ax.set(ylabel='autocorrelation coefficient')
+    ax.axhline(0.0, linestyle='-', color='black', lw=1)
 
 
 def plot_top_bottom_quantile_turnover(quantized_factor):
@@ -321,35 +339,50 @@ def plot_top_bottom_quantile_turnover(quantized_factor):
     ax.set(ylabel='proportion of names new to quantile', xlabel="")
 
 
-def plot_monthly_ic_heatmap(mean_monthly_ic):
+def plot_monthly_IC_heatmap(mean_monthly_vals, val_type='IC', ax=None):
     """
-    Plots a heatmap of the information coefficient by month.
+    Plots a heatmap of the information coefficient or returns by month.
     Parameters
     ----------
-    mean_monthly_ic : pd.DataFrame
+    mean_monthly_vals : pd.DataFrame
         The mean monthly IC for N days forward.
+    val_type : string
+        Name of the metric being plotted
     """
 
-    num_plots = len(mean_monthly_ic.columns)
+    num_plots = len(mean_monthly_vals.columns)
 
     v_spaces = num_plots // 3
     f, axes = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
     axes = (a for a in axes.flatten())
 
-    for current_subplot, (days_num, ic) in zip(axes, mean_monthly_ic.iteritems()):
+    for current_subplot, (days_num, ic) in zip(axes, mean_monthly_vals.iteritems()):
 
-        formatted_ic = pd.Series(index=pd.MultiIndex.from_product([np.unique(ic.index.year), np.unique(ic.index.month)],
-                                                     names=["year", "month"])[:len(ic)], data=ic.values)
+        formatted_ic = (pd.Series(index=pd.MultiIndex.from_product([np.unique(ic.index.year), np.unique(ic.index.month)],
+                                                     names=["year", "month"])
+                        [:len(ic)], data=ic.values))
 
         sns.heatmap(
-            formatted_ic.unstack().round(3),
+            formatted_ic.unstack(),
             annot=True,
             alpha=1.0,
             center=0.0,
             annot_kws={"size": 9},
+            cmap=cm.RdYlGn,
             cbar=False,
             ax=current_subplot)
         current_subplot.set_ylabel("Year")
         current_subplot.set_xlabel("Month")
-        current_subplot.set_title("Monthly Mean %s Day IC" % days_num)
+
+        current_subplot.set_title("Monthly Mean {} Day {}".format(days_num, val_type))
+
+
+def plot_cumulative_returns(factor_returns):
+    f, ax = plt.subplots(1, 1, figsize=(18, 6))
+
+    factor_returns.add(1).cumprod().plot(ax=ax,
+        lw=3, color='forestgreen', alpha=0.6)
+    ax.set(ylabel='cumulative returns',
+           title='Long/Short Factor Portfolio Cumulative Return')
+    ax.axhline(1.0, linestyle='-', color='black', lw=1)
 
