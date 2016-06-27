@@ -57,9 +57,9 @@ def create_factor_tear_sheet(factor,
 
     can_sector_adjust = sectors is not None
     factor, forward_returns = utils.format_input_data(
-        factor, prices, sectors, days)
+        factor, prices, sectors=sectors, days=days, filter_zscore=10)
 
-    daily_ic, _ = perf.factor_information_coefficient(
+    daily_ic = perf.factor_information_coefficient(
         factor, forward_returns,
         sector_adjust=can_sector_adjust,
         by_sector=False)
@@ -70,7 +70,7 @@ def create_factor_tear_sheet(factor,
     factor_returns = perf.factor_returns(factor, forward_returns)
 
     alpha_beta = perf.factor_alpha_beta(factor, forward_returns,
-        factor_daily_returns=factor_returns)
+                                        factor_daily_returns=factor_returns)
 
     quintile_factor = perf.quantize_factor(
         factor, by_sector=False, quantiles=5)
@@ -78,23 +78,22 @@ def create_factor_tear_sheet(factor,
     decile_factor = perf.quantize_factor(factor, by_sector=False,
                                          quantiles=10)
 
-    mean_ret_quintile, std_quintile = perf.mean_return_by_factor_quantile(
+    mean_ret_quintile, std_quintile = perf.mean_return_by_quantile(
         quintile_factor, forward_returns, by_sector=False, std=True)
 
-    mean_ret_quint_daily, std_quint_daily = perf.mean_return_by_factor_quantile(
+    mean_ret_quint_daily, std_quint_daily = perf.mean_return_by_quantile(
         quintile_factor, forward_returns, by_time='D',
         by_sector=False, std=True)
 
     mean_ret_spread_quint, std_spread_quint = perf.compute_mean_returns_spread(
         mean_ret_quint_daily, 5, 1, std=std_quint_daily)
 
-    mean_ret_by_decile = perf.mean_return_by_factor_quantile(decile_factor,
-                                                             forward_returns,
-                                                             by_sector=False)
+    mean_ret_by_decile = perf.mean_return_by_quantile(decile_factor,
+                                                      forward_returns,
+                                                      by_sector=False)
 
     factor_autocorrelation = perf.factor_rank_autocorrelation(
         factor, time_rule='W')
-
 
     ## PLOTTING ##
 
@@ -120,13 +119,13 @@ def create_factor_tear_sheet(factor,
 
     # Sector Specific Breakdown
     if can_sector_adjust and sector_plots:
-        ic_by_sector, _ = perf.mean_information_coefficient(
+        ic_by_sector = perf.mean_information_coefficient(
             factor, forward_returns, by_sector=True)
 
         quintile_factor_by_sector = perf.quantize_factor(
             factor, by_sector=True, quantiles=5)
 
-        mean_return_quintile_sector = perf.mean_return_by_factor_quantile(
+        mean_return_quintile_sector = perf.mean_return_by_quantile(
             quintile_factor, forward_returns, by_sector=True)
 
         plot_ic_by_sector(ic_by_sector)
