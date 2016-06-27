@@ -250,7 +250,7 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
     return factor_quantile
 
 
-def mean_return_by_factor_quantile(quantized_factor, forward_returns,
+def mean_return_by_quantile(quantized_factor, forward_returns,
                                    by_time=None, by_sector=False, std=False):
     """
     Computes mean demeaned returns for factor quantiles across
@@ -316,7 +316,7 @@ def compute_mean_returns_spread(mean_returns, upper_quant,
     mean_returns : pd.DataFrame
         DataFrame of mean daily returns by quantile.
         MultiIndex containing date and quantile.
-        See mean_return_by_factor_quantile.
+        See mean_return_by_quantile.
     upper_quant : integer
         Quantile of mean return from which we wish to subtract
         lower quantile mean return
