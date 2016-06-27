@@ -21,10 +21,12 @@ def compute_forward_returns(prices, days=(1, 5, 10)):
 
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
         [prices.index, prices.columns], names=['date', 'equity']))
+
     for day in days:
         delta = prices.pct_change(day).shift(-day)
         forward_returns[day] = delta.stack() / day
 
+    forward_returns.index.rename(['date', 'equity'], inplace=True)
     return forward_returns
 
 
@@ -128,14 +130,15 @@ def format_input_data(factor, prices, sectors=None, days=(1, 5, 10)):
                            how='left',
                            left_index=True,
                            right_index=True)
+
     if sectors is not None:
         merged_data = pd.merge(pd.DataFrame(sectors),
                                merged_data,
                                how='left',
                                left_index=True,
                                right_index=True)
-        merged_data = merged_data.set_index(
-            [merged_data.index, merged_data["sector"]])
+
+        merged_data = merged_data.set_index([merged_data.index, merged_data["sector"]])
         merged_data = merged_data.drop("sector", 1)
 
     merged_data = merged_data.dropna()

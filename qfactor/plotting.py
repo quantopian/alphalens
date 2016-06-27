@@ -15,6 +15,7 @@
 
 import numpy as np
 import pandas as pd
+import scipy as sp
 import seaborn as sns
 import matplotlib.pyplot as plt
 import performance as perf
@@ -88,6 +89,38 @@ def context(context='notebook', font_scale=1.5, rc=None):
     return sns.plotting_context(context=context, font_scale=font_scale,
                                 rc=rc)
 
+
+def summary_stats(ic_data, quantized_factor, mean_ret_quantile, autocorrelation_data, mean_ret_spread_quantile):
+    ic_summary_table = pd.DataFrame()
+    ic_summary_table["IC Mean"] = ic_data.mean()
+    ic_summary_table["IC Std."] = ic_data.std()
+    ic_summary_table["IC Mean / Std."] = ic_data.mean() / ic_data.std()
+    ic_summary_table["t-stat(IC)"] = sp.stats.ttest_1samp(ic_data, 0)[0]
+
+    max_quantile = quantized_factor.values.max()
+    min_quantile = quantized_factor.values.min()
+    turnover_table = pd.DataFrame(columns=["Top Quantile", "Bottom Quantile"])
+    turnover_table.loc["Mean Turnover"] = [perf.quantile_turnover(quantized_factor, max_quantile).mean(),
+                                           perf.quantile_turnover(quantized_factor, min_quantile).mean()]
+
+    returns_table = pd.DataFrame()
+    returns_table["Mean Daily Return Top Quantile"] = mean_ret_quantile.loc[max_quantile]
+    returns_table["Mean Daily Return Bottom Quantile"] = mean_ret_quantile.loc[min_quantile]
+
+    auto_corr = pd.Series()
+    auto_corr["Mean Factor Rank Autocorrelation"] = autocorrelation_data.mean()
+
+    returns_table["Mean Daily Spread"] = mean_ret_spread_quantile.mean()
+
+    print "Information Coefficient Analysis"
+    utils.print_table(ic_summary_table.round(3).T)
+    print "Returns Analysis"
+    utils.print_table(returns_table.round(3).T)
+    print "Turnover Analysis"
+    utils.print_table(turnover_table.round(3))
+    print auto_corr.round(3)
+
+
 def plot_daily_ic_ts(daily_ic, return_ax=False):
     """
     Plots Spearman Rank Information Coefficient and IC moving average for a given factor.
@@ -105,19 +138,14 @@ def plot_daily_ic_ts(daily_ic, return_ax=False):
     f, axes = plt.subplots(num_plots, 1, figsize=(18, num_plots * 7))
     axes = (a for a in axes.flatten())
 
-    summary_stats = pd.DataFrame(columns=['mean', 'std'])
     for ax, (days_num, ic) in izip(axes, daily_ic.iteritems()):
         title = "{} day IC".format(days_num)
-        summary_stats.loc["%i day IC" % days_num] = [ic.mean(), ic.std()]
 
         ic_df = (pd.DataFrame(ic.rename("{} day IC".format(days_num)))
                  .assign(**{'1 month moving avg': ic.rolling(22).mean()})
                  .plot(title=title, alpha=0.7, ax=ax))
         ax.set(ylabel='IC', xlabel="")
         ax.set_ylim([-0.25, 0.25])
-
-    summary_stats['mean/std'] = summary_stats['mean'] / summary_stats['std']
-    utils.print_table(summary_stats)
 
     if return_ax:
         return axes
@@ -254,7 +282,7 @@ def plot_ic_by_sector_over_time(ic_time):
     fig.suptitle("Monthly Information Coefficient by Sector", fontsize=16, x=.5, y=.93)
     
 
-def plot_factor_rank_auto_correlation(daily_factor, time_rule='W'):
+def plot_factor_rank_auto_correlation(factor_autocorrelation):
     """
     Plots factor rank autocorrelation over time. See factor_rank_autocorrelation for more details.
 
@@ -267,10 +295,8 @@ def plot_factor_rank_auto_correlation(daily_factor, time_rule='W'):
         See http://pandas.pydata.org/pandas-docs/stable/timeseries.html for available options.
     """
 
-    fa = perf.factor_rank_autocorrelation(daily_factor, time_rule=time_rule)
-    print "Mean rank autocorrelation: " + str(fa.mean())
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
-    fa.plot(title='Factor Rank Autocorrelation', ax=ax)
+    factor_autocorrelation.plot(title='Factor Rank Autocorrelation', ax=ax)
     ax.set(ylabel='autocorrelation coefficient')
     
 

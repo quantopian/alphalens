@@ -18,6 +18,7 @@ import performance as perf
 import utils
 import pandas as pd
 
+
 @plotting_context
 def create_factor_tear_sheet(factor,
                              prices,
@@ -35,7 +36,10 @@ def create_factor_tear_sheet(factor,
     factor : pd.Series - MultiIndex
         A MultiIndex Series indexed by date and equity, containing the values for a single alpha factor.
     prices : pd.DataFrame
-        A long form Pandas DataFrame indexed by date with equities in the columns.
+        A long form Pandas DataFrame indexed by date with equities in the columns. It is important to pass the
+        correct pricing data in depending on what time of day your signal was generated so to avoid lookahead bias, or
+        delayed calculations. Pricing data must span the factor analysis time period plus an additional buffer window
+        that is greater than the maximum number of expected days in the forward returns calculations.
     sectors : pd.Series - MultiIndex
         A MultiIndex Series indexed by date and equity, containing the sector codes for each equity.
     sector_plots : boolean
@@ -75,6 +79,10 @@ def create_factor_tear_sheet(factor,
                                                              forward_returns,
                                                              by_sector=False)
 
+    factor_autocorrelation = perf.factor_rank_autocorrelation(factor, time_rule='W')
+
+    summary_stats(daily_ic, quintile_factor, mean_ret_quintile, factor_autocorrelation, mean_ret_spread_quintile)
+
     # What is the sector-netural rolling mean IC for our different forward
     # price windows?
     plot_daily_ic_ts(daily_ic)
@@ -86,6 +94,7 @@ def create_factor_tear_sheet(factor,
     # What are the sector-neutral factor quantile mean returns for our
     # different forward price windows?
     plot_quantile_returns_bar(mean_ret_quintile, by_sector=False)
+
     # What is the difference between top quintile mean return and bottom?
     plot_mean_quintile_returns_spread_time_series(mean_ret_spread_quintile,
                                                   std=std_spread_quintile,
@@ -96,7 +105,7 @@ def create_factor_tear_sheet(factor,
     # How much are the contents of the the top and bottom quintile changing
     # each day?
     plot_top_bottom_quantile_turnover(quintile_factor)
-    plot_factor_rank_auto_correlation(factor)
+    plot_factor_rank_auto_correlation(factor_autocorrelation)
 
     # Sector Specific Breakdown
     if can_sector_adjust and sector_plots:
