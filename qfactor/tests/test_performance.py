@@ -31,9 +31,9 @@ from pandas import (
 from pandas.util.testing import (assert_frame_equal,
                                  assert_series_equal)
 
-from performance import (factor_information_coefficient,
+from .. performance import (factor_information_coefficient,
                          mean_information_coefficient,
-                         quantize_factor)
+                         quantize_factor, quantile_turnover)
 
 
 class PerformanceTestCase(TestCase):
@@ -150,3 +150,27 @@ class PerformanceTestCase(TestCase):
             index=factor.index, data=expected_vals, name='quantile')
 
         assert_series_equal(quantized_factor, expected)
+
+    @parameterized.expand([([[1.0, 2.0, 3.0, 4.0],
+                             [4.0, 3.0, 2.0, 1.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            4.0,
+                            [nan, 1.0, 1.0, 0.0]),])
+    def test_quantile_turnover(self, quantile_values, test_quantile, expected_vals):
+
+        dr = date_range(start='2015-1-1', end='2015-1-4')
+        dr.name = 'date'
+        tickers = ['A', 'B', 'C', 'D']
+
+        quantized_test_factor = Series(DataFrame(index=dr,
+                                               columns=tickers,
+                                               data=quantile_values)
+                                          .stack()
+                                          .rename_axis(['date', 'equity']))
+
+        to = quantile_turnover(quantized_test_factor, test_quantile)
+
+        expected = Series(index=quantized_test_factor.index.levels[0], data=expected_vals)
+
+        assert_series_equal(to, expected)
