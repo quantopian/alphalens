@@ -34,6 +34,7 @@ from pandas.util.testing import (assert_frame_equal,
 
 from .. performance import (factor_information_coefficient,
                             mean_information_coefficient,
+<<<<<<< 9321a4e01bdb19c42a859c2770e0939d3d55e91e
 <<<<<<< 62b44a402b16dec4598c6df60189462fff55d075
                             quantize_factor, quantile_turnover,
                             factor_returns, factor_alpha_beta)
@@ -42,6 +43,12 @@ from .. performance import (factor_information_coefficient,
                             quantile_turnover,
                             factor_rank_autocorrelation)
 >>>>>>> added a few autocorrelation fun tests
+=======
+                            quantize_factor,
+                            quantile_turnover,
+                            factor_rank_autocorrelation,factor_returns, factor_alpha_beta)
+
+>>>>>>> fixed conflicts
 
 
 class PerformanceTestCase(TestCase):
@@ -284,4 +291,3 @@ class PerformanceTestCase(TestCase):
         expected = Series(index=fa.index, data=expected_vals)
 
         assert_series_equal(fa, expected)
-
