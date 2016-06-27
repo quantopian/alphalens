@@ -19,6 +19,8 @@ import scipy as sp
 
 import utils
 from collections import defaultdict
+from statsmodels.regression.linear_model import OLS
+from statsmodels.tools.tools import add_constant
 
 
 def factor_information_coefficient(factor, forward_returns,
@@ -54,11 +56,12 @@ def factor_information_coefficient(factor, forward_returns,
     def src_ic(group):
         f = group.pop('factor')
         _ic = group.apply(lambda x: sp.stats.spearmanr(x, f)[0])
-        _ic['obs_count'] = len(f)
+
         return _ic
 
     if sector_adjust:
-        forward_returns = utils.demean_forward_returns(forward_returns, by_sector=True)
+        forward_returns = utils.demean_forward_returns(forward_returns,
+                                                       by_sector=True)
 
     factor.name = 'factor'
     factor_and_fp = pd.merge(pd.DataFrame(factor),
@@ -68,15 +71,11 @@ def factor_information_coefficient(factor, forward_returns,
                              right_index=True)
 
     grouper = ['date', 'sector'] if by_sector else ['date']
-
     ic = factor_and_fp.groupby(level=grouper).apply(src_ic)
 
-    obs_count = ic.pop('obs_count')
     ic.columns = pd.Int64Index(ic.columns)
 
-    err = ic.apply(lambda x: src_std_error(x, obs_count))
-
-    return ic, err
+    return ic
 
 
 def mean_information_coefficient(factor, forward_returns,
@@ -123,7 +122,7 @@ def mean_information_coefficient(factor, forward_returns,
     if by_sector:
         grouper.append('sector')
 
-    if len(grouper) = 0:
+    if len(grouper) == 0:
         ic = ic.mean()
 
     else:
@@ -132,15 +131,16 @@ def mean_information_coefficient(factor, forward_returns,
               .groupby(grouper)
               .mean())
 
-    ic.columns=pd.Int64Index(ic.columns)
+    ic.columns = pd.Int64Index(ic.columns)
 
     return ic
+
 
 def factor_returns(factor, forward_returns):
     """
     Computes daily returns for portfolio weighted by factor
     values. Weights are computed by demeaning factors and dividing
-    by their range.
+    by the sum of their absolute value (acheiving gross leverage of 1).
 
     Parameters
     ----------
@@ -157,12 +157,12 @@ def factor_returns(factor, forward_returns):
     """
 
     def to_weights(group):
-        return (group - group.mean()) / (group.max() - group.min())
+        return (group - group.mean()) / abs(group).sum()
 
-    weights=factor.groupby(level = ['date']).apply(to_weights)
-    weighted_returns=forward_returns.mulitply(weights).dropna()
+    weights = factor.groupby(level=['date']).apply(to_weights)
+    weighted_returns = forward_returns.multiply(weights, axis=0).dropna()
 
-    factor_daily_returns=weighted_returns.groupby(level = 'date').mean()
+    factor_daily_returns = weighted_returns.groupby(level='date').mean()
 
     return factor_daily_returns
 
@@ -189,29 +189,29 @@ def factor_alpha_beta(factor, forward_returns):
         Daily returns of dollar neutral portfolio weighted by factor value.
     """
 
-    factor_daily_returns=factor_returns(factor, forward_returns)
-    universe_daily_ret=(forward_price.loc[factor_daily_returns.index]
-                          .groupby(level='date')
-                          .mean())
+    factor_daily_returns = factor_returns(factor, forward_returns)
+    universe_daily_ret = (forward_returns.groupby(level='date')
+                          .mean()
+                          .loc[factor_daily_returns.index])
 
-    alpha_beta=pd.DataFrame()
+    alpha_beta = pd.DataFrame()
     for days in factor_daily_returns.columns.values:
-        y=universe_daily_ret[days].values
-        x=factor_daily_returns[days].values
+        y = universe_daily_ret[days].values
+        x = factor_daily_returns[days].values
 
-        x=add_constant(x)
-        reg_fit=OLS(y, x).fit()
-        t_alpha=reg_fit.tvalues[0]
-        alpha, beta=reg_fit.params
+        x = add_constant(x)
+        reg_fit = OLS(y, x).fit()
+        t_alpha = reg_fit.tvalues[0]
+        alpha, beta = reg_fit.params
 
-        alpha_beta.loc['alpha', days]=alpha
-        alpha_beta.loc['t-stat(alpha)']=t_alpha
-        alpha_beta.loc['beta', days]=beta
+        alpha_beta.loc['alpha', days] = alpha
+        alpha_beta.loc['t-stat(alpha)'] = t_alpha
+        alpha_beta.loc['beta', days] = beta
 
     return alpha_beta
 
 
-def quantize_factor(factor, quantiles = 5, by_sector = False):
+def quantize_factor(factor, quantiles=5, by_sector=False):
     """
     Computes daily factor quantiles.
 
@@ -230,12 +230,12 @@ def quantize_factor(factor, quantiles = 5, by_sector = False):
         Factor quantiles indexed by date and symbol.
     """
 
-    grouper=['date', 'sector'] if by_sector else ['date']
+    grouper = ['date', 'sector'] if by_sector else ['date']
 
-    factor_percentile=factor.groupby(level = grouper).rank(pct = True)
+    factor_percentile = factor.groupby(level=grouper).rank(pct=True)
 
-    q_width=1. / quantiles
-    factor_quantile=factor_percentile.apply(
+    q_width = 1. / quantiles
+    factor_quantile = factor_percentile.apply(
         lambda x: ((x - .000000001) // q_width) + 1)
     factor_quantile.name = 'quantile'
 
@@ -296,13 +296,44 @@ def mean_return_by_factor_quantile(quantized_factor, forward_returns,
     return mean_ret
 
 
-def compute_mean_returns_spread(mean_returns, upper_quant, lower_quant, std=None):
+def compute_mean_returns_spread(mean_returns, upper_quant,
+                                lower_quant, std=None):
+    """
+    Computes the difference between the mean returns of
+    two quantiles. Optionally, computes the standard deviation
+    of this difference.
+
+    Parameters
+    ----------
+    mean_returns : pd.DataFrame
+        DataFrame of mean daily returns by quantile.
+        MultiIndex containing date and quantile.
+        See mean_return_by_factor_quantile.
+    upper_quant : integer
+        Quantile of mean return from which we wish to subtract
+        lower quantile mean return
+    lower_quant : integer
+        Quantile of mean return we wish to subtract from
+        upper quantile mean return
+    std : pd.DataFrame (optional)
+        Daily standard deviation in mean return by quantile.
+        Takes the same for as mean_returns.
+
+    Returns
+    -------
+    mean_return_difference : pd.Series
+        Daily difference in quantile returns.
+    joint_std : pd.Series
+        Daily standard deviation of the difference in
+        quantile returns.
+    """
+
     mean_return_difference = mean_returns.xs(upper_quant, level='quantile') - \
         mean_returns.xs(lower_quant, level='quantile')
 
     if std is not None:
         std1 = std.xs(upper_quant, level='quantile')
-        std2 = mean_returns.xs(lower_quant, level='quantile')
+        std2 = std.xs(lower_quant, level='quantile')
         joint_std = np.sqrt(std1**2 + std2**2)
 
         return mean_return_difference, joint_std
@@ -362,7 +393,6 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
         Rolling 1 period (defined by time_rule) autocorrelation of factor values.
 
     """
-
 
     grouper = ['date', 'sector'] if by_sector else ['date']
 
