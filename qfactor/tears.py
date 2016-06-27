@@ -115,7 +115,7 @@ def create_factor_tear_sheet(factor,
     plot_mean_quintile_returns_spread_time_series(
         mean_ret_spread_quint,
         std=std_spread_quint,
-        bandwidth=0.5
+        bandwidth=0.5,
         title="Top Quintile - Bottom Quintile Mean Return (0.5 std. error band)")
 
     plot_top_bottom_quantile_turnover(quintile_factor)
