@@ -94,7 +94,7 @@ def summary_stats(ic_data, quantized_factor, mean_ret_quantile, autocorrelation_
     ic_summary_table = pd.DataFrame()
     ic_summary_table["IC Mean"] = ic_data.mean()
     ic_summary_table["IC Std."] = ic_data.std()
-    ic_summary_table["IC Mean / Std."] = ic_data.mean() / ic_data.std()
+    ic_summary_table["Ann. IR"] = (ic_data.mean() / ic_data.std()) * np.sqrt(252)
     ic_summary_table["t-stat(IC)"] = sp.stats.ttest_1samp(ic_data, 0)[0]
 
     max_quantile = quantized_factor.values.max()
@@ -255,7 +255,7 @@ def plot_ic_by_sector(ic_sector):
     ic_sector.plot(kind='bar', ax=ax)
 
     ax.set(title="Information Coefficient by Sector")
-    
+
 
 def plot_ic_by_sector_over_time(ic_time):
     """
@@ -280,7 +280,7 @@ def plot_ic_by_sector_over_time(ic_time):
         i += 1
     fig = plt.gcf()
     fig.suptitle("Monthly Information Coefficient by Sector", fontsize=16, x=.5, y=.93)
-    
+
 
 def plot_factor_rank_auto_correlation(factor_autocorrelation):
     """
@@ -298,7 +298,7 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation):
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
     factor_autocorrelation.plot(title='Factor Rank Autocorrelation', ax=ax)
     ax.set(ylabel='autocorrelation coefficient')
-    
+
 
 def plot_top_bottom_quantile_turnover(quantized_factor):
     """
@@ -318,7 +318,7 @@ def plot_top_bottom_quantile_turnover(quantized_factor):
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
     turnover.plot(title='Top and Bottom Quantile Daily Turnover', ax=ax, alpha=0.6)
     ax.set(ylabel='proportion of names new to quantile', xlabel="")
-    
+
 
 def plot_monthly_ic_heatmap(mean_monthly_ic):
     """
