@@ -1,18 +1,27 @@
 import pandas as pd
+import numpy as np
 from IPython.display import display
 
 
-def compute_forward_returns(prices, days=(1, 5, 10)):
+def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
     """
     Finds the N day forward returns (as percent change) for each equity provided.
     Parameters
     ----------
     prices : pd.DataFrame
-        Pricing data to use in forward price calculation. Equities as columns, dates as index.
-        Pricing data must span the factor analysis time period plus an additional buffer window
-        that is greater than the maximum number of expected days in the forward returns calculations.
+        Pricing data to use in forward price calculation.
+        Equities as columns, dates as index.
+        Pricing data must span the factor analysis time period
+        plus an additional buffer window
+        that is greater than the maximum number of expected days
+        in the forward returns calculations.
     days : list
-        Number of days forward to project returns. One column will be added for each value.
+        Number of days forward to project returns. One column will
+        be added for each value.
+    filter_zscore : int
+        Sets forward returns greater than X standard deviations
+        from the the mean to nan.
+        Caution: this outlier filtering incorperates lookahead bias.
     Returns
     -------
     forward_returns : pd.DataFrame - MultiIndex
@@ -24,9 +33,15 @@ def compute_forward_returns(prices, days=(1, 5, 10)):
 
     for day in days:
         delta = prices.pct_change(day).shift(-day)
+
+        if filter_zscore is not None:
+            mask = abs(delta - delta.mean()) > (filter_zscore * delta.std())
+            delta[mask] = np.nan
+
         forward_returns[day] = delta.stack() / day
 
     forward_returns.index.rename(['date', 'equity'], inplace=True)
+
     return forward_returns
 
 
@@ -98,45 +113,52 @@ def print_table(table, name=None, fmt=None):
         pd.set_option('display.float_format', prev_option)
 
 
-def format_input_data(factor, prices, filter_zscore=20, sectors=None, days=(1, 5, 10)):
+def format_input_data(factor, prices, sectors=None,
+                      filter_zscore=20, days=(1, 5, 10)):
     """
-    Formats the factor data, pricing data, and sector mappings into DataFrames and Series that
-    contain aligned MultiIndex indices containing date, equity, and sector.
+    Formats the factor data, pricing data, and sector mappings
+    into DataFrames and Series that contain aligned MultiIndex
+    indices containing date, equity, and sector.
     ----------
     ----------
     factor : pandas.Series - MultiIndex
         A list of equities and their factor values indexed by date.
     prices : pd.DataFrame
-        Pricing data to use in forward price calculation. Equities as columns, dates as index.
-        Pricing data must span the factor analysis time period plus an additional buffer window
-        that is greater than the maximum number of expected days in the forward returns calculations.
+        Pricing data to use in forward price calculation.
+        Equities as columns, dates as index.
+        Pricing data must span the factor analysis time period
+        plus an additional buffer window that is greater than the
+        maximum number of expected days in the forward returns
+        calculations.
     sectors : pd.Series - MultiIndex
         A list of equities and their sectors
+    filter_zscore : int
+        Sets forward returns greater than X standard deviations
+        from the the mean to nan.
+        Caution: this outlier filtering incorperates lookahead bias.
     days : list
-        Number of days forward to project returns. One column will be added for each value.
+        Number of days forward to project returns. One column
+        will be added for each value.
     Returns
     -------
     factor : pd.Series
-        A list of equities and their factor values indexed by date, equity, and optionally sector.
+        A list of equities and their factor values indexed by date,
+        equity, and optionally sector.
     forward_returns : pd.DataFrame - MultiIndex
-        A DataFrame of equities and their forward returns indexed by date, equity, and optionally sector.
+        A DataFrame of equities and their forward returns
+        indexed by date, equity, and optionally sector.
         Note: this is the same index as the factor index
     """
 
-    forward_returns = qfactor.utils.compute_forward_returns(prices, days)
+    forward_returns = compute_forward_returns(
+        prices, days, filter_zscore=filter_zscore)
+    factor.name = 'factor'
 
     merged_data = pd.merge(pd.DataFrame(factor),
                            forward_returns,
                            how='left',
                            left_index=True,
                            right_index=True)
-
-    if filter_zscore is not None:
-        min_days = min(days)
-        zscore = lambda x: (x - x.mean()) / x.std()
-        fr_z = merged_data[min_days].groupby(level='date').transform(zscore)
-        merged_data = merged_data[
-            (fr_z < filter_zscore) | (fr_z > -filter_zscore)]
 
     if sectors is not None:
         merged_data = pd.merge(pd.DataFrame(sectors),
