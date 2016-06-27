@@ -24,7 +24,8 @@ def create_factor_tear_sheet(factor,
                              prices,
                              sectors=None,
                              sector_plots=True,
-                             days=(1, 5, 10)
+                             days=(1, 5, 10),
+                             filter_zscore=10
                              ):
     """
 
@@ -52,12 +53,16 @@ def create_factor_tear_sheet(factor,
         If True create sector specific plots.
     days: list
         Days to compute forward returns on.
+    filter_zscore : int
+        Sets forward returns greater than X standard deviations
+        from the the mean to nan.
+        Caution: this outlier filtering incorperates lookahead bias.
 
     """
 
     can_sector_adjust = sectors is not None
     factor, forward_returns = utils.format_input_data(
-        factor, prices, sectors=sectors, days=days, filter_zscore=10)
+        factor, prices, sectors=sectors, days=days, filter_zscore=filter_zscore)
 
     daily_ic = perf.factor_information_coefficient(
         factor, forward_returns,
