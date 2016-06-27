@@ -141,13 +141,13 @@ def mean_information_coefficient(factor, forward_returns,
               .set_index('date')
               .groupby(grouper)
               .mean())
-        err = (err.reset_index()
+        err=(err.reset_index()
                .set_index('date')
                .groupby(grouper)
-               .agg(sum_errors)
+               .agg(sum_errors))
 
-    ic.columns = pd.Int64Index(ic.columns)
-    err.columns = pd.Int64Index(err.columns)
+    ic.columns=pd.Int64Index(ic.columns)
+    err.columns=pd.Int64Index(err.columns)
 
     return ic, err
 
@@ -174,31 +174,59 @@ def factor_returns(factor, forward_returns):
     def to_weights(group):
         return (group - group.mean()) / (group.max() - group.min())
 
-    weights = factor.groupby(level=['date']).apply(to_weights)
-    weighted_returns = forward_returns.mulitply(weights).dropna()
+    weights=factor.groupby(level = ['date']).apply(to_weights)
+    weighted_returns=forward_returns.mulitply(weights).dropna()
 
-    factor_daily_returns = weighted_returns.groupby(level='date').mean()
+    factor_daily_returns=weighted_returns.groupby(level = 'date').mean()
 
     return factor_daily_returns
 
 
 def factor_alpha_beta(factor, forward_returns):
-    factor_daily_returns = factor_returns(factor, forward_returns)
-    market_daily_ret = forward_price.groupby(level='date').mean()
+    """
+    Computes the alpha (excess returns), alpha t-stat (alpha significance),
+    and beta (market exposure) of a factor. A regression is run with
+    the daily factor universe mean return as the depedendent variable
+    and mean daily return from a dollar-neutral portfolio weighted
+    by factor values as the independent variable.
 
-    alpha_beta = pd.DataFrame()
-    for days, factor_ret, _, market_ret in zip(factor_daily_ret.iteritems(),
-                                               market_daily_ret.iteritems()):
-        beta, alpha = sp.stats.linregress(
-            market_ret.loc[factor_daily_ret.index].values,
-            factor_ret.values)[:2]
+    Parameters
+    ----------
+    factor : pandas.Series - MultiIndex
+        A list of equities and their factor values indexed by date.
+    forward_returns : pandas.DataFrame - MultiIndex
+        Daily forward returns in indexed by date and symbol.
+        Separate column for each forward return window.
 
-        alpha_beta.loc['alpha', days] = alpha
-        alpha_beta.loc['beta', days] = beta
+    Returns
+    -------
+    factor_daily_returns : pd.Series
+        Daily returns of dollar neutral portfolio weighted by factor value.
+    """
+
+    factor_daily_returns=factor_returns(factor, forward_returns)
+    universe_daily_ret=(forward_price.loc[factor_daily_returns.index]
+                          .groupby(level='date')
+                          .mean())
+
+    alpha_beta=pd.DataFrame()
+    for days in factor_daily_returns.columns.values:
+        y=universe_daily_ret[days].values
+        x=factor_daily_returns[days].values
+
+        x=add_constant(x)
+        reg_fit=OLS(y, x).fit()
+        t_alpha=reg_fit.tvalues[0]
+        alpha, beta=reg_fit.params
+
+        alpha_beta.loc['alpha', days]=alpha
+        alpha_beta.loc['t-stat(alpha)']=t_alpha
+        alpha_beta.loc['beta', days]=beta
 
     return alpha_beta
 
-def quantize_factor(factor, quantiles=5, by_sector=False):
+
+def quantize_factor(factor, quantiles = 5, by_sector = False):
     """
     Computes daily factor quantiles.
 
@@ -217,12 +245,12 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
         Factor quantiles indexed by date and symbol.
     """
 
-    grouper = ['date', 'sector'] if by_sector else ['date']
+    grouper=['date', 'sector'] if by_sector else ['date']
 
-    factor_percentile = factor.groupby(level=grouper).rank(pct=True)
+    factor_percentile=factor.groupby(level = grouper).rank(pct = True)
 
-    q_width = 1. / quantiles
-    factor_quantile = factor_percentile.apply(
+    q_width=1. / quantiles
+    factor_quantile=factor_percentile.apply(
         lambda x: ((x - .000000001) // q_width) + 1)
     factor_quantile.name = 'quantile'
 
