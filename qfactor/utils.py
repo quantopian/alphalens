@@ -19,7 +19,9 @@ def compute_forward_returns(prices, days=(1, 5, 10)):
         DataFrame containg the N day forward returns for a security.
     """
 
-    forward_returns = pd.DataFrame()
+    forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
+        [prices.index, prices.columns], names=['date', 'equity']))
+
     for day in days:
         delta = prices.pct_change(day).shift(-day)
         forward_returns[day] = delta.stack() / day
