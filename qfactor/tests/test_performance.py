@@ -35,7 +35,7 @@ from pandas.util.testing import (assert_frame_equal,
 from .. performance import (factor_information_coefficient,
                             mean_information_coefficient,
                             quantize_factor, quantile_turnover,
-                            factor_returns)
+                            factor_returns, factor_alpha_beta)
 
 class PerformanceTestCase(TestCase):
     dr = date_range(start='2015-1-1', end='2015-1-2')
@@ -48,7 +48,6 @@ class PerformanceTestCase(TestCase):
               .rename_axis(['date', 'symbol'])).rename('factor').reset_index()
     factor['sector'] = [1, 1, 2, 2, 1, 1, 2, 2]
     factor = factor.set_index(['date', 'symbol', 'sector']).factor
-
 
     @parameterized.expand([(factor, [4, 3, 2, 1, 1, 2, 3, 4],
                             False, False,
@@ -85,7 +84,6 @@ class PerformanceTestCase(TestCase):
                                    data=expected_ic_val)
 
         assert_frame_equal(ic, expected_ic_df)
-
 
     @parameterized.expand([(factor, [4, 3, 2, 1, 1, 2, 3, 4],
                             'D', False,
@@ -142,6 +140,7 @@ class PerformanceTestCase(TestCase):
 
         assert_series_equal(quantized_factor, expected)
 
+<<<<<<< a195a5fff04b2179fd6c39531fdbcb293f4b0b56
 
     @parameterized.expand([([[1.0, 2.0, 3.0, 4.0],
                              [4.0, 3.0, 2.0, 1.0],
@@ -180,10 +179,11 @@ class PerformanceTestCase(TestCase):
         assert_series_equal(to, expected)
 
 
-    @parameterized.expand([([1,2,3,4,4,3,2,1] ,
+    @parameterized.expand([([1, 2, 3, 4, 4, 3, 2, 1],
+
                             [4, 3, 2, 1, 1, 2, 3, 4],
                             [-0.125, -0.125]),
-                           ([1,1,1,1,1,1,1,1],
+                           ([1, 1, 1, 1, 1, 1, 1, 1],
                             [4, 3, 2, 1, 1, 2, 3, 4],
                             [0., 0.])])
     def test_factor_returns(self, factor_vals, fwd_return_vals, expected_vals):
@@ -197,7 +197,20 @@ class PerformanceTestCase(TestCase):
 
         assert_frame_equal(factor_returns_s, expected)
 
+    @parameterized.expand([([1, 2, 3, 4, 1, 1, 1, 1],
+                            [4, 3, 2, 1, 1, 2, 3, 4],
+                            2.5, 0.0, 0.0)])
+    def test_factor_alpha_beta(self, factor_vals, fwd_return_vals,
+                               alpha, t_stat_alpha, beta):
+        factor = Series(index=self.factor.index, data=factor_vals)
+        fwd_return_df = DataFrame(index=self.factor.index,
+                                  columns=[1], data=fwd_return_vals)
 
+        ab = factor_alpha_beta(factor, fwd_return_df)
 
+        expected = DataFrame(columns=[1],
+                             index=['alpha', 't-stat(alpha)', 'beta'],
+                             data=[alpha, t_stat_alpha, beta])
 
+        assert_frame_equal(ab, expected)
 
