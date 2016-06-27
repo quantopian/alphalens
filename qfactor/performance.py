@@ -57,10 +57,6 @@ def factor_information_coefficient(factor, forward_returns,
         _ic['obs_count'] = len(f)
         return _ic
 
-    def src_std_error(rho, n):
-        return np.sqrt((1 - rho ** 2) / (n - 2))
-
-
     if sector_adjust:
         forward_returns = utils.demean_forward_returns(forward_returns, by_sector=True)
 
@@ -114,17 +110,12 @@ def mean_information_coefficient(factor, forward_returns,
     ic : pd.DataFrame
         Mean Spearman Rank correlation between factor and provided
         forward price movement windows.
-
-    err : pd.DataFrame
-        Standard error of computed IC.
     """
 
-    ic, err = factor_information_coefficient(factor,
-                                             forward_returns,
-                                             sector_adjust=sector_adjust,
-                                             by_sector=by_sector)
-
-    sum_errors = lambda x: np.sqrt(np.sum(np.power(x, 2)) / len(x)))
+    ic = factor_information_coefficient(factor,
+                                        forward_returns,
+                                        sector_adjust=sector_adjust,
+                                        by_sector=by_sector)
 
     grouper = []
     if by_time is not None:
@@ -134,22 +125,16 @@ def mean_information_coefficient(factor, forward_returns,
 
     if len(grouper) = 0:
         ic = ic.mean()
-        err = sum_errors(err)
 
     else:
         ic = (ic.reset_index()
               .set_index('date')
               .groupby(grouper)
               .mean())
-        err=(err.reset_index()
-               .set_index('date')
-               .groupby(grouper)
-               .agg(sum_errors))
 
     ic.columns=pd.Int64Index(ic.columns)
-    err.columns=pd.Int64Index(err.columns)
 
-    return ic, err
+    return ic
 
 def factor_returns(factor, forward_returns):
     """

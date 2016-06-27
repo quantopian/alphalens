@@ -187,3 +187,41 @@ class PerformanceTestCase(TestCase):
         expected = Series(index=quantized_test_factor.index.levels[0], data=expected_vals)
 
         assert_series_equal(to, expected)
+
+
+
+    def test_factor_returns():
+        pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
