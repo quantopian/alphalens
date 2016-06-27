@@ -136,7 +136,7 @@ def mean_information_coefficient(factor, forward_returns,
     return ic
 
 
-def factor_returns(factor, forward_returns):
+def factor_returns(factor, forward_returns, long_short=True):
     """
     Computes daily returns for portfolio weighted by factor
     values. Weights are computed by demeaning factors and dividing
@@ -156,10 +156,14 @@ def factor_returns(factor, forward_returns):
         Daily returns of dollar neutral portfolio weighted by factor value.
     """
 
-    def to_weights(group):
-        return (group - group.mean()) / abs(group).sum()
+    def to_weights(group, long_short):
+        if long_short:
+            return (group - group.mean()) / abs(group).sum()
+        else:
+            return group / abs(group).sum()
 
-    weights = factor.groupby(level=['date']).apply(to_weights)
+    weights = factor.groupby(level=['date']).apply(to_weights,
+                                                   long_short=long_short)
     weighted_returns = forward_returns.multiply(weights, axis=0).dropna()
 
     factor_daily_returns = weighted_returns.groupby(level='date').mean()
@@ -167,7 +171,7 @@ def factor_returns(factor, forward_returns):
     return factor_daily_returns
 
 
-def factor_alpha_beta(factor, forward_returns):
+def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     """
     Computes the alpha (excess returns), alpha t-stat (alpha significance),
     and beta (market exposure) of a factor. A regression is run with
@@ -182,14 +186,18 @@ def factor_alpha_beta(factor, forward_returns):
     forward_returns : pandas.DataFrame - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
+    factor_daily_returns : pd.Series
+        Timeseries of daily factor returns. If passed, will
+        use instad of long-short factor returns from factor.
 
     Returns
     -------
     factor_daily_returns : pd.Series
         Daily returns of dollar neutral portfolio weighted by factor value.
     """
+    if factor_daily_returns is None:
+        factor_daily_returns = factor_returns(factor, forward_returns)
 
-    factor_daily_returns = factor_returns(factor, forward_returns)
     universe_daily_ret = (forward_returns.groupby(level='date')
                           .mean()
                           .loc[factor_daily_returns.index])
@@ -205,7 +213,7 @@ def factor_alpha_beta(factor, forward_returns):
         alpha, beta = reg_fit.params
 
         alpha_beta.loc['alpha', days] = alpha
-        alpha_beta.loc['t-stat(alpha)'] = t_alpha
+        alpha_beta.loc['t-stat(alpha)', days] = t_alpha
         alpha_beta.loc['beta', days] = beta
 
     return alpha_beta
