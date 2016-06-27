@@ -49,6 +49,7 @@ class PerformanceTestCase(TestCase):
     factor['sector'] = [1, 1, 2, 2, 1, 1, 2, 2]
     factor = factor.set_index(['date', 'symbol', 'sector']).factor
 
+
     @parameterized.expand([(factor, [4, 3, 2, 1, 1, 2, 3, 4],
                             False, False,
                             dr,
@@ -179,37 +180,22 @@ class PerformanceTestCase(TestCase):
         assert_series_equal(to, expected)
 
 
+    @parameterized.expand([([1,2,3,4,4,3,2,1] ,
+                            [4, 3, 2, 1, 1, 2, 3, 4],
+                            [-0.125, -0.125]),
+                           ([1,1,1,1,1,1,1,1],
+                            [4, 3, 2, 1, 1, 2, 3, 4],
+                            [0., 0.])])
+    def test_factor_returns(self, factor_vals, fwd_return_vals, expected_vals):
+        factor = Series(index=self.factor.index, data=factor_vals)
 
-    def test_factor_returns():
-        pass
+        fwd_return_df = DataFrame(index=self.factor.index,
+                                  columns=[1], data=fwd_return_vals)
 
+        factor_returns_s = factor_returns(factor, fwd_return_df)
+        expected = DataFrame(index=self.dr, data=expected_vals, columns=[1])
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        assert_frame_equal(factor_returns_s, expected)
 
 
 
