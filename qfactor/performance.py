@@ -166,7 +166,7 @@ def factor_returns(factor, forward_returns, long_short=True):
                                                    long_short=long_short)
     weighted_returns = forward_returns.multiply(weights, axis=0).dropna()
 
-    factor_daily_returns = weighted_returns.groupby(level='date').mean()
+    factor_daily_returns = weighted_returns.groupby(level='date').sum()
 
     return factor_daily_returns
 
@@ -213,7 +213,7 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
         alpha, beta = reg_fit.params
 
         alpha_beta.loc['alpha', days] = alpha
-        alpha_beta.loc['t-stat(alpha)', days] = t_alpha
+        alpha_beta.loc['t-stat(alpha)', days] = abs(t_alpha)
         alpha_beta.loc['beta', days] = beta
 
     return alpha_beta
