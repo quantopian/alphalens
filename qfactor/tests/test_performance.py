@@ -37,6 +37,7 @@ from .. performance import (factor_information_coefficient,
                             quantize_factor, quantile_turnover,
                             factor_returns, factor_alpha_beta)
 
+
 class PerformanceTestCase(TestCase):
     dr = date_range(start='2015-1-1', end='2015-1-2')
     dr.name = 'date'
@@ -140,8 +141,6 @@ class PerformanceTestCase(TestCase):
 
         assert_series_equal(quantized_factor, expected)
 
-<<<<<<< a195a5fff04b2179fd6c39531fdbcb293f4b0b56
-
     @parameterized.expand([([[1.0, 2.0, 3.0, 4.0],
                              [4.0, 3.0, 2.0, 1.0],
                              [1.0, 2.0, 3.0, 4.0],
@@ -149,9 +148,9 @@ class PerformanceTestCase(TestCase):
                             4.0,
                             [nan, 1.0, 1.0, 0.0]),
                            ([[1.0, 2.0, 3.0, 4.0],
-                            [1.0, 2.0, 3.0, 4.0],
-                            [1.0, 2.0, 3.0, 4.0],
-                            [1.0, 2.0, 3.0, 4.0]],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
                             3.0,
                             [nan, 0.0, 0.0, 0.0]),
                            ([[1.0, 2.0, 3.0, 4.0],
@@ -160,24 +159,25 @@ class PerformanceTestCase(TestCase):
                              [4.0, 3.0, 2.0, 1.0]],
                             2.0,
                             [nan, 1.0, 1.0, 1.0])])
-    def test_quantile_turnover(self, quantile_values, test_quantile, expected_vals):
+    def test_quantile_turnover(self, quantile_values, test_quantile,
+                               expected_vals):
 
         dr = date_range(start='2015-1-1', end='2015-1-4')
         dr.name = 'date'
         tickers = ['A', 'B', 'C', 'D']
 
         quantized_test_factor = Series(DataFrame(index=dr,
-                                               columns=tickers,
-                                               data=quantile_values)
-                                          .stack()
-                                          .rename_axis(['date', 'equity']))
+                                                 columns=tickers,
+                                                 data=quantile_values)
+                                       .stack()
+                                       .rename_axis(['date', 'equity']))
 
         to = quantile_turnover(quantized_test_factor, test_quantile)
 
-        expected = Series(index=quantized_test_factor.index.levels[0], data=expected_vals)
+        expected = Series(
+            index=quantized_test_factor.index.levels[0], data=expected_vals)
 
         assert_series_equal(to, expected)
-
 
     @parameterized.expand([([1, 2, 3, 4, 4, 3, 2, 1],
 
@@ -213,4 +213,3 @@ class PerformanceTestCase(TestCase):
                              data=[alpha, t_stat_alpha, beta])
 
         assert_frame_equal(ab, expected)
-
