@@ -110,7 +110,7 @@ def create_factor_tear_sheet(factor,
     plot_daily_ic_ts(daily_ic)
     plot_daily_ic_hist(daily_ic)
 
-    plot_monthly_heatmap(mean_monthly_ic)
+    plot_monthly_IC_heatmap(mean_monthly_ic)
 
     plot_mean_quintile_returns_spread_time_series(
         mean_ret_spread_quint,
