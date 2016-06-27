@@ -59,10 +59,12 @@ def factor_information_coefficient(factor, forward_returns,
     def src_std_error(rho, n):
         return np.sqrt((1 - rho ** 2) / (n - 2))
 
+
     if sector_adjust:
         forward_returns = utils.demean_forward_returns(forward_returns, by_sector=True)
 
-    factor_and_fp = pd.merge(pd.DataFrame(factor.rename('factor')),
+    factor.name = 'factor'
+    factor_and_fp = pd.merge(pd.DataFrame(factor),
                              forward_returns,
                              how='left',
                              left_index=True,

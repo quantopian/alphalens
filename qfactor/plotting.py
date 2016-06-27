@@ -90,7 +90,7 @@ def context(context='notebook', font_scale=1.5, rc=None):
                                 rc=rc)
 
 
-def summary_stats(ic_data, quantized_factor, mean_ret_quantile_daily, autocorrelation_data, mean_ret_spread_quantile):
+def summary_stats(ic_data, quantized_factor, mean_ret_quantile, autocorrelation_data, mean_ret_spread_quantile):
     ic_summary_table = pd.DataFrame()
     ic_summary_table["IC Mean"] = ic_data.mean()
     ic_summary_table["IC Std."] = ic_data.std()
@@ -104,10 +104,8 @@ def summary_stats(ic_data, quantized_factor, mean_ret_quantile_daily, autocorrel
                                            perf.quantile_turnover(quantized_factor, min_quantile).mean()]
 
     returns_table = pd.DataFrame()
-    returns_table["Mean Daily Return Top Quantile"] = mean_ret_quantile_daily.groupby(level="quantile").mean().loc[
-        max_quantile]
-    returns_table["Mean Daily Return Bottom Quantile"] = mean_ret_quantile_daily.groupby(level="quantile").mean().loc[
-        min_quantile]
+    returns_table["Mean Daily Return Top Quantile"] = mean_ret_quantile.loc[max_quantile]
+    returns_table["Mean Daily Return Bottom Quantile"] = mean_ret_quantile.loc[min_quantile]
 
     auto_corr = pd.Series()
     auto_corr["Mean Factor Rank Autocorrelation"] = autocorrelation_data.mean()

@@ -81,7 +81,7 @@ def create_factor_tear_sheet(factor,
 
     factor_autocorrelation = perf.factor_rank_autocorrelation(factor, time_rule='W')
 
-    summary_stats(daily_ic, quintile_factor, mean_ret_quintile_daily, factor_autocorrelation, mean_ret_spread_quintile)
+    summary_stats(daily_ic, quintile_factor, mean_ret_quintile, factor_autocorrelation, mean_ret_spread_quintile)
 
     # What is the sector-netural rolling mean IC for our different forward
     # price windows?
