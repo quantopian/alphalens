@@ -90,12 +90,14 @@ def context(context='notebook', font_scale=1.5, rc=None):
                                 rc=rc)
 
 
-def summary_stats(ic_data, quantized_factor, mean_ret_quantile, autocorrelation_data, mean_ret_spread_quantile):
+def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
+                  autocorrelation_data, mean_ret_spread_quantile):
     ic_summary_table = pd.DataFrame()
     ic_summary_table["IC Mean"] = ic_data.mean()
     ic_summary_table["IC Std."] = ic_data.std()
-    ic_summary_table["Ann. IR"] = (ic_data.mean() / ic_data.std()) * np.sqrt(252)
     ic_summary_table["t-stat(IC)"] = sp.stats.ttest_1samp(ic_data, 0)[0]
+    ic_summary_table["Ann. IR"] = (ic_data.mean() / ic_data.std()) * np.sqrt(252)
+    ic_summary_table = ic_summary_table.T.append(alpha_beta)
 
     max_quantile = quantized_factor.values.max()
     min_quantile = quantized_factor.values.min()
@@ -103,17 +105,16 @@ def summary_stats(ic_data, quantized_factor, mean_ret_quantile, autocorrelation_
     turnover_table.loc["Mean Turnover"] = [perf.quantile_turnover(quantized_factor, max_quantile).mean(),
                                            perf.quantile_turnover(quantized_factor, min_quantile).mean()]
 
-    returns_table = pd.DataFrame()
-    returns_table["Mean Daily Return Top Quantile"] = mean_ret_quantile.loc[max_quantile]
-    returns_table["Mean Daily Return Bottom Quantile"] = mean_ret_quantile.loc[min_quantile]
-
     auto_corr = pd.Series()
     auto_corr["Mean Factor Rank Autocorrelation"] = autocorrelation_data.mean()
 
+    returns_table = pd.DataFrame()
+    returns_table["Mean Daily Return Top Quantile"] = mean_ret_quantile.loc[max_quantile]
+    returns_table["Mean Daily Return Bottom Quantile"] = mean_ret_quantile.loc[min_quantile]
     returns_table["Mean Daily Spread"] = mean_ret_spread_quantile.mean()
 
-    print "Information Coefficient Analysis"
-    utils.print_table(ic_summary_table.round(3).T)
+    print "Information Analysis"
+    utils.print_table(ic_summary_table.round(3))
     print "Returns Analysis"
     utils.print_table(returns_table.round(3).T)
     print "Turnover Analysis"
