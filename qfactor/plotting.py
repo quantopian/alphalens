@@ -244,7 +244,7 @@ def plot_mean_quintile_returns_spread_time_series(mean_returns_spread,
         return
 
     f, ax = plt.subplots(figsize=(18, 6))
-    mean_returns_spread = mean_return_spread * 100
+    mean_returns_spread = mean_returns_spread * 100
 
     mean_returns_spread.rename('mean_return_spread').plot(
         alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
@@ -371,10 +371,13 @@ def plot_monthly_IC_heatmap(mean_monthly_vals, val_type='IC', ax=None):
             annot=True,
             alpha=1.0,
             center=0.0,
-            annot_kws={"size": 9},
+            annot_kws={"size": 7},
+            linewidths=0.01,
+            linecolor='white',
             cmap=cm.RdYlGn,
             cbar=False,
             ax=current_subplot)
+        current_subplot.set(ylabel='', xlabel='')
 
         current_subplot.set_title("Monthly Mean {} Day {}".format(days_num, val_type))
 
