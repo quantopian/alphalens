@@ -110,9 +110,9 @@ def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
     auto_corr["Mean Factor Rank Autocorrelation"] = autocorrelation_data.mean()
 
     returns_table = pd.DataFrame()
-    returns_table["Mean Daily Return Top Quantile"] = mean_ret_quantile.loc[max_quantile]
-    returns_table["Mean Daily Return Bottom Quantile"] = mean_ret_quantile.loc[min_quantile]
-    returns_table["Mean Daily Spread"] = mean_ret_spread_quantile.mean()
+    returns_table["Mean Daily Return Top Quantile"] = mean_ret_quantile.loc[max_quantile] * 100
+    returns_table["Mean Daily Return Bottom Quantile"] = mean_ret_quantile.loc[min_quantile] * 100
+    returns_table["Mean Daily Spread"] = mean_ret_spread_quantile.mean() * 100
 
     print "Information Analysis"
     utils.print_table(ic_summary_table.round(3))
@@ -175,7 +175,7 @@ def plot_daily_ic_hist(daily_ic):
     for ax, (days_num, ic) in izip(axes, daily_ic.iteritems()):
         sns.distplot(ic.replace(np.nan, 0.), norm_hist=True, ax=ax)
         ax.set(title="%s day IC" % days_num, xlabel='IC')
-        ax.set_xlim([-1, 1])
+        ax.set_xlim([-0.25, 0.25])
 
 
 def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
@@ -198,19 +198,20 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
         axes = axes.flatten()
 
         for i, (sc, cor) in enumerate(mean_ret_by_q.groupby(level='sector')):
-            cor.xs(sc, level='sector').plot(kind='bar', title=sc, ax=axes[i])
+            (cor.xs(sc, level='sector')
+                .multiply(100)
+                .plot(kind='bar', title=sc, ax=axes[i]))
             axes[i].set_xlabel('')
             axes[i].set_ylabel('mean price % change')
 
         if i < len(axes):
-            axes[-1] = None
+            axes[-1].set_visible(False)
 
-        fig = plt.gcf()
-        fig.suptitle("Mean Return By Factor Quantile By Sector", x=.5, y=.96)
+        f.suptitle("Mean Return By Factor Quantile By Sector", x=.5, y=.96)
 
     else:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
-        mean_ret_by_q.plot(kind='bar',
+        mean_ret_by_q.multiply(100).plot(kind='bar',
                            title="Mean Return By Factor Quantile",
                            ax=ax)
         ax.set(xlabel='', ylabel='mean daily price % change')
@@ -243,12 +244,15 @@ def plot_mean_quintile_returns_spread_time_series(mean_returns_spread,
         return
 
     f, ax = plt.subplots(figsize=(18, 6))
+    mean_returns_spread = mean_return_spread * 100
+
     mean_returns_spread.rename('mean_return_spread').plot(
         alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
     mean_returns_spread.rolling(22).mean().plot(color='orangered', alpha=0.7)
     ax.legend(['mean returns spread', '1 month moving avg'], loc='upper right')
 
     if std is not None:
+        std = std * 100
         upper = mean_returns_spread.values + (std * bandwidth)
         lower = mean_returns_spread.values - (std * bandwidth)
         ax.fill_between(mean_returns_spread.index, lower, upper, alpha=0.3, color='steelblue')
@@ -335,7 +339,7 @@ def plot_top_bottom_quantile_turnover(quantized_factor):
     turnover['bottom quantile turnover'] = perf.quantile_turnover(quantized_factor, 1)
 
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
-    turnover.plot(title='Top and Bottom Quantile Daily Turnover', ax=ax, alpha=0.6)
+    turnover.plot(title='Top and Bottom Quantile Daily Turnover', ax=ax, alpha=0.6, lw=0.8)
     ax.set(ylabel='proportion of names new to quantile', xlabel="")
 
 
@@ -371,8 +375,6 @@ def plot_monthly_IC_heatmap(mean_monthly_vals, val_type='IC', ax=None):
             cmap=cm.RdYlGn,
             cbar=False,
             ax=current_subplot)
-        current_subplot.set_ylabel("Year")
-        current_subplot.set_xlabel("Month")
 
         current_subplot.set_title("Monthly Mean {} Day {}".format(days_num, val_type))
 
@@ -383,6 +385,6 @@ def plot_cumulative_returns(factor_returns):
     factor_returns.add(1).cumprod().plot(ax=ax,
         lw=3, color='forestgreen', alpha=0.6)
     ax.set(ylabel='cumulative returns',
-           title='Long/Short Factor Portfolio Cumulative Return')
+           title='Factor Weighted Long/Short Portfolio Cumulative Return')
     ax.axhline(1.0, linestyle='-', color='black', lw=1)
 
