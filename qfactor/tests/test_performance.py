@@ -199,7 +199,7 @@ class PerformanceTestCase(TestCase):
 
     @parameterized.expand([([1, 2, 3, 4, 1, 1, 1, 1],
                             [3.5, 2.0],
-                            1., nan, 1.)])
+                            (2.**252)-1, nan, 1.)])
     def test_factor_alpha_beta(self, fwd_return_vals, factor_returns_vals,
                                alpha, t_stat_alpha, beta):
         factor_returns = Series(index=self.dr, data=factor_returns_vals)
@@ -210,7 +210,7 @@ class PerformanceTestCase(TestCase):
                                factor_daily_returns=factor_returns)
 
         expected = DataFrame(columns=[1],
-                             index=['alpha', 't-stat(alpha)', 'beta'],
+                             index=['Ann. alpha', 't-stat(alpha)', 'beta'],
                              data=[alpha, t_stat_alpha, beta])
 
         assert_frame_equal(ab, expected)

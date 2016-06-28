@@ -216,7 +216,7 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
         t_alpha = reg_fit.tvalues[0]
         alpha, beta = reg_fit.params
 
-        alpha_beta.loc['alpha', days] = alpha
+        alpha_beta.loc['Ann. alpha', days] = (1 + alpha)**252 - 1
         alpha_beta.loc['t-stat(alpha)', days] = abs(t_alpha)
         alpha_beta.loc['beta', days] = beta
 
