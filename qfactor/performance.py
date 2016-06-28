@@ -47,10 +47,6 @@ def factor_information_coefficient(factor, forward_returns,
     ic : pd.DataFrame
         Spearman Rank correlation between factor and
         provided forward price movement windows.
-
-    err : pd.DataFrame
-        Standard error of computed IC.
-
     """
 
     def src_ic(group):
@@ -255,7 +251,7 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
 
 
 def mean_return_by_quantile(quantized_factor, forward_returns,
-                                   by_time=None, by_sector=False, std=False):
+                            by_time=None, by_sector=False, std=False):
     """
     Computes mean demeaned returns for factor quantiles across
     provided forward returns columns.

@@ -225,10 +225,10 @@ def plot_mean_quintile_returns_spread_time_series(mean_returns_spread,
 
     Parameters
     ----------
-    mean_returns_spread : pd.DataFrame
-        DataFrame with difference between quantile mean returns by day.
-    std : pd.DataFrame
-        DataFrame with standard devation of difference between quantile
+    mean_returns_spread : pd.Series
+        Series with difference between quantile mean returns by day.
+    std : pd.Series
+        Series with standard devation of difference between quantile
         mean returns each day
     bandwidth : float
         Width of displayed error bands in standard deviations
