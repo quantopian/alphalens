@@ -25,7 +25,8 @@ def create_factor_tear_sheet(factor,
                              sectors=None,
                              sector_plots=True,
                              days=(1, 5, 10),
-                             filter_zscore=10
+                             filter_zscore=10,
+                             sector_mappings=None
                              ):
     """
 
@@ -93,7 +94,6 @@ def create_factor_tear_sheet(factor,
     mean_ret_spread_quint, std_spread_quint = perf.compute_mean_returns_spread(
         mean_ret_quint_daily, 5, 1, std=std_quint_daily)
 
-
     factor_autocorrelation = perf.factor_rank_autocorrelation(
         factor, time_rule='W')
 
@@ -132,6 +132,6 @@ def create_factor_tear_sheet(factor,
         mean_return_quintile_sector = perf.mean_return_by_quantile(
             quintile_factor, forward_returns, by_sector=True)
 
-        plot_ic_by_sector(ic_by_sector)
+        plot_ic_by_sector(ic_by_sector, sector_mappings)
 
-        plot_quantile_returns_bar(mean_return_quintile_sector, by_sector=True)
+        plot_quantile_returns_bar(mean_return_quintile_sector, by_sector=True, sector_mapping=sector_mappings)
