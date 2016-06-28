@@ -186,9 +186,9 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     forward_returns : pandas.DataFrame - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
-    factor_daily_returns : pd.Series
+    factor_daily_returns : pd.DataFrame
         Timeseries of daily factor returns. If passed, will
-        use instad of long-short factor returns from factor.
+        use instead of long-short factor returns from factor.
 
     Returns
     -------
@@ -201,6 +201,10 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     universe_daily_ret = (forward_returns.groupby(level='date')
                           .mean()
                           .loc[factor_daily_returns.index])
+
+    if isinstance(factor_daily_returns, pd.Series):
+        factor_daily_returns.name = universe_daily_ret.columns.values[0]
+        factor_daily_returns = pd.DataFrame(factor_daily_returns)
 
     alpha_beta = pd.DataFrame()
     for days in factor_daily_returns.columns.values:
