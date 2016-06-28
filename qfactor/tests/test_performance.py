@@ -32,9 +32,12 @@ from pandas.util.testing import (assert_frame_equal,
                                  assert_series_equal)
 
 
+
 from .. performance import (factor_information_coefficient,
                             mean_information_coefficient,
-                            quantize_factor, quantile_turnover,
+                            quantize_factor,
+                            quantile_turnover,
+                            factor_rank_autocorrelation,
                             factor_returns, factor_alpha_beta)
 
 
@@ -46,9 +49,9 @@ class PerformanceTestCase(TestCase):
                         data=[[1, 2, 3, 4],
                               [4, 3, 2, 1]])
               .stack()
-              .rename_axis(['date', 'symbol'])).rename('factor').reset_index()
+              .rename_axis(['date', 'equity'])).rename('factor').reset_index()
     factor['sector'] = [1, 1, 2, 2, 1, 1, 2, 2]
-    factor = factor.set_index(['date', 'symbol', 'sector']).factor
+    factor = factor.set_index(['date', 'equity', 'sector']).factor
 
     @parameterized.expand([(factor, [4, 3, 2, 1, 1, 2, 3, 4],
                             False, False,
@@ -179,6 +182,7 @@ class PerformanceTestCase(TestCase):
 
         assert_series_equal(to, expected)
 
+
     @parameterized.expand([([1, 2, 3, 4, 4, 3, 2, 1],
 
                             [4, 3, 2, 1, 1, 2, 3, 4],
@@ -214,3 +218,66 @@ class PerformanceTestCase(TestCase):
                              data=[alpha, t_stat_alpha, beta])
 
         assert_frame_equal(ab, expected)
+
+
+    @parameterized.expand([([[1.0, 2.0, 3.0, 4.0],
+                            [1.0, 2.0, 3.0, 4.0],
+                            [1.0, 2.0, 3.0, 4.0],
+                            [1.0, 2.0, 3.0, 4.0]],
+                            [1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2],
+                            '2015-1-4',
+                            'D',
+                            False,
+                            [nan, 1.0, 1.0, 1.0]),
+                           ([[4.0, 3.0, 2.0, 1.0],
+                            [1.0, 2.0, 3.0, 4.0],
+                            [4.0, 3.0, 2.0, 1.0],
+                            [1.0, 2.0, 3.0, 4.0]],
+                            [1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2],
+                            '2015-1-4',
+                            'D',
+                            False,
+                           [nan, -1.0, -1.0, -1.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                            [2.0, 1.0, 4.0, 3.0],
+                            [4.0, 3.0, 2.0, 1.0],
+                            [1.0, 2.0, 3.0, 4.0],
+                            [2.0, 1.0, 4.0, 3.0],
+                            [4.0, 3.0, 2.0, 1.0],
+                            [2.0, 1.0, 4.0, 3.0],
+                            [4.0, 3.0, 2.0, 1.0],
+                            [1.0, 2.0, 3.0, 4.0],
+                            [2.0, 1.0, 4.0, 3.0],
+                            [2.0, 1.0, 4.0, 3.0],
+                            [4.0, 3.0, 2.0, 1.0]],
+                            [1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1,
+                             2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2],
+                            '2015-1-12',
+                            'W',
+                            False,
+                            [nan, 0.768221, -0.400819]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                            [2.0, 1.0, 4.0, 3.0],
+                            [4.0, 3.0, 2.0, 1.0],
+                            [1.0, 2.0, 3.0, 4.0]],
+                            [1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2],
+                            '2015-1-4',
+                            'D',
+                            True,
+                            [nan, -1.0, 1.0, -1.0])
+                           ])
+    def test_factor_rank_autocorrelation(self, factor_values, sector_values, end_date, time_rule, by_sector, expected_vals):
+        dr = date_range(start='2015-1-1', end=end_date)
+        dr.name = 'date'
+        tickers = ['A', 'B', 'C', 'D']
+        factor = Series(DataFrame(index=dr, columns=tickers,
+                            data=factor_values)
+                  .stack()
+                  .rename_axis(['date', 'equity'])).rename('factor').reset_index()
+        factor['sector'] = sector_values
+        factor = factor.set_index(['date', 'equity', 'sector']).factor
+
+        fa = factor_rank_autocorrelation(factor, time_rule, by_sector)
+        expected = Series(index=fa.index, data=expected_vals)
+
+        assert_series_equal(fa, expected)

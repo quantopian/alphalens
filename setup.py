@@ -19,6 +19,7 @@ install_reqs = [
     'pytz>=2014.10',
     'scipy>=0.14.0',
     'seaborn>=0.6.0',
+    'statsmodels>=0.6.1'
 ]
 
 if __name__ == "__main__":
