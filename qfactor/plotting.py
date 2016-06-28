@@ -202,7 +202,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
                 .multiply(100)
                 .plot(kind='bar', title=sc, ax=axes[i]))
             axes[i].set_xlabel('')
-            axes[i].set_ylabel('mean price % change')
+            axes[i].set_ylabel('mean daily return (%)')
 
         if i < len(axes):
             axes[-1].set_visible(False)
@@ -214,7 +214,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
         mean_ret_by_q.multiply(100).plot(kind='bar',
                            title="Mean Return By Factor Quantile",
                            ax=ax)
-        ax.set(xlabel='', ylabel='mean daily price % change')
+        ax.set(xlabel='', ylabel='mean daily return (%)')
 
 
 def plot_mean_quintile_returns_spread_time_series(mean_returns_spread,
@@ -246,7 +246,7 @@ def plot_mean_quintile_returns_spread_time_series(mean_returns_spread,
     f, ax = plt.subplots(figsize=(18, 6))
     mean_returns_spread = mean_returns_spread * 100
 
-    mean_returns_spread.rename('mean_return_spread').plot(
+    mean_returns_spread.plot(
         alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
     mean_returns_spread.rolling(22).mean().plot(color='orangered', alpha=0.7)
     ax.legend(['mean returns spread', '1 month moving avg'], loc='upper right')
@@ -258,7 +258,7 @@ def plot_mean_quintile_returns_spread_time_series(mean_returns_spread,
         ax.fill_between(mean_returns_spread.index, lower, upper, alpha=0.3, color='steelblue')
 
     ax.set(ylabel='Difference in Quantile Mean Return (%)')
-    ax.set(title=title, ylim=(-0.05, 0.05))
+    ax.set(title=title, ylim=(-5., 5.))
     ax.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
 
 
