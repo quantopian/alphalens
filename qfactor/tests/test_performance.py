@@ -182,7 +182,7 @@ class PerformanceTestCase(TestCase):
     @parameterized.expand([([1, 2, 3, 4, 4, 3, 2, 1],
 
                             [4, 3, 2, 1, 1, 2, 3, 4],
-                            [-0.125, -0.125]),
+                            [-0.5, -0.5]),
                            ([1, 1, 1, 1, 1, 1, 1, 1],
                             [4, 3, 2, 1, 1, 2, 3, 4],
                             [0., 0.])])
@@ -198,15 +198,16 @@ class PerformanceTestCase(TestCase):
         assert_frame_equal(factor_returns_s, expected)
 
     @parameterized.expand([([1, 2, 3, 4, 1, 1, 1, 1],
-                            [4, 3, 2, 1, 1, 2, 3, 4],
-                            2.5, 0.0, 0.0)])
-    def test_factor_alpha_beta(self, factor_vals, fwd_return_vals,
+                            [3.5, 2.0],
+                            1., nan, 1.)])
+    def test_factor_alpha_beta(self, fwd_return_vals, factor_returns_vals,
                                alpha, t_stat_alpha, beta):
-        factor = Series(index=self.factor.index, data=factor_vals)
+        factor_returns = Series(index=self.dr, data=factor_returns_vals)
         fwd_return_df = DataFrame(index=self.factor.index,
                                   columns=[1], data=fwd_return_vals)
 
-        ab = factor_alpha_beta(factor, fwd_return_df)
+        ab = factor_alpha_beta(None, fwd_return_df,
+                               factor_daily_returns=factor_returns)
 
         expected = DataFrame(columns=[1],
                              index=['alpha', 't-stat(alpha)', 'beta'],
