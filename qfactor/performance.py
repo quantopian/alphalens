@@ -204,8 +204,8 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
 
     alpha_beta = pd.DataFrame()
     for days in factor_daily_returns.columns.values:
-        y = universe_daily_ret[days].values
-        x = factor_daily_returns[days].values
+        x = universe_daily_ret[days].values
+        y = factor_daily_returns[days].values
 
         x = add_constant(x)
         reg_fit = OLS(y, x).fit()
