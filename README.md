@@ -1,7 +1,9 @@
 ![pyfolio](https://media.quantopian.com/logos/open_source/pyfolio-logo-03.png "pyfolio")
 
 # Qfactor
-Qfactor is a Python Library for performance analysis of predictive (alpha) stock factors. Qfactor works great with the [Zipline](http://zipline.io/) open source backtesting library.
+Qfactor is a Python Library for performance analysis of predictive (alpha) stock factors. Qfactor works great with the [Zipline](http://zipline.io/)
+open source backtesting library, and [pyfolio](https://github.com/quantopian/pyfolio) which provides
+performance and risk analysis of financial portfolios.
 
 The main function of Qfactor is to surface the most relevant statistics and plots about an alpha factor, including:
 
