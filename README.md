@@ -1,7 +1,7 @@
 ![pyfolio](https://media.quantopian.com/logos/open_source/pyfolio-logo-03.png "pyfolio")
 
 # Qfactor
-Qfactor is a Python Library for performance analysis of predictive (alpha) stock factors. Qfactor works great with the[Zipline](http://zipline.io/)open source backtesting library.
+Qfactor is a Python Library for performance analysis of predictive (alpha) stock factors. Qfactor works great with the [Zipline](http://zipline.io/) open source backtesting library.
 
 The main function of Qfactor is to surface the most relevant statistics and plots about an alpha factor, including:
 
@@ -20,7 +20,7 @@ qfactor.tears.create_factor_tear_sheet(my_factor, pricing)
 ![](https://c1.staticflickr.com/3/2389/2073509907_345ad52bc1.jpg)
 
 ##Learn more
-Check out the[example notebooks]()for more on how to read and use the factor tear sheet.
+Check out the [example notebooks]() for more on how to read and use the factor tear sheet.
 
 ##Installation
 ```
@@ -53,11 +53,11 @@ Execute the code in a notebook cell by clicking on it and hitting Shift+Enter.
 
 ## Questions?
 
-If you find a bug, feel free to open an issue on our[github tracker](https://github.com/quantopian/qfactor/issues).
+If you find a bug, feel free to open an issue on our [github tracker](https://github.com/quantopian/qfactor/issues).
 
 ## Contribute
 
-If you want to contribute, a great place to start would be the[help-wanted issues](https://github.com/quantopian/qfactor/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
+If you want to contribute, a great place to start would be the [help-wanted issues](https://github.com/quantopian/qfactor/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
 
 ## Credits
 
