@@ -159,8 +159,7 @@ def factor_returns(factor, forward_returns, long_short=True):
         else:
             return group / abs(group).sum()
 
-    weights = factor.groupby(level=['date']).apply(to_weights,
-                                                   long_short=long_short)
+    weights = factor.groupby(level=['date']).apply(to_weights, long_short)
     weighted_returns = forward_returns.multiply(weights, axis=0).dropna()
 
     factor_daily_returns = weighted_returns.groupby(level='date').sum()
