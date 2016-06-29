@@ -18,7 +18,6 @@ import numpy as np
 import scipy as sp
 
 import utils
-from collections import defaultdict
 from statsmodels.regression.linear_model import OLS
 from statsmodels.tools.tools import add_constant
 
@@ -145,15 +144,17 @@ def factor_returns(factor, forward_returns, long_short=True):
     forward_returns : pandas.DataFrame - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
+    long_short: bool
+        Should this computation happen on a long short portfolio?
 
     Returns
     -------
-    factor_daily_returns : pd.Series
+    factor_daily_returns : pd.DataFrame
         Daily returns of dollar neutral portfolio weighted by factor value.
     """
 
-    def to_weights(group, long_short):
-        if long_short:
+    def to_weights(group, is_long_short):
+        if is_long_short:
             return (group - group.mean()) / abs(group).sum()
         else:
             return group / abs(group).sum()
@@ -182,13 +183,13 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     forward_returns : pandas.Series - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
-    alpha_beta : pd.Series
-        A list containg the alpha, beta, a t-stat(alpha) for the given factor and forward returns.
+    factor_daily_returns : pd.DataFrame
+        Daily returns of dollar neutral portfolio weighted by factor value.
 
     Returns
     -------
-    factor_daily_returns : pd.Series
-        Daily returns of dollar neutral portfolio weighted by factor value.
+    alpha_beta : pd.Series
+        A list containg the alpha, beta, a t-stat(alpha) for the given factor and forward returns.
     """
     if factor_daily_returns is None:
         factor_daily_returns = factor_returns(factor, forward_returns)
@@ -262,15 +263,23 @@ def mean_return_by_quantile(quantized_factor, forward_returns,
         See quantile_bucket_factor for more detail.
     forward_returns : pandas.DataFrame - MultiIndex
         A list of equities and their N day forward returns where each column contains
-        the N day forward returns
-    by_sector : boolean
+        the N day forward returns.
+    by_time : str
+        The pandas string code for time grouping.
+    by_sector : bool
         If True, compute quantile bucket returns separately for each sector.
         Returns demeaning will occur on the sector level.
+    std: bool
+        Should the standard deviation be computed as well?
+
+
 
     Returns
     -------
     mean_returns_by_quantile : pd.DataFrame
         Mean daily returns by specified factor quantile.
+    std_ret: pd.DataFrame
+        Standard deviation of returns by specified quantile.
     """
 
     demeaned_fr = utils.demean_forward_returns(forward_returns,
