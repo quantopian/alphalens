@@ -262,7 +262,7 @@ def plot_mean_quintile_returns_spread_time_series(mean_returns_spread,
         lower = mean_returns_spread.values - (std * bandwidth)
         ax.fill_between(mean_returns_spread.index, lower, upper, alpha=0.3, color='steelblue')
 
-    ax.set(ylabel='Difference in Quantile Mean Return (%)')
+    ax.set(ylabel='Difference in Quantile Mean Return (%)', xlabel='')
     ax.set(title=title, ylim=(-5., 5.))
     ax.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
 
@@ -327,7 +327,7 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation):
 
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
     factor_autocorrelation.plot(title='Factor Rank Autocorrelation', ax=ax)
-    ax.set(ylabel='autocorrelation coefficient')
+    ax.set(ylabel='autocorrelation coefficient', xlabel='')
     ax.axhline(0.0, linestyle='-', color='black', lw=1)
 
 
@@ -396,6 +396,6 @@ def plot_cumulative_returns(factor_returns):
     factor_returns.add(1).cumprod().plot(ax=ax,
         lw=3, color='forestgreen', alpha=0.6)
     ax.set(ylabel='cumulative returns',
-           title='Factor Weighted Long/Short Portfolio Cumulative Return')
+           title='Factor Weighted Long/Short Portfolio Cumulative Return', xlabel='')
     ax.axhline(1.0, linestyle='-', color='black', lw=1)
 
