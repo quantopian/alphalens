@@ -179,12 +179,11 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     ----------
     factor : pandas.Series - MultiIndex
         A list of equities and their factor values indexed by date.
-    forward_returns : pandas.DataFrame - MultiIndex
+    forward_returns : pandas.Series - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
-    factor_daily_returns : pd.DataFrame
-        Timeseries of daily factor returns. If passed, will
-        use instead of long-short factor returns from factor.
+    alpha_beta : pd.Series
+        A list containg the alpha, beta, a t-stat(alpha) for the given factor and forward returns.
 
     Returns
     -------
@@ -271,7 +270,7 @@ def mean_return_by_quantile(quantized_factor, forward_returns,
     Returns
     -------
     mean_returns_by_quantile : pd.DataFrame
-        Sector-wise mean daily returns by specified factor quantile.
+        Mean daily returns by specified factor quantile.
     """
 
     demeaned_fr = utils.demean_forward_returns(forward_returns,

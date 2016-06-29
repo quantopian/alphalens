@@ -93,6 +93,26 @@ def context(context='notebook', font_scale=1.5, rc=None):
 
 def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
                   autocorrelation_data, mean_ret_spread_quantile):
+    """
+    Generates a pretty printed table of summary statistics for the alpha factor.
+
+    Parameters
+    ----------
+    ic_data : pd.DataFrame
+        Spearman Rank correlation between factor and
+        provided forward price movement windows.
+    alpha_beta : pd.Series
+        A list containg the alpha, beta, a t-stat(alpha) for the given factor and forward returns.
+    quantized_factor : pd.Series
+        Factor quantiles indexed by date and symbol.
+    mean_ret_quantile : pd.DataFrame
+        Mean daily returns by specified factor quantile.
+    autocorrelation_data : pd.Series
+        Rolling 1 period (defined by time_rule) autocorrelation of factor values.
+    mean_ret_spread_quantile : pd.Series
+        Daily difference in quantile returns.
+    """
+
     ic_summary_table = pd.DataFrame()
     ic_summary_table["IC Mean"] = ic_data.mean()
     ic_summary_table["IC Std."] = ic_data.std()
