@@ -58,6 +58,10 @@ def create_factor_tear_sheet(factor,
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
         Caution: this outlier filtering incorperates lookahead bias.
+    sector_mappings: dict
+        A dictionary keyed by sector code with values corresponding to the dispay name for each sector.
+        - Example:
+            {101: "Basic Materials", 102: "Consumer Cyclical"}
 
     """
 
