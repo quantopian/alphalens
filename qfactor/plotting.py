@@ -169,6 +169,11 @@ def plot_daily_ic_ts(daily_ic):
         ax.set_title("{} Day Information Coefficient (IC)".format(days_num))
         ax.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
         ax.legend(['IC', '1 month moving avg'], loc='upper right')
+        ax.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
+                fontsize=16,
+                bbox={'facecolor': 'white', 'alpha': 1, 'pad': 5},
+                transform=ax.transAxes,
+                verticalalignment='top')
 
 
 def plot_daily_ic_hist(daily_ic):
@@ -192,6 +197,11 @@ def plot_daily_ic_hist(daily_ic):
         sns.distplot(ic.replace(np.nan, 0.), norm_hist=True, ax=ax)
         ax.set(title="%s Day IC" % days_num, xlabel='IC')
         ax.set_xlim([-0.25, 0.25])
+        ax.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
+                fontsize=16,
+                bbox={'facecolor': 'white', 'alpha': 1, 'pad': 5},
+                transform=ax.transAxes,
+                verticalalignment='top')
 
 
 def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, sector_mapping=None):
@@ -351,6 +361,11 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation):
     factor_autocorrelation.plot(title='Factor Rank Autocorrelation', ax=ax)
     ax.set(ylabel='Autocorrelation Coefficient', xlabel='')
     ax.axhline(0.0, linestyle='-', color='black', lw=1)
+    ax.text(.05, .95, "Mean %.3f" % factor_autocorrelation.mean(),
+            fontsize=16,
+            bbox={'facecolor': 'white', 'alpha': 1, 'pad': 5},
+            transform=ax.transAxes,
+            verticalalignment='top')
 
 
 def plot_top_bottom_quantile_turnover(quantized_factor):

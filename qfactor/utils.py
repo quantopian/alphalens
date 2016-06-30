@@ -40,7 +40,7 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
     Returns
     -------
     forward_returns : pd.DataFrame - MultiIndex
-        DataFrame containg the N day forward returns for a security.
+        DataFrame containing the N day forward returns for a security.
     """
 
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
