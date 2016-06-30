@@ -29,7 +29,6 @@ def create_factor_tear_sheet(factor,
                              sector_mappings=None
                              ):
     """
-
     Creates a full tear sheet for analysis and evaluating single
     return predicting (alpha) factors.
 
@@ -57,8 +56,11 @@ def create_factor_tear_sheet(factor,
     filter_zscore : int
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
-        Caution: this outlier filtering incorperates lookahead bias.
-
+        Caution: this outlier filtering incorporates lookahead bias.
+    sector_mappings: dict
+        A dictionary keyed by sector code with values corresponding to the display name for each sector.
+        - Example:
+            {101: "Basic Materials", 102: "Consumer Cyclical"}
     """
 
     can_sector_adjust = sectors is not None
