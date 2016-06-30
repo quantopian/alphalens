@@ -49,9 +49,9 @@ class PerformanceTestCase(TestCase):
                         data=[[1, 2, 3, 4],
                               [4, 3, 2, 1]])
               .stack()
-              .rename_axis(['date', 'equity'])).rename('factor').reset_index()
+              .rename_axis(['date', 'asset'])).rename('factor').reset_index()
     factor['sector'] = [1, 1, 2, 2, 1, 1, 2, 2]
-    factor = factor.set_index(['date', 'equity', 'sector']).factor
+    factor = factor.set_index(['date', 'asset', 'sector']).factor
 
     @parameterized.expand([(factor, [4, 3, 2, 1, 1, 2, 3, 4],
                             False, False,
@@ -173,7 +173,7 @@ class PerformanceTestCase(TestCase):
                                                  columns=tickers,
                                                  data=quantile_values)
                                        .stack()
-                                       .rename_axis(['date', 'equity']))
+                                       .rename_axis(['date', 'asset']))
 
         to = quantile_turnover(quantized_test_factor, test_quantile)
 
@@ -273,9 +273,9 @@ class PerformanceTestCase(TestCase):
         factor = Series(DataFrame(index=dr, columns=tickers,
                             data=factor_values)
                   .stack()
-                  .rename_axis(['date', 'equity'])).rename('factor').reset_index()
+                  .rename_axis(['date', 'asset'])).rename('factor').reset_index()
         factor['sector'] = sector_values
-        factor = factor.set_index(['date', 'equity', 'sector']).factor
+        factor = factor.set_index(['date', 'asset', 'sector']).factor
 
         fa = factor_rank_autocorrelation(factor, time_rule, by_sector)
         expected = Series(index=fa.index, data=expected_vals)

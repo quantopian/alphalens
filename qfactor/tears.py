@@ -35,7 +35,7 @@ def create_factor_tear_sheet(factor,
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        A MultiIndex Series indexed by date and equity, containing
+        A MultiIndex Series indexed by date and asset, containing
         the values for a single alpha factor.
     prices : pd.DataFrame
         A wide form Pandas DataFrame indexed by date with equities
@@ -47,8 +47,8 @@ def create_factor_tear_sheet(factor,
         that is greater than the maximum number of expected days
         in the forward returns calculations.
     sectors : pd.Series - MultiIndex
-        A MultiIndex Series indexed by date and equity, containing
-        the sector codes for each equity.
+        A MultiIndex Series indexed by date and asset, containing
+        the sector codes for each asset.
     sector_plots : boolean
         If True create sector specific plots.
     days: list

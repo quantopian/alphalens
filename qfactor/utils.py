@@ -20,7 +20,7 @@ from IPython.display import display
 
 def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
     """
-    Finds the N day forward returns (as percent change) for each equity provided.
+    Finds the N day forward returns (as percent change) for each asset provided.
     Parameters
     ----------
     prices : pd.DataFrame
@@ -44,7 +44,7 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
     """
 
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
-        [prices.index, prices.columns], names=['date', 'equity']))
+        [prices.index, prices.columns], names=['date', 'asset']))
 
     for day in days:
         delta = prices.pct_change(day).shift(-day)
@@ -55,7 +55,7 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
 
         forward_returns[day] = delta.stack() / day
 
-    forward_returns.index.rename(['date', 'equity'], inplace=True)
+    forward_returns.index.rename(['date', 'asset'], inplace=True)
 
     return forward_returns
 
@@ -77,7 +77,7 @@ def demean_forward_returns(forward_returns, by_sector=False):
     Parameters
     ----------
     forward_returns : pd.DataFrame - MultiIndex
-        DataFrame with date, equity, sector, and forward returns columns.
+        DataFrame with date, asset, sector, and forward returns columns.
         See compute_forward_returns for more detail.
     by_sector : boolean
         If True, demean according to sector.
@@ -133,7 +133,7 @@ def format_input_data(factor, prices, sectors=None,
     """
     Formats the factor data, pricing data, and sector mappings
     into DataFrames and Series that contain aligned MultiIndex
-    indices containing date, equity, and sector.
+    indices containing date, asset, and sector.
     ----------
     ----------
     factor : pandas.Series - MultiIndex
@@ -158,10 +158,10 @@ def format_input_data(factor, prices, sectors=None,
     -------
     factor : pd.Series
         A list of equities and their factor values indexed by date,
-        equity, and optionally sector.
+        asset, and optionally sector.
     forward_returns : pd.DataFrame - MultiIndex
         A DataFrame of equities and their forward returns
-        indexed by date, equity, and optionally sector.
+        indexed by date, asset, and optionally sector.
         Note: this is the same index as the factor index
     """
 

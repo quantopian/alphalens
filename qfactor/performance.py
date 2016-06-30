@@ -258,7 +258,7 @@ def mean_return_by_quantile(quantized_factor, forward_returns,
     Parameters
     ----------
     quantized_factor : pd.Series - MultiIndex
-        DataFrame with date, equity index and factor quantile as a column.
+        DataFrame with date, asset index and factor quantile as a column.
         See quantile_bucket_factor for more detail.
     forward_returns : pandas.DataFrame - MultiIndex
         A list of equities and their N day forward returns where each column contains
@@ -364,7 +364,7 @@ def quantile_turnover(quantile_factor, quantile):
     Parameters
     ----------
     quantile_factor : pd.Series
-        DataFrame with date, equity and factor quantile.
+        DataFrame with date, asset and factor quantile.
     quantile : integer
         Quantile on which to perform turnover analysis.
 
@@ -376,7 +376,7 @@ def quantile_turnover(quantile_factor, quantile):
 
     quant_names = quantile_factor[quantile_factor == quantile]
     quant_name_sets = quant_names.groupby(level=['date']).apply(
-        lambda x: set(x.index.get_level_values('equity')))
+        lambda x: set(x.index.get_level_values('asset')))
     new_names = (quant_name_sets - quant_name_sets.shift(1)).dropna()
     quant_turnover = new_names.apply(
         lambda x: len(x)) / quant_name_sets.apply(lambda x: len(x))
@@ -395,7 +395,7 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
     Parameters
     ----------
     factor : pd.Series
-        Series with date and equity index. Values are factor values.
+        Series with date and asset index. Values are factor values.
     time_rule : string, optional
         Time span to use in factor grouping mean reduction.
         See http://pandas.pydata.org/pandas-docs/stable/timeseries.html for available options.
@@ -417,11 +417,11 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
     daily_ranks.name = "factor"
     daily_ranks = pd.DataFrame(daily_ranks)
 
-    equity_factor_rank = daily_ranks.reset_index().pivot(
-        index='date', columns='equity', values='factor')
+    asset_factor_rank = daily_ranks.reset_index().pivot(
+        index='date', columns='asset', values='factor')
     if time_rule is not None:
-        equity_factor_rank = equity_factor_rank.resample(time_rule).mean()
+        asset_factor_rank = asset_factor_rank.resample(time_rule).mean()
 
-    autocorr = equity_factor_rank.corrwith(equity_factor_rank.shift(1), axis=1)
+    autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(1), axis=1)
 
     return autocorr
