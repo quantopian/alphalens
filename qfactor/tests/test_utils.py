@@ -43,7 +43,7 @@ class UtilsTestCase(TestCase):
         fp = compute_forward_returns(prices, days=[1, 2])
 
         ix = MultiIndex.from_product([dr, ['A', 'B']],
-                                     names=['date', 'equity'])
+                                     names=['date', 'asset'])
         expected = DataFrame(index=ix, columns=[1, 2])
         expected[1] = [0., 1., 1., -0.5, nan, nan]
         expected[2] = [1., 0., nan, nan, nan, nan]
