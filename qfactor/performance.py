@@ -179,7 +179,7 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     ----------
     factor : pandas.Series - MultiIndex
         A list of equities and their factor values indexed by date.
-    forward_returns : pandas.Series - MultiIndex
+    forward_returns : pandas.DataFrame - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
     factor_daily_returns : pd.DataFrame
