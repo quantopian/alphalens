@@ -202,6 +202,7 @@ def plot_daily_ic_hist(daily_ic):
                 bbox={'facecolor': 'white', 'alpha': 1, 'pad': 5},
                 transform=ax.transAxes,
                 verticalalignment='top')
+        ax.axvline(ic.mean(), color='w', linestyle='dashed', linewidth=2)
 
 
 def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, sector_mapping=None):
