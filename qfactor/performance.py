@@ -187,7 +187,7 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     Returns
     -------
     alpha_beta : pd.Series
-        A list containg the alpha, beta, a t-stat(alpha) for the given factor and forward returns.
+        A list containing the alpha, beta, a t-stat(alpha) for the given factor and forward returns.
     """
     if factor_daily_returns is None:
         factor_daily_returns = factor_returns(factor, forward_returns)
