@@ -19,6 +19,8 @@ import scipy as sp
 import seaborn as sns
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+from matplotlib.ticker import ScalarFormatter
+
 import performance as perf
 import utils
 from itertools import izip
@@ -414,5 +416,43 @@ def plot_cumulative_returns(factor_returns):
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
     factor_returns.add(1).cumprod().plot(ax=ax, lw=3, color='forestgreen', alpha=0.6)
-    ax.set(ylabel='Cumulative Returns', title='Factor Weighted Long/Short Portfolio Cumulative Return', xlabel='')
+    ax.set(ylabel='Cumulative Returns',
+        title='Factor Weighted Long/Short Portfolio Cumulative Return', xlabel='')
+    ax.axhline(1.0, linestyle='-', color='black', lw=1)
+
+
+def plot_cumulative_returns_by_quantile(quantile_daily_returns):
+    """
+    Plots the cumulative returns of various factor quantiles.
+
+    Parameters
+    ----------
+    mean_returns_by_quantile : pd.Series -- MultiIndex
+        Mean daily returns by specified factor quantile.
+        MultiIndex of date, quantile.
+        See performance.mean_returns_by_quantile.
+    """
+
+    f, ax = plt.subplots(1, 1, figsize=(18, 6))
+
+    daily_ret_wide = quantile_daily_returns.reset_index().pivot(
+        index='date', columns='quantile', values=1)
+    cum_ret = daily_ret_wide.add(1).cumprod()
+    cum_ret = cum_ret.loc[:, ::-1]
+    num_quant = len(cum_ret.columns)
+
+    colors = cm.RdYlGn_r(np.linspace(0, 1, num_quant))
+
+    cum_ret.plot(lw=2, ax=ax, color=colors)
+    ax.legend()
+    ymin, ymax = cum_ret.min().min(), cum_ret.max().max()
+    ax.set(ylabel='Log Cumulative Returns',
+           title='Cumulative Return by Quantile',
+           xlabel='',
+           yscale='symlog',
+           yticks=np.linspace(ymin, ymax, 5),
+           ylim=(ymin, ymax))
+
+    ax.yaxis.set_major_formatter(ScalarFormatter())
+
     ax.axhline(1.0, linestyle='-', color='black', lw=1)

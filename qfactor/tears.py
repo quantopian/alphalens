@@ -66,6 +66,8 @@ def create_factor_tear_sheet(factor,
         - Example:
             {101: "Basic Materials", 102: "Consumer Cyclical"}
     """
+    if 1 not in days:
+        days.insert(0, 1)
 
     can_sector_adjust = sectors is not None
     factor, forward_returns = utils.format_input_data(
@@ -115,8 +117,8 @@ def create_factor_tear_sheet(factor,
 
     plot_quantile_returns_bar(mean_ret_quintile, by_sector=False)
 
-    if 1 in days:
-        plot_cumulative_returns(factor_returns[1])
+    plot_cumulative_returns(factor_returns[1])
+    plot_cumulative_returns_by_quantile(mean_ret_quint_daily[1])
 
     plot_daily_ic_ts(daily_ic)
     plot_daily_ic_hist(daily_ic)
