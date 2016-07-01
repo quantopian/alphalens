@@ -15,7 +15,7 @@
 
 import numpy as np
 import pandas as pd
-import scipy as sp
+from scipy import stats
 import seaborn as sns
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
@@ -116,7 +116,7 @@ def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
     ic_summary_table = pd.DataFrame()
     ic_summary_table["IC Mean"] = ic_data.mean()
     ic_summary_table["IC Std."] = ic_data.std()
-    ic_summary_table["t-stat(IC)"] = sp.stats.ttest_1samp(ic_data, 0)[0]
+    ic_summary_table["t-stat(IC)"] = stats.ttest_1samp(ic_data, 0)[0]
     ic_summary_table["Ann. IR"] = (ic_data.mean() / ic_data.std()) * np.sqrt(252)
     ic_summary_table = ic_summary_table.T.append(alpha_beta)
 

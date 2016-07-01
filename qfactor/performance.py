@@ -15,8 +15,7 @@
 
 import pandas as pd
 import numpy as np
-import scipy as sp
-
+from scipy import stats
 import utils
 from statsmodels.regression.linear_model import OLS
 from statsmodels.tools.tools import add_constant
@@ -50,7 +49,7 @@ def factor_information_coefficient(factor, forward_returns,
 
     def src_ic(group):
         f = group.pop('factor')
-        _ic = group.apply(lambda x: sp.stats.spearmanr(x, f)[0])
+        _ic = group.apply(lambda x: stats.spearmanr(x, f)[0])
 
         return _ic
 
