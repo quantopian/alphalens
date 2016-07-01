@@ -24,6 +24,7 @@ def create_factor_tear_sheet(factor,
                              sectors=None,
                              sector_plots=True,
                              days=(1, 5, 10),
+                             quantiles=5,
                              filter_zscore=10,
                              sector_mappings=None
                              ):
@@ -52,6 +53,8 @@ def create_factor_tear_sheet(factor,
         If True create sector specific plots.
     days: list
         Days to compute forward returns on.
+    quantiles: int:
+        The number of buckets to parition the data into for analysis.
     filter_zscore : int
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
@@ -79,31 +82,28 @@ def create_factor_tear_sheet(factor,
     alpha_beta = perf.factor_alpha_beta(factor, forward_returns,
                                         factor_daily_returns=factor_returns)
 
-    quintile_factor = perf.quantize_factor(
-        factor, by_sector=False, quantiles=5)
+    quantile_factor = perf.quantize_factor(
+        factor, by_sector=False, quantiles=quantiles)
 
-    decile_factor = perf.quantize_factor(factor, by_sector=False,
-                                         quantiles=10)
+    mean_ret_quantile, std_quantile = perf.mean_return_by_quantile(
+        quantile_factor, forward_returns, by_sector=False, std=True)
 
-    mean_ret_quintile, std_quintile = perf.mean_return_by_quantile(
-        quintile_factor, forward_returns, by_sector=False, std=True)
-
-    mean_ret_quint_daily, std_quint_daily = perf.mean_return_by_quantile(
-        quintile_factor, forward_returns, by_time='D',
+    mean_ret_quant_daily, std_quant_daily = perf.mean_return_by_quantile(
+        quantile_factor, forward_returns, by_time='D',
         by_sector=False, std=True)
 
-    mean_ret_spread_quint, std_spread_quint = perf.compute_mean_returns_spread(
-        mean_ret_quint_daily, 5, 1, std=std_quint_daily)
+    mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(
+        mean_ret_quant_daily, quantiles, 1, std=std_quant_daily)
 
     factor_autocorrelation = perf.factor_rank_autocorrelation(
         factor, time_rule='W')
 
     ## PLOTTING ##
 
-    summary_stats(daily_ic, alpha_beta, quintile_factor, mean_ret_quintile,
-                  factor_autocorrelation, mean_ret_spread_quint)
+    summary_stats(daily_ic, alpha_beta, quantile_factor, mean_ret_quantile,
+                  factor_autocorrelation, mean_ret_spread_quant)
 
-    plot_quantile_returns_bar(mean_ret_quintile, by_sector=False)
+    plot_quantile_returns_bar(mean_ret_quantile, by_sector=False)
 
     if 1 in days:
         plot_cumulative_returns(factor_returns[1])
@@ -113,13 +113,13 @@ def create_factor_tear_sheet(factor,
 
     plot_monthly_IC_heatmap(mean_monthly_ic)
 
-    plot_mean_quintile_returns_spread_time_series(
-        mean_ret_spread_quint,
-        std=std_spread_quint,
+    plot_mean_quantile_returns_spread_time_series(
+        mean_ret_spread_quant,
+        std=std_spread_quant,
         bandwidth=0.5,
-        title="Top Quintile - Bottom Quintile Mean Return (0.5 std. error band)")
+        title="Top Quantile - Bottom Quantile Mean Return (0.5 std. error band)")
 
-    plot_top_bottom_quantile_turnover(quintile_factor)
+    plot_top_bottom_quantile_turnover(quantile_factor)
     plot_factor_rank_auto_correlation(factor_autocorrelation)
 
     # Sector Specific Breakdown
@@ -127,12 +127,9 @@ def create_factor_tear_sheet(factor,
         ic_by_sector = perf.mean_information_coefficient(
             factor, forward_returns, by_sector=True)
 
-        quintile_factor_by_sector = perf.quantize_factor(
-            factor, by_sector=True, quantiles=5)
-
-        mean_return_quintile_sector = perf.mean_return_by_quantile(
-            quintile_factor, forward_returns, by_sector=True)
+        mean_return_quantile_sector = perf.mean_return_by_quantile(
+            quantile_factor, forward_returns, by_sector=True)
 
         plot_ic_by_sector(ic_by_sector, sector_mappings)
 
-        plot_quantile_returns_bar(mean_return_quintile_sector, by_sector=True, sector_mapping=sector_mappings)
+        plot_quantile_returns_bar(mean_return_quantile_sector, by_sector=True, sector_mapping=sector_mappings)
