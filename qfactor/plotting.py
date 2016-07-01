@@ -135,10 +135,10 @@ def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
     auto_corr["Mean Factor Rank Autocorrelation"] = autocorrelation_data.mean()
 
     returns_table = pd.DataFrame()
-    returns_table["Mean Daily Return Top Quantile (bps)"] = mean_ret_quantile.loc[max_quantile] * DECIMAL_TO_BPS
-    returns_table["Mean Daily Return Bottom Quantile (bps)"] = mean_ret_quantile.loc[min_quantile] * DECIMAL_TO_BPS
-    returns_table["Mean Daily Spread (bps)"] = mean_ret_spread_quantile.mean() * DECIMAL_TO_BPS
-    returns_table = returns_table.T.append(alpha_beta)
+    returns_table = returns_table.append(alpha_beta)
+    returns_table.loc["Mean Daily Return Top Quantile (bps)"] = mean_ret_quantile.loc[max_quantile] * DECIMAL_TO_BPS
+    returns_table.loc["Mean Daily Return Bottom Quantile (bps)"] = mean_ret_quantile.loc[min_quantile] * DECIMAL_TO_BPS
+    returns_table.loc["Mean Daily Spread (bps)"] = mean_ret_spread_quantile.mean() * DECIMAL_TO_BPS
 
     print "Returns Analysis"
     utils.print_table(returns_table.round(3))
