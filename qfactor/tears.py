@@ -71,8 +71,8 @@ def create_factor_tear_sheet(factor,
     if 1 not in days:
         days.insert(0, 1)
 
-    if sector_mappings == 'morningstar':
-        sector_mappings = utils.MORNINGSTAR_SECTOR_MAPPING
+    if sector_names == 'morningstar':
+        sector_names = utils.MORNINGSTAR_SECTOR_MAPPING
 
 
     can_sector_adjust = sectors is not None
@@ -101,11 +101,11 @@ def create_factor_tear_sheet(factor,
         factor, by_sector=False, quantiles=quantiles)
 
     mean_ret_quantile, std_quantile = perf.mean_return_by_quantile(
-        quantile_factor, forward_returns, by_sector=False, std=True)
+        quantile_factor, forward_returns, by_sector=False, std_err=True)
 
     mean_ret_quant_daily, std_quant_daily = perf.mean_return_by_quantile(
         quantile_factor, forward_returns, by_time='D',
-        by_sector=False, std=True)
+        by_sector=False, std_err=True)
 
     mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(
         mean_ret_quant_daily, quantiles, 1, std=std_quant_daily)
@@ -131,8 +131,7 @@ def create_factor_tear_sheet(factor,
     plot_mean_quantile_returns_spread_time_series(
         mean_ret_spread_quant,
         std=std_spread_quant,
-        bandwidth=0.5,
-        title="Top Quantile - Bottom Quantile Mean Return (0.5 std. error band)")
+        bandwidth=0.5)
 
     plot_top_bottom_quantile_turnover(quantile_factor)
     plot_factor_rank_auto_correlation(factor_autocorrelation)
@@ -147,4 +146,5 @@ def create_factor_tear_sheet(factor,
 
         plot_ic_by_sector(ic_by_sector)
 
-        plot_quantile_returns_bar(mean_return_quantile_sector, by_sector=True, sector_mapping=sector_mappings)
+        plot_quantile_returns_bar(mean_return_quantile_sector,
+            by_sector=True)
