@@ -16,7 +16,6 @@
 from plotting import *
 import performance as perf
 import utils
-import pandas as pd
 
 
 @plotting_context

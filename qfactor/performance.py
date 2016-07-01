@@ -15,8 +15,7 @@
 
 import pandas as pd
 import numpy as np
-import scipy as sp
-
+from scipy import stats
 import utils
 from statsmodels.regression.linear_model import OLS
 from statsmodels.tools.tools import add_constant
@@ -50,7 +49,7 @@ def factor_information_coefficient(factor, forward_returns,
 
     def src_ic(group):
         f = group.pop('factor')
-        _ic = group.apply(lambda x: sp.stats.spearmanr(x, f)[0])
+        _ic = group.apply(lambda x: stats.spearmanr(x, f)[0])
 
         return _ic
 
@@ -171,7 +170,7 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     """
     Computes the alpha (excess returns), alpha t-stat (alpha significance),
     and beta (market exposure) of a factor. A regression is run with
-    the daily factor universe mean return as the depedendent variable
+    the daily factor universe mean return as the dependent variable
     and mean daily return from a dollar-neutral portfolio weighted
     by factor values as the independent variable.
 
@@ -188,7 +187,7 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     Returns
     -------
     alpha_beta : pd.Series
-        A list containg the alpha, beta, a t-stat(alpha) for the given factor and forward returns.
+        A list containing the alpha, beta, a t-stat(alpha) for the given factor and forward returns.
     """
     if factor_daily_returns is None:
         factor_daily_returns = factor_returns(factor, forward_returns)

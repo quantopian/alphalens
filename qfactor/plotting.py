@@ -15,7 +15,7 @@
 
 import numpy as np
 import pandas as pd
-import scipy as sp
+from scipy import stats
 import seaborn as sns
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
@@ -116,7 +116,7 @@ def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
     ic_summary_table = pd.DataFrame()
     ic_summary_table["IC Mean"] = ic_data.mean()
     ic_summary_table["IC Std."] = ic_data.std()
-    ic_summary_table["t-stat(IC)"] = sp.stats.ttest_1samp(ic_data, 0)[0]
+    ic_summary_table["t-stat(IC)"] = stats.ttest_1samp(ic_data, 0)[0]
     ic_summary_table["Ann. IR"] = (ic_data.mean() / ic_data.std()) * np.sqrt(252)
     ic_summary_table = ic_summary_table.T.append(alpha_beta)
 
@@ -169,6 +169,11 @@ def plot_daily_ic_ts(daily_ic):
         ax.set_title("{} Day Information Coefficient (IC)".format(days_num))
         ax.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
         ax.legend(['IC', '1 month moving avg'], loc='upper right')
+        ax.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
+                fontsize=16,
+                bbox={'facecolor': 'white', 'alpha': 1, 'pad': 5},
+                transform=ax.transAxes,
+                verticalalignment='top')
 
 
 def plot_daily_ic_hist(daily_ic):
@@ -192,6 +197,12 @@ def plot_daily_ic_hist(daily_ic):
         sns.distplot(ic.replace(np.nan, 0.), norm_hist=True, ax=ax)
         ax.set(title="%s Day IC" % days_num, xlabel='IC')
         ax.set_xlim([-0.25, 0.25])
+        ax.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
+                fontsize=16,
+                bbox={'facecolor': 'white', 'alpha': 1, 'pad': 5},
+                transform=ax.transAxes,
+                verticalalignment='top')
+        ax.axvline(ic.mean(), color='w', linestyle='dashed', linewidth=2)
 
 
 def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, sector_mapping=None):
@@ -351,6 +362,11 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation):
     factor_autocorrelation.plot(title='Factor Rank Autocorrelation', ax=ax)
     ax.set(ylabel='Autocorrelation Coefficient', xlabel='')
     ax.axhline(0.0, linestyle='-', color='black', lw=1)
+    ax.text(.05, .95, "Mean %.3f" % factor_autocorrelation.mean(),
+            fontsize=16,
+            bbox={'facecolor': 'white', 'alpha': 1, 'pad': 5},
+            transform=ax.transAxes,
+            verticalalignment='top')
 
 
 def plot_top_bottom_quantile_turnover(quantized_factor):
