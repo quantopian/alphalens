@@ -96,11 +96,11 @@ def create_factor_tear_sheet(factor,
                                          quantiles=10)
 
     mean_ret_quintile, std_quintile = perf.mean_return_by_quantile(
-        quintile_factor, forward_returns, by_sector=False, std=True)
+        quintile_factor, forward_returns, by_sector=False, std_err=True)
 
     mean_ret_quint_daily, std_quint_daily = perf.mean_return_by_quantile(
         quintile_factor, forward_returns, by_time='D',
-        by_sector=False, std=True)
+        by_sector=False, std_err=True)
 
     mean_ret_spread_quint, std_spread_quint = perf.compute_mean_returns_spread(
         mean_ret_quint_daily, 5, 1, std=std_quint_daily)
@@ -126,8 +126,8 @@ def create_factor_tear_sheet(factor,
     plot_mean_quintile_returns_spread_time_series(
         mean_ret_spread_quint,
         std=std_spread_quint,
-        bandwidth=0.5,
-        title="Top Quintile - Bottom Quintile Mean Return (0.5 std. error band)")
+        bandwidth=1,
+        title="Top Quintile - Bottom Quintile Mean Return (1 std. error band)")
 
     plot_top_bottom_quantile_turnover(quintile_factor)
     plot_factor_rank_auto_correlation(factor_autocorrelation)
