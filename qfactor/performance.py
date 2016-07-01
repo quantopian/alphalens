@@ -170,7 +170,7 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     """
     Computes the alpha (excess returns), alpha t-stat (alpha significance),
     and beta (market exposure) of a factor. A regression is run with
-    the daily factor universe mean return as the depedendent variable
+    the daily factor universe mean return as the dependent variable
     and mean daily return from a dollar-neutral portfolio weighted
     by factor values as the independent variable.
 
