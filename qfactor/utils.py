@@ -143,7 +143,8 @@ def print_table(table, name=None, fmt=None):
 
 
 def format_input_data(factor, prices, sectors=None,
-                      filter_zscore=20, days=(1, 5, 10)):
+                      filter_zscore=20, days=(1, 5, 10),
+                      sector_names=None):
     """
     Formats the factor data, pricing data, and sector mappings
     into DataFrames and Series that contain aligned MultiIndex
@@ -168,6 +169,11 @@ def format_input_data(factor, prices, sectors=None,
     days : list
         Number of days forward to project returns. One column
         will be added for each value.
+    sector_names: dict
+        A dictionary keyed by sector code with values corresponding
+        to the display name for each sector.
+        - Example:
+            {101: "Basic Materials", 102: "Consumer Cyclical"}
     Returns
     -------
     factor : pd.Series
@@ -179,9 +185,11 @@ def format_input_data(factor, prices, sectors=None,
         Note: this is the same index as the factor index
     """
 
+    factor.name = 'factor'
+    factor = factor.rename_axis(['date', 'asset'], axis=0)
+
     forward_returns = compute_forward_returns(
         prices, days, filter_zscore=filter_zscore)
-    factor.name = 'factor'
 
     merged_data = pd.merge(pd.DataFrame(factor),
                            forward_returns,
@@ -190,6 +198,27 @@ def format_input_data(factor, prices, sectors=None,
                            right_index=True)
 
     if sectors is not None:
+        if isinstance(sectors, dict):
+            try:
+                daily_sector = map(lambda x: sectors[x],
+                    factor.reset_index().asset.values)
+            except KeyError:
+                diff = set(factor.index.get_level_values(
+                    'asset')) - set(sectors.keys())
+                raise KeyError(
+                    "Assets {} not in sector mapping".format(
+                        list(diff)))
+
+            sectors = pd.Series(index=factor.index,
+                                data=daily_sector)
+
+        sectors.name = 'sector'
+        sectors = sectors.rename_axis(['date', 'asset'], axis=0)
+
+        if sector_names is not None:
+            sectors = sectors.apply(
+                lambda x: sector_names.get(x, x))
+
         merged_data = pd.merge(pd.DataFrame(sectors),
                                merged_data,
                                how='left',
