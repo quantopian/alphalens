@@ -165,9 +165,11 @@ def format_input_data(factor, prices, sectors=None,
         Note: this is the same index as the factor index
     """
 
+    factor.name = 'factor'
+    factor = factor.rename_axis(['date', 'asset'], axis=0)
+
     forward_returns = compute_forward_returns(
         prices, days, filter_zscore=filter_zscore)
-    factor.name = 'factor'
 
     merged_data = pd.merge(pd.DataFrame(factor),
                            forward_returns,
@@ -176,6 +178,23 @@ def format_input_data(factor, prices, sectors=None,
                            right_index=True)
 
     if sectors is not None:
+        if isinstance(sectors, dict):
+            try:
+                daily_sector = map(lambda x: sectors[x],
+                    factor.reset_index().asset.values)
+            except KeyError:
+                diff = set(factor.index.get_level_values(
+                    'asset')) - set(sectors.keys())
+                raise KeyError(
+                    "Assets {} not in sector mapping".format(
+                        list(diff)))
+
+            sectors = pd.Series(index=factor.index,
+                                data=daily_sector)
+
+        sectors.name = 'sector'
+        sectors = sectors.rename_axis(['date', 'asset'], axis=0)
+
         merged_data = pd.merge(pd.DataFrame(sectors),
                                merged_data,
                                how='left',

@@ -46,9 +46,12 @@ def create_factor_tear_sheet(factor,
         analysis time period plus an additional buffer window
         that is greater than the maximum number of expected days
         in the forward returns calculations.
-    sectors : pd.Series - MultiIndex
-        A MultiIndex Series indexed by date and asset, containing
-        the sector codes for each asset.
+    sectors : pd.Series - MultiIndex or dict
+        Either A MultiIndex Series indexed by date and asset,
+        containing the daily sector codes for each asset, or
+        a dict of asset to sector mappings. If a dict is passed,
+        it is assumed that sector mappings are unchanged for the
+        entire time period of the passed factor data.
     sector_plots : boolean
         If True create sector specific plots.
     days: list
