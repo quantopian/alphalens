@@ -24,6 +24,8 @@ import utils
 from itertools import izip
 from functools import wraps
 
+DECIMAL_TO_BPS = 10000
+
 
 def plotting_context(func):
     """Decorator to set plotting context during function call."""
@@ -116,9 +118,12 @@ def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
     ic_summary_table = pd.DataFrame()
     ic_summary_table["IC Mean"] = ic_data.mean()
     ic_summary_table["IC Std."] = ic_data.std()
-    ic_summary_table["t-stat(IC)"] = stats.ttest_1samp(ic_data, 0)[0]
+    t_stat, p_value = stats.ttest_1samp(ic_data, 0)
+    ic_summary_table["t-stat(IC)"] = t_stat
+    ic_summary_table["p-value(IC)"] = p_value
+    ic_summary_table["IC Skew"] = stats.skew(ic_data)
+    ic_summary_table["IC Kurtosis"] = stats.kurtosis(ic_data)
     ic_summary_table["Ann. IR"] = (ic_data.mean() / ic_data.std()) * np.sqrt(252)
-    ic_summary_table = ic_summary_table.T.append(alpha_beta)
 
     max_quantile = quantized_factor.values.max()
     min_quantile = quantized_factor.values.min()
@@ -130,14 +135,15 @@ def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
     auto_corr["Mean Factor Rank Autocorrelation"] = autocorrelation_data.mean()
 
     returns_table = pd.DataFrame()
-    returns_table["Mean Daily Return Top Quantile"] = mean_ret_quantile.loc[max_quantile] * 100
-    returns_table["Mean Daily Return Bottom Quantile"] = mean_ret_quantile.loc[min_quantile] * 100
-    returns_table["Mean Daily Spread"] = mean_ret_spread_quantile.mean() * 100
+    returns_table = returns_table.append(alpha_beta)
+    returns_table.loc["Mean Daily Return Top Quantile (bps)"] = mean_ret_quantile.loc[max_quantile] * DECIMAL_TO_BPS
+    returns_table.loc["Mean Daily Return Bottom Quantile (bps)"] = mean_ret_quantile.loc[min_quantile] * DECIMAL_TO_BPS
+    returns_table.loc["Mean Daily Spread (bps)"] = mean_ret_spread_quantile.mean() * DECIMAL_TO_BPS
 
-    print "Information Analysis"
-    utils.print_table(ic_summary_table.round(3))
     print "Returns Analysis"
-    utils.print_table(returns_table.round(3).T)
+    utils.print_table(returns_table.round(3))
+    print "Information Analysis"
+    utils.print_table(ic_summary_table.round(3).T)
     print "Turnover Analysis"
     utils.print_table(turnover_table.round(3))
     print auto_corr.round(3)
@@ -235,7 +241,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, sector_mapping=Non
                 plot_title = sc
 
             (cor.xs(sc, level='sector')
-                .multiply(100)
+                .multiply(DECIMAL_TO_BPS)
                 .plot(kind='bar', title=plot_title, ax=axes[i]))
             axes[i].set_xlabel('')
             axes[i].set_ylabel('Mean Daily Return (%)')
@@ -247,13 +253,13 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, sector_mapping=Non
 
     else:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
-        mean_ret_by_q.multiply(100).plot(kind='bar',
+        mean_ret_by_q.multiply(DECIMAL_TO_BPS).plot(kind='bar',
                                          title="Mean Return By Factor Quantile",
                                          ax=ax)
-        ax.set(xlabel='', ylabel='Mean Daily Return (%)')
+        ax.set(xlabel='', ylabel='Mean Daily Return (bps)')
 
 
-def plot_mean_quintile_returns_spread_time_series(mean_returns_spread,
+def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
                                                   std=None,
                                                   bandwidth=0.5,
                                                   title='Top Quintile - Bottom Quantile Mean Return'):
@@ -276,25 +282,25 @@ def plot_mean_quintile_returns_spread_time_series(mean_returns_spread,
     if isinstance(mean_returns_spread, pd.DataFrame):
         for name, fr_column in mean_returns_spread.iteritems():
             stdn = None if std is None else std[name]
-            plot_mean_quintile_returns_spread_time_series(fr_column,
+            plot_mean_quantile_returns_spread_time_series(fr_column,
                                                           std=stdn,
                                                           title=str(name) + " Day Forward Return " + title)
         return
 
     f, ax = plt.subplots(figsize=(18, 6))
-    mean_returns_spread *= 100
+    mean_returns_spread *= DECIMAL_TO_BPS
 
     mean_returns_spread.plot(alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
     pd.rolling_mean(mean_returns_spread, 22).plot(color='orangered', alpha=0.7)
     ax.legend(['mean returns spread', '1 month moving avg'], loc='upper right')
 
     if std is not None:
-        std *= 100
+        std *= DECIMAL_TO_BPS
         upper = mean_returns_spread.values + (std * bandwidth)
         lower = mean_returns_spread.values - (std * bandwidth)
         ax.fill_between(mean_returns_spread.index, lower, upper, alpha=0.3, color='steelblue')
 
-    ax.set(ylabel='Difference In Quantile Mean Return (%)', xlabel='')
+    ax.set(ylabel='Difference In Quantile Mean Return (bps)', xlabel='')
     ax.set(title=title, ylim=(-5., 5.))
     ax.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
 
