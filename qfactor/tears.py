@@ -100,7 +100,7 @@ def create_factor_tear_sheet(factor,
         mean_ret_quant_daily, quantiles, 1, std=std_quant_daily)
 
     factor_autocorrelation = perf.factor_rank_autocorrelation(
-        factor, time_rule='W')
+        factor, time_rule='D')
 
     ## PLOTTING ##
 
