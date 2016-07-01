@@ -194,7 +194,7 @@ def plot_daily_ic_hist(daily_ic):
         ax.set_xlim([-0.25, 0.25])
 
 
-def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, sector_mapping=None):
+def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
     """
     Plots mean daily returns for factor quantiles.
 
@@ -218,14 +218,9 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, sector_mapping=Non
         axes = axes.flatten()
 
         for i, (sc, cor) in enumerate(mean_ret_by_q.groupby(level='sector')):
-            if sector_mapping is not None:
-                plot_title = sector_mapping[sc]
-            else:
-                plot_title = sc
-
             (cor.xs(sc, level='sector')
                 .multiply(100)
-                .plot(kind='bar', title=plot_title, ax=axes[i]))
+                .plot(kind='bar', title=sc, ax=axes[i]))
             axes[i].set_xlabel('')
             axes[i].set_ylabel('Mean Daily Return (%)')
 
@@ -288,7 +283,7 @@ def plot_mean_quintile_returns_spread_time_series(mean_returns_spread,
     ax.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
 
 
-def plot_ic_by_sector(ic_sector, sector_mapping=None):
+def plot_ic_by_sector(ic_sector):
 
     """
     Plots Spearman Rank Information Coefficient for a given factor over provided forward price
@@ -298,14 +293,7 @@ def plot_ic_by_sector(ic_sector, sector_mapping=None):
     ----------
     ic_sector : pd.DataFrame
         Sector-wise mean daily returns.
-    sector_mapping : dict
-        A dictionary keyed by sector code with values corresponding to the display name for each sector.
-        - Example:
-            {101: "Basic Materials", 102: "Consumer Cyclical"}
     """
-    if sector_mapping is not None:
-        ic_sector.index = ic_sector.index.map(lambda x: sector_mapping[x])
-
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
     ic_sector.plot(kind='bar', ax=ax)
 

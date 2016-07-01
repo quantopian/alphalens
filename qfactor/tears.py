@@ -26,7 +26,7 @@ def create_factor_tear_sheet(factor,
                              sector_plots=True,
                              days=(1, 5, 10),
                              filter_zscore=10,
-                             sector_mappings=None
+                             sector_names=None
                              ):
     """
     Creates a full tear sheet for analysis and evaluating single
@@ -60,15 +60,21 @@ def create_factor_tear_sheet(factor,
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
         Caution: this outlier filtering incorporates lookahead bias.
-    sector_mappings: dict
-        A dictionary keyed by sector code with values corresponding to the display name for each sector.
+    sector_names: dict
+        A dictionary keyed by sector code with values corresponding
+        to the display name for each sector.
         - Example:
             {101: "Basic Materials", 102: "Consumer Cyclical"}
     """
 
     can_sector_adjust = sectors is not None
     factor, forward_returns = utils.format_input_data(
-        factor, prices, sectors=sectors, days=days, filter_zscore=filter_zscore)
+        factor,
+        prices,
+        sectors=sectors,
+        days=days,
+        filter_zscore=filter_zscore,
+        sector_names=sector_names)
 
     daily_ic = perf.factor_information_coefficient(
         factor, forward_returns,
@@ -137,6 +143,7 @@ def create_factor_tear_sheet(factor,
         mean_return_quintile_sector = perf.mean_return_by_quantile(
             quintile_factor, forward_returns, by_sector=True)
 
-        plot_ic_by_sector(ic_by_sector, sector_mappings)
+        plot_ic_by_sector(ic_by_sector)
 
-        plot_quantile_returns_bar(mean_return_quintile_sector, by_sector=True, sector_mapping=sector_mappings)
+        plot_quantile_returns_bar(mean_return_quintile_sector,
+            by_sector=True)

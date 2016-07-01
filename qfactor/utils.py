@@ -129,7 +129,8 @@ def print_table(table, name=None, fmt=None):
 
 
 def format_input_data(factor, prices, sectors=None,
-                      filter_zscore=20, days=(1, 5, 10)):
+                      filter_zscore=20, days=(1, 5, 10),
+                      sector_names=None):
     """
     Formats the factor data, pricing data, and sector mappings
     into DataFrames and Series that contain aligned MultiIndex
@@ -154,6 +155,11 @@ def format_input_data(factor, prices, sectors=None,
     days : list
         Number of days forward to project returns. One column
         will be added for each value.
+    sector_names: dict
+        A dictionary keyed by sector code with values corresponding
+        to the display name for each sector.
+        - Example:
+            {101: "Basic Materials", 102: "Consumer Cyclical"}
     Returns
     -------
     factor : pd.Series
@@ -194,6 +200,10 @@ def format_input_data(factor, prices, sectors=None,
 
         sectors.name = 'sector'
         sectors = sectors.rename_axis(['date', 'asset'], axis=0)
+
+        if sector_names is not None:
+            sectors = sectors.apply(
+                lambda x: sector_names.get(x, x))
 
         merged_data = pd.merge(pd.DataFrame(sectors),
                                merged_data,
