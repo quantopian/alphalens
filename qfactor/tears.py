@@ -65,6 +65,10 @@ def create_factor_tear_sheet(factor,
             {101: "Basic Materials", 102: "Consumer Cyclical"}
     """
 
+    if sector_mappings == 'morningstar':
+        sector_mappings = utils.MORNINGSTAR_SECTOR_MAPPING
+
+
     can_sector_adjust = sectors is not None
     factor, forward_returns = utils.format_input_data(
         factor, prices, sectors=sectors, days=days, filter_zscore=filter_zscore)
