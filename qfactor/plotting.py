@@ -199,7 +199,7 @@ def plot_daily_ic_ts(daily_ic, ax=None):
 
     return axes
 
-def plot_daily_ic_hist(daily_ic):
+def plot_daily_ic_hist(daily_ic, ax=None):
     """
     Plots Spearman Rank Information Coefficient histogram for a given factor.
     Sector neutralization of forward returns is recommended.
@@ -219,22 +219,26 @@ def plot_daily_ic_hist(daily_ic):
 
     num_plots = len(daily_ic.columns)
 
-    v_spaces = num_plots // 3
-    f, axes = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
-    axes = (a for a in axes.flatten())
+    v_spaces = ((num_plots - 1) // 3) + 1
 
-    for ax, (days_num, ic) in izip(axes, daily_ic.iteritems()):
-        sns.distplot(ic.replace(np.nan, 0.), norm_hist=True, ax=ax)
-        ax.set(title="%s Day IC" % days_num, xlabel='IC')
-        ax.set_xlim([-0.25, 0.25])
-        ax.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
+    if ax is None:
+        f, axes = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
+        axes = (a for a in axes.flatten())
+    else:
+        axes = (a for a in ax)
+
+    for a, (days_num, ic) in zip(axes, daily_ic.iteritems()):
+        sns.distplot(ic.replace(np.nan, 0.), norm_hist=True, ax=a)
+        a.set(title="%s Day IC" % days_num, xlabel='IC')
+        a.set_xlim([-0.25, 0.25])
+        a.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
                 fontsize=16,
                 bbox={'facecolor': 'white', 'alpha': 1, 'pad': 5},
-                transform=ax.transAxes,
+                transform=a.transAxes,
                 verticalalignment='top')
-        ax.axvline(ic.mean(), color='w', linestyle='dashed', linewidth=2)
+        a.axvline(ic.mean(), color='w', linestyle='dashed', linewidth=2)
 
-    return ax
+    return axes
 
 
 def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
@@ -261,7 +265,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
             mean_ret_by_q.index.get_level_values('sector').unique())
 
         if ax is None:
-            v_spaces = (num_sector + 1) // 2
+            v_spaces = ((num_sector - 1) // 2) + 1
             f, axes = plt.subplots(v_spaces, 2, sharex=False,
                                    sharey=True, figsize=(18, 6*v_spaces))
             axes = axes.flatten()
@@ -448,7 +452,7 @@ def plot_top_bottom_quantile_turnover(quantized_factor, ax=None):
     return ax
 
 
-def plot_monthly_IC_heatmap(mean_monthly_vals, val_type='IC', ax=None):
+def plot_monthly_ic_heatmap(mean_monthly_vals, val_type='IC', ax=None):
     """
     Plots a heatmap of the information coefficient or returns by month.
 
@@ -469,7 +473,7 @@ def plot_monthly_IC_heatmap(mean_monthly_vals, val_type='IC', ax=None):
 
     num_plots = len(mean_monthly_vals.columns)
 
-    v_spaces = num_plots // 3
+    v_spaces = ((num_plots - 1) // 3) + 1
 
     if ax is None:
         f, axes = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))

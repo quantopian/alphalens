@@ -16,6 +16,8 @@
 from plotting import *
 import performance as perf
 import utils
+import matplotlib.gridspec as gridspec
+from itertools import product
 
 
 @plotting_context
@@ -114,27 +116,81 @@ def create_factor_tear_sheet(factor,
         factor, time_rule='D')
 
     ## PLOTTING ##
-
     summary_stats(daily_ic, alpha_beta, quantile_factor, mean_ret_quantile,
                   factor_autocorrelation, mean_ret_spread_quant)
 
-    plot_quantile_returns_bar(mean_ret_quantile, by_sector=False)
+    fr_cols = len(days)
 
-    plot_cumulative_returns(factor_returns[1])
-    plot_cumulative_returns_by_quantile(mean_ret_quant_daily[1])
+    # Returns
+    vertical_sections = 3 + fr_cols
+    fig = plt.figure(figsize=(14, vertical_sections * 7))
+    ret_gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.3)
 
-    plot_daily_ic_ts(daily_ic)
-    plot_daily_ic_hist(daily_ic)
+    i = 0
+    ax_quantile_returns_bar = plt.subplot(ret_gs[i, :])
+    i += 1
+    plot_quantile_returns_bar(mean_ret_quantile, by_sector=False,
+        ax=ax_quantile_returns_bar)
 
-    plot_monthly_IC_heatmap(mean_monthly_ic)
+    ax_cumulative_returns = plt.subplot(ret_gs[i, :])
+    i += 1
+    plot_cumulative_returns(factor_returns[1], ax=ax_cumulative_returns)
+
+    ax_cumulative_returns_by_quantile = plt.subplot(ret_gs[i, :])
+    i += 1
+    plot_cumulative_returns_by_quantile(mean_ret_quant_daily[1],
+        ax=ax_cumulative_returns_by_quantile)
+
+    ax_mean_quantile_returns_spread_ts = []
+    for j in range(fr_cols):
+        p = plt.subplot(ret_gs[i, :])
+        ax_mean_quantile_returns_spread_ts.append(p)
+        i += 1
 
     plot_mean_quantile_returns_spread_time_series(
         mean_ret_spread_quant,
         std=std_spread_quant,
-        bandwidth=0.5)
+        bandwidth=0.5,
+        ax=ax_mean_quantile_returns_spread_ts)
 
-    plot_top_bottom_quantile_turnover(quantile_factor)
-    plot_factor_rank_auto_correlation(factor_autocorrelation)
+    # IC
+    rows_when_3_wide = (((fr_cols - 1) // 3) + 1)
+    ix_3_wide = product(range(rows_when_3_wide), range(3))
+    vertical_sections = fr_cols + 2 * rows_when_3_wide + 2
+    fig = plt.figure(figsize=(14, vertical_sections * 7))
+    ic_gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.3)
+
+    i = 0
+    ax_daily_ic_ts = []
+    for j in range(fr_cols):
+        p = plt.subplot(ic_gs[i, :])
+        ax_mean_quantile_returns_spread_ts.append(p)
+        i += 1
+    plot_daily_ic_ts(daily_ic, ax=ax_daily_ic_ts)
+
+    ax_daily_ic_hist = []
+    for j, k in ix_3_wide:
+        p = plt.subplot(ic_gs[j+i, k])
+        ax_daily_ic_hist.append(p)
+    i += rows_when_3_wide
+    plot_daily_ic_hist(daily_ic, ax=ax_daily_ic_hist)
+
+    ax_monthly_ic_heatmap = []
+    for j, k in ix_3_wide:
+        p = plt.subplot(ic_gs[j+i, k])
+        ax_monthly_ic_heatmap.append(p)
+    i += rows_when_3_wide
+    plot_monthly_ic_heatmap(mean_monthly_ic,
+        ax=ax_monthly_ic_heatmap)
+
+    ax_top_bottom_quantile_turnover = plt.subplot(ic_gs[i, :])
+    plot_top_bottom_quantile_turnover(quantile_factor,
+        ax=ax_top_bottom_quantile_turnover)
+    i += 1
+
+    ax_factor_rank_auto_correlation = plt.subplot(ic_gs[i, :])
+    plot_factor_rank_auto_correlation(factor_autocorrelation,
+        ax=ax_factor_rank_auto_correlation)
 
     # Sector Specific Breakdown
     if can_sector_adjust and sector_plots:
@@ -144,7 +200,24 @@ def create_factor_tear_sheet(factor,
         mean_return_quantile_sector = perf.mean_return_by_quantile(
             quantile_factor, forward_returns, by_sector=True)
 
-        plot_ic_by_sector(ic_by_sector)
+        num_sectors = len(
+            ic_by_sector.index.get_level_values('sector').unique())
+        rows_when_2_wide = (((num_sectors - 1) // 2) + 1)
+        ix_2_wide = product(range(rows_when_2_wide), range(2))
+        vertical_sections = 1 * rows_when_2_wide
+        fig = plt.figure(figsize=(14, vertical_sections * 7))
 
+        s_gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.3)
+        i = 0
+
+        ax_ic_by_sector = plt.subplot(s_gs[i, :])
+        i += 1
+        plot_ic_by_sector(ic_by_sector, ax=ax_ic_by_sector)
+
+        ax_quantile_returns_bar_by_sector = []
+        for j, k in ix_2_wide:
+            p = plt.subplot(ic_gs[j+i, k])
+            ax_monthly_ic_heatmap.append(p)
+        i += rows_when_3_wide
         plot_quantile_returns_bar(mean_return_quantile_sector,
-            by_sector=True)
+            by_sector=True, ax=ax_quantile_returns_bar_by_sector)
