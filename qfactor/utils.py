@@ -200,8 +200,7 @@ def format_input_data(factor, prices, sectors=None,
     if sectors is not None:
         if isinstance(sectors, dict):
             try:
-                daily_sector = map(lambda x: sectors[x],
-                    factor.reset_index().asset.values)
+                daily_sector = map(lambda x: sectors[x], factor.reset_index().asset.values)
             except KeyError:
                 diff = set(factor.index.get_level_values(
                     'asset')) - set(sectors.keys())
