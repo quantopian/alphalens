@@ -5,7 +5,7 @@ import sys
 long_description = ''
 
 if 'upload' in sys.argv:
-    with open('README.md') as f:
+    with open('README.rst') as f:
         long_description = f.read()
 
 install_reqs = [

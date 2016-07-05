@@ -249,7 +249,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
     ----------
     mean_ret_by_q : pd.DataFrame
         DataFrame with quantile, (sector) and mean daily return values.
-    by_sector : boolean
+    by_sector : bool
         Disagregate figures by sector.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
@@ -316,7 +316,7 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
         mean returns each day.
     bandwidth : float
         Width of displayed error bands in standard deviations.
-    title : string
+    title : str
         Plot title.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
@@ -465,8 +465,6 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     ----------
     mean_monthly_ic : pd.DataFrame
         The mean monthly IC for N days forward.
-    ax : matplotlib.Axes, optional
-        Axes upon which to plot.
 
     Returns
     -------
