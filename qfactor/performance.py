@@ -30,9 +30,9 @@ def factor_information_coefficient(factor, forward_returns,
 
     Parameters
     ----------
-    factor : pandas.Series - MultiIndex
+    factor : pd.Series - MultiIndex
         Factor values indexed by date and symbol.
-    forward_returns : pandas.DataFrame - MultiIndex
+    forward_returns : pd.DataFrame - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
     sector_adjust : boolean
@@ -84,14 +84,14 @@ def mean_information_coefficient(factor, forward_returns,
 
     Parameters
     ----------
-    factor : pandas.Series - MultiIndex
+    factor : pd.Series - MultiIndex
         Factor values indexed by date and symbol.
-    forward_returns : pandas.DataFrame - MultiIndex
+    forward_returns : pd.DataFrame - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
     sector_adjust : boolean
         Demean forward returns by sector before computing IC.
-    by_time : string (pandas time_rule), optional
+    by_time : string (pd time_rule), optional
         Time window to use when taking mean IC.
         See http://pandas.pydata.org/pandas-docs/stable/timeseries.html
         for available options.
@@ -138,9 +138,9 @@ def factor_returns(factor, forward_returns, long_short=True):
 
     Parameters
     ----------
-    factor : pandas.Series - MultiIndex
+    factor : pd.Series - MultiIndex
         A list of equities and their factor values indexed by date.
-    forward_returns : pandas.DataFrame - MultiIndex
+    forward_returns : pd.DataFrame - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
     long_short: bool
@@ -176,9 +176,9 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
 
     Parameters
     ----------
-    factor : pandas.Series - MultiIndex
+    factor : pd.Series - MultiIndex
         A list of equities and their factor values indexed by date.
-    forward_returns : pandas.DataFrame - MultiIndex
+    forward_returns : pd.DataFrame - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
     factor_daily_returns : pd.DataFrame
@@ -223,7 +223,7 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
 
     Parameters
     ----------
-    factor : pandas.Series - MultiIndex
+    factor : pd.Series - MultiIndex
         A list of equities and their factor values indexed by date.
     quantiles : integer
         Number of quantiles buckets to use in factor bucketing.
@@ -259,7 +259,7 @@ def mean_return_by_quantile(quantized_factor, forward_returns,
     quantized_factor : pd.Series - MultiIndex
         DataFrame with date, asset index and factor quantile as a column.
         See quantile_bucket_factor for more detail.
-    forward_returns : pandas.DataFrame - MultiIndex
+    forward_returns : pd.DataFrame - MultiIndex
         A list of equities and their N day forward returns where each column contains
         the N day forward returns.
     by_time : str
