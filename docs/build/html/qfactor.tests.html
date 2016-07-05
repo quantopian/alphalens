@@ -1,0 +1,290 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>qfactor.tests package &mdash; Qfactor 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Qfactor 0.1 documentation" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="qfactor-tests-package">
+<h1>qfactor.tests package<a class="headerlink" href="#qfactor-tests-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-qfactor.tests.test_performance">
+<span id="qfactor-tests-test-performance-module"></span><h2>qfactor.tests.test_performance module<a class="headerlink" href="#module-qfactor.tests.test_performance" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase">
+<em class="property">class </em><code class="descclassname">qfactor.tests.test_performance.</code><code class="descname">PerformanceTestCase</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<dl class="attribute">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.dr">
+<code class="descname">dr</code><em class="property"> = DatetimeIndex(['2015-01-01', '2015-01-02'], dtype='datetime64[ns]', name=u'date', freq='D')</em><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.dr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.factor">
+<code class="descname">factor</code><em class="property"> = date        asset  sector 2015-01-01  A      1         1             B      1         2             C      2         3             D      2         4 2015-01-02  A      1         4             B      1         3             C      2         2             D      2         1 Name: factor, dtype: int64</em><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.factor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_factor_alpha_beta">
+<code class="descname">test_factor_alpha_beta</code><em class="property"> = None</em><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_factor_alpha_beta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_factor_alpha_beta_0">
+<code class="descname">test_factor_alpha_beta_0</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_factor_alpha_beta_0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_factor_rank_autocorrelation">
+<code class="descname">test_factor_rank_autocorrelation</code><em class="property"> = None</em><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_factor_rank_autocorrelation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_factor_rank_autocorrelation_0">
+<code class="descname">test_factor_rank_autocorrelation_0</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_factor_rank_autocorrelation_0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_factor_rank_autocorrelation_1">
+<code class="descname">test_factor_rank_autocorrelation_1</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_factor_rank_autocorrelation_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_factor_rank_autocorrelation_2">
+<code class="descname">test_factor_rank_autocorrelation_2</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_factor_rank_autocorrelation_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_factor_rank_autocorrelation_3">
+<code class="descname">test_factor_rank_autocorrelation_3</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_factor_rank_autocorrelation_3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_factor_returns">
+<code class="descname">test_factor_returns</code><em class="property"> = None</em><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_factor_returns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_factor_returns_0">
+<code class="descname">test_factor_returns_0</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_factor_returns_0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_factor_returns_1">
+<code class="descname">test_factor_returns_1</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_factor_returns_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_information_coefficient">
+<code class="descname">test_information_coefficient</code><em class="property"> = None</em><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_information_coefficient" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_information_coefficient_0">
+<code class="descname">test_information_coefficient_0</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_information_coefficient_0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_information_coefficient_1">
+<code class="descname">test_information_coefficient_1</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_information_coefficient_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_information_coefficient_2">
+<code class="descname">test_information_coefficient_2</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_information_coefficient_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_information_coefficient_3">
+<code class="descname">test_information_coefficient_3</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_information_coefficient_3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_mean_information_coefficient">
+<code class="descname">test_mean_information_coefficient</code><em class="property"> = None</em><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_mean_information_coefficient" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_mean_information_coefficient_0">
+<code class="descname">test_mean_information_coefficient_0</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_mean_information_coefficient_0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_mean_information_coefficient_1">
+<code class="descname">test_mean_information_coefficient_1</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_mean_information_coefficient_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_mean_information_coefficient_2">
+<code class="descname">test_mean_information_coefficient_2</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_mean_information_coefficient_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_mean_information_coefficient_3">
+<code class="descname">test_mean_information_coefficient_3</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_mean_information_coefficient_3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_quantile_turnover">
+<code class="descname">test_quantile_turnover</code><em class="property"> = None</em><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_quantile_turnover" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_quantile_turnover_0">
+<code class="descname">test_quantile_turnover_0</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_quantile_turnover_0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_quantile_turnover_1">
+<code class="descname">test_quantile_turnover_1</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_quantile_turnover_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_quantile_turnover_2">
+<code class="descname">test_quantile_turnover_2</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_quantile_turnover_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_quantize_factor">
+<code class="descname">test_quantize_factor</code><em class="property"> = None</em><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_quantize_factor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_quantize_factor_0">
+<code class="descname">test_quantize_factor_0</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_quantize_factor_0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_quantize_factor_1">
+<code class="descname">test_quantize_factor_1</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_quantize_factor_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.test_quantize_factor_2">
+<code class="descname">test_quantize_factor_2</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.test_quantize_factor_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="qfactor.tests.test_performance.PerformanceTestCase.tickers">
+<code class="descname">tickers</code><em class="property"> = ['A', 'B', 'C', 'D']</em><a class="headerlink" href="#qfactor.tests.test_performance.PerformanceTestCase.tickers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-qfactor.tests.test_utils">
+<span id="qfactor-tests-test-utils-module"></span><h2>qfactor.tests.test_utils module<a class="headerlink" href="#module-qfactor.tests.test_utils" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="qfactor.tests.test_utils.UtilsTestCase">
+<em class="property">class </em><code class="descclassname">qfactor.tests.test_utils.</code><code class="descname">UtilsTestCase</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_utils.UtilsTestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<dl class="method">
+<dt id="qfactor.tests.test_utils.UtilsTestCase.test_compute_forward_returns">
+<code class="descname">test_compute_forward_returns</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tests.test_utils.UtilsTestCase.test_compute_forward_returns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-qfactor.tests">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qfactor.tests" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">qfactor.tests package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-qfactor.tests.test_performance">qfactor.tests.test_performance module</a></li>
+<li><a class="reference internal" href="#module-qfactor.tests.test_utils">qfactor.tests.test_utils module</a></li>
+<li><a class="reference internal" href="#module-qfactor.tests">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/qfactor.tests.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Quantopian, Inc..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/qfactor.tests.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
