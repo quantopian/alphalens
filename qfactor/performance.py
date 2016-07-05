@@ -35,9 +35,9 @@ def factor_information_coefficient(factor, forward_returns,
     forward_returns : pd.DataFrame - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
-    sector_adjust : boolean
+    sector_adjust : bool
         Demean forward returns by sector before computing IC.
-    by_sector : boolean
+    by_sector : bool
         If True, compute daily IC separately for each sector.
 
     Returns
@@ -89,13 +89,13 @@ def mean_information_coefficient(factor, forward_returns,
     forward_returns : pd.DataFrame - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
-    sector_adjust : boolean
+    sector_adjust : bool
         Demean forward returns by sector before computing IC.
-    by_time : string (pd time_rule), optional
+    by_time : str (pd time_rule), optional
         Time window to use when taking mean IC.
         See http://pandas.pydata.org/pandas-docs/stable/timeseries.html
         for available options.
-    by_sector : boolean
+    by_sector : bool
         If True, take the mean IC for each sector.
 
     Returns
@@ -225,9 +225,9 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
     ----------
     factor : pd.Series - MultiIndex
         A list of equities and their factor values indexed by date.
-    quantiles : integer
+    quantiles : int
         Number of quantiles buckets to use in factor bucketing.
-    by_sector : boolean
+    by_sector : bool
         If True, compute quantile buckets separately for each sector.
 
     Returns
@@ -263,7 +263,7 @@ def mean_return_by_quantile(quantized_factor, forward_returns,
         A list of equities and their N day forward returns where each column contains
         the N day forward returns.
     by_time : str
-        The pandas string code for time grouping.
+        The pandas str code for time grouping.
     by_sector : bool
         If True, compute quantile bucket returns separately for each sector.
         Returns demeaning will occur on the sector level.
@@ -324,10 +324,10 @@ def compute_mean_returns_spread(mean_returns, upper_quant,
         DataFrame of mean daily returns by quantile.
         MultiIndex containing date and quantile.
         See mean_return_by_quantile.
-    upper_quant : integer
+    upper_quant : int
         Quantile of mean return from which we wish to subtract
         lower quantile mean return
-    lower_quant : integer
+    lower_quant : int
         Quantile of mean return we wish to subtract from
         upper quantile mean return
     std : pd.DataFrame (optional)
@@ -365,7 +365,7 @@ def quantile_turnover(quantile_factor, quantile):
     ----------
     quantile_factor : pd.Series
         DataFrame with date, asset and factor quantile.
-    quantile : integer
+    quantile : int
         Quantile on which to perform turnover analysis.
 
     Returns
@@ -396,10 +396,10 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
     ----------
     factor : pd.Series
         Series with date and asset index. Values are factor values.
-    time_rule : string, optional
+    time_rule : str, optional
         Time span to use in factor grouping mean reduction.
         See http://pandas.pydata.org/pandas-docs/stable/timeseries.html for available options.
-    by_sector : boolean
+    by_sector : bool
         If True, compute autocorrelation separately for each sector.
 
     Returns

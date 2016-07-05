@@ -221,7 +221,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
     ----------
     mean_ret_by_q : pd.DataFrame
         DataFrame with quantile, (sector) and mean daily return values.
-    by_sector : boolean
+    by_sector : bool
         Disagregate figures by sector.
     sector_mapping : dict
         A dictionary keyed by sector code with values corresponding to the display name for each sector.
@@ -273,7 +273,7 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
         mean returns each day.
     bandwidth : float
         Width of displayed error bands in standard deviations.
-    title : string
+    title : str
         Plot title.
     """
 
@@ -394,7 +394,7 @@ def plot_monthly_IC_heatmap(mean_monthly_vals, val_type='IC'):
     ----------
     mean_monthly_vals : pd.DataFrame
         The mean monthly IC for N days forward.
-    val_type : string
+    val_type : str
         Name of the metric being plotted
     """
 
