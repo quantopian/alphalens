@@ -239,7 +239,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
         for i, (sc, cor) in enumerate(mean_ret_by_q.groupby(level='sector')):
             (cor.xs(sc, level='sector')
                 .multiply(DECIMAL_TO_BPS)
-                .plot(kind='bar', title=plot_title, ax=axes[i]))
+                .plot(kind='bar', ax=axes[i]))
 
             axes[i].set_xlabel('')
             axes[i].set_ylabel('Mean Daily Return (%)')
@@ -439,8 +439,7 @@ def plot_cumulative_returns(factor_returns):
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
     factor_returns.add(1).cumprod().plot(ax=ax, lw=3, color='forestgreen', alpha=0.6)
-    ax.set(ylabel='Cumulative Returns',
-        title='Factor Weighted Long/Short Portfolio Cumulative Return', xlabel='')
+    ax.set(ylabel='Cumulative Returns', title='Factor Weighted Long/Short Portfolio Cumulative Return', xlabel='')
     ax.axhline(1.0, linestyle='-', color='black', lw=1)
 
 
