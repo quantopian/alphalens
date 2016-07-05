@@ -26,7 +26,7 @@ def create_factor_tear_sheet(factor,
                              days=(1, 5, 10),
                              quantiles=5,
                              filter_zscore=10,
-                             sector_mappings=None
+                             sector_names=None
                              ):
     """
     Creates a full tear sheet for analysis and evaluating single
@@ -46,9 +46,12 @@ def create_factor_tear_sheet(factor,
         analysis time period plus an additional buffer window
         that is greater than the maximum number of expected days
         in the forward returns calculations.
-    sectors : pd.Series - MultiIndex
-        A MultiIndex Series indexed by date and asset, containing
-        the sector codes for each asset.
+    sectors : pd.Series - MultiIndex or dict
+        Either A MultiIndex Series indexed by date and asset,
+        containing the daily sector codes for each asset, or
+        a dict of asset to sector mappings. If a dict is passed,
+        it is assumed that sector mappings are unchanged for the
+        entire time period of the passed factor data.
     sector_plots : boolean
         If True create sector specific plots.
     days: list
@@ -59,11 +62,14 @@ def create_factor_tear_sheet(factor,
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
         Caution: this outlier filtering incorporates lookahead bias.
-    sector_mappings: dict
-        A dictionary keyed by sector code with values corresponding to the display name for each sector.
+    sector_names: dict
+        A dictionary keyed by sector code with values corresponding
+        to the display name for each sector.
         - Example:
             {101: "Basic Materials", 102: "Consumer Cyclical"}
     """
+    if 1 not in days:
+        days.insert(0, 1)
 
     if sector_mappings == 'morningstar':
         sector_mappings = utils.MORNINGSTAR_SECTOR_MAPPING
@@ -71,7 +77,12 @@ def create_factor_tear_sheet(factor,
 
     can_sector_adjust = sectors is not None
     factor, forward_returns = utils.format_input_data(
-        factor, prices, sectors=sectors, days=days, filter_zscore=filter_zscore)
+        factor,
+        prices,
+        sectors=sectors,
+        days=days,
+        filter_zscore=filter_zscore,
+        sector_names=sector_names)
 
     daily_ic = perf.factor_information_coefficient(
         factor, forward_returns,
@@ -109,8 +120,8 @@ def create_factor_tear_sheet(factor,
 
     plot_quantile_returns_bar(mean_ret_quantile, by_sector=False)
 
-    if 1 in days:
-        plot_cumulative_returns(factor_returns[1])
+    plot_cumulative_returns(factor_returns[1])
+    plot_cumulative_returns_by_quantile(mean_ret_quant_daily[1])
 
     plot_daily_ic_ts(daily_ic)
     plot_daily_ic_hist(daily_ic)
@@ -134,6 +145,6 @@ def create_factor_tear_sheet(factor,
         mean_return_quantile_sector = perf.mean_return_by_quantile(
             quantile_factor, forward_returns, by_sector=True)
 
-        plot_ic_by_sector(ic_by_sector, sector_mappings)
+        plot_ic_by_sector(ic_by_sector)
 
         plot_quantile_returns_bar(mean_return_quantile_sector, by_sector=True, sector_mapping=sector_mappings)

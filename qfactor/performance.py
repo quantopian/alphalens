@@ -249,7 +249,7 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
 
 
 def mean_return_by_quantile(quantized_factor, forward_returns,
-                            by_time=None, by_sector=False, std=False):
+                            by_time=None, by_sector=False, std_err=False):
     """
     Computes mean demeaned returns for factor quantiles across
     provided forward returns columns.
@@ -267,10 +267,8 @@ def mean_return_by_quantile(quantized_factor, forward_returns,
     by_sector : bool
         If True, compute quantile bucket returns separately for each sector.
         Returns demeaning will occur on the sector level.
-    std: bool
-        Should the standard deviation be computed as well?
-
-
+    std_err: bool
+        If True, compute and return the standard error of the mean return.
 
     Returns
     -------
@@ -299,13 +297,16 @@ def mean_return_by_quantile(quantized_factor, forward_returns,
 
     grouper.append(forward_returns_quantile.index.get_level_values('quantile'))
 
-    mean_std = forward_returns_quantile.groupby(grouper).agg(['mean', 'std'])
+    group_stats = forward_returns_quantile.groupby(grouper).agg(
+        ['mean', 'std', 'count'])
 
-    mean_ret = mean_std.T.xs('mean', level=1).T
-    std_ret = mean_std.T.xs('std', level=1).T
+    mean_ret = group_stats.T.xs('mean', level=1).T
 
-    if std:
-        return mean_ret, std_ret
+    if std_err:
+        std_error_ret = group_stats.T.xs('std', level=1).T / \
+            np.sqrt(group_stats.T.xs('count', level=1).T)
+
+        return mean_ret, std_error_ret
 
     return mean_ret
 

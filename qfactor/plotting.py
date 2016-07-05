@@ -19,6 +19,8 @@ from scipy import stats
 import seaborn as sns
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+from matplotlib.ticker import ScalarFormatter
+
 import performance as perf
 import utils
 from itertools import izip
@@ -211,7 +213,7 @@ def plot_daily_ic_hist(daily_ic):
         ax.axvline(ic.mean(), color='w', linestyle='dashed', linewidth=2)
 
 
-def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, sector_mapping=None):
+def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
     """
     Plots mean daily returns for factor quantiles.
 
@@ -235,14 +237,10 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, sector_mapping=Non
         axes = axes.flatten()
 
         for i, (sc, cor) in enumerate(mean_ret_by_q.groupby(level='sector')):
-            if sector_mapping is not None:
-                plot_title = sector_mapping[sc]
-            else:
-                plot_title = sc
-
             (cor.xs(sc, level='sector')
                 .multiply(DECIMAL_TO_BPS)
                 .plot(kind='bar', title=plot_title, ax=axes[i]))
+
             axes[i].set_xlabel('')
             axes[i].set_ylabel('Mean Daily Return (%)')
 
@@ -305,7 +303,7 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     ax.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
 
 
-def plot_ic_by_sector(ic_sector, sector_mapping=None):
+def plot_ic_by_sector(ic_sector):
 
     """
     Plots Spearman Rank Information Coefficient for a given factor over provided forward price
@@ -315,14 +313,7 @@ def plot_ic_by_sector(ic_sector, sector_mapping=None):
     ----------
     ic_sector : pd.DataFrame
         Sector-wise mean daily returns.
-    sector_mapping : dict
-        A dictionary keyed by sector code with values corresponding to the display name for each sector.
-        - Example:
-            {101: "Basic Materials", 102: "Consumer Cyclical"}
     """
-    if sector_mapping is not None:
-        ic_sector.index = ic_sector.index.map(lambda x: sector_mapping[x])
-
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
     ic_sector.plot(kind='bar', ax=ax)
 
@@ -448,5 +439,43 @@ def plot_cumulative_returns(factor_returns):
     f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
     factor_returns.add(1).cumprod().plot(ax=ax, lw=3, color='forestgreen', alpha=0.6)
-    ax.set(ylabel='Cumulative Returns', title='Factor Weighted Long/Short Portfolio Cumulative Return', xlabel='')
+    ax.set(ylabel='Cumulative Returns',
+        title='Factor Weighted Long/Short Portfolio Cumulative Return', xlabel='')
+    ax.axhline(1.0, linestyle='-', color='black', lw=1)
+
+
+def plot_cumulative_returns_by_quantile(quantile_daily_returns):
+    """
+    Plots the cumulative returns of various factor quantiles.
+
+    Parameters
+    ----------
+    mean_returns_by_quantile : pd.Series -- MultiIndex
+        Mean daily returns by specified factor quantile.
+        MultiIndex of date, quantile.
+        See performance.mean_returns_by_quantile.
+    """
+
+    f, ax = plt.subplots(1, 1, figsize=(18, 6))
+
+    daily_ret_wide = quantile_daily_returns.reset_index().pivot(
+        index='date', columns='quantile', values=1)
+    cum_ret = daily_ret_wide.add(1).cumprod()
+    cum_ret = cum_ret.loc[:, ::-1]
+    num_quant = len(cum_ret.columns)
+
+    colors = cm.RdYlGn_r(np.linspace(0, 1, num_quant))
+
+    cum_ret.plot(lw=2, ax=ax, color=colors)
+    ax.legend()
+    ymin, ymax = cum_ret.min().min(), cum_ret.max().max()
+    ax.set(ylabel='Log Cumulative Returns',
+           title='Cumulative Return by Quantile',
+           xlabel='',
+           yscale='symlog',
+           yticks=np.linspace(ymin, ymax, 5),
+           ylim=(ymin, ymax))
+
+    ax.yaxis.set_major_formatter(ScalarFormatter())
+
     ax.axhline(1.0, linestyle='-', color='black', lw=1)
