@@ -18,18 +18,17 @@ import numpy as np
 from IPython.display import display
 
 
-
-MORNINGSTAR_SECTOR_MAPPING = {101 : "Basic Materials",
-                              102 : "Consumer Cyclical",
-                              103 : "Financial Services",
-                              104 : "Real Estate",
-                              205 : "Consumer Defensive",
-                              206 : "Healthcare",
-                              207 : "Utilities",
-                              308 : "Communication Services",
-                              309 : "Energy",
-                              310 : "Industrials",
-                              311 : "Technology"}
+MORNINGSTAR_SECTOR_MAPPING = {101: "Basic Materials",
+                              102: "Consumer Cyclical",
+                              103: "Financial Services",
+                              104: "Real Estate",
+                              205: "Consumer Defensive",
+                              206: "Healthcare",
+                              207: "Utilities",
+                              308: "Communication Services",
+                              309: "Energy",
+                              310: "Industrials",
+                              311: "Technology"}
 
 
 def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
@@ -200,8 +199,7 @@ def format_input_data(factor, prices, sectors=None,
     if sectors is not None:
         if isinstance(sectors, dict):
             try:
-                daily_sector = map(lambda x: sectors[x],
-                    factor.reset_index().asset.values)
+                daily_sector = map(lambda x: sectors[x], factor.reset_index().asset.values)
             except KeyError:
                 diff = set(factor.index.get_level_values(
                     'asset')) - set(sectors.keys())
