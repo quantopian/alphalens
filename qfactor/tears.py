@@ -52,7 +52,7 @@ def create_factor_tear_sheet(factor,
         a dict of asset to sector mappings. If a dict is passed,
         it is assumed that sector mappings are unchanged for the
         entire time period of the passed factor data.
-    sector_plots : boolean
+    sector_plots : bool
         If True create sector specific plots.
     days: list
         Days to compute forward returns on.

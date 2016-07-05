@@ -92,7 +92,7 @@ def demean_forward_returns(forward_returns, by_sector=False):
     forward_returns : pd.DataFrame - MultiIndex
         DataFrame with date, asset, sector, and forward returns columns.
         See compute_forward_returns for more detail.
-    by_sector : boolean
+    by_sector : bool
         If True, demean according to sector.
 
     Returns
