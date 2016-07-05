@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>qfactor package &mdash; Qfactor 0.1 documentation</title>
+    <title>Qfactor &mdash; Qfactor 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -36,27 +36,57 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="qfactor-package">
-<h1>qfactor package<a class="headerlink" href="#qfactor-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="qfactor.tests.html">qfactor.tests package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qfactor.tests.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qfactor.tests.html#module-qfactor.tests.test_performance">qfactor.tests.test_performance module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qfactor.tests.html#module-qfactor.tests.test_utils">qfactor.tests.test_utils module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qfactor.tests.html#module-qfactor.tests">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</div>
-</div>
-<div class="section" id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="qfactor">
+<h1>Qfactor<a class="headerlink" href="#qfactor" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-qfactor.tears">
+<span id="tear-sheets"></span><h2>Tear Sheets<a class="headerlink" href="#module-qfactor.tears" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="qfactor.tears.create_factor_tear_sheet">
+<code class="descclassname">qfactor.tears.</code><code class="descname">create_factor_tear_sheet</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tears.create_factor_tear_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a full tear sheet for analysis and evaluating single
+return predicting (alpha) factors.</p>
+<dl class="docutils">
+<dt>factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex</span></dt>
+<dd>A MultiIndex Series indexed by date and asset, containing
+the values for a single alpha factor.</dd>
+<dt>prices <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
+<dd>A wide form Pandas DataFrame indexed by date with equities
+in the columns. It is important to pass the
+correct pricing data in depending on what time of day your
+signal was generated so to avoid lookahead bias, or
+delayed calculations. Pricing data must span the factor
+analysis time period plus an additional buffer window
+that is greater than the maximum number of expected days
+in the forward returns calculations.</dd>
+<dt>sectors <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex or dict</span></dt>
+<dd>Either A MultiIndex Series indexed by date and asset,
+containing the daily sector codes for each asset, or
+a dict of asset to sector mappings. If a dict is passed,
+it is assumed that sector mappings are unchanged for the
+entire time period of the passed factor data.</dd>
+<dt>sector_plots <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd>If True create sector specific plots.</dd>
+<dt>days: list</dt>
+<dd>Days to compute forward returns on.</dd>
+<dt>quantiles: int:</dt>
+<dd>The number of buckets to parition the data into for analysis.</dd>
+<dt>filter_zscore <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>Sets forward returns greater than X standard deviations
+from the the mean to nan.
+Caution: this outlier filtering incorporates lookahead bias.</dd>
+<dt>sector_names: dict</dt>
+<dd><p class="first">A dictionary keyed by sector code with values corresponding
+to the display name for each sector.
+- Example:</p>
+<blockquote class="last">
+<div>{101: &#8220;Basic Materials&#8221;, 102: &#8220;Consumer Cyclical&#8221;}</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-qfactor.performance">
-<span id="qfactor-performance-module"></span><h2>qfactor.performance module<a class="headerlink" href="#module-qfactor.performance" title="Permalink to this headline">¶</a></h2>
+<span id="performance"></span><h2>Performance<a class="headerlink" href="#module-qfactor.performance" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="qfactor.performance.compute_mean_returns_spread">
 <code class="descclassname">qfactor.performance.</code><code class="descname">compute_mean_returns_spread</code><span class="sig-paren">(</span><em>mean_returns</em>, <em>upper_quant</em>, <em>lower_quant</em>, <em>std=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.performance.compute_mean_returns_spread" title="Permalink to this definition">¶</a></dt>
@@ -273,7 +303,7 @@ not in that quantile in the previous period.</p>
 
 </div>
 <div class="section" id="module-qfactor.plotting">
-<span id="qfactor-plotting-module"></span><h2>qfactor.plotting module<a class="headerlink" href="#module-qfactor.plotting" title="Permalink to this headline">¶</a></h2>
+<span id="plotting"></span><h2>Plotting<a class="headerlink" href="#module-qfactor.plotting" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="qfactor.plotting.context">
 <code class="descclassname">qfactor.plotting.</code><code class="descname">context</code><span class="sig-paren">(</span><em>context='notebook'</em>, <em>font_scale=1.5</em>, <em>rc=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.context" title="Permalink to this definition">¶</a></dt>
@@ -464,55 +494,8 @@ provided forward price movement windows.</dd>
 </dd></dl>
 
 </div>
-<div class="section" id="module-qfactor.tears">
-<span id="qfactor-tears-module"></span><h2>qfactor.tears module<a class="headerlink" href="#module-qfactor.tears" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="qfactor.tears.create_factor_tear_sheet">
-<code class="descclassname">qfactor.tears.</code><code class="descname">create_factor_tear_sheet</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tears.create_factor_tear_sheet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a full tear sheet for analysis and evaluating single
-return predicting (alpha) factors.</p>
-<dl class="docutils">
-<dt>factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex</span></dt>
-<dd>A MultiIndex Series indexed by date and asset, containing
-the values for a single alpha factor.</dd>
-<dt>prices <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>A wide form Pandas DataFrame indexed by date with equities
-in the columns. It is important to pass the
-correct pricing data in depending on what time of day your
-signal was generated so to avoid lookahead bias, or
-delayed calculations. Pricing data must span the factor
-analysis time period plus an additional buffer window
-that is greater than the maximum number of expected days
-in the forward returns calculations.</dd>
-<dt>sectors <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex or dict</span></dt>
-<dd>Either A MultiIndex Series indexed by date and asset,
-containing the daily sector codes for each asset, or
-a dict of asset to sector mappings. If a dict is passed,
-it is assumed that sector mappings are unchanged for the
-entire time period of the passed factor data.</dd>
-<dt>sector_plots <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
-<dd>If True create sector specific plots.</dd>
-<dt>days: list</dt>
-<dd>Days to compute forward returns on.</dd>
-<dt>quantiles: int:</dt>
-<dd>The number of buckets to parition the data into for analysis.</dd>
-<dt>filter_zscore <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Sets forward returns greater than X standard deviations
-from the the mean to nan.
-Caution: this outlier filtering incorporates lookahead bias.</dd>
-<dt>sector_names: dict</dt>
-<dd><p class="first">A dictionary keyed by sector code with values corresponding
-to the display name for each sector.
-- Example:</p>
-<blockquote class="last">
-<div>{101: &#8220;Basic Materials&#8221;, 102: &#8220;Consumer Cyclical&#8221;}</div></blockquote>
-</dd>
-</dl>
-</dd></dl>
-
-</div>
 <div class="section" id="module-qfactor.utils">
-<span id="qfactor-utils-module"></span><h2>qfactor.utils module<a class="headerlink" href="#module-qfactor.utils" title="Permalink to this headline">¶</a></h2>
+<span id="utilities"></span><h2>Utilities<a class="headerlink" href="#module-qfactor.utils" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="qfactor.utils.compute_forward_returns">
 <code class="descclassname">qfactor.utils.</code><code class="descname">compute_forward_returns</code><span class="sig-paren">(</span><em>prices</em>, <em>days=(1</em>, <em>5</em>, <em>10)</em>, <em>filter_zscore=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.utils.compute_forward_returns" title="Permalink to this definition">¶</a></dt>
@@ -635,9 +618,6 @@ Restores original setting after displaying.</dd>
 </dd></dl>
 
 </div>
-<div class="section" id="module-qfactor">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qfactor" title="Permalink to this headline">¶</a></h2>
-</div>
 </div>
 
 
@@ -648,14 +628,11 @@ Restores original setting after displaying.</dd>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">qfactor package</a><ul>
-<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-qfactor.performance">qfactor.performance module</a></li>
-<li><a class="reference internal" href="#module-qfactor.plotting">qfactor.plotting module</a></li>
-<li><a class="reference internal" href="#module-qfactor.tears">qfactor.tears module</a></li>
-<li><a class="reference internal" href="#module-qfactor.utils">qfactor.utils module</a></li>
-<li><a class="reference internal" href="#module-qfactor">Module contents</a></li>
+<li><a class="reference internal" href="#">Qfactor</a><ul>
+<li><a class="reference internal" href="#module-qfactor.tears">Tear Sheets</a></li>
+<li><a class="reference internal" href="#module-qfactor.performance">Performance</a></li>
+<li><a class="reference internal" href="#module-qfactor.plotting">Plotting</a></li>
+<li><a class="reference internal" href="#module-qfactor.utils">Utilities</a></li>
 </ul>
 </li>
 </ul>

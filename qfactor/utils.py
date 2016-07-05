@@ -115,7 +115,7 @@ def print_table(table, name=None, fmt=None):
 
     Parameters
     ----------
-    table : pandas.Series or pandas.DataFrame
+    table : pd.Series or pd.DataFrame
         Table to pretty-print.
     name : str, optional
         Table name to display in upper left corner.
@@ -150,7 +150,7 @@ def format_input_data(factor, prices, sectors=None,
     indices containing date, asset, and sector.
     ----------
     ----------
-    factor : pandas.Series - MultiIndex
+    factor : pd.Series - MultiIndex
         A list of equities and their factor values indexed by date.
     prices : pd.DataFrame
         Pricing data to use in forward price calculation.
