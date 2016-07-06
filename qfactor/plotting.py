@@ -103,8 +103,7 @@ def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
     Parameters
     ----------
     ic_data : pd.DataFrame
-        Spearman Rank correlation between factor and
-        provided forward price movement windows.
+        Spearman Rank correlation between factor and provided forward price movement windows.
     alpha_beta : pd.Series
         A list containing the alpha, beta, a t-stat(alpha) for the given factor and forward returns.
     quantized_factor : pd.Series
@@ -222,7 +221,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False):
     mean_ret_by_q : pd.DataFrame
         DataFrame with quantile, (sector) and mean daily return values.
     by_sector : bool
-        Disagregate figures by sector.
+        Disaggregate figures by sector.
     sector_mapping : dict
         A dictionary keyed by sector code with values corresponding to the display name for each sector.
         - Example:
@@ -269,8 +268,7 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     mean_returns_spread : pd.Series
         Series with difference between quantile mean returns by day.
     std : pd.Series
-        Series with standard devation of difference between quantile
-        mean returns each day.
+        Series with standard devation of difference between quantile mean returns each day.
     bandwidth : float
         Width of displayed error bands in standard deviations.
     title : str
@@ -395,7 +393,7 @@ def plot_monthly_IC_heatmap(mean_monthly_vals, val_type='IC'):
     mean_monthly_vals : pd.DataFrame
         The mean monthly IC for N days forward.
     val_type : str
-        Name of the metric being plotted
+        Name of the metric being plotted.
     """
 
     num_plots = len(mean_monthly_vals.columns)
@@ -449,9 +447,8 @@ def plot_cumulative_returns_by_quantile(quantile_daily_returns):
 
     Parameters
     ----------
-    mean_returns_by_quantile : pd.Series -- MultiIndex
-        Mean daily returns by specified factor quantile.
-        MultiIndex of date, quantile.
+    quantile_daily_returns : pd.Series -- MultiIndex
+        Mean daily returns by specified factor quantile. MultiIndex of date, quantile.
         See performance.mean_returns_by_quantile.
     """
 

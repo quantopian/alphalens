@@ -44,12 +44,10 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
         that is greater than the maximum number of expected days
         in the forward returns calculations.
     days : list
-        Number of days forward to project returns. One column will
-        be added for each value.
+        Number of days forward to project returns. One column will be added for each value.
     filter_zscore : int
-        Sets forward returns greater than X standard deviations
-        from the the mean to nan.
-        Caution: this outlier filtering incorperates lookahead bias.
+        Sets forward returns greater than X standard deviations from the the mean to nan.
+        Caution: this outlier filtering incorporates lookahead bias.
     Returns
     -------
     forward_returns : pd.DataFrame - MultiIndex
@@ -181,7 +179,7 @@ def format_input_data(factor, prices, sectors=None,
     forward_returns : pd.DataFrame - MultiIndex
         A DataFrame of equities and their forward returns
         indexed by date, asset, and optionally sector.
-        Note: this is the same index as the factor index
+        Note: this is the same index as the factor index.
     """
 
     factor.name = 'factor'
