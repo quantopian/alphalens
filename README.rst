@@ -1,7 +1,5 @@
 .. figure:: https://media.quantopian.com/logos/open_source/pyfolio-logo-03.png
-   :alt: pyfolio
-
-   pyfolio
+   :alt: qfactor
 
 Qfactor
 =======
