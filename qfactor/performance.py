@@ -179,8 +179,7 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     factor : pd.Series - MultiIndex
         A list of equities and their factor values indexed by date.
     forward_returns : pd.DataFrame - MultiIndex
-        Daily forward returns in indexed by date and symbol.
-        Separate column for each forward return window.
+        Daily forward returns in indexed by date and symbol. Separate column for each forward return window.
     factor_daily_returns : pd.DataFrame
         Daily returns of dollar neutral portfolio weighted by factor value.
 
@@ -260,8 +259,7 @@ def mean_return_by_quantile(quantized_factor, forward_returns,
         DataFrame with date, asset index and factor quantile as a column.
         See quantile_bucket_factor for more detail.
     forward_returns : pd.DataFrame - MultiIndex
-        A list of equities and their N day forward returns where each column contains
-        the N day forward returns.
+        A list of equities and their N day forward returns where each column contains the N day forward returns.
     by_time : str
         The pandas str code for time grouping.
     by_sector : bool
@@ -321,26 +319,21 @@ def compute_mean_returns_spread(mean_returns, upper_quant,
     Parameters
     ----------
     mean_returns : pd.DataFrame
-        DataFrame of mean daily returns by quantile.
-        MultiIndex containing date and quantile.
+        DataFrame of mean daily returns by quantile. MultiIndex containing date and quantile.
         See mean_return_by_quantile.
     upper_quant : int
-        Quantile of mean return from which we wish to subtract
-        lower quantile mean return
+        Quantile of mean return from which we wish to subtract lower quantile mean return.
     lower_quant : int
-        Quantile of mean return we wish to subtract from
-        upper quantile mean return
+        Quantile of mean return we wish to subtract from upper quantile mean return.
     std : pd.DataFrame (optional)
-        Daily standard deviation in mean return by quantile.
-        Takes the same for as mean_returns.
+        Daily standard deviation in mean return by quantile. Takes the same for as mean_returns.
 
     Returns
     -------
     mean_return_difference : pd.Series
         Daily difference in quantile returns.
     joint_std : pd.Series
-        Daily standard deviation of the difference in
-        quantile returns.
+        Daily standard deviation of the difference in quantile returns.
     """
 
     mean_return_difference = mean_returns.xs(upper_quant, level='quantile') - \
