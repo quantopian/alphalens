@@ -3,10 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Qfactor's documentation!
-===================================
 .. figure:: https://media.quantopian.com/logos/open_source/pyfolio-logo-03.png
    :alt: pyfolio
+
+Qfactor
+-------
 
 Qfactor is a Python Library for performance analysis of predictive
 (alpha) stock factors. Qfactor works great with the
@@ -17,10 +18,10 @@ performance and risk analysis of financial portfolios.
 The main function of Qfactor is to surface the most relevant statistics
 and plots about an alpha factor, including:
 
--  Information Coefficient Analysis
--  Returns Analysis
--  Turnover Analysis
--  Sector Analysis
+- Information Coefficient Analysis
+- Returns Analysis
+- Turnover Analysis
+- Sector Analysis
 
 Getting started
 ---------------
@@ -100,3 +101,13 @@ Credits
 -  `Thomas Wiecki <https://github.com/twiecki>`__
 -  `Jonathan Larkin <https://github.com/marketneutral>`__
 -  Jessica Stauth (jstauth@quantopian.com)
+
+API
+---
+
+Information on a specific functions, classes, or methods.
+
+- :mod:`qfactor.tears`
+- :mod:`qfactor.performance`
+- :mod:`qfactor.plotting`
+- :mod:`qfactor.utils`
