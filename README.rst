@@ -1,12 +1,10 @@
-.. Qfactor documentation master file, created by
-   sphinx-quickstart on Tue Jul  5 15:45:48 2016.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to Qfactor's documentation!
-===================================
 .. figure:: https://media.quantopian.com/logos/open_source/pyfolio-logo-03.png
    :alt: pyfolio
+
+   pyfolio
+
+Qfactor
+=======
 
 Qfactor is a Python Library for performance analysis of predictive
 (alpha) stock factors. Qfactor works great with the
