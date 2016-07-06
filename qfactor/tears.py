@@ -155,7 +155,7 @@ def create_factor_tear_sheet(factor,
 
     # IC
     rows_when_3_wide = (((fr_cols - 1) // 3) + 1)
-    ix_3_wide = product(range(rows_when_3_wide), range(3))
+    ix_3_wide = list(product(range(rows_when_3_wide), range(3)))
     vertical_sections = fr_cols + 2 * rows_when_3_wide + 2
     fig = plt.figure(figsize=(14, vertical_sections * 7))
     ic_gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.3)
@@ -164,7 +164,7 @@ def create_factor_tear_sheet(factor,
     ax_daily_ic_ts = []
     for j in range(fr_cols):
         p = plt.subplot(ic_gs[i, :])
-        ax_mean_quantile_returns_spread_ts.append(p)
+        ax_daily_ic_ts.append(p)
         i += 1
     plot_daily_ic_ts(daily_ic, ax=ax_daily_ic_ts)
 
@@ -204,10 +204,10 @@ def create_factor_tear_sheet(factor,
             ic_by_sector.index.get_level_values('sector').unique())
         rows_when_2_wide = (((num_sectors - 1) // 2) + 1)
         ix_2_wide = product(range(rows_when_2_wide), range(2))
-        vertical_sections = 1 * rows_when_2_wide
+        vertical_sections = 1 + rows_when_2_wide
         fig = plt.figure(figsize=(14, vertical_sections * 7))
 
-        s_gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.3)
+        s_gs = gridspec.GridSpec(vertical_sections, 2, wspace=0.5, hspace=0.3)
         i = 0
 
         ax_ic_by_sector = plt.subplot(s_gs[i, :])
@@ -216,8 +216,8 @@ def create_factor_tear_sheet(factor,
 
         ax_quantile_returns_bar_by_sector = []
         for j, k in ix_2_wide:
-            p = plt.subplot(ic_gs[j+i, k])
-            ax_monthly_ic_heatmap.append(p)
+            p = plt.subplot(s_gs[j+i, k])
+            ax_quantile_returns_bar_by_sector.append(p)
         i += rows_when_3_wide
         plot_quantile_returns_bar(mean_return_quantile_sector,
             by_sector=True, ax=ax_quantile_returns_bar_by_sector)

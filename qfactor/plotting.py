@@ -260,6 +260,9 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
         The axes that were plotted on.
     """
 
+    ymin = mean_ret_by_q.min().min() * DECIMAL_TO_BPS
+    ymax = mean_ret_by_q.max().max() * DECIMAL_TO_BPS
+
     if by_sector:
         num_sector = len(
             mean_ret_by_q.index.get_level_values('sector').unique())
@@ -277,9 +280,10 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
                 .multiply(DECIMAL_TO_BPS)
                 .plot(kind='bar', title=sc, ax=a))
 
-            a.set(xlabel='', ylabel='Mean Daily Return (bps)')
+            a.set(xlabel='', ylabel='Mean Daily Return (bps)',
+                  ylim=(ymin, ymax))
 
-        if num_sector % 2 != 0:
+        if num_sector < len(list(axes)):
             axes[-1].set_visible(False)
 
         return axes
@@ -289,8 +293,9 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
             f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
         mean_ret_by_q.multiply(DECIMAL_TO_BPS).plot(kind='bar',
-                                                    title="Mean Return By Factor Quantile", ax=ax)
-        ax.set(xlabel='', ylabel='Mean Daily Return (bps)')
+            title="Mean Return By Factor Quantile", ax=ax)
+        ax.set(xlabel='', ylabel='Mean Daily Return (bps)',
+               ylim=(ymin, ymax))
 
         return ax
 
@@ -452,16 +457,14 @@ def plot_top_bottom_quantile_turnover(quantized_factor, ax=None):
     return ax
 
 
-def plot_monthly_ic_heatmap(mean_monthly_vals, val_type='IC', ax=None):
+def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     """
     Plots a heatmap of the information coefficient or returns by month.
 
     Parameters
     ----------
-    mean_monthly_vals : pd.DataFrame
+    mean_monthly_ic : pd.DataFrame
         The mean monthly IC for N days forward.
-    val_type : string
-        Name of the metric being plotted
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -471,7 +474,7 @@ def plot_monthly_ic_heatmap(mean_monthly_vals, val_type='IC', ax=None):
         The axes that were plotted on.
     """
 
-    num_plots = len(mean_monthly_vals.columns)
+    num_plots = len(mean_monthly_ic.columns)
 
     v_spaces = ((num_plots - 1) // 3) + 1
 
@@ -481,7 +484,7 @@ def plot_monthly_ic_heatmap(mean_monthly_vals, val_type='IC', ax=None):
     else:
         axes = (a for a in ax)
 
-    for a, (days_num, ic) in zip(axes, mean_monthly_vals.iteritems()):
+    for a, (days_num, ic) in zip(axes, mean_monthly_ic.iteritems()):
 
         formatted_ic = (pd.Series(index=pd.MultiIndex.from_product([np.unique(ic.index.year),
                                                                     np.unique(ic.index.month)],
@@ -502,7 +505,7 @@ def plot_monthly_ic_heatmap(mean_monthly_vals, val_type='IC', ax=None):
         a.set(ylabel='', xlabel='')
 
         a.set_title(
-            "Monthly Mean {} Day {}".format(days_num, val_type))
+            "Monthly Mean {} Day Return IC".format(days_num))
 
     return axes
 
