@@ -1,40 +1,136 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Qfactor &mdash; Qfactor 0.1 documentation</title>
-    
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Qfactor 0.1 documentation" href="index.html" />
-   
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Qfactor &mdash; Qfactor 0.1 documentation</title>
+  
 
-  </head>
-  <body role="document">  
+  
+  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Qfactor 0.1 documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Qfactor
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <!-- Local TOC -->
+                <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Qfactor</a><ul>
+<li><a class="reference internal" href="#module-qfactor.tears">Tear Sheets</a></li>
+<li><a class="reference internal" href="#module-qfactor.performance">Performance</a></li>
+<li><a class="reference internal" href="#module-qfactor.plotting">Plotting</a></li>
+<li><a class="reference internal" href="#module-qfactor.utils">Utilities</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Qfactor</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Qfactor</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/qfactor.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="qfactor">
 <h1>Qfactor<a class="headerlink" href="#qfactor" title="Permalink to this headline">¶</a></h1>
@@ -45,43 +141,65 @@
 <code class="descclassname">qfactor.tears.</code><code class="descname">create_factor_tear_sheet</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.tears.create_factor_tear_sheet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a full tear sheet for analysis and evaluating single
 return predicting (alpha) factors.</p>
-<dl class="docutils">
-<dt>factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex</span></dt>
-<dd>A MultiIndex Series indexed by date and asset, containing
-the values for a single alpha factor.</dd>
-<dt>prices <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>A wide form Pandas DataFrame indexed by date with equities
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series - MultiIndex</p>
+<blockquote>
+<div><p>A MultiIndex Series indexed by date and asset, containing
+the values for a single alpha factor.</p>
+</div></blockquote>
+<p><strong>prices</strong> : pd.DataFrame</p>
+<blockquote>
+<div><p>A wide form Pandas DataFrame indexed by date with equities
 in the columns. It is important to pass the
 correct pricing data in depending on what time of day your
 signal was generated so to avoid lookahead bias, or
 delayed calculations. Pricing data must span the factor
 analysis time period plus an additional buffer window
 that is greater than the maximum number of expected days
-in the forward returns calculations.</dd>
-<dt>sectors <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex or dict</span></dt>
-<dd>Either A MultiIndex Series indexed by date and asset,
+in the forward returns calculations.</p>
+</div></blockquote>
+<p><strong>sectors</strong> : pd.Series - MultiIndex or dict</p>
+<blockquote>
+<div><p>Either A MultiIndex Series indexed by date and asset,
 containing the daily sector codes for each asset, or
 a dict of asset to sector mappings. If a dict is passed,
 it is assumed that sector mappings are unchanged for the
-entire time period of the passed factor data.</dd>
-<dt>sector_plots <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If True create sector specific plots.</dd>
-<dt>days: list</dt>
-<dd>Days to compute forward returns on.</dd>
-<dt>quantiles: int:</dt>
-<dd>The number of buckets to parition the data into for analysis.</dd>
-<dt>filter_zscore <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Sets forward returns greater than X standard deviations
+entire time period of the passed factor data.</p>
+</div></blockquote>
+<p><strong>sector_plots</strong> : bool</p>
+<blockquote>
+<div><p>If True create sector specific plots.</p>
+</div></blockquote>
+<p><strong>days: list</strong></p>
+<blockquote>
+<div><p>Days to compute forward returns on.</p>
+</div></blockquote>
+<p><strong>quantiles: int:</strong></p>
+<blockquote>
+<div><p>The number of buckets to parition the data into for analysis.</p>
+</div></blockquote>
+<p><strong>filter_zscore</strong> : int</p>
+<blockquote>
+<div><p>Sets forward returns greater than X standard deviations
 from the the mean to nan.
-Caution: this outlier filtering incorporates lookahead bias.</dd>
-<dt>sector_names: dict</dt>
-<dd><p class="first">A dictionary keyed by sector code with values corresponding
+Caution: this outlier filtering incorporates lookahead bias.</p>
+</div></blockquote>
+<p><strong>sector_names: dict</strong></p>
+<blockquote class="last">
+<div><p>A dictionary keyed by sector code with values corresponding
 to the display name for each sector.
 - Example:</p>
-<blockquote class="last">
-<div>{101: &#8220;Basic Materials&#8221;, 102: &#8220;Consumer Cyclical&#8221;}</div></blockquote>
-</dd>
-</dl>
+<blockquote>
+<div><p>{101: &#8220;Basic Materials&#8221;, 102: &#8220;Consumer Cyclical&#8221;}</p>
+</div></blockquote>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -93,23 +211,41 @@ to the display name for each sector.
 <dd><p>Computes the difference between the mean returns of
 two quantiles. Optionally, computes the standard deviation
 of this difference.</p>
-<dl class="docutils">
-<dt>mean_returns <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>DataFrame of mean daily returns by quantile. MultiIndex containing date and quantile.
-See mean_return_by_quantile.</dd>
-<dt>upper_quant <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Quantile of mean return from which we wish to subtract lower quantile mean return.</dd>
-<dt>lower_quant <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Quantile of mean return we wish to subtract from upper quantile mean return.</dd>
-<dt>std <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame (optional)</span></dt>
-<dd>Daily standard deviation in mean return by quantile. Takes the same for as mean_returns.</dd>
-</dl>
-<dl class="docutils">
-<dt>mean_return_difference <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>Daily difference in quantile returns.</dd>
-<dt>joint_std <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>Daily standard deviation of the difference in quantile returns.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mean_returns</strong> : pd.DataFrame</p>
+<blockquote>
+<div><p>DataFrame of mean daily returns by quantile. MultiIndex containing date and quantile.
+See mean_return_by_quantile.</p>
+</div></blockquote>
+<p><strong>upper_quant</strong> : int</p>
+<blockquote>
+<div><p>Quantile of mean return from which we wish to subtract lower quantile mean return.</p>
+</div></blockquote>
+<p><strong>lower_quant</strong> : int</p>
+<blockquote>
+<div><p>Quantile of mean return we wish to subtract from upper quantile mean return.</p>
+</div></blockquote>
+<p><strong>std</strong> : pd.DataFrame (optional)</p>
+<blockquote>
+<div><p>Daily standard deviation in mean return by quantile. Takes the same for as mean_returns.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>mean_return_difference</strong> : pd.Series</p>
+<blockquote>
+<div><p>Daily difference in quantile returns.</p>
+</div></blockquote>
+<p><strong>joint_std</strong> : pd.Series</p>
+<blockquote class="last">
+<div><p>Daily standard deviation of the difference in quantile returns.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -120,18 +256,32 @@ and beta (market exposure) of a factor. A regression is run with
 the daily factor universe mean return as the dependent variable
 and mean daily return from a dollar-neutral portfolio weighted
 by factor values as the independent variable.</p>
-<dl class="docutils">
-<dt>factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex</span></dt>
-<dd>A list of equities and their factor values indexed by date.</dd>
-<dt>forward_returns <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame - MultiIndex</span></dt>
-<dd>Daily forward returns in indexed by date and symbol. Separate column for each forward return window.</dd>
-<dt>factor_daily_returns <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>Daily returns of dollar neutral portfolio weighted by factor value.</dd>
-</dl>
-<dl class="docutils">
-<dt>alpha_beta <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>A list containing the alpha, beta, a t-stat(alpha) for the given factor and forward returns.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series - MultiIndex</p>
+<blockquote>
+<div><p>A list of equities and their factor values indexed by date.</p>
+</div></blockquote>
+<p><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
+<blockquote>
+<div><p>Daily forward returns in indexed by date and symbol. Separate column for each forward return window.</p>
+</div></blockquote>
+<p><strong>factor_daily_returns</strong> : pd.DataFrame</p>
+<blockquote>
+<div><p>Daily returns of dollar neutral portfolio weighted by factor value.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>alpha_beta</strong> : pd.Series</p>
+<blockquote class="last">
+<div><p>A list containing the alpha, beta, a t-stat(alpha) for the given factor and forward returns.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -140,22 +290,38 @@ by factor values as the independent variable.</p>
 <dd><p>Computes Spearman Rank Correlation based Information Coefficient (IC)
 between factor values and N day forward returns for each day in
 the factor index.</p>
-<dl class="docutils">
-<dt>factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex</span></dt>
-<dd>Factor values indexed by date and symbol.</dd>
-<dt>forward_returns <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame - MultiIndex</span></dt>
-<dd>Daily forward returns in indexed by date and symbol.
-Separate column for each forward return window.</dd>
-<dt>sector_adjust <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>Demean forward returns by sector before computing IC.</dd>
-<dt>by_sector <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If True, compute daily IC separately for each sector.</dd>
-</dl>
-<dl class="docutils">
-<dt>ic <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>Spearman Rank correlation between factor and
-provided forward price movement windows.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series - MultiIndex</p>
+<blockquote>
+<div><p>Factor values indexed by date and symbol.</p>
+</div></blockquote>
+<p><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
+<blockquote>
+<div><p>Daily forward returns in indexed by date and symbol.
+Separate column for each forward return window.</p>
+</div></blockquote>
+<p><strong>sector_adjust</strong> : bool</p>
+<blockquote>
+<div><p>Demean forward returns by sector before computing IC.</p>
+</div></blockquote>
+<p><strong>by_sector</strong> : bool</p>
+<blockquote>
+<div><p>If True, compute daily IC separately for each sector.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ic</strong> : pd.DataFrame</p>
+<blockquote class="last">
+<div><p>Spearman Rank correlation between factor and
+provided forward price movement windows.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -166,19 +332,33 @@ We must compare week to week factor ranks rather than factor values to account f
 systematic shifts in the factor values of all names or names within a sector.
 This metric is useful for measuring the turnover of a factor. If the value of a factor
 for each name changes randomly from week to week, we&#8217;d expect a weekly autocorrelation of 0.</p>
-<dl class="docutils">
-<dt>factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>Series with date and asset index. Values are factor values.</dd>
-<dt>time_rule <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
-<dd>Time span to use in factor grouping mean reduction.
-See <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/timeseries.html">http://pandas.pydata.org/pandas-docs/stable/timeseries.html</a> for available options.</dd>
-<dt>by_sector <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If True, compute autocorrelation separately for each sector.</dd>
-</dl>
-<dl class="docutils">
-<dt>autocorr <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>Rolling 1 period (defined by time_rule) autocorrelation of factor values.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series</p>
+<blockquote>
+<div><p>Series with date and asset index. Values are factor values.</p>
+</div></blockquote>
+<p><strong>time_rule</strong> : str, optional</p>
+<blockquote>
+<div><p>Time span to use in factor grouping mean reduction.
+See <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/timeseries.html">http://pandas.pydata.org/pandas-docs/stable/timeseries.html</a> for available options.</p>
+</div></blockquote>
+<p><strong>by_sector</strong> : bool</p>
+<blockquote>
+<div><p>If True, compute autocorrelation separately for each sector.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>autocorr</strong> : pd.Series</p>
+<blockquote class="last">
+<div><p>Rolling 1 period (defined by time_rule) autocorrelation of factor values.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -187,19 +367,33 @@ See <a class="reference external" href="http://pandas.pydata.org/pandas-docs/sta
 <dd><p>Computes daily returns for portfolio weighted by factor
 values. Weights are computed by demeaning factors and dividing
 by the sum of their absolute value (acheiving gross leverage of 1).</p>
-<dl class="docutils">
-<dt>factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex</span></dt>
-<dd>A list of equities and their factor values indexed by date.</dd>
-<dt>forward_returns <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame - MultiIndex</span></dt>
-<dd>Daily forward returns in indexed by date and symbol.
-Separate column for each forward return window.</dd>
-<dt>long_short: bool</dt>
-<dd>Should this computation happen on a long short portfolio?</dd>
-</dl>
-<dl class="docutils">
-<dt>factor_daily_returns <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>Daily returns of dollar neutral portfolio weighted by factor value.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series - MultiIndex</p>
+<blockquote>
+<div><p>A list of equities and their factor values indexed by date.</p>
+</div></blockquote>
+<p><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
+<blockquote>
+<div><p>Daily forward returns in indexed by date and symbol.
+Separate column for each forward return window.</p>
+</div></blockquote>
+<p><strong>long_short: bool</strong></p>
+<blockquote>
+<div><p>Should this computation happen on a long short portfolio?</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>factor_daily_returns</strong> : pd.DataFrame</p>
+<blockquote class="last">
+<div><p>Daily returns of dollar neutral portfolio weighted by factor value.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -210,26 +404,44 @@ Answers questions like:
 What is the mean IC for each month?
 What is the mean IC for each sector for our whole timerange?
 What is the mean IC for for each sector, each week?</p>
-<dl class="docutils">
-<dt>factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex</span></dt>
-<dd>Factor values indexed by date and symbol.</dd>
-<dt>forward_returns <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame - MultiIndex</span></dt>
-<dd>Daily forward returns in indexed by date and symbol.
-Separate column for each forward return window.</dd>
-<dt>sector_adjust <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>Demean forward returns by sector before computing IC.</dd>
-<dt>by_time <span class="classifier-delimiter">:</span> <span class="classifier">str (pd time_rule), optional</span></dt>
-<dd>Time window to use when taking mean IC.
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series - MultiIndex</p>
+<blockquote>
+<div><p>Factor values indexed by date and symbol.</p>
+</div></blockquote>
+<p><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
+<blockquote>
+<div><p>Daily forward returns in indexed by date and symbol.
+Separate column for each forward return window.</p>
+</div></blockquote>
+<p><strong>sector_adjust</strong> : bool</p>
+<blockquote>
+<div><p>Demean forward returns by sector before computing IC.</p>
+</div></blockquote>
+<p><strong>by_time</strong> : str (pd time_rule), optional</p>
+<blockquote>
+<div><p>Time window to use when taking mean IC.
 See <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/timeseries.html">http://pandas.pydata.org/pandas-docs/stable/timeseries.html</a>
-for available options.</dd>
-<dt>by_sector <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If True, take the mean IC for each sector.</dd>
-</dl>
-<dl class="docutils">
-<dt>ic <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>Mean Spearman Rank correlation between factor and provided
-forward price movement windows.</dd>
-</dl>
+for available options.</p>
+</div></blockquote>
+<p><strong>by_sector</strong> : bool</p>
+<blockquote>
+<div><p>If True, take the mean IC for each sector.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ic</strong> : pd.DataFrame</p>
+<blockquote class="last">
+<div><p>Mean Spearman Rank correlation between factor and provided
+forward price movement windows.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -237,26 +449,46 @@ forward price movement windows.</dd>
 <code class="descclassname">qfactor.performance.</code><code class="descname">mean_return_by_quantile</code><span class="sig-paren">(</span><em>quantized_factor</em>, <em>forward_returns</em>, <em>by_time=None</em>, <em>by_sector=False</em>, <em>std_err=False</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.performance.mean_return_by_quantile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes mean demeaned returns for factor quantiles across
 provided forward returns columns.</p>
-<dl class="docutils">
-<dt>quantized_factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex</span></dt>
-<dd>DataFrame with date, asset index and factor quantile as a column.
-See quantile_bucket_factor for more detail.</dd>
-<dt>forward_returns <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame - MultiIndex</span></dt>
-<dd>A list of equities and their N day forward returns where each column contains the N day forward returns.</dd>
-<dt>by_time <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>The pandas str code for time grouping.</dd>
-<dt>by_sector <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If True, compute quantile bucket returns separately for each sector.
-Returns demeaning will occur on the sector level.</dd>
-<dt>std_err: bool</dt>
-<dd>If True, compute and return the standard error of the mean return.</dd>
-</dl>
-<dl class="docutils">
-<dt>mean_returns_by_quantile <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>Mean daily returns by specified factor quantile.</dd>
-<dt>std_ret: pd.DataFrame</dt>
-<dd>Standard deviation of returns by specified quantile.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quantized_factor</strong> : pd.Series - MultiIndex</p>
+<blockquote>
+<div><p>DataFrame with date, asset index and factor quantile as a column.
+See quantile_bucket_factor for more detail.</p>
+</div></blockquote>
+<p><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
+<blockquote>
+<div><p>A list of equities and their N day forward returns where each column contains the N day forward returns.</p>
+</div></blockquote>
+<p><strong>by_time</strong> : str</p>
+<blockquote>
+<div><p>The pandas str code for time grouping.</p>
+</div></blockquote>
+<p><strong>by_sector</strong> : bool</p>
+<blockquote>
+<div><p>If True, compute quantile bucket returns separately for each sector.
+Returns demeaning will occur on the sector level.</p>
+</div></blockquote>
+<p><strong>std_err: bool</strong></p>
+<blockquote>
+<div><p>If True, compute and return the standard error of the mean return.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>mean_returns_by_quantile</strong> : pd.DataFrame</p>
+<blockquote>
+<div><p>Mean daily returns by specified factor quantile.</p>
+</div></blockquote>
+<p>std_ret: pd.DataFrame</p>
+<blockquote class="last">
+<div><p>Standard deviation of returns by specified quantile.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -264,34 +496,60 @@ Returns demeaning will occur on the sector level.</dd>
 <code class="descclassname">qfactor.performance.</code><code class="descname">quantile_turnover</code><span class="sig-paren">(</span><em>quantile_factor</em>, <em>quantile</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.performance.quantile_turnover" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the proportion of names in a factor quantile that were
 not in that quantile in the previous period.</p>
-<dl class="docutils">
-<dt>quantile_factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>DataFrame with date, asset and factor quantile.</dd>
-<dt>quantile <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Quantile on which to perform turnover analysis.</dd>
-</dl>
-<dl class="docutils">
-<dt>quant_turnover <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>Period by period turnover for that quantile.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quantile_factor</strong> : pd.Series</p>
+<blockquote>
+<div><p>DataFrame with date, asset and factor quantile.</p>
+</div></blockquote>
+<p><strong>quantile</strong> : int</p>
+<blockquote>
+<div><p>Quantile on which to perform turnover analysis.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>quant_turnover</strong> : pd.Series</p>
+<blockquote class="last">
+<div><p>Period by period turnover for that quantile.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="qfactor.performance.quantize_factor">
 <code class="descclassname">qfactor.performance.</code><code class="descname">quantize_factor</code><span class="sig-paren">(</span><em>factor</em>, <em>quantiles=5</em>, <em>by_sector=False</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.performance.quantize_factor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes daily factor quantiles.</p>
-<dl class="docutils">
-<dt>factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex</span></dt>
-<dd>A list of equities and their factor values indexed by date.</dd>
-<dt>quantiles <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Number of quantiles buckets to use in factor bucketing.</dd>
-<dt>by_sector <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If True, compute quantile buckets separately for each sector.</dd>
-</dl>
-<dl class="docutils">
-<dt>factor_quantile <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>Factor quantiles indexed by date and symbol.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series - MultiIndex</p>
+<blockquote>
+<div><p>A list of equities and their factor values indexed by date.</p>
+</div></blockquote>
+<p><strong>quantiles</strong> : int</p>
+<blockquote>
+<div><p>Number of quantiles buckets to use in factor bucketing.</p>
+</div></blockquote>
+<p><strong>by_sector</strong> : bool</p>
+<blockquote>
+<div><p>If True, compute quantile buckets separately for each sector.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>factor_quantile</strong> : pd.Series</p>
+<blockquote class="last">
+<div><p>Factor quantiles indexed by date and symbol.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -303,48 +561,77 @@ not in that quantile in the previous period.</p>
 <dd><p>Create pyfolio default plotting style context.</p>
 <p>Under the hood, calls and returns seaborn.plotting_context() with
 some custom settings. Usually you would use in a with-context.</p>
-<dl class="docutils">
-<dt>context <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
-<dd>Name of seaborn context.</dd>
-<dt>font_scale <span class="classifier-delimiter">:</span> <span class="classifier">float, optional</span></dt>
-<dd>Scale font by factor font_scale.</dd>
-<dt>rc <span class="classifier-delimiter">:</span> <span class="classifier">dict, optional</span></dt>
-<dd><p class="first">Config flags.
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>context</strong> : str, optional</p>
+<blockquote>
+<div><p>Name of seaborn context.</p>
+</div></blockquote>
+<p><strong>font_scale</strong> : float, optional</p>
+<blockquote>
+<div><p>Scale font by factor font_scale.</p>
+</div></blockquote>
+<p><strong>rc</strong> : dict, optional</p>
+<blockquote>
+<div><p>Config flags.
 By default, {&#8216;lines.linewidth&#8217;: 1.5,</p>
 <blockquote>
-<div>&#8216;axes.facecolor&#8217;: &#8216;0.995&#8217;,
-&#8216;figure.facecolor&#8217;: &#8216;0.97&#8217;}</div></blockquote>
-<p class="last">is being used and will be added to any
+<div><p>&#8216;axes.facecolor&#8217;: &#8216;0.995&#8217;,
+&#8216;figure.facecolor&#8217;: &#8216;0.97&#8217;}</p>
+</div></blockquote>
+<p>is being used and will be added to any
 rc passed in, unless explicitly overriden.</p>
-</dd>
-</dl>
-<p>seaborn plotting context</p>
-<dl class="docutils">
-<dt>with pyfolio.plotting.context(font_scale=2):</dt>
-<dd>pyfolio.create_full_tear_sheet()</dd>
-</dl>
-<p>For more information, see seaborn.plotting_context().</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">seaborn plotting context</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-obj docutils literal"><span class="pre">For</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">see</span></code></p>
+</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_cumulative_returns">
 <code class="descclassname">qfactor.plotting.</code><code class="descname">plot_cumulative_returns</code><span class="sig-paren">(</span><em>factor_returns</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_cumulative_returns" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the cumulative returns of the returns series passed in.</p>
-<dl class="docutils">
-<dt>factor_returns <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>Daily returns of dollar neutral portfolio weighted by factor value.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_returns</strong> : pd.Series</p>
+<blockquote class="last">
+<div><p>Daily returns of dollar neutral portfolio weighted by factor value.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_cumulative_returns_by_quantile">
 <code class="descclassname">qfactor.plotting.</code><code class="descname">plot_cumulative_returns_by_quantile</code><span class="sig-paren">(</span><em>quantile_daily_returns</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_cumulative_returns_by_quantile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the cumulative returns of various factor quantiles.</p>
-<dl class="docutils">
-<dt>quantile_daily_returns <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series &#8211; MultiIndex</span></dt>
-<dd>Mean daily returns by specified factor quantile. MultiIndex of date, quantile.
-See performance.mean_returns_by_quantile.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quantile_daily_returns</strong> : pd.Series &#8211; MultiIndex</p>
+<blockquote class="last">
+<div><p>Mean daily returns by specified factor quantile. MultiIndex of date, quantile.
+See performance.mean_returns_by_quantile.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -352,10 +639,18 @@ See performance.mean_returns_by_quantile.</dd>
 <code class="descclassname">qfactor.plotting.</code><code class="descname">plot_daily_ic_hist</code><span class="sig-paren">(</span><em>daily_ic</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_daily_ic_hist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots Spearman Rank Information Coefficient histogram for a given factor.
 Sector neutralization of forward returns is recommended.</p>
-<dl class="docutils">
-<dt>daily_ic <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>DataFrame indexed by date, with IC for each forward return.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>daily_ic</strong> : pd.DataFrame</p>
+<blockquote class="last">
+<div><p>DataFrame indexed by date, with IC for each forward return.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -363,20 +658,36 @@ Sector neutralization of forward returns is recommended.</p>
 <code class="descclassname">qfactor.plotting.</code><code class="descname">plot_daily_ic_ts</code><span class="sig-paren">(</span><em>daily_ic</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_daily_ic_ts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots Spearman Rank Information Coefficient and IC moving average for a given factor.
 Sector neutralization of forward returns is recommended.</p>
-<dl class="docutils">
-<dt>daily_ic <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>DataFrame indexed by date, with IC for each forward return.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>daily_ic</strong> : pd.DataFrame</p>
+<blockquote class="last">
+<div><p>DataFrame indexed by date, with IC for each forward return.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_factor_rank_auto_correlation">
 <code class="descclassname">qfactor.plotting.</code><code class="descname">plot_factor_rank_auto_correlation</code><span class="sig-paren">(</span><em>factor_autocorrelation</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_factor_rank_auto_correlation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots factor rank autocorrelation over time. See factor_rank_autocorrelation for more details.</p>
-<dl class="docutils">
-<dt>factor_autocorrelation <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>Rolling 1 period (defined by time_rule) autocorrelation of factor values.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_autocorrelation</strong> : pd.Series</p>
+<blockquote class="last">
+<div><p>Rolling 1 period (defined by time_rule) autocorrelation of factor values.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -384,10 +695,18 @@ Sector neutralization of forward returns is recommended.</p>
 <code class="descclassname">qfactor.plotting.</code><code class="descname">plot_ic_by_sector</code><span class="sig-paren">(</span><em>ic_sector</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_ic_by_sector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots Spearman Rank Information Coefficient for a given factor over provided forward price
 movement windows. Separates by sector.</p>
-<dl class="docutils">
-<dt>ic_sector <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>Sector-wise mean daily returns.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ic_sector</strong> : pd.DataFrame</p>
+<blockquote class="last">
+<div><p>Sector-wise mean daily returns.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -395,66 +714,118 @@ movement windows. Separates by sector.</p>
 <code class="descclassname">qfactor.plotting.</code><code class="descname">plot_ic_by_sector_over_time</code><span class="sig-paren">(</span><em>ic_time</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_ic_by_sector_over_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots sector-wise time window mean daily Spearman Rank Information Coefficient
 for a given factor over provided forward price movement windows.</p>
-<dl class="docutils">
-<dt>ic_time <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>Sector-wise mean daily returns.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ic_time</strong> : pd.DataFrame</p>
+<blockquote class="last">
+<div><p>Sector-wise mean daily returns.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_mean_quantile_returns_spread_time_series">
 <code class="descclassname">qfactor.plotting.</code><code class="descname">plot_mean_quantile_returns_spread_time_series</code><span class="sig-paren">(</span><em>mean_returns_spread</em>, <em>std=None</em>, <em>bandwidth=0.5</em>, <em>title='Top Quintile - Bottom Quantile Mean Return'</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_mean_quantile_returns_spread_time_series" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots mean daily returns for factor quantiles.</p>
-<dl class="docutils">
-<dt>mean_returns_spread <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>Series with difference between quantile mean returns by day.</dd>
-<dt>std <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>Series with standard devation of difference between quantile mean returns each day.</dd>
-<dt>bandwidth <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Width of displayed error bands in standard deviations.</dd>
-<dt>title <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>Plot title.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mean_returns_spread</strong> : pd.Series</p>
+<blockquote>
+<div><p>Series with difference between quantile mean returns by day.</p>
+</div></blockquote>
+<p><strong>std</strong> : pd.Series</p>
+<blockquote>
+<div><p>Series with standard devation of difference between quantile mean returns each day.</p>
+</div></blockquote>
+<p><strong>bandwidth</strong> : float</p>
+<blockquote>
+<div><p>Width of displayed error bands in standard deviations.</p>
+</div></blockquote>
+<p><strong>title</strong> : str</p>
+<blockquote class="last">
+<div><p>Plot title.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_monthly_IC_heatmap">
 <code class="descclassname">qfactor.plotting.</code><code class="descname">plot_monthly_IC_heatmap</code><span class="sig-paren">(</span><em>mean_monthly_vals</em>, <em>val_type='IC'</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_monthly_IC_heatmap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots a heatmap of the information coefficient or returns by month.</p>
-<dl class="docutils">
-<dt>mean_monthly_vals <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>The mean monthly IC for N days forward.</dd>
-<dt>val_type <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>Name of the metric being plotted.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mean_monthly_vals</strong> : pd.DataFrame</p>
+<blockquote>
+<div><p>The mean monthly IC for N days forward.</p>
+</div></blockquote>
+<p><strong>val_type</strong> : str</p>
+<blockquote class="last">
+<div><p>Name of the metric being plotted.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_quantile_returns_bar">
 <code class="descclassname">qfactor.plotting.</code><code class="descname">plot_quantile_returns_bar</code><span class="sig-paren">(</span><em>mean_ret_by_q</em>, <em>by_sector=False</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_quantile_returns_bar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots mean daily returns for factor quantiles.</p>
-<dl class="docutils">
-<dt>mean_ret_by_q <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>DataFrame with quantile, (sector) and mean daily return values.</dd>
-<dt>by_sector <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>Disaggregate figures by sector.</dd>
-<dt>sector_mapping <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
-<dd><p class="first">A dictionary keyed by sector code with values corresponding to the display name for each sector.
-- Example:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mean_ret_by_q</strong> : pd.DataFrame</p>
+<blockquote>
+<div><p>DataFrame with quantile, (sector) and mean daily return values.</p>
+</div></blockquote>
+<p><strong>by_sector</strong> : bool</p>
+<blockquote>
+<div><p>Disaggregate figures by sector.</p>
+</div></blockquote>
+<p><strong>sector_mapping</strong> : dict</p>
 <blockquote class="last">
-<div>{101: &#8220;Basic Materials&#8221;, 102: &#8220;Consumer Cyclical&#8221;}</div></blockquote>
-</dd>
-</dl>
+<div><p>A dictionary keyed by sector code with values corresponding to the display name for each sector.
+- Example:</p>
+<blockquote>
+<div><p>{101: &#8220;Basic Materials&#8221;, 102: &#8220;Consumer Cyclical&#8221;}</p>
+</div></blockquote>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_top_bottom_quantile_turnover">
 <code class="descclassname">qfactor.plotting.</code><code class="descname">plot_top_bottom_quantile_turnover</code><span class="sig-paren">(</span><em>quantized_factor</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_top_bottom_quantile_turnover" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots daily top and bottom quantile factor turnover.</p>
-<dl class="docutils">
-<dt>quantized_factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>Factor quantiles indexed by date and symbol.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quantized_factor</strong> : pd.Series</p>
+<blockquote class="last">
+<div><p>Factor quantiles indexed by date and symbol.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -467,20 +838,38 @@ for a given factor over provided forward price movement windows.</p>
 <dt id="qfactor.plotting.summary_stats">
 <code class="descclassname">qfactor.plotting.</code><code class="descname">summary_stats</code><span class="sig-paren">(</span><em>ic_data</em>, <em>alpha_beta</em>, <em>quantized_factor</em>, <em>mean_ret_quantile</em>, <em>autocorrelation_data</em>, <em>mean_ret_spread_quantile</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.summary_stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a pretty printed table of summary statistics for the alpha factor.</p>
-<dl class="docutils">
-<dt>ic_data <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>Spearman Rank correlation between factor and provided forward price movement windows.</dd>
-<dt>alpha_beta <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>A list containing the alpha, beta, a t-stat(alpha) for the given factor and forward returns.</dd>
-<dt>quantized_factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>Factor quantiles indexed by date and symbol.</dd>
-<dt>mean_ret_quantile <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>Mean daily returns by specified factor quantile.</dd>
-<dt>autocorrelation_data <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>Rolling 1 period (defined by time_rule) autocorrelation of factor values.</dd>
-<dt>mean_ret_spread_quantile <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>Daily difference in quantile returns.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ic_data</strong> : pd.DataFrame</p>
+<blockquote>
+<div><p>Spearman Rank correlation between factor and provided forward price movement windows.</p>
+</div></blockquote>
+<p><strong>alpha_beta</strong> : pd.Series</p>
+<blockquote>
+<div><p>A list containing the alpha, beta, a t-stat(alpha) for the given factor and forward returns.</p>
+</div></blockquote>
+<p><strong>quantized_factor</strong> : pd.Series</p>
+<blockquote>
+<div><p>Factor quantiles indexed by date and symbol.</p>
+</div></blockquote>
+<p><strong>mean_ret_quantile</strong> : pd.DataFrame</p>
+<blockquote>
+<div><p>Mean daily returns by specified factor quantile.</p>
+</div></blockquote>
+<p><strong>autocorrelation_data</strong> : pd.Series</p>
+<blockquote>
+<div><p>Rolling 1 period (defined by time_rule) autocorrelation of factor values.</p>
+</div></blockquote>
+<p><strong>mean_ret_spread_quantile</strong> : pd.Series</p>
+<blockquote class="last">
+<div><p>Daily difference in quantile returns.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -490,24 +879,38 @@ for a given factor over provided forward price movement windows.</p>
 <dt id="qfactor.utils.compute_forward_returns">
 <code class="descclassname">qfactor.utils.</code><code class="descname">compute_forward_returns</code><span class="sig-paren">(</span><em>prices</em>, <em>days=(1</em>, <em>5</em>, <em>10)</em>, <em>filter_zscore=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.utils.compute_forward_returns" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds the N day forward returns (as percent change) for each asset provided.</p>
-<dl class="docutils">
-<dt>prices <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>Pricing data to use in forward price calculation.
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>prices</strong> : pd.DataFrame</p>
+<blockquote>
+<div><p>Pricing data to use in forward price calculation.
 Equities as columns, dates as index.
 Pricing data must span the factor analysis time period
 plus an additional buffer window
 that is greater than the maximum number of expected days
-in the forward returns calculations.</dd>
-<dt>days <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd>Number of days forward to project returns. One column will be added for each value.</dd>
-<dt>filter_zscore <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Sets forward returns greater than X standard deviations from the the mean to nan.
-Caution: this outlier filtering incorporates lookahead bias.</dd>
-</dl>
-<dl class="docutils">
-<dt>forward_returns <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame - MultiIndex</span></dt>
-<dd>DataFrame containing the N day forward returns for a security.</dd>
-</dl>
+in the forward returns calculations.</p>
+</div></blockquote>
+<p><strong>days</strong> : list</p>
+<blockquote>
+<div><p>Number of days forward to project returns. One column will be added for each value.</p>
+</div></blockquote>
+<p><strong>filter_zscore</strong> : int</p>
+<blockquote>
+<div><p>Sets forward returns greater than X standard deviations from the the mean to nan.
+Caution: this outlier filtering incorporates lookahead bias.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
+<blockquote class="last">
+<div><p>DataFrame containing the N day forward returns for a security.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -523,18 +926,30 @@ return for the Technology stocks in our universe was 0.5% in the</p>
 <blockquote>
 <div>same period, the sector adjusted 5 day return for AAPL</div></blockquote>
 <p>in this period is -0.4%.</p>
-<dl class="docutils">
-<dt>forward_returns <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame - MultiIndex</span></dt>
-<dd>DataFrame with date, asset, sector, and forward returns columns.
-See compute_forward_returns for more detail.</dd>
-<dt>by_sector <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If True, demean according to sector.</dd>
-</dl>
-<dl class="docutils">
-<dt>adjusted_forward_returns <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame - MultiIndex</span></dt>
-<dd>DataFrame of the same format as the input, but with each
-security&#8217;s returns normalized by sector.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
+<blockquote>
+<div><p>DataFrame with date, asset, sector, and forward returns columns.
+See compute_forward_returns for more detail.</p>
+</div></blockquote>
+<p><strong>by_sector</strong> : bool</p>
+<blockquote>
+<div><p>If True, demean according to sector.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>adjusted_forward_returns</strong> : pd.DataFrame - MultiIndex</p>
+<blockquote class="last">
+<div><p>DataFrame of the same format as the input, but with each
+security&#8217;s returns normalized by sector.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -543,29 +958,43 @@ security&#8217;s returns normalized by sector.</dd>
 <dd><p>Formats the factor data, pricing data, and sector mappings
 into DataFrames and Series that contain aligned MultiIndex
 indices containing date, asset, and sector.</p>
-<dl class="docutils">
-<dt>factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex</span></dt>
-<dd>A list of equities and their factor values indexed by date.</dd>
-<dt>prices <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
-<dd>Pricing data to use in forward price calculation.
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series - MultiIndex</p>
+<blockquote>
+<div><p>A list of equities and their factor values indexed by date.</p>
+</div></blockquote>
+<p><strong>prices</strong> : pd.DataFrame</p>
+<blockquote>
+<div><p>Pricing data to use in forward price calculation.
 Equities as columns, dates as index.
 Pricing data must span the factor analysis time period
 plus an additional buffer window that is greater than the
 maximum number of expected days in the forward returns
-calculations.</dd>
-<dt>sectors <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex</span></dt>
-<dd>A list of equities and their sectors</dd>
-<dt>filter_zscore <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Sets forward returns greater than X standard deviations
+calculations.</p>
+</div></blockquote>
+<p><strong>sectors</strong> : pd.Series - MultiIndex</p>
+<blockquote>
+<div><p>A list of equities and their sectors</p>
+</div></blockquote>
+<p><strong>filter_zscore</strong> : int</p>
+<blockquote>
+<div><p>Sets forward returns greater than X standard deviations
 from the the mean to nan.
-Caution: this outlier filtering incorperates lookahead bias.</dd>
-<dt>days <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd>Number of days forward to project returns. One column
-will be added for each value.</dd>
-<dt>sector_names: dict</dt>
-<dd><p class="first">A dictionary keyed by sector code with values corresponding
+Caution: this outlier filtering incorperates lookahead bias.</p>
+</div></blockquote>
+<p><strong>days</strong> : list</p>
+<blockquote>
+<div><p>Number of days forward to project returns. One column
+will be added for each value.</p>
+</div></blockquote>
+<p><strong>sector_names: dict</strong></p>
+<blockquote>
+<div><p>A dictionary keyed by sector code with values corresponding
 to the display name for each sector.</p>
-<blockquote class="last">
+<blockquote>
 <div><ul>
 <li><dl class="first docutils">
 <dt>Example:</dt>
@@ -575,17 +1004,24 @@ to the display name for each sector.</p>
 </li>
 </ul>
 </div></blockquote>
-</dd>
-</dl>
-<dl class="docutils">
-<dt>factor <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
-<dd>A list of equities and their factor values indexed by date,
-asset, and optionally sector.</dd>
-<dt>forward_returns <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame - MultiIndex</span></dt>
-<dd>A DataFrame of equities and their forward returns
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series</p>
+<blockquote>
+<div><p>A list of equities and their factor values indexed by date,
+asset, and optionally sector.</p>
+</div></blockquote>
+<p><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
+<blockquote class="last">
+<div><p>A DataFrame of equities and their forward returns
 indexed by date, asset, and optionally sector.
-Note: this is the same index as the factor index.</dd>
-</dl>
+Note: this is the same index as the factor index.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -594,82 +1030,90 @@ Note: this is the same index as the factor index.</dd>
 <dd><p>Pretty print a pandas DataFrame.</p>
 <p>Uses HTML output if running inside Jupyter Notebook, otherwise
 formatted text output.</p>
-<dl class="docutils">
-<dt>table <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series or pd.DataFrame</span></dt>
-<dd>Table to pretty-print.</dd>
-<dt>name <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
-<dd>Table name to display in upper left corner.</dd>
-<dt>fmt <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
-<dd>Formatter to use for displaying table elements.
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>table</strong> : pd.Series or pd.DataFrame</p>
+<blockquote>
+<div><p>Table to pretty-print.</p>
+</div></blockquote>
+<p><strong>name</strong> : str, optional</p>
+<blockquote>
+<div><p>Table name to display in upper left corner.</p>
+</div></blockquote>
+<p><strong>fmt</strong> : str, optional</p>
+<blockquote class="last">
+<div><p>Formatter to use for displaying table elements.
 E.g. &#8216;{0:.2f}%&#8217; for displaying 100 as &#8216;100.00%&#8217;.
-Restores original setting after displaying.</dd>
-</dl>
+Restores original setting after displaying.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
 </div>
 
 
+           </div>
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Qfactor</a><ul>
-<li><a class="reference internal" href="#module-qfactor.tears">Tear Sheets</a></li>
-<li><a class="reference internal" href="#module-qfactor.performance">Performance</a></li>
-<li><a class="reference internal" href="#module-qfactor.plotting">Plotting</a></li>
-<li><a class="reference internal" href="#module-qfactor.utils">Utilities</a></li>
-</ul>
-</li>
-</ul>
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="index.html">Documentation overview</a><ul>
-  </ul></li>
-</ul>
-</div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/qfactor.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Quantopian, Inc..
+
     </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2016, Quantopian, Inc..
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
-      
-      |
-      <a href="_sources/qfactor.txt"
-          rel="nofollow">Page source</a>
-    </div>
 
-    
+    </section>
 
-    
-  </body>
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>
