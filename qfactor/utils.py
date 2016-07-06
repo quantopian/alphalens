@@ -34,6 +34,7 @@ MORNINGSTAR_SECTOR_MAPPING = {101: "Basic Materials",
 def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
     """
     Finds the N day forward returns (as percent change) for each asset provided.
+
     Parameters
     ----------
     prices : pd.DataFrame
@@ -48,6 +49,7 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
     filter_zscore : int
         Sets forward returns greater than X standard deviations from the the mean to nan.
         Caution: this outlier filtering incorporates lookahead bias.
+
     Returns
     -------
     forward_returns : pd.DataFrame - MultiIndex
@@ -84,7 +86,6 @@ def demean_forward_returns(forward_returns, by_sector=False):
      same period, the sector adjusted 5 day return for AAPL
     in this period is -0.4%.
 
-
     Parameters
     ----------
     forward_returns : pd.DataFrame - MultiIndex
@@ -98,7 +99,6 @@ def demean_forward_returns(forward_returns, by_sector=False):
     adjusted_forward_returns : pd.DataFrame - MultiIndex
         DataFrame of the same format as the input, but with each
         security's returns normalized by sector.
-
     """
     grouper = ['date', 'sector'] if by_sector else ['date']
 
@@ -106,7 +106,8 @@ def demean_forward_returns(forward_returns, by_sector=False):
 
 
 def print_table(table, name=None, fmt=None):
-    """Pretty print a pandas DataFrame.
+    """
+    Pretty print a pandas DataFrame.
 
     Uses HTML output if running inside Jupyter Notebook, otherwise
     formatted text output.
@@ -121,7 +122,6 @@ def print_table(table, name=None, fmt=None):
         Formatter to use for displaying table elements.
         E.g. '{0:.2f}%' for displaying 100 as '100.00%'.
         Restores original setting after displaying.
-
     """
     if isinstance(table, pd.Series):
         table = pd.DataFrame(table)
@@ -146,7 +146,8 @@ def format_input_data(factor, prices, sectors=None,
     Formats the factor data, pricing data, and sector mappings
     into DataFrames and Series that contain aligned MultiIndex
     indices containing date, asset, and sector.
-    ----------
+
+    Parameters
     ----------
     factor : pd.Series - MultiIndex
         A list of equities and their factor values indexed by date.
@@ -169,8 +170,9 @@ def format_input_data(factor, prices, sectors=None,
     sector_names: dict
         A dictionary keyed by sector code with values corresponding
         to the display name for each sector.
-        - Example:
-            {101: "Basic Materials", 102: "Consumer Cyclical"}
+            - Example:
+                {101: "Basic Materials", 102: "Consumer Cyclical"}
+
     Returns
     -------
     factor : pd.Series

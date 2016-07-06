@@ -38,19 +38,93 @@
             
   <div class="section" id="welcome-to-qfactor-s-documentation">
 <h1>Welcome to Qfactor&#8217;s documentation!<a class="headerlink" href="#welcome-to-qfactor-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Contents:</p>
-<div class="toctree-wrapper compound">
-<ul class="simple">
-</ul>
+<div class="figure">
+<img alt="pyfolio" src="https://media.quantopian.com/logos/open_source/pyfolio-logo-03.png" />
 </div>
 </div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="qfactor">
+<h1>Qfactor<a class="headerlink" href="#qfactor" title="Permalink to this headline">¶</a></h1>
+<p>Qfactor is a Python Library for performance analysis of predictive
+(alpha) stock factors. Qfactor works great with the
+<a class="reference external" href="http://zipline.io/">Zipline</a> open source backtesting library, and
+<a class="reference external" href="https://github.com/quantopian/pyfolio">pyfolio</a> which provides
+performance and risk analysis of financial portfolios.</p>
+<p>The main function of Qfactor is to surface the most relevant statistics
+and plots about an alpha factor, including:</p>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span>Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
+<li>Information Coefficient Analysis</li>
+<li>Returns Analysis</li>
+<li>Turnover Analysis</li>
+<li>Sector Analysis</li>
 </ul>
+<div class="section" id="getting-started">
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<p>With a signal and pricing data creating a factor &#8220;tear sheet&#8221; is just:</p>
+<div class="code python highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">qfactor</span>
+
+<span class="n">qfactor</span><span class="o">.</span><span class="n">tears</span><span class="o">.</span><span class="n">create_factor_tear_sheet</span><span class="p">(</span><span class="n">my_factor</span><span class="p">,</span> <span class="n">pricing</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="figure">
+<img alt="" src="https://c1.staticflickr.com/3/2389/2073509907_345ad52bc1.jpg" />
+</div>
+</div>
+<div class="section" id="learn-more">
+<h2>Learn more<a class="headerlink" href="#learn-more" title="Permalink to this headline">¶</a></h2>
+<p>Check out the <a href="#id1"><span class="problematic" id="id2">`example notebooks &lt;&gt;`__</span></a> for more on how to read and use
+the factor tear sheet.</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span>pip install qfactor
+</pre></div>
+</div>
+<p>Qfactor depends on:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/matplotlib/matplotlib">matplotlib</a></li>
+<li><a class="reference external" href="https://github.com/numpy/numpy">numpy</a></li>
+<li><a class="reference external" href="https://github.com/pydata/pandas">pandas</a></li>
+<li><a class="reference external" href="https://github.com/scipy/scipy">scipy</a></li>
+<li><a class="reference external" href="https://github.com/mwaskom/seaborn">seaborn</a></li>
+<li><a class="reference external" href="https://github.com/statsmodels/statsmodels">statsmodels</a></li>
+</ul>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>A good way to get started is to run the examples in a <a class="reference external" href="http://jupyter.org/">Jupyter
+notebook</a>.</p>
+<p>To get set up with an example, you can:</p>
+<p>Run a Jupyter notebook server via:</p>
+<div class="code bash highlight-python"><div class="highlight"><pre><span></span>jupyter notebook
+</pre></div>
+</div>
+<p>From the notebook list page(usually found at
+<code class="docutils literal"><span class="pre">http://localhost:8888/</span></code>), navigate over to the examples directory,
+and open any file with a .ipynb extension.</p>
+<p>Execute the code in a notebook cell by clicking on it and hitting
+Shift+Enter.</p>
+</div>
+<div class="section" id="questions">
+<h2>Questions?<a class="headerlink" href="#questions" title="Permalink to this headline">¶</a></h2>
+<p>If you find a bug, feel free to open an issue on our <a class="reference external" href="https://github.com/quantopian/qfactor/issues">github
+tracker</a>.</p>
+</div>
+<div class="section" id="contribute">
+<h2>Contribute<a class="headerlink" href="#contribute" title="Permalink to this headline">¶</a></h2>
+<p>If you want to contribute, a great place to start would be the
+<a class="reference external" href="https://github.com/quantopian/qfactor/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22">help-wanted
+issues</a>.</p>
+</div>
+<div class="section" id="credits">
+<h2>Credits<a class="headerlink" href="#credits" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/a-campbell">Andrew Campbell</a></li>
+<li><a class="reference external" href="https://github.com/jameschristopher">James Christopher</a></li>
+<li><a class="reference external" href="https://github.com/twiecki">Thomas Wiecki</a></li>
+<li><a class="reference external" href="https://github.com/marketneutral">Jonathan Larkin</a></li>
+<li>Jessica Stauth (<a class="reference external" href="mailto:jstauth&#37;&#52;&#48;quantopian&#46;com">jstauth<span>&#64;</span>quantopian<span>&#46;</span>com</a>)</li>
+</ul>
+</div>
 </div>
 
 
@@ -62,7 +136,16 @@
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Welcome to Qfactor&#8217;s documentation!</a></li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+<li><a class="reference internal" href="#qfactor">Qfactor</a><ul>
+<li><a class="reference internal" href="#getting-started">Getting started</a></li>
+<li><a class="reference internal" href="#learn-more">Learn more</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#questions">Questions?</a></li>
+<li><a class="reference internal" href="#contribute">Contribute</a></li>
+<li><a class="reference internal" href="#credits">Credits</a></li>
+</ul>
+</li>
 </ul>
 <div class="relations">
 <h3>Related Topics</h3>
