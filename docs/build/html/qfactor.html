@@ -169,7 +169,7 @@ a dict of asset to sector mappings. If a dict is passed,
 it is assumed that sector mappings are unchanged for the
 entire time period of the passed factor data.</p>
 </div></blockquote>
-<p><strong>sector_plots</strong> : bool</p>
+<p><strong>sector_plots</strong> : boolean</p>
 <blockquote>
 <div><p>If True create sector specific plots.</p>
 </div></blockquote>
@@ -179,7 +179,7 @@ entire time period of the passed factor data.</p>
 </div></blockquote>
 <p><strong>quantiles: int:</strong></p>
 <blockquote>
-<div><p>The number of buckets to parition the data into for analysis.</p>
+<div><p>The number of buckets to partition the data into for analysis.</p>
 </div></blockquote>
 <p><strong>filter_zscore</strong> : int</p>
 <blockquote>
@@ -591,23 +591,29 @@ rc passed in, unless explicitly overriden.</p>
 </tr>
 </tbody>
 </table>
-<div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last"><code class="xref py py-obj docutils literal"><span class="pre">For</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">see</span></code></p>
-</div>
 </dd></dl>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_cumulative_returns">
-<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_cumulative_returns</code><span class="sig-paren">(</span><em>factor_returns</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_cumulative_returns" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_cumulative_returns</code><span class="sig-paren">(</span><em>factor_returns</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_cumulative_returns" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the cumulative returns of the returns series passed in.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_returns</strong> : pd.Series</p>
-<blockquote class="last">
+<blockquote>
 <div><p>Daily returns of dollar neutral portfolio weighted by factor value.</p>
+</div></blockquote>
+<p><strong>ax</strong> : matplotlib.Axes, optional</p>
+<blockquote>
+<div><p>Axes upon which to plot.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> : matplotlib.Axes</p>
+<blockquote class="last">
+<div><p>The axes that were plotted on.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -617,17 +623,25 @@ rc passed in, unless explicitly overriden.</p>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_cumulative_returns_by_quantile">
-<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_cumulative_returns_by_quantile</code><span class="sig-paren">(</span><em>quantile_daily_returns</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_cumulative_returns_by_quantile" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_cumulative_returns_by_quantile</code><span class="sig-paren">(</span><em>quantile_daily_returns</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_cumulative_returns_by_quantile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the cumulative returns of various factor quantiles.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quantile_daily_returns</strong> : pd.Series &#8211; MultiIndex</p>
-<blockquote class="last">
-<div><p>Mean daily returns by specified factor quantile. MultiIndex of date, quantile.
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mean_returns_by_quantile</strong> : pd.Series &#8211; MultiIndex</p>
+<blockquote>
+<div><p>Mean daily returns by specified factor quantile.
+MultiIndex of date, quantile.
 See performance.mean_returns_by_quantile.</p>
 </div></blockquote>
+<p><strong>ax</strong> : matplotlib.Axes, optional</p>
+<blockquote>
+<div><p>Axes upon which to plot.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>ax</strong> : matplotlib.Axes</p>
 </td>
 </tr>
 </tbody>
@@ -636,7 +650,7 @@ See performance.mean_returns_by_quantile.</p>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_daily_ic_hist">
-<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_daily_ic_hist</code><span class="sig-paren">(</span><em>daily_ic</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_daily_ic_hist" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_daily_ic_hist</code><span class="sig-paren">(</span><em>daily_ic</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_daily_ic_hist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots Spearman Rank Information Coefficient histogram for a given factor.
 Sector neutralization of forward returns is recommended.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -644,8 +658,18 @@ Sector neutralization of forward returns is recommended.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>daily_ic</strong> : pd.DataFrame</p>
-<blockquote class="last">
+<blockquote>
 <div><p>DataFrame indexed by date, with IC for each forward return.</p>
+</div></blockquote>
+<p><strong>ax</strong> : matplotlib.Axes, optional</p>
+<blockquote>
+<div><p>Axes upon which to plot.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> : matplotlib.Axes</p>
+<blockquote class="last">
+<div><p>The axes that were plotted on.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -655,7 +679,7 @@ Sector neutralization of forward returns is recommended.</p>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_daily_ic_ts">
-<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_daily_ic_ts</code><span class="sig-paren">(</span><em>daily_ic</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_daily_ic_ts" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_daily_ic_ts</code><span class="sig-paren">(</span><em>daily_ic</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_daily_ic_ts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots Spearman Rank Information Coefficient and IC moving average for a given factor.
 Sector neutralization of forward returns is recommended.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -663,8 +687,18 @@ Sector neutralization of forward returns is recommended.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>daily_ic</strong> : pd.DataFrame</p>
-<blockquote class="last">
+<blockquote>
 <div><p>DataFrame indexed by date, with IC for each forward return.</p>
+</div></blockquote>
+<p><strong>ax</strong> : matplotlib.Axes, optional</p>
+<blockquote>
+<div><p>Axes upon which to plot.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>axes</strong> : matplotlib.Axes</p>
+<blockquote class="last">
+<div><p>The axes that were plotted on.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -674,15 +708,25 @@ Sector neutralization of forward returns is recommended.</p>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_factor_rank_auto_correlation">
-<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_factor_rank_auto_correlation</code><span class="sig-paren">(</span><em>factor_autocorrelation</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_factor_rank_auto_correlation" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_factor_rank_auto_correlation</code><span class="sig-paren">(</span><em>factor_autocorrelation</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_factor_rank_auto_correlation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots factor rank autocorrelation over time. See factor_rank_autocorrelation for more details.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_autocorrelation</strong> : pd.Series</p>
-<blockquote class="last">
+<blockquote>
 <div><p>Rolling 1 period (defined by time_rule) autocorrelation of factor values.</p>
+</div></blockquote>
+<p><strong>ax</strong> : matplotlib.Axes, optional</p>
+<blockquote>
+<div><p>Axes upon which to plot.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> : matplotlib.Axes</p>
+<blockquote class="last">
+<div><p>The axes that were plotted on.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -692,7 +736,7 @@ Sector neutralization of forward returns is recommended.</p>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_ic_by_sector">
-<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_ic_by_sector</code><span class="sig-paren">(</span><em>ic_sector</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_ic_by_sector" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_ic_by_sector</code><span class="sig-paren">(</span><em>ic_sector</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_ic_by_sector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots Spearman Rank Information Coefficient for a given factor over provided forward price
 movement windows. Separates by sector.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -700,27 +744,18 @@ movement windows. Separates by sector.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ic_sector</strong> : pd.DataFrame</p>
-<blockquote class="last">
+<blockquote>
 <div><p>Sector-wise mean daily returns.</p>
+</div></blockquote>
+<p><strong>ax</strong> : matplotlib.Axes, optional</p>
+<blockquote>
+<div><p>Axes upon which to plot.</p>
 </div></blockquote>
 </td>
 </tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="qfactor.plotting.plot_ic_by_sector_over_time">
-<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_ic_by_sector_over_time</code><span class="sig-paren">(</span><em>ic_time</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_ic_by_sector_over_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots sector-wise time window mean daily Spearman Rank Information Coefficient
-for a given factor over provided forward price movement windows.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ic_time</strong> : pd.DataFrame</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> : matplotlib.Axes</p>
 <blockquote class="last">
-<div><p>Sector-wise mean daily returns.</p>
+<div><p>The axes that were plotted on.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -730,7 +765,7 @@ for a given factor over provided forward price movement windows.</p>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_mean_quantile_returns_spread_time_series">
-<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_mean_quantile_returns_spread_time_series</code><span class="sig-paren">(</span><em>mean_returns_spread</em>, <em>std=None</em>, <em>bandwidth=0.5</em>, <em>title='Top Quintile - Bottom Quantile Mean Return'</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_mean_quantile_returns_spread_time_series" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_mean_quantile_returns_spread_time_series</code><span class="sig-paren">(</span><em>mean_returns_spread</em>, <em>std=None</em>, <em>bandwidth=0.5</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_mean_quantile_returns_spread_time_series" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots mean daily returns for factor quantiles.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -742,15 +777,26 @@ for a given factor over provided forward price movement windows.</p>
 </div></blockquote>
 <p><strong>std</strong> : pd.Series</p>
 <blockquote>
-<div><p>Series with standard devation of difference between quantile mean returns each day.</p>
+<div><p>Series with standard devation of difference between quantile
+mean returns each day.</p>
 </div></blockquote>
 <p><strong>bandwidth</strong> : float</p>
 <blockquote>
 <div><p>Width of displayed error bands in standard deviations.</p>
 </div></blockquote>
-<p><strong>title</strong> : str</p>
-<blockquote class="last">
+<p><strong>title</strong> : string</p>
+<blockquote>
 <div><p>Plot title.</p>
+</div></blockquote>
+<p><strong>ax</strong> : matplotlib.Axes, optional</p>
+<blockquote>
+<div><p>Axes upon which to plot.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> : matplotlib.Axes</p>
+<blockquote class="last">
+<div><p>The axes that were plotted on.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -759,20 +805,26 @@ for a given factor over provided forward price movement windows.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="qfactor.plotting.plot_monthly_IC_heatmap">
-<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_monthly_IC_heatmap</code><span class="sig-paren">(</span><em>mean_monthly_vals</em>, <em>val_type='IC'</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_monthly_IC_heatmap" title="Permalink to this definition">¶</a></dt>
+<dt id="qfactor.plotting.plot_monthly_ic_heatmap">
+<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_monthly_ic_heatmap</code><span class="sig-paren">(</span><em>mean_monthly_ic</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_monthly_ic_heatmap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots a heatmap of the information coefficient or returns by month.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mean_monthly_vals</strong> : pd.DataFrame</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mean_monthly_ic</strong> : pd.DataFrame</p>
 <blockquote>
 <div><p>The mean monthly IC for N days forward.</p>
 </div></blockquote>
-<p><strong>val_type</strong> : str</p>
+<p><strong>ax</strong> : matplotlib.Axes, optional</p>
+<blockquote>
+<div><p>Axes upon which to plot.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> : matplotlib.Axes</p>
 <blockquote class="last">
-<div><p>Name of the metric being plotted.</p>
+<div><p>The axes that were plotted on.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -782,7 +834,7 @@ for a given factor over provided forward price movement windows.</p>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_quantile_returns_bar">
-<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_quantile_returns_bar</code><span class="sig-paren">(</span><em>mean_ret_by_q</em>, <em>by_sector=False</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_quantile_returns_bar" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_quantile_returns_bar</code><span class="sig-paren">(</span><em>mean_ret_by_q</em>, <em>by_sector=False</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_quantile_returns_bar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots mean daily returns for factor quantiles.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -792,17 +844,19 @@ for a given factor over provided forward price movement windows.</p>
 <blockquote>
 <div><p>DataFrame with quantile, (sector) and mean daily return values.</p>
 </div></blockquote>
-<p><strong>by_sector</strong> : bool</p>
+<p><strong>by_sector</strong> : boolean</p>
 <blockquote>
-<div><p>Disaggregate figures by sector.</p>
+<div><p>Disagregate figures by sector.</p>
 </div></blockquote>
-<p><strong>sector_mapping</strong> : dict</p>
+<p><strong>ax</strong> : matplotlib.Axes, optional</p>
+<blockquote>
+<div><p>Axes upon which to plot.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> : matplotlib.Axes</p>
 <blockquote class="last">
-<div><p>A dictionary keyed by sector code with values corresponding to the display name for each sector.
-- Example:</p>
-<blockquote>
-<div><p>{101: &#8220;Basic Materials&#8221;, 102: &#8220;Consumer Cyclical&#8221;}</p>
-</div></blockquote>
+<div><p>The axes that were plotted on.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -812,15 +866,25 @@ for a given factor over provided forward price movement windows.</p>
 
 <dl class="function">
 <dt id="qfactor.plotting.plot_top_bottom_quantile_turnover">
-<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_top_bottom_quantile_turnover</code><span class="sig-paren">(</span><em>quantized_factor</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_top_bottom_quantile_turnover" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">qfactor.plotting.</code><code class="descname">plot_top_bottom_quantile_turnover</code><span class="sig-paren">(</span><em>quantized_factor</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qfactor.plotting.plot_top_bottom_quantile_turnover" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots daily top and bottom quantile factor turnover.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quantized_factor</strong> : pd.Series</p>
-<blockquote class="last">
+<blockquote>
 <div><p>Factor quantiles indexed by date and symbol.</p>
+</div></blockquote>
+<p><strong>ax</strong> : matplotlib.Axes, optional</p>
+<blockquote>
+<div><p>Axes upon which to plot.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> : matplotlib.Axes</p>
+<blockquote class="last">
+<div><p>The axes that were plotted on.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -844,7 +908,8 @@ for a given factor over provided forward price movement windows.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ic_data</strong> : pd.DataFrame</p>
 <blockquote>
-<div><p>Spearman Rank correlation between factor and provided forward price movement windows.</p>
+<div><p>Spearman Rank correlation between factor and
+provided forward price movement windows.</p>
 </div></blockquote>
 <p><strong>alpha_beta</strong> : pd.Series</p>
 <blockquote>
@@ -922,10 +987,9 @@ Sector-wise normalization incorporates the assumption of a
 sector neutral portfolio constraint and thus allows allows the
 factor to be evaluated across sectors.</p>
 <p>For example, if AAPL 5 day return is 0.1% and mean 5 day
-return for the Technology stocks in our universe was 0.5% in the</p>
-<blockquote>
-<div>same period, the sector adjusted 5 day return for AAPL</div></blockquote>
-<p>in this period is -0.4%.</p>
+return for the Technology stocks in our universe was 0.5% in the
+same period, the sector adjusted 5 day return for AAPL
+in this period is -0.4%.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -998,7 +1062,7 @@ to the display name for each sector.</p>
 <div><ul>
 <li><dl class="first docutils">
 <dt>Example:</dt>
-<dd><p class="first last">{101: &#8220;Basic Materials&#8221;, 102: &#8220;Consumer Cyclical&#8221;}</p>
+<dd><p class="first last"><code class="docutils literal"><span class="pre">{101:</span> <span class="pre">&quot;Basic</span> <span class="pre">Materials&quot;,</span> <span class="pre">102:</span> <span class="pre">&quot;Consumer</span> <span class="pre">Cyclical&quot;}</span></code></p>
 </dd>
 </dl>
 </li>

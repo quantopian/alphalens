@@ -83,7 +83,7 @@ def demean_forward_returns(forward_returns, by_sector=False):
 
     For example, if AAPL 5 day return is 0.1% and mean 5 day
     return for the Technology stocks in our universe was 0.5% in the
-     same period, the sector adjusted 5 day return for AAPL
+    same period, the sector adjusted 5 day return for AAPL
     in this period is -0.4%.
 
     Parameters
@@ -171,7 +171,7 @@ def format_input_data(factor, prices, sectors=None,
         A dictionary keyed by sector code with values corresponding
         to the display name for each sector.
             - Example:
-                {101: "Basic Materials", 102: "Consumer Cyclical"}
+                ``{101: "Basic Materials", 102: "Consumer Cyclical"}``
 
     Returns
     -------
