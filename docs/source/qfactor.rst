@@ -1,8 +1,4 @@
 
-Qfactor
-=======
-
-
 Tear Sheets
 -----------
 
