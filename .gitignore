@@ -6,3 +6,4 @@
 *.pyc
 
 build/
+docs/build/
