@@ -141,9 +141,8 @@ def factor_returns(factor, forward_returns, long_short=True):
     factor : pd.Series - MultiIndex
         A list of equities and their factor values indexed by date.
     forward_returns : pd.DataFrame - MultiIndex
-        Daily forward returns in indexed by date and symbol.
-        Separate column for each forward return window.
-    long_short: bool
+        Daily forward returns in indexed by date and symbol. Separate column for each forward return window.
+    long_short : bool
         Should this computation happen on a long short portfolio?
 
     Returns
@@ -265,14 +264,14 @@ def mean_return_by_quantile(quantized_factor, forward_returns,
     by_sector : bool
         If True, compute quantile bucket returns separately for each sector.
         Returns demeaning will occur on the sector level.
-    std_err: bool
+    std_err : bool
         If True, compute and return the standard error of the mean return.
 
     Returns
     -------
     mean_returns_by_quantile : pd.DataFrame
         Mean daily returns by specified factor quantile.
-    std_ret: pd.DataFrame
+    std_ret : pd.DataFrame
         Standard deviation of returns by specified quantile.
     """
 

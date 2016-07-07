@@ -83,8 +83,7 @@ def demean_forward_returns(forward_returns, by_sector=False):
 
     For example, if AAPL 5 day return is 0.1% and mean 5 day
     return for the Technology stocks in our universe was 0.5% in the
-     same period, the sector adjusted 5 day return for AAPL
-    in this period is -0.4%.
+    same period, the sector adjusted 5 day return for AAPL in this period is -0.4%.
 
     Parameters
     ----------
@@ -159,7 +158,7 @@ def format_input_data(factor, prices, sectors=None,
         maximum number of expected days in the forward returns
         calculations.
     sectors : pd.Series - MultiIndex
-        A list of equities and their sectors
+        A list of equities and their sectors.
     filter_zscore : int
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
@@ -167,11 +166,9 @@ def format_input_data(factor, prices, sectors=None,
     days : list
         Number of days forward to project returns. One column
         will be added for each value.
-    sector_names: dict
+    sector_names : dict
         A dictionary keyed by sector code with values corresponding
         to the display name for each sector.
-            - Example:
-                {101: "Basic Materials", 102: "Consumer Cyclical"}
 
     Returns
     -------
