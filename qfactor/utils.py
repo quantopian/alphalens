@@ -18,23 +18,23 @@ import numpy as np
 from IPython.display import display
 
 
-
-MORNINGSTAR_SECTOR_MAPPING = {101 : "Basic Materials",
-                              102 : "Consumer Cyclical",
-                              103 : "Financial Services",
-                              104 : "Real Estate",
-                              205 : "Consumer Defensive",
-                              206 : "Healthcare",
-                              207 : "Utilities",
-                              308 : "Communication Services",
-                              309 : "Energy",
-                              310 : "Industrials",
-                              311 : "Technology"}
+MORNINGSTAR_SECTOR_MAPPING = {101: "Basic Materials",
+                              102: "Consumer Cyclical",
+                              103: "Financial Services",
+                              104: "Real Estate",
+                              205: "Consumer Defensive",
+                              206: "Healthcare",
+                              207: "Utilities",
+                              308: "Communication Services",
+                              309: "Energy",
+                              310: "Industrials",
+                              311: "Technology"}
 
 
 def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
     """
     Finds the N day forward returns (as percent change) for each asset provided.
+
     Parameters
     ----------
     prices : pd.DataFrame
@@ -45,12 +45,11 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
         that is greater than the maximum number of expected days
         in the forward returns calculations.
     days : list
-        Number of days forward to project returns. One column will
-        be added for each value.
+        Number of days forward to project returns. One column will be added for each value.
     filter_zscore : int
-        Sets forward returns greater than X standard deviations
-        from the the mean to nan.
-        Caution: this outlier filtering incorperates lookahead bias.
+        Sets forward returns greater than X standard deviations from the the mean to nan.
+        Caution: this outlier filtering incorporates lookahead bias.
+
     Returns
     -------
     forward_returns : pd.DataFrame - MultiIndex
@@ -84,16 +83,15 @@ def demean_forward_returns(forward_returns, by_sector=False):
 
     For example, if AAPL 5 day return is 0.1% and mean 5 day
     return for the Technology stocks in our universe was 0.5% in the
-     same period, the sector adjusted 5 day return for AAPL
+    same period, the sector adjusted 5 day return for AAPL
     in this period is -0.4%.
-
 
     Parameters
     ----------
     forward_returns : pd.DataFrame - MultiIndex
         DataFrame with date, asset, sector, and forward returns columns.
         See compute_forward_returns for more detail.
-    by_sector : boolean
+    by_sector : bool
         If True, demean according to sector.
 
     Returns
@@ -101,7 +99,6 @@ def demean_forward_returns(forward_returns, by_sector=False):
     adjusted_forward_returns : pd.DataFrame - MultiIndex
         DataFrame of the same format as the input, but with each
         security's returns normalized by sector.
-
     """
     grouper = ['date', 'sector'] if by_sector else ['date']
 
@@ -109,14 +106,15 @@ def demean_forward_returns(forward_returns, by_sector=False):
 
 
 def print_table(table, name=None, fmt=None):
-    """Pretty print a pandas DataFrame.
+    """
+    Pretty print a pandas DataFrame.
 
     Uses HTML output if running inside Jupyter Notebook, otherwise
     formatted text output.
 
     Parameters
     ----------
-    table : pandas.Series or pandas.DataFrame
+    table : pd.Series or pd.DataFrame
         Table to pretty-print.
     name : str, optional
         Table name to display in upper left corner.
@@ -124,7 +122,6 @@ def print_table(table, name=None, fmt=None):
         Formatter to use for displaying table elements.
         E.g. '{0:.2f}%' for displaying 100 as '100.00%'.
         Restores original setting after displaying.
-
     """
     if isinstance(table, pd.Series):
         table = pd.DataFrame(table)
@@ -149,9 +146,10 @@ def format_input_data(factor, prices, sectors=None,
     Formats the factor data, pricing data, and sector mappings
     into DataFrames and Series that contain aligned MultiIndex
     indices containing date, asset, and sector.
+
+    Parameters
     ----------
-    ----------
-    factor : pandas.Series - MultiIndex
+    factor : pd.Series - MultiIndex
         A list of equities and their factor values indexed by date.
     prices : pd.DataFrame
         Pricing data to use in forward price calculation.
@@ -172,8 +170,9 @@ def format_input_data(factor, prices, sectors=None,
     sector_names: dict
         A dictionary keyed by sector code with values corresponding
         to the display name for each sector.
-        - Example:
-            {101: "Basic Materials", 102: "Consumer Cyclical"}
+            - Example:
+                ``{101: "Basic Materials", 102: "Consumer Cyclical"}``
+
     Returns
     -------
     factor : pd.Series
@@ -182,7 +181,7 @@ def format_input_data(factor, prices, sectors=None,
     forward_returns : pd.DataFrame - MultiIndex
         A DataFrame of equities and their forward returns
         indexed by date, asset, and optionally sector.
-        Note: this is the same index as the factor index
+        Note: this is the same index as the factor index.
     """
 
     factor.name = 'factor'
@@ -200,8 +199,7 @@ def format_input_data(factor, prices, sectors=None,
     if sectors is not None:
         if isinstance(sectors, dict):
             try:
-                daily_sector = map(lambda x: sectors[x],
-                    factor.reset_index().asset.values)
+                daily_sector = map(lambda x: sectors[x], factor.reset_index().asset.values)
             except KeyError:
                 diff = set(factor.index.get_level_values(
                     'asset')) - set(sectors.keys())

@@ -68,15 +68,6 @@ def context(context='notebook', font_scale=1.5, rc=None):
     -------
     seaborn plotting context
 
-    Example
-    -------
-    with pyfolio.plotting.context(font_scale=2):
-        pyfolio.create_full_tear_sheet()
-
-    See also
-    --------
-    For more information, see seaborn.plotting_context().
-
     """
     if rc is None:
         rc = {}

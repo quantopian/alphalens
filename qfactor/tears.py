@@ -59,7 +59,7 @@ def create_factor_tear_sheet(factor,
     days: list
         Days to compute forward returns on.
     quantiles: int:
-        The number of buckets to parition the data into for analysis.
+        The number of buckets to partition the data into for analysis.
     filter_zscore : int
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
