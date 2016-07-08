@@ -86,7 +86,7 @@ def create_factor_tear_sheet(factor,
 
     daily_ic = perf.factor_information_coefficient(
         factor, forward_returns,
-        sector_adjust=can_sector_adjust,
+        sector_adjust=False,
         by_sector=False)
 
     mean_monthly_ic = perf.mean_information_coefficient(
