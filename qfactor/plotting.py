@@ -16,6 +16,8 @@
 import numpy as np
 import pandas as pd
 from scipy import stats
+import statsmodels.api as sm
+
 import seaborn as sns
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
@@ -158,7 +160,6 @@ def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
 def plot_daily_ic_ts(daily_ic, ax=None):
     """
     Plots Spearman Rank Information Coefficient and IC moving average for a given factor.
-    Sector neutralization of forward returns is recommended.
 
     Parameters
     ----------
@@ -185,7 +186,7 @@ def plot_daily_ic_ts(daily_ic, ax=None):
 
         a.set(ylabel='IC', xlabel="")
         a.set_ylim([-0.25, 0.25])
-        a.set_title("{} Day Information Coefficient (IC)".format(days_num))
+        a.set_title("{} Day Forward Return Information Coefficient (IC)".format(days_num))
         a.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
         a.legend(['IC', '1 month moving avg'], loc='upper right')
         a.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
@@ -199,7 +200,6 @@ def plot_daily_ic_ts(daily_ic, ax=None):
 def plot_daily_ic_hist(daily_ic, ax=None):
     """
     Plots Spearman Rank Information Coefficient histogram for a given factor.
-    Sector neutralization of forward returns is recommended.
 
     Parameters
     ----------
@@ -235,6 +235,51 @@ def plot_daily_ic_hist(daily_ic, ax=None):
 
     return ax
 
+def plot_daily_ic_qq(daily_ic, theoretical_dist=stats.norm, ax=None):
+    """
+    Plots Spearman Rank Information Coefficient "Q-Q" plot relative to
+    a theoretical distribution.
+
+    Parameters
+    ----------
+    daily_ic : pd.DataFrame
+        DataFrame indexed by date, with IC for each forward return.
+    theoretical_dist : scipy.stats._continuous_distns
+        Continuous distribution generator. scipy.stats.norm and
+        scipy.stats.t are popular options.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+
+    num_plots = len(daily_ic.columns)
+
+    v_spaces = ((num_plots - 1) // 3) + 1
+
+    if ax is None:
+        f, ax = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
+        ax = ax.flatten()
+
+    if isinstance(theoretical_dist, stats.norm.__class__):
+        dist_name = 'Normal'
+    elif isinstance(theoretical_dist, stats.t.__class__):
+        dist_name = 'T'
+    else:
+        dist_name = 'Theoretical'
+
+    for a, (days_num, ic) in zip(ax, daily_ic.iteritems()):
+        sm.qqplot(ic.replace(np.nan, 0.).values, theoretical_dist, fit=True,
+                  line='45', ax=a)
+        a.set(title="{} Day IC {} Dist. Q-Q".format(
+              days_num, dist_name),
+              ylabel='Observed Quantile',
+              xlabel='{} Distribution Quantile'.format(dist_name))
+
+    return ax
 
 def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
     """
@@ -495,7 +540,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
         a.set(ylabel='', xlabel='')
 
         a.set_title(
-            "Monthly Mean {} Day Return IC".format(days_num))
+            "Monthly Mean {} Day IC".format(days_num))
 
     return ax
 
