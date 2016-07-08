@@ -169,19 +169,16 @@ def plot_daily_ic_ts(daily_ic, ax=None):
 
     Returns
     -------
-    axes : matplotlib.Axes
+    ax : matplotlib.Axes
         The axes that were plotted on.
     """
 
     num_plots = len(daily_ic.columns)
     if ax is None:
-        f, axes = plt.subplots(num_plots, 1, figsize=(18, num_plots * 7))
-        axes = (a for a in axes.flatten())
+        f, ax = plt.subplots(num_plots, 1, figsize=(18, num_plots * 7))
+        ax = ax.flatten()
 
-    else:
-        axes = (a for a in ax)
-
-    for a, (days_num, ic) in zip(axes, daily_ic.iteritems()):
+    for a, (days_num, ic) in zip(ax, daily_ic.iteritems()):
         ic.plot(alpha=0.7, ax=a, lw=0.7, color='steelblue')
         ic.rolling(22).mean().plot(ax=a,
                                    color='forestgreen', lw=2, alpha=0.8)
@@ -197,7 +194,7 @@ def plot_daily_ic_ts(daily_ic, ax=None):
                 transform=a.transAxes,
                 verticalalignment='top')
 
-    return axes
+    return ax
 
 def plot_daily_ic_hist(daily_ic, ax=None):
     """
@@ -222,12 +219,10 @@ def plot_daily_ic_hist(daily_ic, ax=None):
     v_spaces = ((num_plots - 1) // 3) + 1
 
     if ax is None:
-        f, axes = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
-        axes = (a for a in axes.flatten())
-    else:
-        axes = (a for a in ax)
+        f, ax = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
+        ax = ax.flatten()
 
-    for a, (days_num, ic) in zip(axes, daily_ic.iteritems()):
+    for a, (days_num, ic) in zip(ax, daily_ic.iteritems()):
         sns.distplot(ic.replace(np.nan, 0.), norm_hist=True, ax=a)
         a.set(title="%s Day IC" % days_num, xlabel='IC')
         a.set_xlim([-0.25, 0.25])
@@ -238,7 +233,7 @@ def plot_daily_ic_hist(daily_ic, ax=None):
                 verticalalignment='top')
         a.axvline(ic.mean(), color='w', linestyle='dashed', linewidth=2)
 
-    return axes
+    return ax
 
 
 def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
@@ -269,13 +264,11 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
 
         if ax is None:
             v_spaces = ((num_sector - 1) // 2) + 1
-            f, axes = plt.subplots(v_spaces, 2, sharex=False,
+            f, ax = plt.subplots(v_spaces, 2, sharex=False,
                                    sharey=True, figsize=(18, 6*v_spaces))
-            axes = axes.flatten()
-        else:
-            axes = (a for a in ax)
+            ax = ax.flatten()
 
-        for a, (sc, cor) in zip(axes, mean_ret_by_q.groupby(level='sector')):
+        for a, (sc, cor) in zip(ax, mean_ret_by_q.groupby(level='sector')):
             (cor.xs(sc, level='sector')
                 .multiply(DECIMAL_TO_BPS)
                 .plot(kind='bar', title=sc, ax=a))
@@ -283,10 +276,10 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
             a.set(xlabel='', ylabel='Mean Daily Return (bps)',
                   ylim=(ymin, ymax))
 
-        if num_sector < len(list(axes)):
-            axes[-1].set_visible(False)
+        if num_sector < len(ax):
+            ax[-1].set_visible(False)
 
-        return axes
+        return ax
 
     else:
         if ax is None:
@@ -477,17 +470,16 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     v_spaces = ((num_plots - 1) // 3) + 1
 
     if ax is None:
-        f, axes = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
-        axes = (a for a in axes.flatten())
-    else:
-        axes = (a for a in ax)
+        f, ax = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
+        ax = ax.flatten()
 
-    for a, (days_num, ic) in zip(axes, mean_monthly_ic.iteritems()):
+    for a, (days_num, ic) in zip(ax, mean_monthly_ic.iteritems()):
 
-        formatted_ic = (pd.Series(index=pd.MultiIndex.from_product([np.unique(ic.index.year),
-                                                                    np.unique(ic.index.month)],
-                                                                   names=["year", "month"])
-                                  [:len(ic)], data=ic.values))
+        formatted_ic = (pd.Series(
+            index=pd.MultiIndex.from_product([np.unique(ic.index.year),
+                                              np.unique(ic.index.month)],
+                                             names=["year", "month"])
+            [:len(ic)], data=ic.values))
 
         sns.heatmap(
             formatted_ic.unstack(),
@@ -505,7 +497,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
         a.set_title(
             "Monthly Mean {} Day Return IC".format(days_num))
 
-    return axes
+    return ax
 
 
 def plot_cumulative_returns(factor_returns, ax=None):
