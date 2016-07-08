@@ -233,6 +233,9 @@ def plot_daily_ic_hist(daily_ic, ax=None):
                 verticalalignment='top')
         a.axvline(ic.mean(), color='w', linestyle='dashed', linewidth=2)
 
+    if num_plots < len(ax):
+        ax[-1].set_visible(False)
+
     return ax
 
 def plot_daily_ic_qq(daily_ic, theoretical_dist=stats.norm, ax=None):
@@ -304,9 +307,9 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False,
     """
 
     ymin = (np.percentile(mean_ret_by_q.values, ylim_percentiles[0])
-            * DECIMAL_TO_BPS) - .01
+            * DECIMAL_TO_BPS) - .05
     ymax = (np.percentile(mean_ret_by_q.values, ylim_percentiles[1])
-            * DECIMAL_TO_BPS) + .01
+            * DECIMAL_TO_BPS) + .05
 
     if by_sector:
         num_sector = len(
@@ -548,6 +551,9 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
 
         a.set_title(
             "Monthly Mean {} Day IC".format(days_num))
+
+    if num_plots < len(ax):
+        ax[-1].set_visible(False)
 
     return ax
 
