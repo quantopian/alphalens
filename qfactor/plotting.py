@@ -339,8 +339,8 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
 
 
 def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
-                                                  std=None,
-                                                  bandwidth=0.5,
+                                                  std_err=None,
+                                                  bandwidth=1,
                                                   ax=None):
     """
     Plots mean daily returns for factor quantiles.
@@ -366,17 +366,15 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     """
 
     if isinstance(mean_returns_spread, pd.DataFrame):
-        if ax is not None:
-            axs = (a for a in ax)
-        else:
-            axs = (None for a in mean_returns_spread.columns)
+        if ax is None:
+            ax = [None for a in mean_returns_spread.columns]
 
-        for a, (name, fr_column) in zip(axs, mean_returns_spread.iteritems()):
-            stdn = None if std is None else std[name]
-            ret_ax = plot_mean_quantile_returns_spread_time_series(fr_column,
-                                                                   std=stdn, ax=a)
+        for a, (name, fr_column) in zip(ax, mean_returns_spread.iteritems()):
+            stdn = None if std_err is None else std_err[name]
+            plot_mean_quantile_returns_spread_time_series(fr_column,
+                                                          std_err=stdn, ax=a)
 
-        return axs
+        return ax
 
     days = mean_returns_spread.name
     title = ('Top Minus Bottom Quantile Mean Return ({} Day Forward Return)'
@@ -385,21 +383,24 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     if ax is None:
         f, ax = plt.subplots(figsize=(18, 6))
 
-    mean_returns_spread *= DECIMAL_TO_BPS
+    mean_returns_spread_bps = mean_returns_spread * DECIMAL_TO_BPS
 
-    mean_returns_spread.plot(alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
-    pd.rolling_mean(mean_returns_spread, 22).plot(color='orangered', alpha=0.7)
+    mean_returns_spread_bps.plot(alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
+    pd.rolling_mean(mean_returns_spread_bps, 22).plot(color='orangered', alpha=0.7)
     ax.legend(['mean returns spread', '1 month moving avg'], loc='upper right')
 
-    if std is not None:
-        std *= DECIMAL_TO_BPS
-        upper = mean_returns_spread.values + (std * bandwidth)
-        lower = mean_returns_spread.values - (std * bandwidth)
+    if std_err is not None:
+        std_err_bps = std_err * DECIMAL_TO_BPS
+        upper = mean_returns_spread_bps.values + (std_err_bps * bandwidth)
+        lower = mean_returns_spread_bps.values - (std_err_bps * bandwidth)
         ax.fill_between(
             mean_returns_spread.index, lower, upper, alpha=0.3, color='steelblue')
 
-    ax.set(ylabel='Difference In Quantile Mean Return (bps)', xlabel='')
-    ax.set(title=title, ylim=(-5., 5.))
+    ylim = np.percentile(abs(mean_returns_spread_bps.values), 95)
+
+    ax.set(ylabel='Difference In Quantile Mean Return (bps)', xlabel='',
+           title=title, ylim=(-ylim, ylim))
+
     ax.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
 
     return ax
