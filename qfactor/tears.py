@@ -108,7 +108,7 @@ def create_factor_tear_sheet(factor,
         by_sector=False, std_err=True)
 
     mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(
-        mean_ret_quant_daily, quantiles, 1, std=std_quant_daily)
+        mean_ret_quant_daily, quantiles, 1, std_err=std_quant_daily)
 
     factor_autocorrelation = perf.factor_rank_autocorrelation(
         factor, time_rule='D')
@@ -147,7 +147,7 @@ def create_factor_tear_sheet(factor,
 
     plot_mean_quantile_returns_spread_time_series(
         mean_ret_spread_quant,
-        std=std_spread_quant,
+        std_err=std_spread_quant,
         bandwidth=0.5,
         ax=ax_mean_quantile_returns_spread_ts)
 

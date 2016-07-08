@@ -309,7 +309,7 @@ def mean_return_by_quantile(quantized_factor, forward_returns,
 
 
 def compute_mean_returns_spread(mean_returns, upper_quant,
-                                lower_quant, std=None):
+                                lower_quant, std_err=None):
     """
     Computes the difference between the mean returns of
     two quantiles. Optionally, computes the standard deviation
@@ -318,14 +318,18 @@ def compute_mean_returns_spread(mean_returns, upper_quant,
     Parameters
     ----------
     mean_returns : pd.DataFrame
-        DataFrame of mean daily returns by quantile. MultiIndex containing date and quantile.
+        DataFrame of mean daily returns by quantile.
+        MultiIndex containing date and quantile.
         See mean_return_by_quantile.
     upper_quant : int
-        Quantile of mean return from which we wish to subtract lower quantile mean return.
+        Quantile of mean return from which we
+        wish to subtract lower quantile mean return.
     lower_quant : int
-        Quantile of mean return we wish to subtract from upper quantile mean return.
-    std : pd.DataFrame (optional)
-        Daily standard deviation in mean return by quantile. Takes the same for as mean_returns.
+        Quantile of mean return we wish to subtract
+        from upper quantile mean return.
+    std_err : pd.DataFrame (optional)
+        Daily standard error in mean return by quantile.
+        Takes the same form as mean_returns.
 
     Returns
     -------
@@ -339,11 +343,11 @@ def compute_mean_returns_spread(mean_returns, upper_quant,
         mean_returns.xs(lower_quant, level='quantile')
 
     if std is not None:
-        std1 = std.xs(upper_quant, level='quantile')
-        std2 = std.xs(lower_quant, level='quantile')
-        joint_std = np.sqrt(std1**2 + std2**2)
+        std1 = std_err.xs(upper_quant, level='quantile')
+        std2 = std_err.xs(lower_quant, level='quantile')
+        joint_std_err = np.sqrt(std1**2 + std2**2)
 
-        return mean_return_difference, joint_std
+        return mean_return_difference, joint_std_err
 
     return mean_return_difference
 
