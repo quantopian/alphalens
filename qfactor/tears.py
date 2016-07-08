@@ -154,7 +154,7 @@ def create_factor_tear_sheet(factor,
     # IC
     rows_when_3_wide = (((fr_cols - 1) // 3) + 1)
     ix_3_wide = list(product(range(rows_when_3_wide), range(3)))
-    vertical_sections = fr_cols + 2 * rows_when_3_wide + 2
+    vertical_sections = fr_cols + 3 * rows_when_3_wide + 2
     fig = plt.figure(figsize=(14, vertical_sections * 7))
     ic_gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.3)
 
@@ -172,6 +172,13 @@ def create_factor_tear_sheet(factor,
         ax_daily_ic_hist.append(p)
     i += rows_when_3_wide
     plot_daily_ic_hist(daily_ic, ax=ax_daily_ic_hist)
+
+    ax_daily_ic_qq = []
+    for j, k in ix_3_wide:
+        p = plt.subplot(ic_gs[j+i, k])
+        ax_daily_ic_qq.append(p)
+    i += rows_when_3_wide
+    plot_daily_ic_qq(daily_ic, ax=ax_daily_ic_qq)
 
     ax_monthly_ic_heatmap = []
     for j, k in ix_3_wide:
