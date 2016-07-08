@@ -5,3 +5,5 @@
 
 *.pyc
 
+build/
+docs/build/

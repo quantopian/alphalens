@@ -30,14 +30,14 @@ def factor_information_coefficient(factor, forward_returns,
 
     Parameters
     ----------
-    factor : pandas.Series - MultiIndex
+    factor : pd.Series - MultiIndex
         Factor values indexed by date and symbol.
-    forward_returns : pandas.DataFrame - MultiIndex
+    forward_returns : pd.DataFrame - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
-    sector_adjust : boolean
+    sector_adjust : bool
         Demean forward returns by sector before computing IC.
-    by_sector : boolean
+    by_sector : bool
         If True, compute daily IC separately for each sector.
 
     Returns
@@ -84,18 +84,18 @@ def mean_information_coefficient(factor, forward_returns,
 
     Parameters
     ----------
-    factor : pandas.Series - MultiIndex
+    factor : pd.Series - MultiIndex
         Factor values indexed by date and symbol.
-    forward_returns : pandas.DataFrame - MultiIndex
+    forward_returns : pd.DataFrame - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
-    sector_adjust : boolean
+    sector_adjust : bool
         Demean forward returns by sector before computing IC.
-    by_time : string (pandas time_rule), optional
+    by_time : str (pd time_rule), optional
         Time window to use when taking mean IC.
         See http://pandas.pydata.org/pandas-docs/stable/timeseries.html
         for available options.
-    by_sector : boolean
+    by_sector : bool
         If True, take the mean IC for each sector.
 
     Returns
@@ -138,12 +138,11 @@ def factor_returns(factor, forward_returns, long_short=True):
 
     Parameters
     ----------
-    factor : pandas.Series - MultiIndex
+    factor : pd.Series - MultiIndex
         A list of equities and their factor values indexed by date.
-    forward_returns : pandas.DataFrame - MultiIndex
-        Daily forward returns in indexed by date and symbol.
-        Separate column for each forward return window.
-    long_short: bool
+    forward_returns : pd.DataFrame - MultiIndex
+        Daily forward returns in indexed by date and symbol. Separate column for each forward return window.
+    long_short : bool
         Should this computation happen on a long short portfolio?
 
     Returns
@@ -176,11 +175,10 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
 
     Parameters
     ----------
-    factor : pandas.Series - MultiIndex
+    factor : pd.Series - MultiIndex
         A list of equities and their factor values indexed by date.
-    forward_returns : pandas.DataFrame - MultiIndex
-        Daily forward returns in indexed by date and symbol.
-        Separate column for each forward return window.
+    forward_returns : pd.DataFrame - MultiIndex
+        Daily forward returns in indexed by date and symbol. Separate column for each forward return window.
     factor_daily_returns : pd.DataFrame
         Daily returns of dollar neutral portfolio weighted by factor value.
 
@@ -223,11 +221,11 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
 
     Parameters
     ----------
-    factor : pandas.Series - MultiIndex
+    factor : pd.Series - MultiIndex
         A list of equities and their factor values indexed by date.
-    quantiles : integer
+    quantiles : int
         Number of quantiles buckets to use in factor bucketing.
-    by_sector : boolean
+    by_sector : bool
         If True, compute quantile buckets separately for each sector.
 
     Returns
@@ -259,22 +257,21 @@ def mean_return_by_quantile(quantized_factor, forward_returns,
     quantized_factor : pd.Series - MultiIndex
         DataFrame with date, asset index and factor quantile as a column.
         See quantile_bucket_factor for more detail.
-    forward_returns : pandas.DataFrame - MultiIndex
-        A list of equities and their N day forward returns where each column contains
-        the N day forward returns.
+    forward_returns : pd.DataFrame - MultiIndex
+        A list of equities and their N day forward returns where each column contains the N day forward returns.
     by_time : str
-        The pandas string code for time grouping.
+        The pandas str code for time grouping.
     by_sector : bool
         If True, compute quantile bucket returns separately for each sector.
         Returns demeaning will occur on the sector level.
-    std_err: bool
+    std_err : bool
         If True, compute and return the standard error of the mean return.
 
     Returns
     -------
     mean_returns_by_quantile : pd.DataFrame
         Mean daily returns by specified factor quantile.
-    std_ret: pd.DataFrame
+    std_ret : pd.DataFrame
         Standard deviation of returns by specified quantile.
     """
 
@@ -321,26 +318,21 @@ def compute_mean_returns_spread(mean_returns, upper_quant,
     Parameters
     ----------
     mean_returns : pd.DataFrame
-        DataFrame of mean daily returns by quantile.
-        MultiIndex containing date and quantile.
+        DataFrame of mean daily returns by quantile. MultiIndex containing date and quantile.
         See mean_return_by_quantile.
-    upper_quant : integer
-        Quantile of mean return from which we wish to subtract
-        lower quantile mean return
-    lower_quant : integer
-        Quantile of mean return we wish to subtract from
-        upper quantile mean return
+    upper_quant : int
+        Quantile of mean return from which we wish to subtract lower quantile mean return.
+    lower_quant : int
+        Quantile of mean return we wish to subtract from upper quantile mean return.
     std : pd.DataFrame (optional)
-        Daily standard deviation in mean return by quantile.
-        Takes the same for as mean_returns.
+        Daily standard deviation in mean return by quantile. Takes the same for as mean_returns.
 
     Returns
     -------
     mean_return_difference : pd.Series
         Daily difference in quantile returns.
     joint_std : pd.Series
-        Daily standard deviation of the difference in
-        quantile returns.
+        Daily standard deviation of the difference in quantile returns.
     """
 
     mean_return_difference = mean_returns.xs(upper_quant, level='quantile') - \
@@ -365,7 +357,7 @@ def quantile_turnover(quantile_factor, quantile):
     ----------
     quantile_factor : pd.Series
         DataFrame with date, asset and factor quantile.
-    quantile : integer
+    quantile : int
         Quantile on which to perform turnover analysis.
 
     Returns
@@ -396,10 +388,10 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
     ----------
     factor : pd.Series
         Series with date and asset index. Values are factor values.
-    time_rule : string, optional
+    time_rule : str, optional
         Time span to use in factor grouping mean reduction.
         See http://pandas.pydata.org/pandas-docs/stable/timeseries.html for available options.
-    by_sector : boolean
+    by_sector : bool
         If True, compute autocorrelation separately for each sector.
 
     Returns
