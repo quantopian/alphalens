@@ -342,7 +342,7 @@ def compute_mean_returns_spread(mean_returns, upper_quant,
     mean_return_difference = mean_returns.xs(upper_quant, level='quantile') - \
         mean_returns.xs(lower_quant, level='quantile')
 
-    if std is not None:
+    if std_err is not None:
         std1 = std_err.xs(upper_quant, level='quantile')
         std2 = std_err.xs(lower_quant, level='quantile')
         joint_std_err = np.sqrt(std1**2 + std2**2)

@@ -128,6 +128,7 @@ def create_factor_tear_sheet(factor,
     ax_quantile_returns_bar = plt.subplot(ret_gs[i, :])
     i += 1
     plot_quantile_returns_bar(mean_ret_quantile, by_sector=False,
+        ylim_percentiles=(0,100),
         ax=ax_quantile_returns_bar)
 
     ax_cumulative_returns = plt.subplot(ret_gs[i, :])
@@ -225,4 +226,5 @@ def create_factor_tear_sheet(factor,
             ax_quantile_returns_bar_by_sector.append(p)
         i += rows_when_3_wide
         plot_quantile_returns_bar(mean_return_quantile_sector,
-            by_sector=True, ax=ax_quantile_returns_bar_by_sector)
+            by_sector=True, ylim_percentiles=(5, 95),
+            ax=ax_quantile_returns_bar_by_sector)

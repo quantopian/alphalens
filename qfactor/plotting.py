@@ -281,7 +281,8 @@ def plot_daily_ic_qq(daily_ic, theoretical_dist=stats.norm, ax=None):
 
     return ax
 
-def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
+def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False,
+                              ylim_percentiles=(0,100), ax=None):
     """
     Plots mean daily returns for factor quantiles.
 
@@ -291,6 +292,8 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
         DataFrame with quantile, (sector) and mean daily return values.
     by_sector : bool
         Disagregate figures by sector.
+    ylim_percentiles : tuple of integers
+        Percentiles of observed data to use as ylimts for plot.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -300,8 +303,10 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
         The axes that were plotted on.
     """
 
-    ymin = mean_ret_by_q.min().min() * DECIMAL_TO_BPS
-    ymax = mean_ret_by_q.max().max() * DECIMAL_TO_BPS
+    ymin = (np.percentile(mean_ret_by_q.values, ylim_percentiles[0])
+            * DECIMAL_TO_BPS) - .01
+    ymax = (np.percentile(mean_ret_by_q.values, ylim_percentiles[1])
+            * DECIMAL_TO_BPS) + .01
 
     if by_sector:
         num_sector = len(
@@ -386,7 +391,8 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     mean_returns_spread_bps = mean_returns_spread * DECIMAL_TO_BPS
 
     mean_returns_spread_bps.plot(alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
-    pd.rolling_mean(mean_returns_spread_bps, 22).plot(color='orangered', alpha=0.7)
+    pd.rolling_mean(mean_returns_spread_bps, 22).plot(color='orangered',
+                    alpha=0.7, ax=ax)
     ax.legend(['mean returns spread', '1 month moving avg'], loc='upper right')
 
     if std_err is not None:
