@@ -46,6 +46,6 @@ class UtilsTestCase(TestCase):
                                      names=['date', 'asset'])
         expected = DataFrame(index=ix, columns=[1, 2])
         expected[1] = [0., 1., 1., -0.5, nan, nan]
-        expected[2] = [1., 0., nan, nan, nan, nan]
+        expected[2] = [0.5, 0., nan, nan, nan, nan]
 
         assert_frame_equal(fp, expected)

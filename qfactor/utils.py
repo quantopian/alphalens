@@ -45,10 +45,13 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
         that is greater than the maximum number of expected days
         in the forward returns calculations.
     days : list
-        Number of days forward to project returns. One column will be added for each value.
+        Number of days forward to project returns.
+        One column will be added for each value.
     filter_zscore : int
-        Sets forward returns greater than X standard deviations from the the mean to nan.
-        Caution: this outlier filtering incorporates lookahead bias.
+        Sets forward returns greater than X standard
+        deviations from the the mean to nan.
+        Caution: this outlier filtering incorporates
+        lookahead bias.
 
     Returns
     -------
@@ -196,7 +199,8 @@ def format_input_data(factor, prices, sectors=None,
     if sectors is not None:
         if isinstance(sectors, dict):
             try:
-                daily_sector = map(lambda x: sectors[x], factor.reset_index().asset.values)
+                daily_sector = map(
+                    lambda x: sectors[x], factor.reset_index().asset.values)
             except KeyError:
                 diff = set(factor.index.get_level_values(
                     'asset')) - set(sectors.keys())

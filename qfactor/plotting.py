@@ -16,6 +16,8 @@
 import numpy as np
 import pandas as pd
 from scipy import stats
+import statsmodels.api as sm
+
 import seaborn as sns
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
@@ -158,7 +160,6 @@ def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
 def plot_daily_ic_ts(daily_ic, ax=None):
     """
     Plots Spearman Rank Information Coefficient and IC moving average for a given factor.
-    Sector neutralization of forward returns is recommended.
 
     Parameters
     ----------
@@ -169,26 +170,23 @@ def plot_daily_ic_ts(daily_ic, ax=None):
 
     Returns
     -------
-    axes : matplotlib.Axes
+    ax : matplotlib.Axes
         The axes that were plotted on.
     """
 
     num_plots = len(daily_ic.columns)
     if ax is None:
-        f, axes = plt.subplots(num_plots, 1, figsize=(18, num_plots * 7))
-        axes = (a for a in axes.flatten())
+        f, ax = plt.subplots(num_plots, 1, figsize=(18, num_plots * 7))
+        ax = ax.flatten()
 
-    else:
-        axes = (a for a in ax)
-
-    for a, (days_num, ic) in zip(axes, daily_ic.iteritems()):
+    for a, (days_num, ic) in zip(ax, daily_ic.iteritems()):
         ic.plot(alpha=0.7, ax=a, lw=0.7, color='steelblue')
         ic.rolling(22).mean().plot(ax=a,
                                    color='forestgreen', lw=2, alpha=0.8)
 
         a.set(ylabel='IC', xlabel="")
         a.set_ylim([-0.25, 0.25])
-        a.set_title("{} Day Information Coefficient (IC)".format(days_num))
+        a.set_title("{} Day Forward Return Information Coefficient (IC)".format(days_num))
         a.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
         a.legend(['IC', '1 month moving avg'], loc='upper right')
         a.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
@@ -197,12 +195,11 @@ def plot_daily_ic_ts(daily_ic, ax=None):
                 transform=a.transAxes,
                 verticalalignment='top')
 
-    return axes
+    return ax
 
 def plot_daily_ic_hist(daily_ic, ax=None):
     """
     Plots Spearman Rank Information Coefficient histogram for a given factor.
-    Sector neutralization of forward returns is recommended.
 
     Parameters
     ----------
@@ -222,12 +219,10 @@ def plot_daily_ic_hist(daily_ic, ax=None):
     v_spaces = ((num_plots - 1) // 3) + 1
 
     if ax is None:
-        f, axes = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
-        axes = (a for a in axes.flatten())
-    else:
-        axes = (a for a in ax)
+        f, ax = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
+        ax = ax.flatten()
 
-    for a, (days_num, ic) in zip(axes, daily_ic.iteritems()):
+    for a, (days_num, ic) in zip(ax, daily_ic.iteritems()):
         sns.distplot(ic.replace(np.nan, 0.), norm_hist=True, ax=a)
         a.set(title="%s Day IC" % days_num, xlabel='IC')
         a.set_xlim([-0.25, 0.25])
@@ -238,19 +233,23 @@ def plot_daily_ic_hist(daily_ic, ax=None):
                 verticalalignment='top')
         a.axvline(ic.mean(), color='w', linestyle='dashed', linewidth=2)
 
-    return axes
+    if num_plots < len(ax):
+        ax[-1].set_visible(False)
 
+    return ax
 
-def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
+def plot_daily_ic_qq(daily_ic, theoretical_dist=stats.norm, ax=None):
     """
-    Plots mean daily returns for factor quantiles.
+    Plots Spearman Rank Information Coefficient "Q-Q" plot relative to
+    a theoretical distribution.
 
     Parameters
     ----------
-    mean_ret_by_q : pd.DataFrame
-        DataFrame with quantile, (sector) and mean daily return values.
-    by_sector : bool
-        Disagregate figures by sector.
+    daily_ic : pd.DataFrame
+        DataFrame indexed by date, with IC for each forward return.
+    theoretical_dist : scipy.stats._continuous_distns
+        Continuous distribution generator. scipy.stats.norm and
+        scipy.stats.t are popular options.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -260,8 +259,57 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
         The axes that were plotted on.
     """
 
-    ymin = mean_ret_by_q.min().min() * DECIMAL_TO_BPS
-    ymax = mean_ret_by_q.max().max() * DECIMAL_TO_BPS
+    num_plots = len(daily_ic.columns)
+
+    v_spaces = ((num_plots - 1) // 3) + 1
+
+    if ax is None:
+        f, ax = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
+        ax = ax.flatten()
+
+    if isinstance(theoretical_dist, stats.norm.__class__):
+        dist_name = 'Normal'
+    elif isinstance(theoretical_dist, stats.t.__class__):
+        dist_name = 'T'
+    else:
+        dist_name = 'Theoretical'
+
+    for a, (days_num, ic) in zip(ax, daily_ic.iteritems()):
+        sm.qqplot(ic.replace(np.nan, 0.).values, theoretical_dist, fit=True,
+                  line='45', ax=a)
+        a.set(title="{} Day IC {} Dist. Q-Q".format(
+              days_num, dist_name),
+              ylabel='Observed Quantile',
+              xlabel='{} Distribution Quantile'.format(dist_name))
+
+    return ax
+
+def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False,
+                              ylim_percentiles=(0,100), ax=None):
+    """
+    Plots mean daily returns for factor quantiles.
+
+    Parameters
+    ----------
+    mean_ret_by_q : pd.DataFrame
+        DataFrame with quantile, (sector) and mean daily return values.
+    by_sector : bool
+        Disagregate figures by sector.
+    ylim_percentiles : tuple of integers
+        Percentiles of observed data to use as ylimts for plot.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+
+    ymin = (np.percentile(mean_ret_by_q.values, ylim_percentiles[0])
+            * DECIMAL_TO_BPS) - .05
+    ymax = (np.percentile(mean_ret_by_q.values, ylim_percentiles[1])
+            * DECIMAL_TO_BPS) + .05
 
     if by_sector:
         num_sector = len(
@@ -269,13 +317,11 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
 
         if ax is None:
             v_spaces = ((num_sector - 1) // 2) + 1
-            f, axes = plt.subplots(v_spaces, 2, sharex=False,
+            f, ax = plt.subplots(v_spaces, 2, sharex=False,
                                    sharey=True, figsize=(18, 6*v_spaces))
-            axes = axes.flatten()
-        else:
-            axes = (a for a in ax)
+            ax = ax.flatten()
 
-        for a, (sc, cor) in zip(axes, mean_ret_by_q.groupby(level='sector')):
+        for a, (sc, cor) in zip(ax, mean_ret_by_q.groupby(level='sector')):
             (cor.xs(sc, level='sector')
                 .multiply(DECIMAL_TO_BPS)
                 .plot(kind='bar', title=sc, ax=a))
@@ -283,10 +329,10 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
             a.set(xlabel='', ylabel='Mean Daily Return (bps)',
                   ylim=(ymin, ymax))
 
-        if num_sector < len(list(axes)):
-            axes[-1].set_visible(False)
+        if num_sector < len(ax):
+            ax[-1].set_visible(False)
 
-        return axes
+        return ax
 
     else:
         if ax is None:
@@ -301,8 +347,8 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ax=None):
 
 
 def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
-                                                  std=None,
-                                                  bandwidth=0.5,
+                                                  std_err=None,
+                                                  bandwidth=1,
                                                   ax=None):
     """
     Plots mean daily returns for factor quantiles.
@@ -328,17 +374,15 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     """
 
     if isinstance(mean_returns_spread, pd.DataFrame):
-        if ax is not None:
-            axs = (a for a in ax)
-        else:
-            axs = (None for a in mean_returns_spread.columns)
+        if ax is None:
+            ax = [None for a in mean_returns_spread.columns]
 
-        for a, (name, fr_column) in zip(axs, mean_returns_spread.iteritems()):
-            stdn = None if std is None else std[name]
-            ret_ax = plot_mean_quantile_returns_spread_time_series(fr_column,
-                                                                   std=stdn, ax=a)
+        for a, (name, fr_column) in zip(ax, mean_returns_spread.iteritems()):
+            stdn = None if std_err is None else std_err[name]
+            plot_mean_quantile_returns_spread_time_series(fr_column,
+                                                          std_err=stdn, ax=a)
 
-        return axs
+        return ax
 
     days = mean_returns_spread.name
     title = ('Top Minus Bottom Quantile Mean Return ({} Day Forward Return)'
@@ -347,21 +391,25 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     if ax is None:
         f, ax = plt.subplots(figsize=(18, 6))
 
-    mean_returns_spread *= DECIMAL_TO_BPS
+    mean_returns_spread_bps = mean_returns_spread * DECIMAL_TO_BPS
 
-    mean_returns_spread.plot(alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
-    pd.rolling_mean(mean_returns_spread, 22).plot(color='orangered', alpha=0.7)
+    mean_returns_spread_bps.plot(alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
+    pd.rolling_mean(mean_returns_spread_bps, 22).plot(color='orangered',
+                    alpha=0.7, ax=ax)
     ax.legend(['mean returns spread', '1 month moving avg'], loc='upper right')
 
-    if std is not None:
-        std *= DECIMAL_TO_BPS
-        upper = mean_returns_spread.values + (std * bandwidth)
-        lower = mean_returns_spread.values - (std * bandwidth)
+    if std_err is not None:
+        std_err_bps = std_err * DECIMAL_TO_BPS
+        upper = mean_returns_spread_bps.values + (std_err_bps * bandwidth)
+        lower = mean_returns_spread_bps.values - (std_err_bps * bandwidth)
         ax.fill_between(
             mean_returns_spread.index, lower, upper, alpha=0.3, color='steelblue')
 
-    ax.set(ylabel='Difference In Quantile Mean Return (bps)', xlabel='')
-    ax.set(title=title, ylim=(-5., 5.))
+    ylim = np.percentile(abs(mean_returns_spread_bps.values), 95)
+
+    ax.set(ylabel='Difference In Quantile Mean Return (bps)', xlabel='',
+           title=title, ylim=(-ylim, ylim))
+
     ax.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
 
     return ax
@@ -477,17 +525,16 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     v_spaces = ((num_plots - 1) // 3) + 1
 
     if ax is None:
-        f, axes = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
-        axes = (a for a in axes.flatten())
-    else:
-        axes = (a for a in ax)
+        f, ax = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
+        ax = ax.flatten()
 
-    for a, (days_num, ic) in zip(axes, mean_monthly_ic.iteritems()):
+    for a, (days_num, ic) in zip(ax, mean_monthly_ic.iteritems()):
 
-        formatted_ic = (pd.Series(index=pd.MultiIndex.from_product([np.unique(ic.index.year),
-                                                                    np.unique(ic.index.month)],
-                                                                   names=["year", "month"])
-                                  [:len(ic)], data=ic.values))
+        formatted_ic = (pd.Series(
+            index=pd.MultiIndex.from_product([np.unique(ic.index.year),
+                                              np.unique(ic.index.month)],
+                                             names=["year", "month"])
+            [:len(ic)], data=ic.values))
 
         sns.heatmap(
             formatted_ic.unstack(),
@@ -503,9 +550,12 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
         a.set(ylabel='', xlabel='')
 
         a.set_title(
-            "Monthly Mean {} Day Return IC".format(days_num))
+            "Monthly Mean {} Day IC".format(days_num))
 
-    return axes
+    if num_plots < len(ax):
+        ax[-1].set_visible(False)
+
+    return ax
 
 
 def plot_cumulative_returns(factor_returns, ax=None):
