@@ -213,8 +213,15 @@ def format_input_data(factor, prices, sectors=None,
         sectors = sectors.rename_axis(['date', 'asset'], axis=0)
 
         if sector_names is not None:
-            sectors = sectors.apply(
-                lambda x: sector_names.get(x, x))
+            diff = set(sector.values) - set(sector_names.keys())
+            if len(diff) > 0:
+                raise KeyError(
+                    "Sectors {} not in passed sector names".format(
+                        list(diff)))
+
+            sn = pd.Series(sector_names)
+            sectors = pd.Series(index=factor.index,
+                data=sn[sectors.values])
 
         merged_data = pd.merge(pd.DataFrame(sectors),
                                merged_data,
