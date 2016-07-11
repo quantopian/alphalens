@@ -120,7 +120,7 @@ def create_factor_tear_sheet(factor,
     fr_cols = len(days)
 
     # Returns
-    vertical_sections = 3 + fr_cols
+    vertical_sections = 4 + fr_cols
     fig = plt.figure(figsize=(14, vertical_sections * 7))
     ret_gs = gridspec.GridSpec(vertical_sections, 2, wspace=0.4, hspace=0.3)
 
@@ -128,8 +128,14 @@ def create_factor_tear_sheet(factor,
     ax_quantile_returns_bar = plt.subplot(ret_gs[i, :])
     i += 1
     plot_quantile_returns_bar(mean_ret_quantile, by_sector=False,
-        ylim_percentiles=(0,100),
+        ylim_percentiles=None,
         ax=ax_quantile_returns_bar)
+
+    ax_quantile_returns_violin = plt.subplot(ret_gs[i, :])
+    i += 1
+    plot_quantile_returns_violin(mean_ret_quant_daily,
+        ylim_percentiles=(1,99),
+        ax=ax_quantile_returns_violin)
 
     ax_cumulative_returns = plt.subplot(ret_gs[i, :])
     i += 1
