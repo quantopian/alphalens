@@ -198,18 +198,16 @@ def format_input_data(factor, prices, sectors=None,
 
     if sectors is not None:
         if isinstance(sectors, dict):
-            try:
-                daily_sector = map(
-                    lambda x: sectors[x], factor.reset_index().asset.values)
-            except KeyError:
-                diff = set(factor.index.get_level_values(
-                    'asset')) - set(sectors.keys())
+            diff = set(factor.index.get_level_values(
+                'asset')) - set(sectors.keys())
+            if len(diff) > 0:
                 raise KeyError(
                     "Assets {} not in sector mapping".format(
                         list(diff)))
 
+            ss = pd.Series(sectors)
             sectors = pd.Series(index=factor.index,
-                                data=daily_sector)
+                data=ss[factor.index.get_level_values('asset')].values)
 
         sectors.name = 'sector'
         sectors = sectors.rename_axis(['date', 'asset'], axis=0)
