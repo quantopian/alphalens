@@ -186,16 +186,18 @@ def plot_daily_ic_ts(daily_ic, ax=None):
 
         a.set(ylabel='IC', xlabel="")
         a.set_ylim([-0.25, 0.25])
-        a.set_title("{} Day Forward Return Information Coefficient (IC)".format(days_num))
+        a.set_title(
+            "{} Day Forward Return Information Coefficient (IC)".format(days_num))
         a.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
         a.legend(['IC', '1 month moving avg'], loc='upper right')
         a.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
-                fontsize=16,
-                bbox={'facecolor': 'white', 'alpha': 1, 'pad': 5},
-                transform=a.transAxes,
-                verticalalignment='top')
+               fontsize=16,
+               bbox={'facecolor': 'white', 'alpha': 1, 'pad': 5},
+               transform=a.transAxes,
+               verticalalignment='top')
 
     return ax
+
 
 def plot_daily_ic_hist(daily_ic, ax=None):
     """
@@ -227,16 +229,17 @@ def plot_daily_ic_hist(daily_ic, ax=None):
         a.set(title="%s Day IC" % days_num, xlabel='IC')
         a.set_xlim([-0.25, 0.25])
         a.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
-                fontsize=16,
-                bbox={'facecolor': 'white', 'alpha': 1, 'pad': 5},
-                transform=a.transAxes,
-                verticalalignment='top')
+               fontsize=16,
+               bbox={'facecolor': 'white', 'alpha': 1, 'pad': 5},
+               transform=a.transAxes,
+               verticalalignment='top')
         a.axvline(ic.mean(), color='w', linestyle='dashed', linewidth=2)
 
     if num_plots < len(ax):
         ax[-1].set_visible(False)
 
     return ax
+
 
 def plot_daily_ic_qq(daily_ic, theoretical_dist=stats.norm, ax=None):
     """
@@ -284,8 +287,9 @@ def plot_daily_ic_qq(daily_ic, theoretical_dist=stats.norm, ax=None):
 
     return ax
 
+
 def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False,
-                              ylim_percentiles=(0,100), ax=None):
+                              ylim_percentiles=None, ax=None):
     """
     Plots mean daily returns for factor quantiles.
 
@@ -296,7 +300,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False,
     by_sector : bool
         Disagregate figures by sector.
     ylim_percentiles : tuple of integers
-        Percentiles of observed data to use as ylimts for plot.
+        Percentiles of observed data to use as y limits for plot.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -306,10 +310,14 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False,
         The axes that were plotted on.
     """
 
-    ymin = (np.percentile(mean_ret_by_q.values, ylim_percentiles[0])
-            * DECIMAL_TO_BPS) - .05
-    ymax = (np.percentile(mean_ret_by_q.values, ylim_percentiles[1])
-            * DECIMAL_TO_BPS) + .05
+    if ylim_percentiles is not None:
+        ymin = (np.percentile(mean_ret_by_q.values, ylim_percentiles[0])
+                * DECIMAL_TO_BPS) - .05
+        ymax = (np.percentile(mean_ret_by_q.values, ylim_percentiles[1])
+                * DECIMAL_TO_BPS) + .05
+    else:
+        ymin = None
+        ymax = None
 
     if by_sector:
         num_sector = len(
@@ -318,7 +326,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False,
         if ax is None:
             v_spaces = ((num_sector - 1) // 2) + 1
             f, ax = plt.subplots(v_spaces, 2, sharex=False,
-                                   sharey=True, figsize=(18, 6*v_spaces))
+                                 sharey=True, figsize=(18, 6*v_spaces))
             ax = ax.flatten()
 
         for a, (sc, cor) in zip(ax, mean_ret_by_q.groupby(level='sector')):
@@ -339,11 +347,69 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False,
             f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
         mean_ret_by_q.multiply(DECIMAL_TO_BPS).plot(kind='bar',
-            title="Mean Return By Factor Quantile", ax=ax)
+                                                    title="Mean Daily Return By Factor Quantile", ax=ax)
         ax.set(xlabel='', ylabel='Mean Daily Return (bps)',
                ylim=(ymin, ymax))
 
         return ax
+
+
+def plot_quantile_returns_violin(daily_return_by_q,
+                                 ylim_percentiles=None, ax=None):
+    """
+    Plots a violin box plot of daily returns for factor quantiles.
+
+    Parameters
+    ----------
+    daily_return_by_q : pd.DataFrame - MultiIndex
+        DataFrame with day and quantile as rows MultiIndex,
+        forward return windows as columns, returns as values.
+    ylim_percentiles : tuple of integers
+        Percentiles of observed data to use as y limits for plot.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+    if ylim_percentiles is not None:
+        ymin = (np.percentile(daily_return_by_q.values,
+                ylim_percentiles[0])
+                * DECIMAL_TO_BPS) - .05
+        ymax = (np.percentile(daily_return_by_q.values,
+                ylim_percentiles[1])
+                * DECIMAL_TO_BPS) + .05
+    else:
+        ymin = None
+        ymax = None
+
+    if ax is None:
+        f, ax = plt.subplots(1, 1, figsize=(18, 6))
+
+    unstacked_dr = (daily_return_by_q
+                    .multiply(DECIMAL_TO_BPS)
+                    .rename_axis('forward_days', axis=1)
+                    .stack()
+                    .rename('return')
+                    .reset_index())
+
+    sns.violinplot(data=unstacked_dr,
+                   x='quantile',
+                   hue='forward_days',
+                   y='return',
+                   orient='v',
+                   cut=0,
+                   inner='quartile',
+                   ax=ax)
+    ax.set(xlabel='', ylabel='Daily Return (bps)',
+           title="Daily Return By Factor Quantile",
+           ylim=(ymin, ymax))
+
+    ax.axhline(0.0, linestyle='-', color='black', lw=0.7, alpha=0.6)
+
+    return ax
 
 
 def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
@@ -395,7 +461,7 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
 
     mean_returns_spread_bps.plot(alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
     pd.rolling_mean(mean_returns_spread_bps, 22).plot(color='orangered',
-                    alpha=0.7, ax=ax)
+                                                      alpha=0.7, ax=ax)
     ax.legend(['mean returns spread', '1 month moving avg'], loc='upper right')
 
     if std_err is not None:
