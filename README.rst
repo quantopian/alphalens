@@ -1,6 +1,3 @@
-.. figure:: https://media.quantopian.com/logos/open_source/pyfolio-logo-03.png
-   :alt: qfactor
-
 Qfactor
 =======
 
@@ -28,8 +25,6 @@ With a signal and pricing data creating a factor "tear sheet" is just:
     import qfactor
 
     qfactor.tears.create_factor_tear_sheet(my_factor, pricing)
-
-.. figure:: https://c1.staticflickr.com/3/2389/2073509907_345ad52bc1.jpg
    :alt:
 
 Learn more
@@ -96,3 +91,14 @@ Credits
 -  `Thomas Wiecki <https://github.com/twiecki>`__
 -  `Jonathan Larkin <https://github.com/marketneutral>`__
 -  Jessica Stauth (jstauth@quantopian.com)
+
+Example Tear Sheet
+------------------
+
+Example factor courtesy of `ExtractAlpha <http://extractalpha.com/>`
+
+.. image:: qfactor/examples/table_tear.png
+.. image:: qfactor/examples/returns_tear.png
+.. image:: qfactor/examples/ic_tear.png
+.. image:: qfactor/examples/sector_tear.png
+    :alt:
