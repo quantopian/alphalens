@@ -312,9 +312,9 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False,
 
     if ylim_percentiles is not None:
         ymin = (np.percentile(mean_ret_by_q.values, ylim_percentiles[0])
-                * DECIMAL_TO_BPS) - .05
+                * DECIMAL_TO_BPS)
         ymax = (np.percentile(mean_ret_by_q.values, ylim_percentiles[1])
-                * DECIMAL_TO_BPS) + .05
+                * DECIMAL_TO_BPS)
     else:
         ymin = None
         ymax = None
@@ -377,10 +377,10 @@ def plot_quantile_returns_violin(daily_return_by_q,
     if ylim_percentiles is not None:
         ymin = (np.percentile(daily_return_by_q.values,
                 ylim_percentiles[0])
-                * DECIMAL_TO_BPS) - .05
+                * DECIMAL_TO_BPS)
         ymax = (np.percentile(daily_return_by_q.values,
                 ylim_percentiles[1])
-                * DECIMAL_TO_BPS) + .05
+                * DECIMAL_TO_BPS)
     else:
         ymin = None
         ymax = None
@@ -502,7 +502,11 @@ def plot_ic_by_sector(ic_sector, ax=None):
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
     ic_sector.plot(kind='bar', ax=ax)
 
-    ax.set(title="Information Coefficient By Sector")
+    ax.set(title="Information Coefficient By Sector",
+           xlabel="")
+
+    ax.set_xticklabels(ax.xaxis.get_majorticklabels(), rotation=45,
+                       ha='right', fontsize=10)
 
     return ax
 
