@@ -16,9 +16,11 @@
 import pandas as pd
 import numpy as np
 from scipy import stats
-import utils
+
 from statsmodels.regression.linear_model import OLS
 from statsmodels.tools.tools import add_constant
+
+from . import utils
 
 
 def factor_information_coefficient(factor, forward_returns,
@@ -141,7 +143,8 @@ def factor_returns(factor, forward_returns, long_short=True):
     factor : pd.Series - MultiIndex
         A list of equities and their factor values indexed by date.
     forward_returns : pd.DataFrame - MultiIndex
-        Daily forward returns in indexed by date and symbol. Separate column for each forward return window.
+        Daily forward returns in indexed by date and symbol.
+        Separate column for each forward return window.
     long_short : bool
         Should this computation happen on a long short portfolio?
 
@@ -178,14 +181,16 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     factor : pd.Series - MultiIndex
         A list of equities and their factor values indexed by date.
     forward_returns : pd.DataFrame - MultiIndex
-        Daily forward returns in indexed by date and symbol. Separate column for each forward return window.
+        Daily forward returns in indexed by date and symbol.
+        Separate column for each forward return window.
     factor_daily_returns : pd.DataFrame
         Daily returns of dollar neutral portfolio weighted by factor value.
 
     Returns
     -------
     alpha_beta : pd.Series
-        A list containing the alpha, beta, a t-stat(alpha) for the given factor and forward returns.
+        A list containing the alpha, beta, a t-stat(alpha)
+        for the given factor and forward returns.
     """
     if factor_daily_returns is None:
         factor_daily_returns = factor_returns(factor, forward_returns)
@@ -278,7 +283,7 @@ def mean_return_by_quantile(quantized_factor, forward_returns,
     demeaned_fr = utils.demean_forward_returns(forward_returns,
                                                by_sector=by_sector)
 
-    quantized_factor = quantized_factor.rename('quantile')
+    quantized_factor.name = 'quantile'
     forward_returns_quantile = (pd.DataFrame(quantized_factor)
                                 .merge(demeaned_fr, how='left',
                                        left_index=True, right_index=True)
@@ -416,7 +421,8 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
     asset_factor_rank = daily_ranks.reset_index().pivot(
         index='date', columns='asset', values='factor')
     if time_rule is not None:
-        asset_factor_rank = asset_factor_rank.resample(time_rule).mean()
+        asset_factor_rank = asset_factor_rank.resample(
+            time_rule, how='mean').dropna(how='all')
 
     autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(1), axis=1)
 

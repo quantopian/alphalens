@@ -23,9 +23,9 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 
-import performance as perf
-import utils
-from itertools import izip
+from . import performance as perf
+from . import utils
+
 from functools import wraps
 
 DECIMAL_TO_BPS = 10000
@@ -108,7 +108,8 @@ def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
         Spearman Rank correlation between factor and
         provided forward price movement windows.
     alpha_beta : pd.Series
-        A list containing the alpha, beta, a t-stat(alpha) for the given factor and forward returns.
+        A list containing the alpha, beta, a t-stat(alpha) for the
+        given factor and forward returns.
     quantized_factor : pd.Series
         Factor quantiles indexed by date and symbol.
     mean_ret_quantile : pd.DataFrame
@@ -132,29 +133,34 @@ def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
 
     max_quantile = quantized_factor.values.max()
     min_quantile = quantized_factor.values.min()
-    turnover_table = pd.DataFrame(columns=["Top Quantile", "Bottom Quantile"])
-    turnover_table.loc["Mean Turnover"] = [perf.quantile_turnover(quantized_factor, max_quantile).mean(),
-                                           perf.quantile_turnover(quantized_factor, min_quantile).mean()]
+    turnover_table = pd.DataFrame(
+        columns=["Top Quantile", "Bottom Quantile"])
+    turnover_table.loc["Mean Turnover"] = [
+        perf.quantile_turnover(quantized_factor, max_quantile).mean(),
+        perf.quantile_turnover(quantized_factor, min_quantile).mean()]
 
     auto_corr = pd.Series()
     auto_corr["Mean Factor Rank Autocorrelation"] = autocorrelation_data.mean()
 
     returns_table = pd.DataFrame()
     returns_table = returns_table.append(alpha_beta)
-    returns_table.loc["Mean Daily Return Top Quantile (bps)"] = mean_ret_quantile.loc[
+    returns_table.loc[
+        "Mean Daily Return Top Quantile (bps)"] = mean_ret_quantile.loc[
         max_quantile] * DECIMAL_TO_BPS
-    returns_table.loc["Mean Daily Return Bottom Quantile (bps)"] = mean_ret_quantile.loc[
+    returns_table.loc[
+        "Mean Daily Return Bottom Quantile (bps)"] = mean_ret_quantile.loc[
         min_quantile] * DECIMAL_TO_BPS
     returns_table.loc[
-        "Mean Daily Spread (bps)"] = mean_ret_spread_quantile.mean() * DECIMAL_TO_BPS
+        "Mean Daily Spread (bps)"] = mean_ret_spread_quantile.mean() \
+        * DECIMAL_TO_BPS
 
-    print "Returns Analysis"
-    utils.print_table(returns_table.round(3))
-    print "Information Analysis"
-    utils.print_table(ic_summary_table.round(3).T)
-    print "Turnover Analysis"
-    utils.print_table(turnover_table.round(3))
-    print auto_corr.round(3)
+    print("Returns Analysis")
+    utils.print_table(returns_table.apply(lambda x: x.round(3)))
+    print("Information Analysis")
+    utils.print_table(ic_summary_table.apply(lambda x: x.round(3)).T)
+    print("Turnover Analysis")
+    utils.print_table(turnover_table.apply(lambda x: x.round(3)))
+    print(auto_corr.apply(lambda x: x.round(3)))
 
 
 def plot_daily_ic_ts(daily_ic, ax=None):
@@ -181,13 +187,14 @@ def plot_daily_ic_ts(daily_ic, ax=None):
 
     for a, (days_num, ic) in zip(ax, daily_ic.iteritems()):
         ic.plot(alpha=0.7, ax=a, lw=0.7, color='steelblue')
-        ic.rolling(22).mean().plot(ax=a,
-                                   color='forestgreen', lw=2, alpha=0.8)
+        pd.rolling_mean(ic, 22).plot(ax=a,
+                                     color='forestgreen', lw=2, alpha=0.8)
 
         a.set(ylabel='IC', xlabel="")
         a.set_ylim([-0.25, 0.25])
         a.set_title(
-            "{} Day Forward Return Information Coefficient (IC)".format(days_num))
+            "{} Day Forward Return Information Coefficient (IC)"
+            .format(days_num))
         a.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
         a.legend(['IC', '1 month moving avg'], loc='upper right')
         a.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
@@ -346,8 +353,9 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False,
         if ax is None:
             f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-        mean_ret_by_q.multiply(DECIMAL_TO_BPS).plot(kind='bar',
-                                                    title="Mean Daily Return By Factor Quantile", ax=ax)
+        (mean_ret_by_q.multiply(DECIMAL_TO_BPS)
+            .plot(kind='bar',
+                  title="Mean Daily Return By Factor Quantile", ax=ax))
         ax.set(xlabel='', ylabel='Mean Daily Return (bps)',
                ylim=(ymin, ymax))
 
@@ -376,10 +384,10 @@ def plot_quantile_returns_violin(daily_return_by_q,
     """
     if ylim_percentiles is not None:
         ymin = (np.percentile(daily_return_by_q.values,
-                ylim_percentiles[0])
+                              ylim_percentiles[0])
                 * DECIMAL_TO_BPS)
         ymax = (np.percentile(daily_return_by_q.values,
-                ylim_percentiles[1])
+                              ylim_percentiles[1])
                 * DECIMAL_TO_BPS)
     else:
         ymin = None
@@ -389,11 +397,11 @@ def plot_quantile_returns_violin(daily_return_by_q,
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
     unstacked_dr = (daily_return_by_q
-                    .multiply(DECIMAL_TO_BPS)
-                    .rename_axis('forward_days', axis=1)
-                    .stack()
-                    .rename('return')
-                    .reset_index())
+                    .multiply(DECIMAL_TO_BPS))
+    unstacked_dr.columns = unstacked_dr.columns.set_names('forward_days')
+    unstacked_dr = unstacked_dr.stack()
+    unstacked_dr.name = 'return'
+    unstacked_dr = unstacked_dr.reset_index()
 
     sns.violinplot(data=unstacked_dr,
                    x='quantile',
@@ -468,8 +476,8 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
         std_err_bps = std_err * DECIMAL_TO_BPS
         upper = mean_returns_spread_bps.values + (std_err_bps * bandwidth)
         lower = mean_returns_spread_bps.values - (std_err_bps * bandwidth)
-        ax.fill_between(
-            mean_returns_spread.index, lower, upper, alpha=0.3, color='steelblue')
+        ax.fill_between(mean_returns_spread.index, lower,
+                        upper, alpha=0.3, color='steelblue')
 
     ylim = np.percentile(abs(mean_returns_spread_bps.values), 95)
 
@@ -483,8 +491,9 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
 
 def plot_ic_by_sector(ic_sector, ax=None):
     """
-    Plots Spearman Rank Information Coefficient for a given factor over provided forward price
-    movement windows. Separates by sector.
+    Plots Spearman Rank Information Coefficient for a given
+    factor over provided forward price movement windows.
+    Separates by sector.
 
     Parameters
     ----------
@@ -568,8 +577,8 @@ def plot_top_bottom_quantile_turnover(quantized_factor, ax=None):
     turnover['bottom quantile turnover'] = perf.quantile_turnover(
         quantized_factor, 1)
 
-    turnover.plot(
-        title='Top and Bottom Quantile Daily Turnover', ax=ax, alpha=0.6, lw=0.8)
+    turnover.plot(title='Top and Bottom Quantile Daily Turnover',
+                  ax=ax, alpha=0.6, lw=0.8)
     ax.set(ylabel='Proportion Of Names New To Quantile', xlabel="")
 
     return ax
@@ -650,7 +659,8 @@ def plot_cumulative_returns(factor_returns, ax=None):
     factor_returns.add(1).cumprod().plot(
         ax=ax, lw=3, color='forestgreen', alpha=0.6)
     ax.set(ylabel='Cumulative Returns',
-           title='Factor Weighted Long/Short Portfolio Cumulative Return', xlabel='')
+           title='Factor Weighted Long/Short Portfolio Cumulative Return',
+           xlabel='')
     ax.axhline(1.0, linestyle='-', color='black', lw=1)
 
     return ax

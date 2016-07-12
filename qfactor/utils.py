@@ -185,7 +185,7 @@ def format_input_data(factor, prices, sectors=None,
     """
 
     factor.name = 'factor'
-    factor = factor.rename_axis(['date', 'asset'], axis=0)
+    factor.index = factor.index.set_names(['date', 'asset'])
 
     forward_returns = compute_forward_returns(
         prices, days, filter_zscore=filter_zscore)
@@ -210,7 +210,7 @@ def format_input_data(factor, prices, sectors=None,
                 data=ss[factor.index.get_level_values('asset')].values)
 
         sectors.name = 'sector'
-        sectors = sectors.rename_axis(['date', 'asset'], axis=0)
+        sectors.index = sectors.index.set_names(['date', 'asset'])
 
         if sector_names is not None:
             sectors = sectors.apply(

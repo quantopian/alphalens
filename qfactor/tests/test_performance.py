@@ -48,8 +48,10 @@ class PerformanceTestCase(TestCase):
     factor = (DataFrame(index=dr, columns=tickers,
                         data=[[1, 2, 3, 4],
                               [4, 3, 2, 1]])
-              .stack()
-              .rename_axis(['date', 'asset'])).rename('factor').reset_index()
+              .stack())
+    factor.index = factor.index.set_names(['date', 'asset'])
+    factor.name = 'factor'
+    factor = factor.reset_index()
     factor['sector'] = [1, 1, 2, 2, 1, 1, 2, 2]
     factor = factor.set_index(['date', 'asset', 'sector']).factor
 
@@ -172,8 +174,9 @@ class PerformanceTestCase(TestCase):
         quantized_test_factor = Series(DataFrame(index=dr,
                                                  columns=tickers,
                                                  data=quantile_values)
-                                       .stack()
-                                       .rename_axis(['date', 'asset']))
+                                       .stack())
+        quantized_test_factor.index = quantized_test_factor.index.set_names(
+            ['date', 'asset'])
 
         to = quantile_turnover(quantized_test_factor, test_quantile)
 
@@ -224,7 +227,8 @@ class PerformanceTestCase(TestCase):
                             [1.0, 2.0, 3.0, 4.0],
                             [1.0, 2.0, 3.0, 4.0],
                             [1.0, 2.0, 3.0, 4.0]],
-                            [1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2],
+                            [1, 1, 2, 2, 1, 1, 2,
+                             2, 1, 1, 2, 2, 1, 1, 2, 2],
                             '2015-1-4',
                             'D',
                             False,
@@ -233,7 +237,8 @@ class PerformanceTestCase(TestCase):
                             [1.0, 2.0, 3.0, 4.0],
                             [4.0, 3.0, 2.0, 1.0],
                             [1.0, 2.0, 3.0, 4.0]],
-                            [1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2],
+                            [1, 1, 2, 2, 1, 1, 2,
+                             2, 1, 1, 2, 2, 1, 1, 2, 2],
                             '2015-1-4',
                             'D',
                             False,
@@ -250,8 +255,12 @@ class PerformanceTestCase(TestCase):
                             [2.0, 1.0, 4.0, 3.0],
                             [2.0, 1.0, 4.0, 3.0],
                             [4.0, 3.0, 2.0, 1.0]],
-                            [1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1,
-                             2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2],
+                            [1, 1, 2, 2, 1, 1, 2, 2,
+                             1, 1, 2, 2, 1, 1, 2, 2,
+                             1, 1, 2, 2, 1, 1, 2, 2,
+                             1, 1, 2, 2, 1, 1, 2, 2,
+                             1, 1, 2, 2, 1, 1, 2, 2,
+                             1, 1, 2, 2, 1, 1, 2, 2],
                             '2015-1-12',
                             'W',
                             False,
@@ -260,20 +269,26 @@ class PerformanceTestCase(TestCase):
                             [2.0, 1.0, 4.0, 3.0],
                             [4.0, 3.0, 2.0, 1.0],
                             [1.0, 2.0, 3.0, 4.0]],
-                            [1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2],
+                            [1, 1, 2, 2, 1, 1, 2,
+                             2, 1, 1, 2, 2, 1, 1, 2, 2],
                             '2015-1-4',
                             'D',
                             True,
                             [nan, -1.0, 1.0, -1.0])
                            ])
-    def test_factor_rank_autocorrelation(self, factor_values, sector_values, end_date, time_rule, by_sector, expected_vals):
+    def test_factor_rank_autocorrelation(self, factor_values,
+                                         sector_values, end_date,
+                                         time_rule, by_sector,
+                                         expected_vals):
         dr = date_range(start='2015-1-1', end=end_date)
         dr.name = 'date'
         tickers = ['A', 'B', 'C', 'D']
-        factor = Series(DataFrame(index=dr, columns=tickers,
-                            data=factor_values)
-                  .stack()
-                  .rename_axis(['date', 'asset'])).rename('factor').reset_index()
+        factor_df = DataFrame(index=dr, columns=tickers, data=factor_values).stack()
+        factor_df.index = factor_df.index.set_names(['date', 'asset'])
+
+        factor = Series(factor_df)
+        factor.name = 'factor'
+        factor = factor.reset_index()
         factor['sector'] = sector_values
         factor = factor.set_index(['date', 'asset', 'sector']).factor
 
