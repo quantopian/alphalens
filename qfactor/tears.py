@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from plotting import *
-import performance as perf
-import utils
+from . plotting import *
+from . import performance as perf
+from . import utils
 import matplotlib.gridspec as gridspec
 from itertools import product
 
@@ -74,7 +74,6 @@ def create_factor_tear_sheet(factor,
     if sector_names == 'morningstar':
         sector_names = utils.MORNINGSTAR_SECTOR_MAPPING
 
-
     can_sector_adjust = sectors is not None
     factor, forward_returns = utils.format_input_data(
         factor,
@@ -128,14 +127,14 @@ def create_factor_tear_sheet(factor,
     ax_quantile_returns_bar = plt.subplot(ret_gs[i, :])
     i += 1
     plot_quantile_returns_bar(mean_ret_quantile, by_sector=False,
-        ylim_percentiles=None,
-        ax=ax_quantile_returns_bar)
+                              ylim_percentiles=None,
+                              ax=ax_quantile_returns_bar)
 
     ax_quantile_returns_violin = plt.subplot(ret_gs[i, :])
     i += 1
     plot_quantile_returns_violin(mean_ret_quant_daily,
-        ylim_percentiles=(1,99),
-        ax=ax_quantile_returns_violin)
+                                 ylim_percentiles=(1, 99),
+                                 ax=ax_quantile_returns_violin)
 
     ax_cumulative_returns = plt.subplot(ret_gs[i, :])
     i += 1
@@ -144,7 +143,7 @@ def create_factor_tear_sheet(factor,
     ax_cumulative_returns_by_quantile = plt.subplot(ret_gs[i, :])
     i += 1
     plot_cumulative_returns_by_quantile(mean_ret_quant_daily[1],
-        ax=ax_cumulative_returns_by_quantile)
+                                        ax=ax_cumulative_returns_by_quantile)
 
     ax_mean_quantile_returns_spread_ts = []
     for j in range(fr_cols):
@@ -193,16 +192,16 @@ def create_factor_tear_sheet(factor,
         ax_monthly_ic_heatmap.append(p)
     i += rows_when_wide
     plot_monthly_ic_heatmap(mean_monthly_ic,
-        ax=ax_monthly_ic_heatmap)
+                            ax=ax_monthly_ic_heatmap)
 
     ax_top_bottom_quantile_turnover = plt.subplot(ic_gs[i, :])
     plot_top_bottom_quantile_turnover(quantile_factor,
-        ax=ax_top_bottom_quantile_turnover)
+                                      ax=ax_top_bottom_quantile_turnover)
     i += 1
 
     ax_factor_rank_auto_correlation = plt.subplot(ic_gs[i, :])
     plot_factor_rank_auto_correlation(factor_autocorrelation,
-        ax=ax_factor_rank_auto_correlation)
+                                      ax=ax_factor_rank_auto_correlation)
 
     # Sector Specific Breakdown
     if can_sector_adjust and sector_plots:
@@ -232,5 +231,5 @@ def create_factor_tear_sheet(factor,
             ax_quantile_returns_bar_by_sector.append(p)
         i += rows_when_wide
         plot_quantile_returns_bar(mean_return_quantile_sector,
-            by_sector=True, ylim_percentiles=(5, 95),
-            ax=ax_quantile_returns_bar_by_sector)
+                                  by_sector=True, ylim_percentiles=(5, 95),
+                                  ax=ax_quantile_returns_bar_by_sector)
