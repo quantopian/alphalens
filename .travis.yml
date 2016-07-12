@@ -24,7 +24,7 @@ before_install:
   - cp qfactor/tests/matplotlibrc .
   
 install:
-  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython numpy scipy nose matplotlib pandas statsmodels seaborn nose_parameterized
+  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython numpy scipy nose matplotlib pandas statsmodels seaborn nose-parameterized
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes mock; fi
   - source activate testenv
   - python setup.py install
