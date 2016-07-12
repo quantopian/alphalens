@@ -139,8 +139,9 @@ def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
         perf.quantile_turnover(quantized_factor, max_quantile).mean(),
         perf.quantile_turnover(quantized_factor, min_quantile).mean()]
 
-    auto_corr = pd.Series()
-    auto_corr["Mean Factor Rank Autocorrelation"] = autocorrelation_data.mean()
+    auto_corr = pd.DataFrame()
+    auto_corr.loc[
+        "Mean Factor Rank Autocorrelation", " "] = autocorrelation_data.mean()
 
     returns_table = pd.DataFrame()
     returns_table = returns_table.append(alpha_beta)
@@ -160,7 +161,7 @@ def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
     utils.print_table(ic_summary_table.apply(lambda x: x.round(3)).T)
     print("Turnover Analysis")
     utils.print_table(turnover_table.apply(lambda x: x.round(3)))
-    print(auto_corr.apply(lambda x: x.round(3)))
+    utils.print_table(auto_corr.apply(lambda x: x.round(3)))
 
 
 def plot_daily_ic_ts(daily_ic, ax=None):
