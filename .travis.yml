@@ -25,8 +25,9 @@ before_install:
   
 install:
   - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython numpy scipy nose matplotlib pandas statsmodels seaborn
-  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes mock; fi
   - source activate testenv
+  - pip install nose_parameterized
+  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes mock; fi
   - python setup.py install
 
 script: nosetests
