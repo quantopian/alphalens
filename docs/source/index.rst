@@ -102,10 +102,10 @@ Example Tear Sheet
 
 Example factor courtesy of `ExtractAlpha <http://extractalpha.com/>`_
 
-.. image:: alphalens/examples/table_tear.png
-.. image:: alphalens/examples/returns_tear.png
-.. image:: alphalens/examples/ic_tear.png
-.. image:: alphalens/examples/sector_tear.png
+.. image:: examples/table_tear.png
+.. image:: examples/returns_tear.png
+.. image:: examples/ic_tear.png
+.. image:: examples/sector_tear.png
     :alt:
 
 API
