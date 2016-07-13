@@ -209,11 +209,8 @@ def format_input_data(factor, prices, sectors=None,
             sectors = pd.Series(index=factor.index,
                 data=ss[factor.index.get_level_values('asset')].values)
 
-        sectors.name = 'sector'
-        sectors.index = sectors.index.set_names(['date', 'asset'])
-
         if sector_names is not None:
-            diff = set(sector.values) - set(sector_names.keys())
+            diff = set(sectors.values) - set(sector_names.keys())
             if len(diff) > 0:
                 raise KeyError(
                     "Sectors {} not in passed sector names".format(
@@ -221,7 +218,10 @@ def format_input_data(factor, prices, sectors=None,
 
             sn = pd.Series(sector_names)
             sectors = pd.Series(index=factor.index,
-                data=sn[sectors.values])
+                data=sn[sectors.values].values)
+
+        sectors.name = 'sector'
+        sectors.index = sectors.index.set_names(['date', 'asset'])
 
         merged_data = pd.merge(pd.DataFrame(sectors),
                                merged_data,
