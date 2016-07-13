@@ -1,21 +1,21 @@
-qfactor.tests package
+alphalens.tests package
 =====================
 
 Submodules
 ----------
 
-qfactor.tests.test_performance module
+alphalens.tests.test_performance module
 -------------------------------------
 
-.. automodule:: qfactor.tests.test_performance
+.. automodule:: alphalens.tests.test_performance
     :members:
     :undoc-members:
     :show-inheritance:
 
-qfactor.tests.test_utils module
+alphalens.tests.test_utils module
 -------------------------------
 
-.. automodule:: qfactor.tests.test_utils
+.. automodule:: alphalens.tests.test_utils
     :members:
     :undoc-members:
     :show-inheritance:
@@ -24,7 +24,7 @@ qfactor.tests.test_utils module
 Module contents
 ---------------
 
-.. automodule:: qfactor.tests
+.. automodule:: alphalens.tests
     :members:
     :undoc-members:
     :show-inheritance:

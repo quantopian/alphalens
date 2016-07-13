@@ -1,11 +1,11 @@
 
-Qfactor
+Alphalens
 =======
 
 Tear Sheets
 -----------
 
-.. automodule:: qfactor.tears
+.. automodule:: alphalens.tears
     :members:
     :undoc-members:
     :show-inheritance:
@@ -13,7 +13,7 @@ Tear Sheets
 Performance
 -----------
 
-.. automodule:: qfactor.performance
+.. automodule:: alphalens.performance
     :members:
     :undoc-members:
     :show-inheritance:
@@ -21,7 +21,7 @@ Performance
 Plotting
 --------
 
-.. automodule:: qfactor.plotting
+.. automodule:: alphalens.plotting
     :members:
     :undoc-members:
     :show-inheritance:
@@ -29,7 +29,7 @@ Plotting
 Utilities
 ---------
 
-.. automodule:: qfactor.utils
+.. automodule:: alphalens.utils
     :members:
     :undoc-members:
     :show-inheritance:

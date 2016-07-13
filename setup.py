@@ -22,15 +22,20 @@ install_reqs = [
     'statsmodels>=0.6.1'
 ]
 
+test_reqs = [
+    "nose>=1.3.7",
+    "nose_parameterized>=0.5.0"
+]
+
 if __name__ == "__main__":
     setup(
-        name='qfactor',
+        name='alphalens',
         version='0.0.0',
         description='Factor analysis tools',
         author='Quantopian Inc.',
         author_email='andrew@quantopian.com',
         packages=[
-            'qfactor',
+            'alphalens',
         ],
         long_description=long_description,
         classifiers=[
@@ -43,6 +48,7 @@ if __name__ == "__main__":
             'Programming Language :: Python',
             'Topic :: Utilities',
         ],
-        url='https://github.com/quantopian/qfactor',
-        install_requires=install_reqs
+        url='https://github.com/quantopian/alphalens',
+        install_requires=install_reqs,
+        test_requires=test_reqs
     )

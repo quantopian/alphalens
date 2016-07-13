@@ -3,26 +3,22 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+Alphalens
+=========
 
-.. figure:: https://media.quantopian.com/logos/open_source/pyfolio-logo-03.png
-   :alt: pyfolio
-
-Qfactor
--------
-
-Qfactor is a Python Library for performance analysis of predictive
-(alpha) stock factors. Qfactor works great with the
+Alphalens is a Python Library for performance analysis of predictive
+(alpha) stock factors. Alphalens works great with the
 `Zipline <http://zipline.io/>`__ open source backtesting library, and
-`pyfolio <https://github.com/quantopian/pyfolio>`__ which provides
+`Pyfolio <https://github.com/quantopian/pyfolio>`__ which provides
 performance and risk analysis of financial portfolios.
 
-The main function of Qfactor is to surface the most relevant statistics
+The main function of Alphalens is to surface the most relevant statistics
 and plots about an alpha factor, including:
 
-- Information Coefficient Analysis
-- Returns Analysis
-- Turnover Analysis
-- Sector Analysis
+-  Information Coefficient Analysis
+-  Returns Analysis
+-  Turnover Analysis
+-  Sector Analysis
 
 Getting started
 ---------------
@@ -31,17 +27,15 @@ With a signal and pricing data creating a factor "tear sheet" is just:
 
 .. code:: python
 
-    import qfactor
+    import alphalens
 
-    qfactor.tears.create_factor_tear_sheet(my_factor, pricing)
+    alphalens.tears.create_factor_tear_sheet(my_factor, pricing)
 
-.. figure:: https://c1.staticflickr.com/3/2389/2073509907_345ad52bc1.jpg
-   :alt:
 
 Learn more
 ----------
 
-Check out the `example notebooks <>`__ for more on how to read and use
+Check out the `example notebooks <https://github.com/quantopian/qfactor/tree/master/examples>`__ for more on how to read and use
 the factor tear sheet.
 
 Installation
@@ -49,9 +43,9 @@ Installation
 
 ::
 
-    pip install qfactor
+    pip install alphalens
 
-Qfactor depends on:
+Alphalens depends on:
 
 -  `matplotlib <https://github.com/matplotlib/matplotlib>`__
 -  `numpy <https://github.com/numpy/numpy>`__
@@ -85,14 +79,14 @@ Questions?
 ----------
 
 If you find a bug, feel free to open an issue on our `github
-tracker <https://github.com/quantopian/qfactor/issues>`__.
+tracker <https://github.com/quantopian/alphalens/issues>`__.
 
 Contribute
 ----------
 
 If you want to contribute, a great place to start would be the
 `help-wanted
-issues <https://github.com/quantopian/qfactor/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22>`__.
+issues <https://github.com/quantopian/alphalens/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22>`__.
 
 Credits
 -------
@@ -103,12 +97,23 @@ Credits
 -  `Jonathan Larkin <https://github.com/marketneutral>`__
 -  Jessica Stauth (jstauth@quantopian.com)
 
+Example Tear Sheet
+------------------
+
+Example factor courtesy of `ExtractAlpha <http://extractalpha.com/>`_
+
+.. image:: examples/table_tear.png
+.. image:: examples/returns_tear.png
+.. image:: examples/ic_tear.png
+.. image:: examples/sector_tear.png
+    :alt:
+
 API
 ---
 
 Information on a specific functions, classes, or methods.
 
-- :mod:`qfactor.tears`
-- :mod:`qfactor.performance`
-- :mod:`qfactor.plotting`
-- :mod:`qfactor.utils`
+- :mod:`alphalens.tears`
+- :mod:`alphalens.performance`
+- :mod:`alphalens.plotting`
+- :mod:`alphalens.utils`
