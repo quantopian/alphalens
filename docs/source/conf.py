@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Qfactor documentation build configuration file, created by
+# Alphalens documentation build configuration file, created by
 # sphinx-quickstart on Tue Jul  5 15:45:48 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -48,7 +48,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Qfactor'
+project = u'Alphalens'
 copyright = u'2016, Quantopian, Inc.'
 author = u'Quantopian, Inc.'
 
@@ -202,7 +202,7 @@ html_static_path = ['_static']
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Qfactordoc'
+htmlhelp_basename = 'Alphalensdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -224,7 +224,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Qfactor.tex', u'Qfactor Documentation',
+    (master_doc, 'Alphalens.tex', u'Alphalens Documentation',
      u'Quantopian, Inc.', 'manual'),
 ]
 
@@ -254,7 +254,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'qfactor', u'Qfactor Documentation',
+    (master_doc, 'alphalens', u'Alphalens Documentation',
      [author], 1)
 ]
 
@@ -268,8 +268,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Qfactor', u'Qfactor Documentation',
-     author, 'Qfactor', 'One line description of project.',
+    (master_doc, 'Alphalens', u'Alphalens Documentation',
+     author, 'Alphalens', 'One line description of project.',
      'Miscellaneous'),
 ]
 

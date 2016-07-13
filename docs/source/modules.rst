@@ -1,7 +1,7 @@
-qfactor
+alphalens
 =======
 
 .. toctree::
    :maxdepth: 4
 
-   qfactor
+   alphalens

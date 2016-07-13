@@ -21,7 +21,7 @@ before_install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - cp qfactor/tests/matplotlibrc .
+  - cp alphalens/tests/matplotlibrc .
   
 install:
   - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython numpy scipy nose matplotlib pandas statsmodels seaborn
