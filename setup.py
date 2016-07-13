@@ -29,13 +29,13 @@ test_reqs = [
 
 if __name__ == "__main__":
     setup(
-        name='qfactor',
+        name='alphalens',
         version='0.0.0',
         description='Factor analysis tools',
         author='Quantopian Inc.',
         author_email='andrew@quantopian.com',
         packages=[
-            'qfactor',
+            'alphalens',
         ],
         long_description=long_description,
         classifiers=[
@@ -48,7 +48,7 @@ if __name__ == "__main__":
             'Programming Language :: Python',
             'Topic :: Utilities',
         ],
-        url='https://github.com/quantopian/qfactor',
+        url='https://github.com/quantopian/alphalens',
         install_requires=install_reqs,
         test_requires=test_reqs
     )
