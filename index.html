@@ -1,0 +1,299 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Alphalens &mdash; Alphalens 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Alphalens 0.1 documentation" href="#"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> Alphalens
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <!-- Local TOC -->
+                <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Alphalens</a><ul>
+<li><a class="reference internal" href="#getting-started">Getting started</a></li>
+<li><a class="reference internal" href="#learn-more">Learn more</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#questions">Questions?</a></li>
+<li><a class="reference internal" href="#contribute">Contribute</a></li>
+<li><a class="reference internal" href="#credits">Credits</a></li>
+<li><a class="reference internal" href="#example-tear-sheet">Example Tear Sheet</a></li>
+<li><a class="reference internal" href="#api">API</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">Alphalens</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="#">Docs</a> &raquo;</li>
+      
+    <li>Alphalens</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/index.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="alphalens">
+<h1>Alphalens<a class="headerlink" href="#alphalens" title="Permalink to this headline">¶</a></h1>
+<p>Alphalens is a Python Library for performance analysis of predictive
+(alpha) stock factors. Alphalens works great with the
+<a class="reference external" href="http://zipline.io/">Zipline</a> open source backtesting library, and
+<a class="reference external" href="https://github.com/quantopian/pyfolio">Pyfolio</a> which provides
+performance and risk analysis of financial portfolios.</p>
+<p>The main function of Alphalens is to surface the most relevant statistics
+and plots about an alpha factor, including:</p>
+<ul class="simple">
+<li>Information Coefficient Analysis</li>
+<li>Returns Analysis</li>
+<li>Turnover Analysis</li>
+<li>Sector Analysis</li>
+</ul>
+<div class="section" id="getting-started">
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<p>With a signal and pricing data creating a factor &#8220;tear sheet&#8221; is just:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">alphalens</span>
+
+<span class="n">alphalens</span><span class="o">.</span><span class="n">tears</span><span class="o">.</span><span class="n">create_factor_tear_sheet</span><span class="p">(</span><span class="n">my_factor</span><span class="p">,</span> <span class="n">pricing</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="learn-more">
+<h2>Learn more<a class="headerlink" href="#learn-more" title="Permalink to this headline">¶</a></h2>
+<p>Check out the <a class="reference external" href="https://github.com/quantopian/qfactor/tree/master/examples">example notebooks</a> for more on how to read and use
+the factor tear sheet.</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">alphalens</span>
+</pre></div>
+</div>
+<p>Alphalens depends on:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/matplotlib/matplotlib">matplotlib</a></li>
+<li><a class="reference external" href="https://github.com/numpy/numpy">numpy</a></li>
+<li><a class="reference external" href="https://github.com/pydata/pandas">pandas</a></li>
+<li><a class="reference external" href="https://github.com/scipy/scipy">scipy</a></li>
+<li><a class="reference external" href="https://github.com/mwaskom/seaborn">seaborn</a></li>
+<li><a class="reference external" href="https://github.com/statsmodels/statsmodels">statsmodels</a></li>
+</ul>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>A good way to get started is to run the examples in a <a class="reference external" href="http://jupyter.org/">Jupyter
+notebook</a>.</p>
+<p>To get set up with an example, you can:</p>
+<p>Run a Jupyter notebook server via:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">jupyter</span> <span class="n">notebook</span>
+</pre></div>
+</div>
+<p>From the notebook list page(usually found at
+<code class="docutils literal"><span class="pre">http://localhost:8888/</span></code>), navigate over to the examples directory,
+and open any file with a .ipynb extension.</p>
+<p>Execute the code in a notebook cell by clicking on it and hitting
+Shift+Enter.</p>
+</div>
+<div class="section" id="questions">
+<h2>Questions?<a class="headerlink" href="#questions" title="Permalink to this headline">¶</a></h2>
+<p>If you find a bug, feel free to open an issue on our <a class="reference external" href="https://github.com/quantopian/alphalens/issues">github
+tracker</a>.</p>
+</div>
+<div class="section" id="contribute">
+<h2>Contribute<a class="headerlink" href="#contribute" title="Permalink to this headline">¶</a></h2>
+<p>If you want to contribute, a great place to start would be the
+<a class="reference external" href="https://github.com/quantopian/alphalens/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22">help-wanted
+issues</a>.</p>
+</div>
+<div class="section" id="credits">
+<h2>Credits<a class="headerlink" href="#credits" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/a-campbell">Andrew Campbell</a></li>
+<li><a class="reference external" href="https://github.com/jameschristopher">James Christopher</a></li>
+<li><a class="reference external" href="https://github.com/twiecki">Thomas Wiecki</a></li>
+<li><a class="reference external" href="https://github.com/marketneutral">Jonathan Larkin</a></li>
+<li>Jessica Stauth (<a class="reference external" href="mailto:jstauth&#37;&#52;&#48;quantopian&#46;com">jstauth<span>&#64;</span>quantopian<span>&#46;</span>com</a>)</li>
+</ul>
+</div>
+<div class="section" id="example-tear-sheet">
+<h2>Example Tear Sheet<a class="headerlink" href="#example-tear-sheet" title="Permalink to this headline">¶</a></h2>
+<p>Example factor courtesy of <a class="reference external" href="http://extractalpha.com/">ExtractAlpha</a></p>
+<img alt="examples/table_tear.png" src="examples/table_tear.png" />
+<img alt="examples/returns_tear.png" src="examples/returns_tear.png" />
+<img alt="examples/ic_tear.png" src="examples/ic_tear.png" />
+<img alt="" src="examples/sector_tear.png" />
+</div>
+<div class="section" id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<p>Information on a specific functions, classes, or methods.</p>
+<ul class="simple">
+<li><a class="reference internal" href="alphalens.html#module-alphalens.tears" title="alphalens.tears"><code class="xref py py-mod docutils literal"><span class="pre">alphalens.tears</span></code></a></li>
+<li><a class="reference internal" href="alphalens.html#module-alphalens.performance" title="alphalens.performance"><code class="xref py py-mod docutils literal"><span class="pre">alphalens.performance</span></code></a></li>
+<li><a class="reference internal" href="alphalens.html#module-alphalens.plotting" title="alphalens.plotting"><code class="xref py py-mod docutils literal"><span class="pre">alphalens.plotting</span></code></a></li>
+<li><a class="reference internal" href="alphalens.html#module-alphalens.utils" title="alphalens.utils"><code class="xref py py-mod docutils literal"><span class="pre">alphalens.utils</span></code></a></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Quantopian, Inc..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
