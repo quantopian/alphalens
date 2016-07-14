@@ -33,7 +33,7 @@ With a signal and pricing data creating a factor "tear sheet" is just:
 Learn more
 ----------
 
-Check out the `example notebooks <https://github.com/quantopian/qfactor/tree/master/examples>`__ for more on how to read and use
+Check out the `example notebooks <https://github.com/quantopian/qfactor/tree/master/examples/notebooks>`__ for more on how to read and use
 the factor tear sheet.
 
 Installation
@@ -100,8 +100,8 @@ Example Tear Sheet
 
 Example factor courtesy of `ExtractAlpha <http://extractalpha.com/>`_
 
-.. image:: examples/table_tear.png
-.. image:: examples/returns_tear.png
-.. image:: examples/ic_tear.png
-.. image:: examples/sector_tear.png
+.. image:: https://github.com/quantopian/alphalens/raw/master/examples/table_tear.png
+.. image:: https://github.com/quantopian/alphalens/raw/master/examples/returns_tear.png
+.. image:: https://github.com/quantopian/alphalens/raw/master/examples/ic_tear.png
+.. image:: https://github.com/quantopian/alphalens/raw/master/examples/sector_tear.png
     :alt:
