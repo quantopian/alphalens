@@ -1,7 +1,8 @@
 Alphalens
 =========
-.. image:: https://travis-ci.com/quantopian/alphalens.svg?token=tw8BdqzqoxGpJiLUMKdN&branch=master
-    :target: https://travis-ci.com/quantopian/alphalens
+.. image:: https://travis-ci.org/quantopian/alphalens.svg?branch=master
+    :target: https://travis-ci.org/quantopian/alphalens
+   
     
 Alphalens is a Python Library for performance analysis of predictive
 (alpha) stock factors. Alphalens works great with the
