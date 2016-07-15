@@ -36,6 +36,8 @@ if __name__ == "__main__":
         author_email='andrew@quantopian.com',
         packages=[
             'alphalens',
+            'alphalens.examples',
+            'alphalens.tests',
         ],
         long_description=long_description,
         classifiers=[
