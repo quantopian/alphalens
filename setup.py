@@ -32,7 +32,7 @@ if __name__ == "__main__":
         version='0.0.0',
         description='Factor analysis tools',
         author='Quantopian Inc.',
-        author_email='andrew@quantopian.com',
+        author_email='opensource@quantopian.com',
         packages=find_packages(include='alphalens.*'),
         long_description=long_description,
         classifiers=[
