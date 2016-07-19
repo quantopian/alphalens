@@ -71,9 +71,6 @@ def create_factor_tear_sheet(factor,
     if 1 not in days:
         days.insert(0, 1)
 
-    if sector_names == 'morningstar':
-        sector_names = utils.MORNINGSTAR_SECTOR_MAPPING
-
     can_sector_adjust = sectors is not None
     factor, forward_returns = utils.format_input_data(
         factor,
