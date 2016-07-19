@@ -34,6 +34,9 @@ if __name__ == "__main__":
         author='Quantopian Inc.',
         author_email='opensource@quantopian.com',
         packages=find_packages(include='alphalens.*'),
+        package_data={
+            'alphalens': ['examples/*'],
+        },
         long_description=long_description,
         classifiers=[
             'Development Status :: 4 - Beta',
