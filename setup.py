@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from setuptools import setup
+from setuptools import setup, find_packages
 import sys
 
 long_description = ''
@@ -9,23 +9,22 @@ if 'upload' in sys.argv:
         long_description = f.read()
 
 install_reqs = [
-    'funcsigs>=0.4',
     'matplotlib>=1.4.0',
-    'mock>=1.1.2',
     'numpy>=1.9.1',
     'pandas>=0.16.1',
-    'pyparsing>=2.0.3',
-    'python-dateutil>=2.4.2',
-    'pytz>=2014.10',
     'scipy>=0.14.0',
     'seaborn>=0.6.0',
-    'statsmodels>=0.6.1'
+    'statsmodels>=0.6.1',
+    'IPython>=3.2.3',
 ]
 
-test_reqs = [
-    "nose>=1.3.7",
-    "nose_parameterized>=0.5.0"
-]
+extra_reqs = {
+    'test': [
+        "nose>=1.3.7",
+        "nose_parameterized>=0.5.0",
+        "tox>=2.3.1",
+    ],
+}
 
 if __name__ == "__main__":
     setup(
@@ -33,12 +32,11 @@ if __name__ == "__main__":
         version='0.0.0',
         description='Factor analysis tools',
         author='Quantopian Inc.',
-        author_email='andrew@quantopian.com',
-        packages=[
-            'alphalens',
-            'alphalens.examples',
-            'alphalens.tests',
-        ],
+        author_email='opensource@quantopian.com',
+        packages=find_packages(include='alphalens.*'),
+        package_data={
+            'alphalens': ['examples/*'],
+        },
         long_description=long_description,
         classifiers=[
             'Development Status :: 4 - Beta',
@@ -47,10 +45,14 @@ if __name__ == "__main__":
             'Natural Language :: English',
             'Operating System :: OS Independent',
             'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3.4',
+            'Programming Language :: Python :: 3.5',
             'Programming Language :: Python',
             'Topic :: Utilities',
+            'Topic :: Office/Business :: Financial',
+            'Topic :: Scientific/Engineering :: Information Analysis',
         ],
         url='https://github.com/quantopian/alphalens',
         install_requires=install_reqs,
-        test_requires=test_reqs
+        extras_require=extra_reqs,
     )
