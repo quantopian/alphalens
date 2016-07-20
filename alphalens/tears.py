@@ -20,7 +20,7 @@ import matplotlib.gridspec as gridspec
 from itertools import product
 
 
-@plotting_context
+@p.plotting_context
 def create_factor_tear_sheet(factor,
                              prices,
                              sectors=None,
