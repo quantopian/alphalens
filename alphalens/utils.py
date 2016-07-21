@@ -90,6 +90,7 @@ def demean_forward_returns(forward_returns, by_sector=False):
         DataFrame of the same format as the input, but with each
         security's returns normalized by sector.
     """
+
     grouper = ['date', 'sector'] if by_sector else ['date']
 
     return forward_returns.groupby(level=grouper).apply(lambda x: x - x.mean())

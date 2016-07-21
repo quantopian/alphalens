@@ -93,12 +93,15 @@ def context(context='notebook', font_scale=1.5, rc=None):
     for name, val in rc_default.items():
         rc.setdefault(name, val)
 
-    return sns.plotting_context(context=context, font_scale=font_scale,
-                                rc=rc)
+    return sns.plotting_context(context=context, font_scale=font_scale, rc=rc)
 
 
-def summary_stats(ic_data, alpha_beta, quantized_factor, mean_ret_quantile,
-                  autocorrelation_data, mean_ret_spread_quantile):
+def summary_stats(ic_data,
+                  alpha_beta,
+                  quantized_factor,
+                  mean_ret_quantile,
+                  autocorrelation_data,
+                  mean_ret_spread_quantile):
     """
     Generates a pretty printed table of summary statistics for the alpha factor.
 
@@ -319,10 +322,8 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False,
     """
 
     if ylim_percentiles is not None:
-        ymin = (np.percentile(mean_ret_by_q.values, ylim_percentiles[0])
-                * DECIMAL_TO_BPS)
-        ymax = (np.percentile(mean_ret_by_q.values, ylim_percentiles[1])
-                * DECIMAL_TO_BPS)
+        ymin = (np.percentile(mean_ret_by_q.values, ylim_percentiles[0]) * DECIMAL_TO_BPS)
+        ymax = (np.percentile(mean_ret_by_q.values, ylim_percentiles[1]) * DECIMAL_TO_BPS)
     else:
         ymin = None
         ymax = None
@@ -363,8 +364,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False,
         return ax
 
 
-def plot_quantile_returns_violin(daily_return_by_q,
-                                 ylim_percentiles=None, ax=None):
+def plot_quantile_returns_violin(daily_return_by_q, ylim_percentiles=None, ax=None):
     """
     Plots a violin box plot of daily returns for factor quantiles.
 
@@ -384,12 +384,8 @@ def plot_quantile_returns_violin(daily_return_by_q,
         The axes that were plotted on.
     """
     if ylim_percentiles is not None:
-        ymin = (np.percentile(daily_return_by_q.values,
-                              ylim_percentiles[0])
-                * DECIMAL_TO_BPS)
-        ymax = (np.percentile(daily_return_by_q.values,
-                              ylim_percentiles[1])
-                * DECIMAL_TO_BPS)
+        ymin = (np.percentile(daily_return_by_q.values, ylim_percentiles[0]) * DECIMAL_TO_BPS)
+        ymax = (np.percentile(daily_return_by_q.values, ylim_percentiles[1])  * DECIMAL_TO_BPS)
     else:
         ymin = None
         ymax = None
@@ -421,10 +417,7 @@ def plot_quantile_returns_violin(daily_return_by_q,
     return ax
 
 
-def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
-                                                  std_err=None,
-                                                  bandwidth=1,
-                                                  ax=None):
+def plot_mean_quantile_returns_spread_time_series(mean_returns_spread, std_err=None, bandwidth=1, ax=None):
     """
     Plots mean daily returns for factor quantiles.
 
@@ -432,13 +425,11 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     ----------
     mean_returns_spread : pd.Series
         Series with difference between quantile mean returns by day.
-    std : pd.Series
-        Series with standard devation of difference between quantile
+    std_err : pd.Series
+        Series with standard error of difference between quantile
         mean returns each day.
     bandwidth : float
         Width of displayed error bands in standard deviations.
-    title : str
-        Plot title.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -454,14 +445,12 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
 
         for a, (name, fr_column) in zip(ax, mean_returns_spread.iteritems()):
             stdn = None if std_err is None else std_err[name]
-            plot_mean_quantile_returns_spread_time_series(fr_column,
-                                                          std_err=stdn, ax=a)
+            plot_mean_quantile_returns_spread_time_series(fr_column, std_err=stdn, ax=a)
 
         return ax
 
     days = mean_returns_spread.name
-    title = ('Top Minus Bottom Quantile Mean Return ({} Day Forward Return)'
-             .format(days if days is not None else ""))
+    title = ('Top Minus Bottom Quantile Mean Return ({} Day Forward Return)'.format(days if days is not None else ""))
 
     if ax is None:
         f, ax = plt.subplots(figsize=(18, 6))
@@ -469,22 +458,17 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     mean_returns_spread_bps = mean_returns_spread * DECIMAL_TO_BPS
 
     mean_returns_spread_bps.plot(alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
-    pd.rolling_mean(mean_returns_spread_bps, 22).plot(color='orangered',
-                                                      alpha=0.7, ax=ax)
+    pd.rolling_mean(mean_returns_spread_bps, 22).plot(color='orangered', alpha=0.7, ax=ax)
     ax.legend(['mean returns spread', '1 month moving avg'], loc='upper right')
 
     if std_err is not None:
         std_err_bps = std_err * DECIMAL_TO_BPS
         upper = mean_returns_spread_bps.values + (std_err_bps * bandwidth)
         lower = mean_returns_spread_bps.values - (std_err_bps * bandwidth)
-        ax.fill_between(mean_returns_spread.index, lower,
-                        upper, alpha=0.3, color='steelblue')
+        ax.fill_between(mean_returns_spread.index, lower, upper, alpha=0.3, color='steelblue')
 
     ylim = np.percentile(abs(mean_returns_spread_bps.values), 95)
-
-    ax.set(ylabel='Difference In Quantile Mean Return (bps)', xlabel='',
-           title=title, ylim=(-ylim, ylim))
-
+    ax.set(ylabel='Difference In Quantile Mean Return (bps)', xlabel='', title=title, ylim=(-ylim, ylim))
     ax.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
 
     return ax
@@ -512,11 +496,8 @@ def plot_ic_by_sector(ic_sector, ax=None):
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
     ic_sector.plot(kind='bar', ax=ax)
 
-    ax.set(title="Information Coefficient By Sector",
-           xlabel="")
-
-    ax.set_xticklabels(ax.xaxis.get_majorticklabels(), rotation=45,
-                       ha='right', fontsize=10)
+    ax.set(title="Information Coefficient By Sector", xlabel="")
+    ax.set_xticklabels(ax.xaxis.get_majorticklabels(), rotation=45, ha='right', fontsize=10)
 
     return ax
 
@@ -573,13 +554,9 @@ def plot_top_bottom_quantile_turnover(quantized_factor, ax=None):
 
     max_quantile = quantized_factor.values.max()
     turnover = pd.DataFrame()
-    turnover['top quantile turnover'] = perf.quantile_turnover(
-        quantized_factor, max_quantile)
-    turnover['bottom quantile turnover'] = perf.quantile_turnover(
-        quantized_factor, 1)
-
-    turnover.plot(title='Top and Bottom Quantile Daily Turnover',
-                  ax=ax, alpha=0.6, lw=0.8)
+    turnover['top quantile turnover'] = perf.quantile_turnover(quantized_factor, max_quantile)
+    turnover['bottom quantile turnover'] = perf.quantile_turnover(quantized_factor, 1)
+    turnover.plot(title='Top and Bottom Quantile Daily Turnover', ax=ax, alpha=0.6, lw=0.8)
     ax.set(ylabel='Proportion Of Names New To Quantile', xlabel="")
 
     return ax
@@ -673,10 +650,8 @@ def plot_cumulative_returns_by_quantile(quantile_daily_returns, ax=None):
 
     Parameters
     ----------
-    mean_returns_by_quantile : pd.Series -- MultiIndex
-        Mean daily returns by specified factor quantile.
-        MultiIndex of date, quantile.
-        See performance.mean_returns_by_quantile.
+    quantile_daily_returns : pd.DataFrame
+        Cumulative returns by factor quantile.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -688,8 +663,7 @@ def plot_cumulative_returns_by_quantile(quantile_daily_returns, ax=None):
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    daily_ret_wide = quantile_daily_returns.reset_index().pivot(
-        index='date', columns='quantile', values=1)
+    daily_ret_wide = quantile_daily_returns.reset_index().pivot(index='date', columns='quantile', values=1)
     cum_ret = daily_ret_wide.add(1).cumprod()
     cum_ret = cum_ret.loc[:, ::-1]
     num_quant = len(cum_ret.columns)
@@ -707,7 +681,6 @@ def plot_cumulative_returns_by_quantile(quantile_daily_returns, ax=None):
            ylim=(ymin, ymax))
 
     ax.yaxis.set_major_formatter(ScalarFormatter())
-
     ax.axhline(1.0, linestyle='-', color='black', lw=1)
 
     return ax

@@ -23,8 +23,7 @@ from statsmodels.tools.tools import add_constant
 from . import utils
 
 
-def factor_information_coefficient(factor, forward_returns,
-                                   sector_adjust=False, by_sector=False):
+def factor_information_coefficient(factor, forward_returns, sector_adjust=False, by_sector=False):
     """
     Computes Spearman Rank Correlation based Information Coefficient (IC)
     between factor values and N day forward returns for each day in
@@ -74,9 +73,7 @@ def factor_information_coefficient(factor, forward_returns,
     return ic
 
 
-def mean_information_coefficient(factor, forward_returns,
-                                 sector_adjust=False,
-                                 by_time=None, by_sector=False):
+def mean_information_coefficient(factor, forward_returns, sector_adjust=False, by_time=None, by_sector=False):
     """
     Get the mean information coefficient of specified groups.
     Answers questions like:
@@ -244,15 +241,13 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
     factor_percentile = factor.groupby(level=grouper).rank(pct=True)
 
     q_width = 1. / quantiles
-    factor_quantile = factor_percentile.apply(
-        lambda x: ((x - .000000001) // q_width) + 1)
+    factor_quantile = factor_percentile.apply(lambda x: ((x - .000000001) // q_width) + 1)
     factor_quantile.name = 'quantile'
 
     return factor_quantile
 
 
-def mean_return_by_quantile(quantized_factor, forward_returns,
-                            by_time=None, by_sector=False, std_err=False):
+def mean_return_by_quantile(quantized_factor, forward_returns, by_time=None, by_sector=False, std_err=False):
     """
     Computes mean demeaned returns for factor quantiles across
     provided forward returns columns.
@@ -269,8 +264,6 @@ def mean_return_by_quantile(quantized_factor, forward_returns,
     by_sector : bool
         If True, compute quantile bucket returns separately for each sector.
         Returns demeaning will occur on the sector level.
-    std_err : bool
-        If True, compute and return the standard error of the mean return.
 
     Returns
     -------
@@ -304,17 +297,12 @@ def mean_return_by_quantile(quantized_factor, forward_returns,
 
     mean_ret = group_stats.T.xs('mean', level=1).T
 
-    if std_err:
-        std_error_ret = group_stats.T.xs('std', level=1).T / \
-            np.sqrt(group_stats.T.xs('count', level=1).T)
+    std_error_ret = group_stats.T.xs('std', level=1).T / np.sqrt(group_stats.T.xs('count', level=1).T)
 
-        return mean_ret, std_error_ret
-
-    return mean_ret
+    return mean_ret, std_error_ret
 
 
-def compute_mean_returns_spread(mean_returns, upper_quant,
-                                lower_quant, std_err=None):
+def compute_mean_returns_spread(mean_returns, upper_quant, lower_quant, std_err=None):
     """
     Computes the difference between the mean returns of
     two quantiles. Optionally, computes the standard deviation
@@ -332,7 +320,7 @@ def compute_mean_returns_spread(mean_returns, upper_quant,
     lower_quant : int
         Quantile of mean return we wish to subtract
         from upper quantile mean return.
-    std_err : pd.DataFrame (optional)
+    std_err : pd.DataFrame
         Daily standard error in mean return by quantile.
         Takes the same form as mean_returns.
 
@@ -347,14 +335,11 @@ def compute_mean_returns_spread(mean_returns, upper_quant,
     mean_return_difference = mean_returns.xs(upper_quant, level='quantile') - \
         mean_returns.xs(lower_quant, level='quantile')
 
-    if std_err is not None:
-        std1 = std_err.xs(upper_quant, level='quantile')
-        std2 = std_err.xs(lower_quant, level='quantile')
-        joint_std_err = np.sqrt(std1**2 + std2**2)
+    std1 = std_err.xs(upper_quant, level='quantile')
+    std2 = std_err.xs(lower_quant, level='quantile')
+    joint_std_err = np.sqrt(std1**2 + std2**2)
 
-        return mean_return_difference, joint_std_err
-
-    return mean_return_difference
+    return mean_return_difference, joint_std_err
 
 
 def quantile_turnover(quantile_factor, quantile):
