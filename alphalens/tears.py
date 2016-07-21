@@ -37,8 +37,23 @@ def create_factor_tear_sheet(factor,
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        A MultiIndex Series indexed by date and asset, containing
+        A MultiIndex Series indexed by date (level 0) and asset (level 1), containing
         the values for a single alpha factor.
+        ::
+            -----------------------------------
+                date    |    asset   |
+            -----------------------------------
+                        |   AAPL     |   0.5
+                        -----------------------
+                        |   BA       |  -1.1
+                        -----------------------
+            2014-01-01  |   CMG      |   1.7
+                        -----------------------
+                        |   DAL      |  -0.1
+                        -----------------------
+                        |   LULU     |   2.7
+                        -----------------------
+
     prices : pd.DataFrame
         A wide form Pandas DataFrame indexed by date with assets
         in the columns. It is important to pass the
