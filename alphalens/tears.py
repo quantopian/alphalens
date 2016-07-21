@@ -25,7 +25,7 @@ from itertools import product
 def create_factor_tear_sheet(factor,
                              prices,
                              sectors=None,
-                             sector_plots=True,
+                             show_sector_plots=True,
                              days=(1, 5, 10),
                              quantiles=5,
                              filter_zscore=10,
@@ -40,7 +40,7 @@ def create_factor_tear_sheet(factor,
         A MultiIndex Series indexed by date and asset, containing
         the values for a single alpha factor.
     prices : pd.DataFrame
-        A wide form Pandas DataFrame indexed by date with equities
+        A wide form Pandas DataFrame indexed by date with assets
         in the columns. It is important to pass the
         correct pricing data in depending on what time of day your
         signal was generated so to avoid lookahead bias, or
@@ -54,13 +54,13 @@ def create_factor_tear_sheet(factor,
         a dict of asset to sector mappings. If a dict is passed,
         it is assumed that sector mappings are unchanged for the
         entire time period of the passed factor data.
-    sector_plots : bool
+    show_sector_plots : bool
         If True create sector specific plots.
     days : sequence[int]
         Days to compute forward returns on.
     quantiles : int
         The number of buckets to parition the data into for analysis.
-    filter_zscore : int
+    filter_zscore :
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
         Caution: this outlier filtering incorporates lookahead bias.
@@ -72,12 +72,12 @@ def create_factor_tear_sheet(factor,
         days.insert(0, 1)
 
     can_sector_adjust = sectors is not None
-    factor, forward_returns = utils.format_input_data(factor,
-                                                      prices,
-                                                      sectors=sectors,
-                                                      days=days,
-                                                      filter_zscore=filter_zscore,
-                                                      sector_names=sector_names)
+    factor, forward_returns = utils.create_clean_factor_and_forward_returns(factor,
+                                                                            prices,
+                                                                            sectors=sectors,
+                                                                            days=days,
+                                                                            filter_zscore=filter_zscore,
+                                                                            sector_names=sector_names)
 
     daily_ic = perf.factor_information_coefficient(factor, forward_returns, sector_adjust=False, by_sector=False)
 
@@ -89,16 +89,12 @@ def create_factor_tear_sheet(factor,
 
     quantile_factor = perf.quantize_factor(factor, by_sector=False, quantiles=quantiles)
 
-    mean_ret_quantile, std_quantile = perf.mean_return_by_quantile(quantile_factor,
-                                                                   forward_returns,
-                                                                   by_sector=False,
-                                                                   std_err=True)
+    mean_ret_quantile, std_quantile = perf.mean_return_by_quantile(quantile_factor, forward_returns, by_sector=False)
 
     mean_ret_quant_daily, std_quant_daily = perf.mean_return_by_quantile(quantile_factor,
                                                                          forward_returns,
                                                                          by_time='D',
-                                                                         by_sector=False,
-                                                                         std_err=True)
+                                                                         by_sector=False)
 
     mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(mean_ret_quant_daily,
                                                                                quantiles,
@@ -198,10 +194,12 @@ def create_factor_tear_sheet(factor,
     plotting.plot_factor_rank_auto_correlation(factor_autocorrelation, ax=ax_factor_rank_auto_correlation)
 
     # Sector Specific Breakdown
-    if can_sector_adjust and sector_plots:
+    if can_sector_adjust and show_sector_plots:
         ic_by_sector = perf.mean_information_coefficient(factor, forward_returns, by_sector=True)
 
-        mean_return_quantile_sector, _ = perf.mean_return_by_quantile(quantile_factor, forward_returns, by_sector=True)
+        mean_return_quantile_sector, mean_return_quantile_sector_std_err = perf.mean_return_by_quantile(quantile_factor,
+                                                                                                        forward_returns,
+                                                                                                        by_sector=True)
 
         num_sectors = len(ic_by_sector.index.get_level_values('sector').unique())
         rows_when_2_wide = (((num_sectors - 1) // 2) + 1)

@@ -138,7 +138,7 @@ def factor_returns(factor, forward_returns, long_short=True):
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        A list of equities and their factor values indexed by date.
+        Factor values indexed by date and asset
     forward_returns : pd.DataFrame - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
@@ -176,7 +176,7 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        A list of equities and their factor values indexed by date.
+        Factor values indexed by date and asset
     forward_returns : pd.DataFrame - MultiIndex
         Daily forward returns in indexed by date and symbol.
         Separate column for each forward return window.
@@ -224,7 +224,7 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        A list of equities and their factor values indexed by date.
+        Factor values indexed by date and asset
     quantiles : int
         Number of quantiles buckets to use in factor bucketing.
     by_sector : bool
@@ -241,13 +241,13 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
     factor_percentile = factor.groupby(level=grouper).rank(pct=True)
 
     q_width = 1. / quantiles
-    factor_quantile = factor_percentile.apply(lambda x: ((x - .000000001) // q_width) + 1)
+    factor_quantile = factor_percentile.apply(lambda x: int(((x - .000000001) // q_width) + 1))
     factor_quantile.name = 'quantile'
 
     return factor_quantile
 
 
-def mean_return_by_quantile(quantized_factor, forward_returns, by_time=None, by_sector=False, std_err=False):
+def mean_return_by_quantile(quantized_factor, forward_returns, by_time=None, by_sector=False):
     """
     Computes mean demeaned returns for factor quantiles across
     provided forward returns columns.
@@ -258,7 +258,7 @@ def mean_return_by_quantile(quantized_factor, forward_returns, by_time=None, by_
         DataFrame with date, asset index and factor quantile as a column.
         See quantile_bucket_factor for more detail.
     forward_returns : pd.DataFrame - MultiIndex
-        A list of equities and their N day forward returns where each column contains the N day forward returns.
+        Assets and their N day forward returns where each column contains the N day forward returns.
     by_time : str
         The pandas str code for time grouping.
     by_sector : bool
@@ -373,10 +373,10 @@ def quantile_turnover(quantile_factor, quantile):
 def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
     """
     Computes autocorrelation of mean factor ranks in specified timespans.
-    We must compare week to week factor ranks rather than factor values to account for
+    We must compare period to period factor ranks rather than factor values to account for
     systematic shifts in the factor values of all names or names within a sector.
     This metric is useful for measuring the turnover of a factor. If the value of a factor
-    for each name changes randomly from week to week, we'd expect a weekly autocorrelation of 0.
+    for each name changes randomly from period to period, we'd expect an autocorrelation of 0.
 
     Parameters
     ----------

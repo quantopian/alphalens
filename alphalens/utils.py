@@ -18,7 +18,6 @@ import numpy as np
 from IPython.display import display
 
 
-
 def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
     """
     Finds the N day forward returns (as percent change) for each asset provided.
@@ -27,7 +26,7 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
     ----------
     prices : pd.DataFrame
         Pricing data to use in forward price calculation.
-        Equities as columns, dates as index.
+        Assets as columns, dates as index.
         Pricing data must span the factor analysis time period
         plus an additional buffer window
         that is greater than the maximum number of expected days
@@ -130,9 +129,12 @@ def print_table(table, name=None, fmt=None):
         pd.set_option('display.float_format', prev_option)
 
 
-def format_input_data(factor, prices, sectors=None,
-                      filter_zscore=20, days=(1, 5, 10),
-                      sector_names=None):
+def create_clean_factor_and_forward_returns(factor,
+                                            prices,
+                                            sectors=None,
+                                            filter_zscore=20,
+                                            days=(1, 5, 10),
+                                            sector_names=None):
     """
     Formats the factor data, pricing data, and sector mappings
     into DataFrames and Series that contain aligned MultiIndex
@@ -141,16 +143,16 @@ def format_input_data(factor, prices, sectors=None,
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        A list of equities and their factor values indexed by date.
+        A list of assets and their factor values indexed by date.
     prices : pd.DataFrame
         Pricing data to use in forward price calculation.
-        Equities as columns, dates as index.
+        Assets as columns, dates as index.
         Pricing data must span the factor analysis time period
         plus an additional buffer window that is greater than the
         maximum number of expected days in the forward returns
         calculations.
     sectors : pd.Series - MultiIndex
-        A list of equities and their sectors.
+        A list of assets and their sectors.
     filter_zscore : int
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
@@ -165,10 +167,10 @@ def format_input_data(factor, prices, sectors=None,
     Returns
     -------
     factor : pd.Series
-        A list of equities and their factor values indexed by date,
+        A list of assets and their factor values indexed by date,
         asset, and optionally sector.
     forward_returns : pd.DataFrame - MultiIndex
-        A DataFrame of equities and their forward returns
+        A DataFrame of assets and their forward returns
         indexed by date, asset, and optionally sector.
         Note: this is the same index as the factor index.
     """
