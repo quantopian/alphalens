@@ -60,7 +60,7 @@ def create_factor_tear_sheet(factor,
         Days to compute forward returns on.
     quantiles : int
         The number of buckets to parition the data into for analysis.
-    filter_zscore :
+    filter_zscore : int or float
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
         Caution: this outlier filtering incorporates lookahead bias.
@@ -68,8 +68,11 @@ def create_factor_tear_sheet(factor,
         A dictionary keyed by sector code with values corresponding
         to the display name for each sector.
     """
+
+    days = list(days)
     if 1 not in days:
         days.insert(0, 1)
+    days.sort()
 
     can_sector_adjust = sectors is not None
     factor, forward_returns = utils.create_clean_factor_and_forward_returns(factor,
