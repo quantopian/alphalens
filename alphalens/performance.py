@@ -25,16 +25,16 @@ from . import utils
 
 def factor_information_coefficient(factor, forward_returns, sector_adjust=False, by_sector=False):
     """
-    Computes Spearman Rank Correlation based Information Coefficient (IC)
+    Computes the Spearman Rank Correlation based Information Coefficient (IC)
     between factor values and N day forward returns for each day in
     the factor index.
 
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        Factor values indexed by date and symbol.
+        Factor values indexed by date and asset.
     forward_returns : pd.DataFrame - MultiIndex
-        Daily forward returns in indexed by date and symbol.
+        Forward returns in indexed by date and asset.
         Separate column for each forward return window.
     sector_adjust : bool
         Demean forward returns by sector before computing IC.
@@ -45,18 +45,16 @@ def factor_information_coefficient(factor, forward_returns, sector_adjust=False,
     -------
     ic : pd.DataFrame
         Spearman Rank correlation between factor and
-        provided forward price movement windows.
+        provided forward returns.
     """
 
     def src_ic(group):
         f = group.pop('factor')
         _ic = group.apply(lambda x: stats.spearmanr(x, f)[0])
-
         return _ic
 
     if sector_adjust:
-        forward_returns = utils.demean_forward_returns(forward_returns,
-                                                       by_sector=True)
+        forward_returns = utils.demean_forward_returns(forward_returns, by_sector=True)
 
     factor.name = 'factor'
     factor_and_fp = pd.merge(pd.DataFrame(factor),
@@ -84,9 +82,9 @@ def mean_information_coefficient(factor, forward_returns, sector_adjust=False, b
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        Factor values indexed by date and symbol.
+        Factor values indexed by date and asset.
     forward_returns : pd.DataFrame - MultiIndex
-        Daily forward returns in indexed by date and symbol.
+        Daily forward returns in indexed by date and asset.
         Separate column for each forward return window.
     sector_adjust : bool
         Demean forward returns by sector before computing IC.
@@ -119,10 +117,7 @@ def mean_information_coefficient(factor, forward_returns, sector_adjust=False, b
         ic = ic.mean()
 
     else:
-        ic = (ic.reset_index()
-              .set_index('date')
-              .groupby(grouper)
-              .mean())
+        ic = (ic.reset_index().set_index('date').groupby(grouper).mean())
 
     ic.columns = pd.Int64Index(ic.columns)
 
@@ -133,14 +128,14 @@ def factor_returns(factor, forward_returns, long_short=True):
     """
     Computes daily returns for portfolio weighted by factor
     values. Weights are computed by demeaning factors and dividing
-    by the sum of their absolute value (acheiving gross leverage of 1).
+    by the sum of their absolute value (achieving gross leverage of 1).
 
     Parameters
     ----------
     factor : pd.Series - MultiIndex
         Factor values indexed by date and asset
     forward_returns : pd.DataFrame - MultiIndex
-        Daily forward returns in indexed by date and symbol.
+        Daily forward returns in indexed by date and asset.
         Separate column for each forward return window.
     long_short : bool
         Should this computation happen on a long short portfolio?
@@ -178,7 +173,7 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     factor : pd.Series - MultiIndex
         Factor values indexed by date and asset
     forward_returns : pd.DataFrame - MultiIndex
-        Daily forward returns in indexed by date and symbol.
+        Daily forward returns in indexed by date and asset.
         Separate column for each forward return window.
     factor_daily_returns : pd.DataFrame
         Daily returns of dollar neutral portfolio weighted by factor value.
@@ -192,9 +187,7 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     if factor_daily_returns is None:
         factor_daily_returns = factor_returns(factor, forward_returns)
 
-    universe_daily_ret = (forward_returns.groupby(level='date')
-                          .mean()
-                          .loc[factor_daily_returns.index])
+    universe_daily_ret = (forward_returns.groupby(level='date').mean().loc[factor_daily_returns.index])
 
     if isinstance(factor_daily_returns, pd.Series):
         factor_daily_returns.name = universe_daily_ret.columns.values[0]
@@ -210,7 +203,7 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
         t_alpha = reg_fit.tvalues[0]
         alpha, beta = reg_fit.params
 
-        alpha_beta.loc['Ann. alpha', days] = (1 + alpha)**252 - 1
+        alpha_beta.loc['Ann. alpha', days] = (1 + alpha) ** 252 - 1
         alpha_beta.loc['t-stat(alpha)', days] = abs(t_alpha)
         alpha_beta.loc['beta', days] = beta
 
@@ -226,14 +219,14 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
     factor : pd.Series - MultiIndex
         Factor values indexed by date and asset
     quantiles : int
-        Number of quantiles buckets to use in factor bucketing.
+        Number of quantile buckets to use in factor bucketing.
     by_sector : bool
         If True, compute quantile buckets separately for each sector.
 
     Returns
     -------
     factor_quantile : pd.Series
-        Factor quantiles indexed by date and symbol.
+        Factor quantiles indexed by date and asset.
     """
 
     grouper = ['date', 'sector'] if by_sector else ['date']
@@ -258,7 +251,8 @@ def mean_return_by_quantile(quantized_factor, forward_returns, by_time=None, by_
         DataFrame with date, asset index and factor quantile as a column.
         See quantile_bucket_factor for more detail.
     forward_returns : pd.DataFrame - MultiIndex
-        Assets and their N day forward returns where each column contains the N day forward returns.
+        Daily forward returns in indexed by date and asset.
+        Separate column for each forward return window.
     by_time : str
         The pandas str code for time grouping.
     by_sector : bool
@@ -267,19 +261,20 @@ def mean_return_by_quantile(quantized_factor, forward_returns, by_time=None, by_
 
     Returns
     -------
-    mean_returns_by_quantile : pd.DataFrame
+    mean_ret : pd.DataFrame
         Mean daily returns by specified factor quantile.
-    std_ret : pd.DataFrame
-        Standard deviation of returns by specified quantile.
+    std_error_ret : pd.DataFrame
+        Standard error of returns by specified quantile.
     """
 
-    demeaned_fr = utils.demean_forward_returns(forward_returns,
-                                               by_sector=by_sector)
+    demeaned_fr = utils.demean_forward_returns(forward_returns, by_sector=by_sector)
 
     quantized_factor.name = 'quantile'
     forward_returns_quantile = (pd.DataFrame(quantized_factor)
-                                .merge(demeaned_fr, how='left',
-                                       left_index=True, right_index=True)
+                                .merge(demeaned_fr,
+                                       how='left',
+                                       left_index=True,
+                                       right_index=True)
                                 .set_index('quantile', append=True))
 
     grouper = []
@@ -292,8 +287,7 @@ def mean_return_by_quantile(quantized_factor, forward_returns, by_time=None, by_
 
     grouper.append(forward_returns_quantile.index.get_level_values('quantile'))
 
-    group_stats = forward_returns_quantile.groupby(grouper).agg(
-        ['mean', 'std', 'count'])
+    group_stats = forward_returns_quantile.groupby(grouper).agg(['mean', 'std', 'count'])
 
     mean_ret = group_stats.T.xs('mean', level=1).T
 
@@ -305,7 +299,7 @@ def mean_return_by_quantile(quantized_factor, forward_returns, by_time=None, by_
 def compute_mean_returns_spread(mean_returns, upper_quant, lower_quant, std_err=None):
     """
     Computes the difference between the mean returns of
-    two quantiles. Optionally, computes the standard deviation
+    two quantiles. Optionally, computes the standard error
     of this difference.
 
     Parameters
@@ -328,8 +322,8 @@ def compute_mean_returns_spread(mean_returns, upper_quant, lower_quant, std_err=
     -------
     mean_return_difference : pd.Series
         Daily difference in quantile returns.
-    joint_std : pd.Series
-        Daily standard deviation of the difference in quantile returns.
+    joint_std_err : pd.Series
+        Daily standard error of the difference in quantile returns.
     """
 
     mean_return_difference = mean_returns.xs(upper_quant, level='quantile') - \
@@ -361,18 +355,16 @@ def quantile_turnover(quantile_factor, quantile):
     """
 
     quant_names = quantile_factor[quantile_factor == quantile]
-    quant_name_sets = quant_names.groupby(level=['date']).apply(
-        lambda x: set(x.index.get_level_values('asset')))
+    quant_name_sets = quant_names.groupby(level=['date']).apply(lambda x: set(x.index.get_level_values('asset')))
     new_names = (quant_name_sets - quant_name_sets.shift(1)).dropna()
-    quant_turnover = new_names.apply(
-        lambda x: len(x)) / quant_name_sets.apply(lambda x: len(x))
+    quant_turnover = new_names.apply(lambda x: len(x)) / quant_name_sets.apply(lambda x: len(x))
 
     return quant_turnover
 
 
 def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
     """
-    Computes autocorrelation of mean factor ranks in specified timespans.
+    Computes autocorrelation of mean factor ranks in specified time spans.
     We must compare period to period factor ranks rather than factor values to account for
     systematic shifts in the factor values of all names or names within a sector.
     This metric is useful for measuring the turnover of a factor. If the value of a factor
@@ -380,8 +372,8 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
 
     Parameters
     ----------
-    factor : pd.Series
-        Series with date and asset index. Values are factor values.
+    factor : pd.Series - MultiIndex
+        Factor values indexed by date and asset.
     time_rule : str, optional
         Time span to use in factor grouping mean reduction.
         See http://pandas.pydata.org/pandas-docs/stable/timeseries.html for available options.
@@ -403,11 +395,9 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
     daily_ranks.name = "factor"
     daily_ranks = pd.DataFrame(daily_ranks)
 
-    asset_factor_rank = daily_ranks.reset_index().pivot(
-        index='date', columns='asset', values='factor')
+    asset_factor_rank = daily_ranks.reset_index().pivot(index='date', columns='asset', values='factor')
     if time_rule is not None:
-        asset_factor_rank = asset_factor_rank.resample(
-            time_rule, how='mean').dropna(how='all')
+        asset_factor_rank = asset_factor_rank.resample(time_rule, how='mean').dropna(how='all')
 
     autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(1), axis=1)
 

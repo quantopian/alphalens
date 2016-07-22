@@ -26,24 +26,22 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
     ----------
     prices : pd.DataFrame
         Pricing data to use in forward price calculation.
-        Assets as columns, dates as index.
-        Pricing data must span the factor analysis time period
-        plus an additional buffer window
+        Assets as columns, dates as index. Pricing data must
+        span the factor analysis time period plus an additional buffer window
         that is greater than the maximum number of expected days
         in the forward returns calculations.
-    days : list
-        Number of days forward to project returns.
-        One column will be added for each value.
-    filter_zscore : int
-        Sets forward returns greater than X standard
-        deviations from the the mean to nan.
-        Caution: this outlier filtering incorporates
-        lookahead bias.
+    days : sequence[int]
+        Days to compute forward returns on.
+    filter_zscore : int or float
+        Sets forward returns greater than X standard deviations
+        from the the mean to nan.
+        Caution: this outlier filtering incorporates lookahead bias.
 
     Returns
     -------
     forward_returns : pd.DataFrame - MultiIndex
-        DataFrame containing the N day forward returns for a security.
+        Forward returns in indexed by date and asset.
+        Separate column for each forward return window.
     """
 
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
@@ -65,8 +63,8 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
 
 def demean_forward_returns(forward_returns, by_sector=False):
     """
-    Convert forward price movements to price movements relative to mean
-    daily all-universe or sector price movements.
+    Convert forward returns to returns relative to mean
+    daily all-universe or sector returns.
     Sector-wise normalization incorporates the assumption of a
     sector neutral portfolio constraint and thus allows allows the
     factor to be evaluated across sectors.
@@ -78,8 +76,8 @@ def demean_forward_returns(forward_returns, by_sector=False):
     Parameters
     ----------
     forward_returns : pd.DataFrame - MultiIndex
-        DataFrame with date, asset, sector, and forward returns columns.
-        See compute_forward_returns for more detail.
+        Forward returns in indexed by date and asset.
+        Separate column for each forward return window.
     by_sector : bool
         If True, demean according to sector.
 
@@ -129,12 +127,12 @@ def print_table(table, name=None, fmt=None):
         pd.set_option('display.float_format', prev_option)
 
 
-def create_clean_factor_and_forward_returns(factor,
-                                            prices,
-                                            sectors=None,
-                                            filter_zscore=20,
-                                            days=(1, 5, 10),
-                                            sector_names=None):
+def get_clean_factor_and_forward_returns(factor,
+                                         prices,
+                                         sectors=None,
+                                         days=(1, 5, 10),
+                                         filter_zscore=20,
+                                         sector_names=None):
     """
     Formats the factor data, pricing data, and sector mappings
     into DataFrames and Series that contain aligned MultiIndex
@@ -143,36 +141,41 @@ def create_clean_factor_and_forward_returns(factor,
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        A list of assets and their factor values indexed by date.
+        A MultiIndex Series indexed by date (level 0) and asset (level 1), containing
+        the values for a single alpha factor.
     prices : pd.DataFrame
-        Pricing data to use in forward price calculation.
-        Assets as columns, dates as index.
-        Pricing data must span the factor analysis time period
-        plus an additional buffer window that is greater than the
-        maximum number of expected days in the forward returns
-        calculations.
-    sectors : pd.Series - MultiIndex
-        A list of assets and their sectors.
-    filter_zscore : int
+        A wide form Pandas DataFrame indexed by date with assets
+        in the columns. It is important to pass the
+        correct pricing data in depending on what time of day your
+        signal was generated so to avoid lookahead bias, or
+        delayed calculations. Pricing data must span the factor
+        analysis time period plus an additional buffer window
+        that is greater than the maximum number of expected days
+        in the forward returns calculations.
+    sectors : pd.Series - MultiIndex or dict
+        Either A MultiIndex Series indexed by date and asset,
+        containing the daily sector codes for each asset, or
+        a dict of asset to sector mappings. If a dict is passed,
+        it is assumed that sector mappings are unchanged for the
+        entire time period of the passed factor data.
+    days : sequence[int]
+        Days to compute forward returns on.
+    filter_zscore : int or float
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
-        Caution: this outlier filtering incorperates lookahead bias.
-    days : list
-        Number of days forward to project returns. One column
-        will be added for each value.
+        Caution: this outlier filtering incorporates lookahead bias.
     sector_names : dict
         A dictionary keyed by sector code with values corresponding
         to the display name for each sector.
 
     Returns
     -------
-    factor : pd.Series
-        A list of assets and their factor values indexed by date,
-        asset, and optionally sector.
+    factor : pd.Series - MultiIndex
+        A MultiIndex Series indexed by date (level 0) and asset (level 1), containing
+        the values for a single alpha factor.
     forward_returns : pd.DataFrame - MultiIndex
-        A DataFrame of assets and their forward returns
-        indexed by date, asset, and optionally sector.
-        Note: this is the same index as the factor index.
+        Forward returns in indexed by date and asset.
+        Separate column for each forward return window.
     """
 
     factor.name = 'factor'

@@ -32,7 +32,7 @@ def create_factor_tear_sheet(factor,
                              sector_names=None):
     """
     Creates a full tear sheet for analysis and evaluating single
-    return predicting (alpha) factors.
+    return predicting (alpha) factor.
 
     Parameters
     ----------
@@ -90,12 +90,12 @@ def create_factor_tear_sheet(factor,
     days.sort()
 
     can_sector_adjust = sectors is not None
-    factor, forward_returns = utils.create_clean_factor_and_forward_returns(factor,
-                                                                            prices,
-                                                                            sectors=sectors,
-                                                                            days=days,
-                                                                            filter_zscore=filter_zscore,
-                                                                            sector_names=sector_names)
+    factor, forward_returns = utils.get_clean_factor_and_forward_returns(factor,
+                                                                         prices,
+                                                                         sectors=sectors,
+                                                                         days=days,
+                                                                         filter_zscore=filter_zscore,
+                                                                         sector_names=sector_names)
 
     daily_ic = perf.factor_information_coefficient(factor, forward_returns, sector_adjust=False, by_sector=False)
 

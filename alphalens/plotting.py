@@ -114,7 +114,7 @@ def summary_stats(ic_data,
         A list containing the alpha, beta, a t-stat(alpha) for the
         given factor and forward returns.
     quantized_factor : pd.Series
-        Factor quantiles indexed by date and symbol.
+        Factor quantiles indexed by date and asset.
     mean_ret_quantile : pd.DataFrame
         Mean daily returns by specified factor quantile.
     autocorrelation_data : pd.Series
@@ -299,8 +299,7 @@ def plot_daily_ic_qq(daily_ic, theoretical_dist=stats.norm, ax=None):
     return ax
 
 
-def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False,
-                              ylim_percentiles=None, ax=None):
+def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False, ylim_percentiles=None, ax=None):
     """
     Plots mean daily returns for factor quantiles.
 
@@ -309,7 +308,7 @@ def plot_quantile_returns_bar(mean_ret_by_q, by_sector=False,
     mean_ret_by_q : pd.DataFrame
         DataFrame with quantile, (sector) and mean daily return values.
     by_sector : bool
-        Disagregate figures by sector.
+        Disaggregated figures by sector.
     ylim_percentiles : tuple of integers
         Percentiles of observed data to use as y limits for plot.
     ax : matplotlib.Axes, optional
@@ -477,7 +476,7 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread, std_err=N
 def plot_ic_by_sector(ic_sector, ax=None):
     """
     Plots Spearman Rank Information Coefficient for a given
-    factor over provided forward price movement windows.
+    factor over provided forward returns.
     Separates by sector.
 
     Parameters
@@ -540,7 +539,7 @@ def plot_top_bottom_quantile_turnover(quantized_factor, ax=None):
     Parameters
     ----------
     quantized_factor : pd.Series
-        Factor quantiles indexed by date and symbol.
+        Factor quantiles indexed by date and asset.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
