@@ -1,3 +1,6 @@
+.. image:: https://media.quantopian.com/logos/open_source/alphalens-logo-03.png
+    :align: center
+
 Alphalens
 =========
 .. image:: https://travis-ci.org/quantopian/alphalens.svg?branch=master
