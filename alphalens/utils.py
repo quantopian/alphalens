@@ -71,7 +71,8 @@ def demean_forward_returns(forward_returns, by_sector=False):
 
     For example, if AAPL 5 day return is 0.1% and mean 5 day
     return for the Technology stocks in our universe was 0.5% in the
-    same period, the sector adjusted 5 day return for AAPL in this period is -0.4%.
+    same period, the sector adjusted 5 day return for AAPL in this
+    period is -0.4%.
 
     Parameters
     ----------
@@ -141,8 +142,8 @@ def get_clean_factor_and_forward_returns(factor,
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        A MultiIndex Series indexed by date (level 0) and asset (level 1), containing
-        the values for a single alpha factor.
+        A MultiIndex Series indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor.
     prices : pd.DataFrame
         A wide form Pandas DataFrame indexed by date with assets
         in the columns. It is important to pass the
@@ -171,8 +172,8 @@ def get_clean_factor_and_forward_returns(factor,
     Returns
     -------
     factor : pd.Series - MultiIndex
-        A MultiIndex Series indexed by date (level 0) and asset (level 1), containing
-        the values for a single alpha factor.
+        A MultiIndex Series indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor.
     forward_returns : pd.DataFrame - MultiIndex
         Forward returns in indexed by date and asset.
         Separate column for each forward return window.
@@ -201,7 +202,7 @@ def get_clean_factor_and_forward_returns(factor,
 
             ss = pd.Series(sectors)
             sectors = pd.Series(index=factor.index,
-                data=ss[factor.index.get_level_values('asset')].values)
+                                data=ss[factor.index.get_level_values('asset')].values)
 
         if sector_names is not None:
             diff = set(sectors.values) - set(sector_names.keys())

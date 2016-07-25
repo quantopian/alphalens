@@ -23,7 +23,10 @@ from statsmodels.tools.tools import add_constant
 from . import utils
 
 
-def factor_information_coefficient(factor, forward_returns, sector_adjust=False, by_sector=False):
+def factor_information_coefficient(factor,
+                                   forward_returns,
+                                   sector_adjust=False,
+                                   by_sector=False):
     """
     Computes the Spearman Rank Correlation based Information Coefficient (IC)
     between factor values and N day forward returns for each day in
@@ -54,7 +57,8 @@ def factor_information_coefficient(factor, forward_returns, sector_adjust=False,
         return _ic
 
     if sector_adjust:
-        forward_returns = utils.demean_forward_returns(forward_returns, by_sector=True)
+        forward_returns = utils.demean_forward_returns(forward_returns,
+                                                       by_sector=True)
 
     factor.name = 'factor'
     factor_and_fp = pd.merge(pd.DataFrame(factor),
@@ -71,7 +75,11 @@ def factor_information_coefficient(factor, forward_returns, sector_adjust=False,
     return ic
 
 
-def mean_information_coefficient(factor, forward_returns, sector_adjust=False, by_time=None, by_sector=False):
+def mean_information_coefficient(factor,
+                                 forward_returns,
+                                 sector_adjust=False,
+                                 by_time=None,
+                                 by_sector=False):
     """
     Get the mean information coefficient of specified groups.
     Answers questions like:
@@ -187,7 +195,8 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     if factor_daily_returns is None:
         factor_daily_returns = factor_returns(factor, forward_returns)
 
-    universe_daily_ret = (forward_returns.groupby(level='date').mean().loc[factor_daily_returns.index])
+    universe_daily_ret = (forward_returns.groupby(level='date').mean()
+                          .loc[factor_daily_returns.index])
 
     if isinstance(factor_daily_returns, pd.Series):
         factor_daily_returns.name = universe_daily_ret.columns.values[0]
@@ -234,13 +243,17 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
     factor_percentile = factor.groupby(level=grouper).rank(pct=True)
 
     q_width = 1. / quantiles
-    factor_quantile = factor_percentile.apply(lambda x: int(((x - .000000001) // q_width) + 1))
+    factor_quantile = factor_percentile.apply(
+        lambda x: int(((x - .000000001) // q_width) + 1))
     factor_quantile.name = 'quantile'
 
     return factor_quantile
 
 
-def mean_return_by_quantile(quantized_factor, forward_returns, by_time=None, by_sector=False):
+def mean_return_by_quantile(quantized_factor,
+                            forward_returns,
+                            by_time=None,
+                            by_sector=False):
     """
     Computes mean demeaned returns for factor quantiles across
     provided forward returns columns.
@@ -267,7 +280,8 @@ def mean_return_by_quantile(quantized_factor, forward_returns, by_time=None, by_
         Standard error of returns by specified quantile.
     """
 
-    demeaned_fr = utils.demean_forward_returns(forward_returns, by_sector=by_sector)
+    demeaned_fr = utils.demean_forward_returns(forward_returns,
+                                               by_sector=by_sector)
 
     quantized_factor.name = 'quantile'
     forward_returns_quantile = (pd.DataFrame(quantized_factor)
@@ -287,16 +301,21 @@ def mean_return_by_quantile(quantized_factor, forward_returns, by_time=None, by_
 
     grouper.append(forward_returns_quantile.index.get_level_values('quantile'))
 
-    group_stats = forward_returns_quantile.groupby(grouper).agg(['mean', 'std', 'count'])
+    group_stats = forward_returns_quantile.groupby(grouper)\
+        .agg(['mean', 'std', 'count'])
 
     mean_ret = group_stats.T.xs('mean', level=1).T
 
-    std_error_ret = group_stats.T.xs('std', level=1).T / np.sqrt(group_stats.T.xs('count', level=1).T)
+    std_error_ret = group_stats.T.xs('std', level=1).T /\
+                    np.sqrt(group_stats.T.xs('count', level=1).T)
 
     return mean_ret, std_error_ret
 
 
-def compute_mean_returns_spread(mean_returns, upper_quant, lower_quant, std_err=None):
+def compute_mean_returns_spread(mean_returns,
+                                upper_quant,
+                                lower_quant,
+                                std_err=None):
     """
     Computes the difference between the mean returns of
     two quantiles. Optionally, computes the standard error
@@ -355,9 +374,11 @@ def quantile_turnover(quantile_factor, quantile):
     """
 
     quant_names = quantile_factor[quantile_factor == quantile]
-    quant_name_sets = quant_names.groupby(level=['date']).apply(lambda x: set(x.index.get_level_values('asset')))
+    quant_name_sets = quant_names.groupby(level=['date']).apply(
+        lambda x: set(x.index.get_level_values('asset')))
     new_names = (quant_name_sets - quant_name_sets.shift(1)).dropna()
-    quant_turnover = new_names.apply(lambda x: len(x)) / quant_name_sets.apply(lambda x: len(x))
+    quant_turnover = new_names.apply(
+        lambda x: len(x)) / quant_name_sets.apply(lambda x: len(x))
 
     return quant_turnover
 
@@ -365,10 +386,11 @@ def quantile_turnover(quantile_factor, quantile):
 def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
     """
     Computes autocorrelation of mean factor ranks in specified time spans.
-    We must compare period to period factor ranks rather than factor values to account for
-    systematic shifts in the factor values of all names or names within a sector.
-    This metric is useful for measuring the turnover of a factor. If the value of a factor
-    for each name changes randomly from period to period, we'd expect an autocorrelation of 0.
+    We must compare period to period factor ranks rather than factor values
+    to account for systematic shifts in the factor values of all names or names
+    within a sector. This metric is useful for measuring the turnover of a
+    factor. If the value of a factor for each name changes randomly from period
+     to period, we'd expect an autocorrelation of 0.
 
     Parameters
     ----------
@@ -376,14 +398,16 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
         Factor values indexed by date and asset.
     time_rule : str, optional
         Time span to use in factor grouping mean reduction.
-        See http://pandas.pydata.org/pandas-docs/stable/timeseries.html for available options.
+        See http://pandas.pydata.org/pandas-docs/stable/timeseries.html
+        for available options.
     by_sector : bool
         If True, compute autocorrelation separately for each sector.
 
     Returns
     -------
     autocorr : pd.Series
-        Rolling 1 period (defined by time_rule) autocorrelation of factor values.
+        Rolling 1 period (defined by time_rule) autocorrelation of
+        factor values.
 
     """
 
@@ -395,9 +419,12 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
     daily_ranks.name = "factor"
     daily_ranks = pd.DataFrame(daily_ranks)
 
-    asset_factor_rank = daily_ranks.reset_index().pivot(index='date', columns='asset', values='factor')
+    asset_factor_rank = daily_ranks.reset_index().pivot(index='date',
+                                                        columns='asset',
+                                                        values='factor')
     if time_rule is not None:
-        asset_factor_rank = asset_factor_rank.resample(time_rule, how='mean').dropna(how='all')
+        asset_factor_rank = asset_factor_rank.resample(time_rule, how='mean')\
+            .dropna(how='all')
 
     autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(1), axis=1)
 

@@ -97,17 +97,28 @@ def create_factor_tear_sheet(factor,
                                                                          filter_zscore=filter_zscore,
                                                                          sector_names=sector_names)
 
-    daily_ic = perf.factor_information_coefficient(factor, forward_returns, sector_adjust=False, by_sector=False)
+    daily_ic = perf.factor_information_coefficient(factor,
+                                                   forward_returns,
+                                                   sector_adjust=False,
+                                                   by_sector=False)
 
-    mean_monthly_ic = perf.mean_information_coefficient(factor, forward_returns, by_time="M")
+    mean_monthly_ic = perf.mean_information_coefficient(factor,
+                                                        forward_returns,
+                                                        by_time="M")
 
     factor_returns = perf.factor_returns(factor, forward_returns)
 
-    alpha_beta = perf.factor_alpha_beta(factor, forward_returns, factor_daily_returns=factor_returns)
+    alpha_beta = perf.factor_alpha_beta(factor,
+                                        forward_returns,
+                                        factor_daily_returns=factor_returns)
 
-    quantile_factor = perf.quantize_factor(factor, by_sector=False, quantiles=quantiles)
+    quantile_factor = perf.quantize_factor(factor,
+                                           by_sector=False,
+                                           quantiles=quantiles)
 
-    mean_ret_quantile, std_quantile = perf.mean_return_by_quantile(quantile_factor, forward_returns, by_sector=False)
+    mean_ret_quantile, std_quantile = perf.mean_return_by_quantile(quantile_factor,
+                                                                   forward_returns,
+                                                                   by_sector=False)
 
     mean_ret_quant_daily, std_quant_daily = perf.mean_return_by_quantile(quantile_factor,
                                                                          forward_returns,
@@ -119,7 +130,8 @@ def create_factor_tear_sheet(factor,
                                                                                1,
                                                                                std_err=std_quant_daily)
 
-    factor_autocorrelation = perf.factor_rank_autocorrelation(factor, time_rule='D')
+    factor_autocorrelation = perf.factor_rank_autocorrelation(factor,
+                                                              time_rule='D')
 
 
     ## PLOTTING ##
@@ -147,15 +159,19 @@ def create_factor_tear_sheet(factor,
 
     ax_quantile_returns_violin = plt.subplot(ret_gs[i, :])
     i += 1
-    plotting.plot_quantile_returns_violin(mean_ret_quant_daily, ylim_percentiles=(1, 99), ax=ax_quantile_returns_violin)
+    plotting.plot_quantile_returns_violin(mean_ret_quant_daily,
+                                          ylim_percentiles=(1, 99),
+                                          ax=ax_quantile_returns_violin)
 
     ax_cumulative_returns = plt.subplot(ret_gs[i, :])
     i += 1
-    plotting.plot_cumulative_returns(factor_returns[1], ax=ax_cumulative_returns)
+    plotting.plot_cumulative_returns(factor_returns[1],
+                                     ax=ax_cumulative_returns)
 
     ax_cumulative_returns_by_quantile = plt.subplot(ret_gs[i, :])
     i += 1
-    plotting.plot_cumulative_returns_by_quantile(mean_ret_quant_daily[1], ax=ax_cumulative_returns_by_quantile)
+    plotting.plot_cumulative_returns_by_quantile(mean_ret_quant_daily[1],
+                                                 ax=ax_cumulative_returns_by_quantile)
 
     ax_mean_quantile_returns_spread_ts = []
     for j in range(fr_cols):
@@ -205,15 +221,19 @@ def create_factor_tear_sheet(factor,
     plotting.plot_monthly_ic_heatmap(mean_monthly_ic, ax=ax_monthly_ic_heatmap)
 
     ax_top_bottom_quantile_turnover = plt.subplot(ic_gs[i, :])
-    plotting.plot_top_bottom_quantile_turnover(quantile_factor, ax=ax_top_bottom_quantile_turnover)
+    plotting.plot_top_bottom_quantile_turnover(quantile_factor,
+                                               ax=ax_top_bottom_quantile_turnover)
     i += 1
 
     ax_factor_rank_auto_correlation = plt.subplot(ic_gs[i, :])
-    plotting.plot_factor_rank_auto_correlation(factor_autocorrelation, ax=ax_factor_rank_auto_correlation)
+    plotting.plot_factor_rank_auto_correlation(factor_autocorrelation,
+                                               ax=ax_factor_rank_auto_correlation)
 
     # Sector Specific Breakdown
     if can_sector_adjust and show_sector_plots:
-        ic_by_sector = perf.mean_information_coefficient(factor, forward_returns, by_sector=True)
+        ic_by_sector = perf.mean_information_coefficient(factor,
+                                                         forward_returns,
+                                                         by_sector=True)
 
         mean_return_quantile_sector, mean_return_quantile_sector_std_err = perf.mean_return_by_quantile(quantile_factor,
                                                                                                         forward_returns,
