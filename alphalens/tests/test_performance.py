@@ -32,7 +32,6 @@ from pandas.util.testing import (assert_frame_equal,
                                  assert_series_equal)
 
 
-
 from .. performance import (factor_information_coefficient,
                             mean_information_coefficient,
                             quantize_factor,
@@ -131,19 +130,18 @@ class PerformanceTestCase(TestCase):
         assert_frame_equal(ic, expected_ic_df)
 
     @parameterized.expand([(factor, 4, False,
-                            [1., 2., 3., 4., 4., 3., 2., 1.]),
+                            [1, 2, 3, 4, 4, 3, 2, 1]),
                            (factor, 2, False,
-                            [1., 1., 2., 2., 2., 2., 1., 1.]),
+                            [1, 1, 2, 2, 2, 2, 1, 1]),
                            (factor, 2, True,
-                            [1., 2., 1., 2., 2., 1., 2., 1.])])
-    def test_quantize_factor(self, factor, quantiles,
-                             by_sector, expected_vals):
-        quantized_factor = quantize_factor(
-            factor, quantiles=quantiles, by_sector=by_sector)
-
-        expected = Series(
-            index=factor.index, data=expected_vals, name='quantile')
-
+                            [1, 2, 1, 2, 2, 1, 2, 1])])
+    def test_quantize_factor(self, factor, quantiles, by_sector, expected_vals):
+        quantized_factor = quantize_factor(factor,
+                                           quantiles=quantiles,
+                                           by_sector=by_sector)
+        expected = Series(index=factor.index,
+                          data=expected_vals,
+                          name='quantile')
         assert_series_equal(quantized_factor, expected)
 
     @parameterized.expand([([[1.0, 2.0, 3.0, 4.0],
@@ -283,7 +281,8 @@ class PerformanceTestCase(TestCase):
         dr = date_range(start='2015-1-1', end=end_date)
         dr.name = 'date'
         tickers = ['A', 'B', 'C', 'D']
-        factor_df = DataFrame(index=dr, columns=tickers, data=factor_values).stack()
+        factor_df = DataFrame(index=dr, columns=tickers, data=factor_values)\
+            .stack()
         factor_df.index = factor_df.index.set_names(['date', 'asset'])
 
         factor = Series(factor_df)
