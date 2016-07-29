@@ -97,6 +97,7 @@ Credits
 -  `Thomas Wiecki <https://github.com/twiecki>`__
 -  `Jonathan Larkin <https://github.com/marketneutral>`__
 -  Jessica Stauth (jstauth@quantopian.com)
+-  `Taso Petridis <https://github.com/tasopetridis>`_
 
 Example Tear Sheet
 ------------------
