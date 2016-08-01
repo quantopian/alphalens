@@ -213,7 +213,6 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
         alpha, beta = reg_fit.params
 
         alpha_beta.loc['Ann. alpha', days] = (1 + alpha) ** 252 - 1
-        alpha_beta.loc['t-stat(alpha)', days] = abs(t_alpha)
         alpha_beta.loc['beta', days] = beta
 
     return alpha_beta
@@ -238,13 +237,13 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
         Factor quantiles indexed by date and asset.
     """
 
+    def quantile_calc(x, quantiles):
+        return pd.qcut(x, quantiles, labels=False) + 1
+
     grouper = ['date', 'sector'] if by_sector else ['date']
 
-    factor_percentile = factor.groupby(level=grouper).rank(pct=True)
-
-    q_width = 1. / quantiles
-    factor_quantile = factor_percentile.apply(
-        lambda x: int(((x - .000000001) // q_width) + 1))
+    factor_percentile = factor.groupby(level=grouper)
+    factor_quantile = factor_percentile.apply(quantile_calc, quantiles=quantiles)
     factor_quantile.name = 'quantile'
 
     return factor_quantile
@@ -413,15 +412,13 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
 
     grouper = ['date', 'sector'] if by_sector else ['date']
 
-    daily_ranks = factor.groupby(level=grouper).apply(
-        lambda x: x.rank(ascending=True))
-
+    daily_ranks = factor.groupby(level=grouper).rank()
     daily_ranks.name = "factor"
-    daily_ranks = pd.DataFrame(daily_ranks)
 
     asset_factor_rank = daily_ranks.reset_index().pivot(index='date',
                                                         columns='asset',
                                                         values='factor')
+
     if time_rule is not None:
         asset_factor_rank = asset_factor_rank.resample(time_rule, how='mean')\
             .dropna(how='all')

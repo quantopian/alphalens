@@ -241,7 +241,7 @@ def plot_daily_ic_hist(daily_ic, ax=None):
     for a, (days_num, ic) in zip(ax, daily_ic.iteritems()):
         sns.distplot(ic.replace(np.nan, 0.), norm_hist=True, ax=a)
         a.set(title="%s Day IC" % days_num, xlabel='IC')
-        a.set_xlim([-0.25, 0.25])
+        a.set_xlim([-1, 1])
         a.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
                fontsize=16,
                bbox={'facecolor': 'white', 'alpha': 1, 'pad': 5},
@@ -608,6 +608,8 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
         The axes that were plotted on.
     """
 
+    mean_monthly_ic = mean_monthly_ic.copy()
+
     num_plots = len(mean_monthly_ic.columns)
 
     v_spaces = ((num_plots - 1) // 3) + 1
@@ -616,16 +618,20 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
         f, ax = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
         ax = ax.flatten()
 
+    new_index_year = []
+    new_index_month = []
+    for date in mean_monthly_ic.index:
+        new_index_year.append(date.year)
+        new_index_month.append(date.month)
+
+    mean_monthly_ic.index = pd.MultiIndex.from_arrays(
+        [new_index_year, new_index_month],
+        names=["year", "month"])
+
     for a, (days_num, ic) in zip(ax, mean_monthly_ic.iteritems()):
 
-        formatted_ic = (pd.Series(
-            index=pd.MultiIndex.from_product([np.unique(ic.index.year),
-                                              np.unique(ic.index.month)],
-                                             names=["year", "month"])
-            [:len(ic)], data=ic.values))
-
         sns.heatmap(
-            formatted_ic.unstack(),
+            ic.unstack(),
             annot=True,
             alpha=1.0,
             center=0.0,
@@ -637,8 +643,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
             ax=a)
         a.set(ylabel='', xlabel='')
 
-        a.set_title(
-            "Monthly Mean {} Day IC".format(days_num))
+        a.set_title("Monthly Mean {} Day IC".format(days_num))
 
     if num_plots < len(ax):
         ax[-1].set_visible(False)
