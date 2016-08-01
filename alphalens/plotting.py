@@ -187,6 +187,8 @@ def plot_daily_ic_ts(daily_ic, ax=None):
         The axes that were plotted on.
     """
 
+    daily_ic = daily_ic.copy()
+
     num_plots = len(daily_ic.columns)
     if ax is None:
         f, ax = plt.subplots(num_plots, 1, figsize=(18, num_plots * 7))
@@ -229,6 +231,8 @@ def plot_daily_ic_hist(daily_ic, ax=None):
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
+
+    daily_ic = daily_ic.copy()
 
     num_plots = len(daily_ic.columns)
 
@@ -275,6 +279,8 @@ def plot_daily_ic_qq(daily_ic, theoretical_dist=stats.norm, ax=None):
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
+
+    daily_ic = daily_ic.copy()
 
     num_plots = len(daily_ic.columns)
 
@@ -325,6 +331,8 @@ def plot_quantile_returns_bar(mean_ret_by_q,
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
+
+    mean_ret_by_q = mean_ret_by_q.copy()
 
     if ylim_percentiles is not None:
         ymin = (np.percentile(mean_ret_by_q.values,
@@ -403,6 +411,8 @@ def plot_quantile_returns_violin(daily_return_by_q,
 
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
+
+    daily_return_by_q = daily_return_by_q.copy()
 
     unstacked_dr = (daily_return_by_q
                     .multiply(DECIMAL_TO_BPS))
@@ -669,6 +679,8 @@ def plot_cumulative_returns(factor_returns, ax=None):
     """
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
+
+    factor_returns = factor_returns.copy()
 
     factor_returns.add(1).cumprod().plot(
         ax=ax, lw=3, color='forestgreen', alpha=0.6)

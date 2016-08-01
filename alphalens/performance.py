@@ -51,6 +51,9 @@ def factor_information_coefficient(factor,
         provided forward returns.
     """
 
+    factor = factor.copy()
+    forward_returns = forward_returns.copy()
+
     def src_ic(group):
         f = group.pop('factor')
         _ic = group.apply(lambda x: stats.spearmanr(x, f)[0])
@@ -282,6 +285,7 @@ def mean_return_by_quantile(quantized_factor,
     demeaned_fr = utils.demean_forward_returns(forward_returns,
                                                by_sector=by_sector)
 
+    quantized_factor = quantized_factor.copy()
     quantized_factor.name = 'quantile'
     forward_returns_quantile = (pd.DataFrame(quantized_factor)
                                 .merge(demeaned_fr,

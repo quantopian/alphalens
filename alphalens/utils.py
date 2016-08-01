@@ -179,6 +179,8 @@ def get_clean_factor_and_forward_returns(factor,
         Separate column for each forward return window.
     """
 
+    factor = factor.copy()
+
     factor.name = 'factor'
     factor.index = factor.index.set_names(['date', 'asset'])
 
