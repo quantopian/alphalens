@@ -196,11 +196,8 @@ class PerformanceTestCase(TestCase):
         fwd_return_df = DataFrame(index=self.factor.index,
                                   columns=[1], data=fwd_return_vals)
 
-        print fwd_return_df
         factor_returns_s = factor_returns(factor, fwd_return_df)
-        print factor_returns_s
         expected = DataFrame(index=self.dr, data=expected_vals, columns=[1])
-        print expected
 
         assert_frame_equal(factor_returns_s, expected)
 
