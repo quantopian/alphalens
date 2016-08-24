@@ -25,8 +25,8 @@ from . import utils
 
 def factor_information_coefficient(factor,
                                    forward_returns,
-                                   sector_adjust=False,
-                                   by_sector=False):
+                                   group_adjust=False,
+                                   by_group=False):
     """
     Computes the Spearman Rank Correlation based Information Coefficient (IC)
     between factor values and N day forward returns for each day in
@@ -39,10 +39,10 @@ def factor_information_coefficient(factor,
     forward_returns : pd.DataFrame - MultiIndex
         Forward returns in indexed by date and asset.
         Separate column for each forward return window.
-    sector_adjust : bool
-        Demean forward returns by sector before computing IC.
-    by_sector : bool
-        If True, compute daily IC separately for each sector.
+    group_adjust : bool
+        Demean forward returns by group before computing IC.
+    by_group : bool
+        If True, compute daily IC separately for each group.
 
     Returns
     -------
@@ -59,9 +59,9 @@ def factor_information_coefficient(factor,
         _ic = group.apply(lambda x: stats.spearmanr(x, f)[0])
         return _ic
 
-    if sector_adjust:
+    if group_adjust:
         forward_returns = utils.demean_forward_returns(forward_returns,
-                                                       by_sector=True)
+                                                       by_group=True)
 
     factor.name = 'factor'
     factor_and_fp = pd.merge(pd.DataFrame(factor),
@@ -70,7 +70,7 @@ def factor_information_coefficient(factor,
                              left_index=True,
                              right_index=True)
 
-    grouper = ['date', 'sector'] if by_sector else ['date']
+    grouper = ['date', 'group'] if by_group else ['date']
     ic = factor_and_fp.groupby(level=grouper).apply(src_ic)
 
     ic.columns = pd.Int64Index(ic.columns)
@@ -80,15 +80,15 @@ def factor_information_coefficient(factor,
 
 def mean_information_coefficient(factor,
                                  forward_returns,
-                                 sector_adjust=False,
+                                 group_adjust=False,
                                  by_time=None,
-                                 by_sector=False):
+                                 by_group=False):
     """
     Get the mean information coefficient of specified groups.
     Answers questions like:
     What is the mean IC for each month?
-    What is the mean IC for each sector for our whole timerange?
-    What is the mean IC for for each sector, each week?
+    What is the mean IC for each group for our whole timerange?
+    What is the mean IC for for each group, each week?
 
     Parameters
     ----------
@@ -97,14 +97,14 @@ def mean_information_coefficient(factor,
     forward_returns : pd.DataFrame - MultiIndex
         Daily forward returns in indexed by date and asset.
         Separate column for each forward return window.
-    sector_adjust : bool
-        Demean forward returns by sector before computing IC.
+    group_adjust : bool
+        Demean forward returns by group before computing IC.
     by_time : str (pd time_rule), optional
         Time window to use when taking mean IC.
         See http://pandas.pydata.org/pandas-docs/stable/timeseries.html
         for available options.
-    by_sector : bool
-        If True, take the mean IC for each sector.
+    by_group : bool
+        If True, take the mean IC for each group.
 
     Returns
     -------
@@ -115,14 +115,14 @@ def mean_information_coefficient(factor,
 
     ic = factor_information_coefficient(factor,
                                         forward_returns,
-                                        sector_adjust=sector_adjust,
-                                        by_sector=by_sector)
+                                        group_adjust=group_adjust,
+                                        by_group=by_group)
 
     grouper = []
     if by_time is not None:
         grouper.append(pd.TimeGrouper(by_time))
-    if by_sector:
-        grouper.append('sector')
+    if by_group:
+        grouper.append('group')
 
     if len(grouper) == 0:
         ic = ic.mean()
@@ -221,7 +221,7 @@ def factor_alpha_beta(factor, forward_returns, factor_daily_returns=None):
     return alpha_beta
 
 
-def quantize_factor(factor, quantiles=5, by_sector=False):
+def quantize_factor(factor, quantiles=5, by_group=False):
     """
     Computes daily factor quantiles.
 
@@ -231,8 +231,8 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
         Factor values indexed by date and asset
     quantiles : int
         Number of quantile buckets to use in factor bucketing.
-    by_sector : bool
-        If True, compute quantile buckets separately for each sector.
+    by_group : bool
+        If True, compute quantile buckets separately for each group.
 
     Returns
     -------
@@ -243,7 +243,7 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
     def quantile_calc(x, quantiles):
         return pd.qcut(x, quantiles, labels=False) + 1
 
-    grouper = ['date', 'sector'] if by_sector else ['date']
+    grouper = ['date', 'group'] if by_group else ['date']
 
     factor_percentile = factor.groupby(level=grouper)
     factor_quantile = factor_percentile.apply(quantile_calc, quantiles=quantiles)
@@ -255,7 +255,7 @@ def quantize_factor(factor, quantiles=5, by_sector=False):
 def mean_return_by_quantile(quantized_factor,
                             forward_returns,
                             by_time=None,
-                            by_sector=False):
+                            by_group=False):
     """
     Computes mean demeaned returns for factor quantiles across
     provided forward returns columns.
@@ -270,9 +270,9 @@ def mean_return_by_quantile(quantized_factor,
         Separate column for each forward return window.
     by_time : str
         The pandas str code for time grouping.
-    by_sector : bool
-        If True, compute quantile bucket returns separately for each sector.
-        Returns demeaning will occur on the sector level.
+    by_group : bool
+        If True, compute quantile bucket returns separately for each group.
+        Returns demeaning will occur on the group level.
 
     Returns
     -------
@@ -283,7 +283,7 @@ def mean_return_by_quantile(quantized_factor,
     """
 
     demeaned_fr = utils.demean_forward_returns(forward_returns,
-                                               by_sector=by_sector)
+                                               by_group=by_group)
 
     quantized_factor = quantized_factor.copy()
     quantized_factor.name = 'quantile'
@@ -298,9 +298,9 @@ def mean_return_by_quantile(quantized_factor,
     if by_time is not None:
         grouper.append(pd.TimeGrouper(by_time, level='date'))
 
-    if by_sector:
+    if by_group:
         grouper.append(
-            forward_returns_quantile.index.get_level_values('sector'))
+            forward_returns_quantile.index.get_level_values('group'))
 
     grouper.append(forward_returns_quantile.index.get_level_values('quantile'))
 
@@ -386,12 +386,12 @@ def quantile_turnover(quantile_factor, quantile):
     return quant_turnover
 
 
-def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
+def factor_rank_autocorrelation(factor, time_rule='W', by_group=False):
     """
     Computes autocorrelation of mean factor ranks in specified time spans.
     We must compare period to period factor ranks rather than factor values
     to account for systematic shifts in the factor values of all names or names
-    within a sector. This metric is useful for measuring the turnover of a
+    within a group. This metric is useful for measuring the turnover of a
     factor. If the value of a factor for each name changes randomly from period
      to period, we'd expect an autocorrelation of 0.
 
@@ -403,8 +403,8 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
         Time span to use in factor grouping mean reduction.
         See http://pandas.pydata.org/pandas-docs/stable/timeseries.html
         for available options.
-    by_sector : bool
-        If True, compute autocorrelation separately for each sector.
+    by_group : bool
+        If True, compute autocorrelation separately for each group.
 
     Returns
     -------
@@ -414,7 +414,7 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_sector=False):
 
     """
 
-    grouper = ['date', 'sector'] if by_sector else ['date']
+    grouper = ['date', 'group'] if by_group else ['date']
 
     daily_ranks = factor.groupby(level=grouper).rank()
     daily_ranks.name = "factor"
