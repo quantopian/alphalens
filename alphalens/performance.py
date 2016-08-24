@@ -159,7 +159,8 @@ def factor_returns(factor, forward_returns, long_short=True):
 
     def to_weights(group, is_long_short):
         if is_long_short:
-            return (group - group.mean()) / abs(group).sum()
+            demeaned_vals = group - group.mean()
+            return demeaned_vals / demeaned_vals.abs().sum()
         else:
             return group / abs(group).sum()
 
