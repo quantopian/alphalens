@@ -185,20 +185,22 @@ class PerformanceTestCase(TestCase):
 
 
     @parameterized.expand([([1, 2, 3, 4, 4, 3, 2, 1],
-
                             [4, 3, 2, 1, 1, 2, 3, 4],
-                            [-0.5, -0.5]),
+                            [-1.25000, -1.25000]),
                            ([1, 1, 1, 1, 1, 1, 1, 1],
                             [4, 3, 2, 1, 1, 2, 3, 4],
-                            [0., 0.])])
+                            [nan, nan])])
     def test_factor_returns(self, factor_vals, fwd_return_vals, expected_vals):
         factor = Series(index=self.factor.index, data=factor_vals)
 
         fwd_return_df = DataFrame(index=self.factor.index,
                                   columns=[1], data=fwd_return_vals)
 
+        print fwd_return_df
         factor_returns_s = factor_returns(factor, fwd_return_df)
+        print factor_returns_s
         expected = DataFrame(index=self.dr, data=expected_vals, columns=[1])
+        print expected
 
         assert_frame_equal(factor_returns_s, expected)
 
@@ -212,7 +214,7 @@ class PerformanceTestCase(TestCase):
                                   columns=[1], data=fwd_return_vals)
 
         ab = factor_alpha_beta(None, fwd_return_df,
-                               factor_daily_returns=factor_returns)
+                               factor_returns=factor_returns)
 
         expected = DataFrame(columns=[1],
                              index=['Ann. alpha', 'beta'],
