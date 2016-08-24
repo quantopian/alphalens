@@ -18,9 +18,9 @@ import numpy as np
 from IPython.display import display
 
 
-def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
+def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
     """
-    Finds the N day forward returns (as percent change) for each asset provided.
+    Finds the N period forward returns (as percent change) for each asset provided.
 
     Parameters
     ----------
@@ -28,10 +28,10 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
         Pricing data to use in forward price calculation.
         Assets as columns, dates as index. Pricing data must
         span the factor analysis time period plus an additional buffer window
-        that is greater than the maximum number of expected days
+        that is greater than the maximum number of expected periods
         in the forward returns calculations.
-    days : sequence[int]
-        Days to compute forward returns on.
+    periods : sequence[int]
+        periods to compute forward returns on.
     filter_zscore : int or float
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
@@ -47,14 +47,14 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
         [prices.index, prices.columns], names=['date', 'asset']))
 
-    for day in days:
-        delta = prices.pct_change(day).shift(-day)
+    for period in periods:
+        delta = prices.pct_change(period).shift(-period)
 
         if filter_zscore is not None:
             mask = abs(delta - delta.mean()) > (filter_zscore * delta.std())
             delta[mask] = np.nan
 
-        forward_returns[day] = delta.stack() / day
+        forward_returns[period] = delta.stack() / period
 
     forward_returns.index.rename(['date', 'asset'], inplace=True)
 
@@ -64,14 +64,14 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
 def demean_forward_returns(forward_returns, by_group=False):
     """
     Convert forward returns to returns relative to mean
-    daily all-universe or group returns.
+    period wise all-universe or group returns.
     group-wise normalization incorporates the assumption of a
     group neutral portfolio constraint and thus allows allows the
     factor to be evaluated across groups.
 
-    For example, if AAPL 5 day return is 0.1% and mean 5 day
+    For example, if AAPL 5 period return is 0.1% and mean 5 period
     return for the Technology stocks in our universe was 0.5% in the
-    same period, the group adjusted 5 day return for AAPL in this
+    same period, the group adjusted 5 period return for AAPL in this
     period is -0.4%.
 
     Parameters
@@ -131,7 +131,7 @@ def print_table(table, name=None, fmt=None):
 def get_clean_factor_and_forward_returns(factor,
                                          prices,
                                          groupby=None,
-                                         days=(1, 5, 10),
+                                         periods=(1, 5, 10),
                                          filter_zscore=20,
                                          groupby_labels=None):
     """
@@ -147,20 +147,20 @@ def get_clean_factor_and_forward_returns(factor,
     prices : pd.DataFrame
         A wide form Pandas DataFrame indexed by date with assets
         in the columns. It is important to pass the
-        correct pricing data in depending on what time of day your
+        correct pricing data in depending on what time of period your
         signal was generated so to avoid lookahead bias, or
         delayed calculations. Pricing data must span the factor
         analysis time period plus an additional buffer window
-        that is greater than the maximum number of expected days
+        that is greater than the maximum number of expected periods
         in the forward returns calculations.
     groupby : pd.Series - MultiIndex or dict
         Either A MultiIndex Series indexed by date and asset,
-        containing the daily group codes for each asset, or
+        containing the period wise group codes for each asset, or
         a dict of asset to group mappings. If a dict is passed,
         it is assumed that group mappings are unchanged for the
         entire time period of the passed factor data.
-    days : sequence[int]
-        Days to compute forward returns on.
+    periods : sequence[int]
+        periods to compute forward returns on.
     filter_zscore : int or float
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
@@ -185,7 +185,7 @@ def get_clean_factor_and_forward_returns(factor,
     factor.index = factor.index.set_names(['date', 'asset'])
 
     forward_returns = compute_forward_returns(
-        prices, days, filter_zscore=filter_zscore)
+        prices, periods, filter_zscore=filter_zscore)
 
     merged_data = pd.merge(pd.DataFrame(factor),
                            forward_returns,

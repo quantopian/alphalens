@@ -26,7 +26,7 @@ def create_factor_tear_sheet(factor,
                              prices,
                              groupby=None,
                              show_groupby_plots=True,
-                             days=(1, 5, 10),
+                             periods=(1, 5, 10),
                              quantiles=5,
                              filter_zscore=10,
                              groupby_labels=None):
@@ -57,22 +57,22 @@ def create_factor_tear_sheet(factor,
     prices : pd.DataFrame
         A wide form Pandas DataFrame indexed by date with assets
         in the columns. It is important to pass the
-        correct pricing data in depending on what time of day your
+        correct pricing data in depending on what time your
         signal was generated so to avoid lookahead bias, or
         delayed calculations. Pricing data must span the factor
         analysis time period plus an additional buffer window
-        that is greater than the maximum number of expected days
+        that is greater than the maximum number of expected periods
         in the forward returns calculations.
     groupby : pd.Series - MultiIndex or dict
         Either A MultiIndex Series indexed by date and asset,
-        containing the daily group codes for each asset, or
+        containing the period wise group codes for each asset, or
         a dict of asset to group mappings. If a dict is passed,
         it is assumed that group mappings are unchanged for the
         entire time period of the passed factor data.
     show_groupby_plots : bool
         If True create group specific plots.
-    days : sequence[int]
-        Days to compute forward returns on.
+    periods : sequence[int]
+        periods to compute forward returns on.
     quantiles : int
         The number of buckets to parition the data into for analysis.
     filter_zscore : int or float
@@ -84,20 +84,20 @@ def create_factor_tear_sheet(factor,
         to the display name for each group.
     """
 
-    days = list(days)
-    if 1 not in days:
-        days.insert(0, 1)
-    days.sort()
+    periods = list(periods)
+    if 1 not in periods:
+        periods.insert(0, 1)
+    periods.sort()
 
     can_group_adjust = groupby is not None
     factor, forward_returns = utils.get_clean_factor_and_forward_returns(factor,
                                                                          prices,
                                                                          groupby=groupby,
-                                                                         days=days,
+                                                                         periods=periods,
                                                                          filter_zscore=filter_zscore,
                                                                          groupby_labels=groupby_labels)
 
-    daily_ic = perf.factor_information_coefficient(factor,
+    ic = perf.factor_information_coefficient(factor,
                                                    forward_returns,
                                                    group_adjust=False,
                                                    by_group=False)
@@ -110,7 +110,7 @@ def create_factor_tear_sheet(factor,
 
     alpha_beta = perf.factor_alpha_beta(factor,
                                         forward_returns,
-                                        factor_daily_returns=factor_returns)
+                                        factor_returns=factor_returns)
 
     quantile_factor = perf.quantize_factor(factor,
                                            by_group=False,
@@ -135,14 +135,14 @@ def create_factor_tear_sheet(factor,
 
 
     ## PLOTTING ##
-    plotting.summary_stats(daily_ic,
+    plotting.summary_stats(ic,
                            alpha_beta,
                            quantile_factor,
                            mean_ret_quantile,
                            factor_autocorrelation,
                            mean_ret_spread_quant)
 
-    fr_cols = len(days)
+    fr_cols = len(periods)
 
     # Returns
     vertical_sections = 4 + fr_cols
@@ -194,24 +194,24 @@ def create_factor_tear_sheet(factor,
     ic_gs = gridspec.GridSpec(vertical_sections, 2, wspace=0.4, hspace=0.3)
 
     i = 0
-    ax_daily_ic_ts = []
+    ax_ic_ts = []
     for j in range(fr_cols):
         p = plt.subplot(ic_gs[i, :])
-        ax_daily_ic_ts.append(p)
+        ax_ic_ts.append(p)
         i += 1
-    plotting.plot_daily_ic_ts(daily_ic, ax=ax_daily_ic_ts)
+    plotting.plot_ic_ts(ic, ax=ax_ic_ts)
 
-    ax_daily_ic_hist = []
-    ax_daily_ic_qq = []
+    ax_ic_hist = []
+    ax_ic_qq = []
     for j in range(fr_cols):
         p_hist = plt.subplot(ic_gs[j+i, 0])
         p_qq = plt.subplot(ic_gs[j+i, 1])
-        ax_daily_ic_hist.append(p_hist)
-        ax_daily_ic_qq.append(p_qq)
+        ax_ic_hist.append(p_hist)
+        ax_ic_qq.append(p_qq)
 
     i += fr_cols
-    plotting.plot_daily_ic_hist(daily_ic, ax=ax_daily_ic_hist)
-    plotting.plot_daily_ic_qq(daily_ic, ax=ax_daily_ic_qq)
+    plotting.plot_ic_hist(ic, ax=ax_ic_hist)
+    plotting.plot_ic_qq(ic, ax=ax_ic_qq)
 
     ax_monthly_ic_heatmap = []
     for j, k in ix_wide:
