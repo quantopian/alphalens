@@ -309,7 +309,7 @@ def plot_daily_ic_qq(daily_ic, theoretical_dist=stats.norm, ax=None):
 
 
 def plot_quantile_returns_bar(mean_ret_by_q,
-                              by_sector=False,
+                              by_group=False,
                               ylim_percentiles=None,
                               ax=None):
     """
@@ -318,9 +318,9 @@ def plot_quantile_returns_bar(mean_ret_by_q,
     Parameters
     ----------
     mean_ret_by_q : pd.DataFrame
-        DataFrame with quantile, (sector) and mean daily return values.
-    by_sector : bool
-        Disaggregated figures by sector.
+        DataFrame with quantile, (group) and mean daily return values.
+    by_group : bool
+        Disaggregated figures by group.
     ylim_percentiles : tuple of integers
         Percentiles of observed data to use as y limits for plot.
     ax : matplotlib.Axes, optional
@@ -343,25 +343,25 @@ def plot_quantile_returns_bar(mean_ret_by_q,
         ymin = None
         ymax = None
 
-    if by_sector:
-        num_sector = len(
-            mean_ret_by_q.index.get_level_values('sector').unique())
+    if by_group:
+        num_group = len(
+            mean_ret_by_q.index.get_level_values('group').unique())
 
         if ax is None:
-            v_spaces = ((num_sector - 1) // 2) + 1
+            v_spaces = ((num_group - 1) // 2) + 1
             f, ax = plt.subplots(v_spaces, 2, sharex=False,
                                  sharey=True, figsize=(18, 6*v_spaces))
             ax = ax.flatten()
 
-        for a, (sc, cor) in zip(ax, mean_ret_by_q.groupby(level='sector')):
-            (cor.xs(sc, level='sector')
+        for a, (sc, cor) in zip(ax, mean_ret_by_q.groupby(level='group')):
+            (cor.xs(sc, level='group')
                 .multiply(DECIMAL_TO_BPS)
                 .plot(kind='bar', title=sc, ax=a))
 
             a.set(xlabel='', ylabel='Mean Daily Return (bps)',
                   ylim=(ymin, ymax))
 
-        if num_sector < len(ax):
+        if num_group < len(ax):
             ax[-1].set_visible(False)
 
         return ax
@@ -510,16 +510,16 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     return ax
 
 
-def plot_ic_by_sector(ic_sector, ax=None):
+def plot_ic_by_group(ic_group, ax=None):
     """
     Plots Spearman Rank Information Coefficient for a given
     factor over provided forward returns.
-    Separates by sector.
+    Separates by group.
 
     Parameters
     ----------
-    ic_sector : pd.DataFrame
-        Sector-wise mean daily returns.
+    ic_group : pd.DataFrame
+        group-wise mean daily returns.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -530,9 +530,9 @@ def plot_ic_by_sector(ic_sector, ax=None):
     """
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
-    ic_sector.plot(kind='bar', ax=ax)
+    ic_group.plot(kind='bar', ax=ax)
 
-    ax.set(title="Information Coefficient By Sector", xlabel="")
+    ax.set(title="Information Coefficient By group", xlabel="")
     ax.set_xticklabels(ax.xaxis.get_majorticklabels(),
                        rotation=45,
                        ha='right',
