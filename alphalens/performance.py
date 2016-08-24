@@ -261,9 +261,10 @@ def quantize_factor(factor, quantiles=5, by_group=False):
 def mean_return_by_quantile(quantized_factor,
                             forward_returns,
                             by_time=None,
-                            by_group=False):
+                            by_group=False,
+                            demeaned=True):
     """
-    Computes mean demeaned returns for factor quantiles across
+    Computes mean returns for factor quantiles across
     provided forward returns columns.
 
     Parameters
@@ -281,6 +282,8 @@ def mean_return_by_quantile(quantized_factor,
     by_group : bool
         If True, compute quantile bucket returns separately for each group.
         Returns demeaning will occur on the group level.
+    demeaned : bool
+        Compute demeaned mean returns (long short portfolio)
 
     Returns
     -------
@@ -290,8 +293,11 @@ def mean_return_by_quantile(quantized_factor,
         Standard error of returns by specified quantile.
     """
 
-    demeaned_fr = utils.demean_forward_returns(forward_returns,
-                                               by_group=by_group)
+    if demeaned	:
+        demeaned_fr = utils.demean_forward_returns(forward_returns,
+                                                   by_group=by_group)
+    else:
+        demeaned_fr = forward_returns.copy()
 
     quantized_factor = quantized_factor.copy()
     quantized_factor.name = 'quantile'

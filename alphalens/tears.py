@@ -29,7 +29,8 @@ def create_factor_tear_sheet(factor,
                              periods=(1, 5, 10),
                              quantiles=5,
                              filter_zscore=10,
-                             groupby_labels=None):
+                             groupby_labels=None,
+                             long_short=True):
     """
     Creates a full tear sheet for analysis and evaluating single
     return predicting (alpha) factor.
@@ -82,6 +83,8 @@ def create_factor_tear_sheet(factor,
     groupby_labels : dict
         A dictionary keyed by group code with values corresponding
         to the display name for each group.
+    long_short : bool
+        Should this computation happen on a long short portfolio?
     """
 
     periods = list(periods)
@@ -106,7 +109,7 @@ def create_factor_tear_sheet(factor,
                                                         forward_returns,
                                                         by_time="M")
 
-    factor_returns = perf.factor_returns(factor, forward_returns)
+    factor_returns = perf.factor_returns(factor, forward_returns, long_short)
 
     alpha_beta = perf.factor_alpha_beta(factor,
                                         forward_returns,
@@ -118,12 +121,14 @@ def create_factor_tear_sheet(factor,
 
     mean_ret_quantile, std_quantile = perf.mean_return_by_quantile(quantile_factor,
                                                                    forward_returns,
-                                                                   by_group=False)
+                                                                   by_group=False,
+                                                                   demeaned=long_short)
 
     mean_ret_quant_daily, std_quant_daily = perf.mean_return_by_quantile(quantile_factor,
                                                                          forward_returns,
                                                                          by_time='D',
-                                                                         by_group=False)
+                                                                         by_group=False,
+                                                                         demeaned=long_short)
 
     mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(mean_ret_quant_daily,
                                                                                quantiles,
@@ -237,7 +242,8 @@ def create_factor_tear_sheet(factor,
 
         mean_return_quantile_group, mean_return_quantile_group_std_err = perf.mean_return_by_quantile(quantile_factor,
                                                                                                       forward_returns,
-                                                                                                      by_group=True)
+                                                                                                      by_group=True,
+                                                                                                      demeaned=True)
 
         num_groups = len(ic_by_group.index.get_level_values('group').unique())
         rows_when_2_wide = (((num_groups - 1) // 2) + 1)
