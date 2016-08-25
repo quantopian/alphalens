@@ -54,7 +54,7 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
             mask = abs(delta - delta.mean()) > (filter_zscore * delta.std())
             delta[mask] = np.nan
 
-        forward_returns[day] = delta.stack() / day
+        forward_returns[day] = delta.stack().add(1).pow(1./day).sub(1)
 
     forward_returns.index.rename(['date', 'asset'], inplace=True)
 
