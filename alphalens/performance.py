@@ -293,7 +293,7 @@ def mean_return_by_quantile(quantized_factor,
         Standard error of returns by specified quantile.
     """
 
-    if demeaned	:
+    if demeaned:
         demeaned_fr = utils.demean_forward_returns(forward_returns,
                                                    by_group=by_group)
     else:
