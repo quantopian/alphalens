@@ -18,9 +18,9 @@ import numpy as np
 from IPython.display import display
 
 
-def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
+def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
     """
-    Finds the N day forward returns (as percent change) for each asset provided.
+    Finds the N period forward returns (as percent change) for each asset provided.
 
     Parameters
     ----------
@@ -28,10 +28,10 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
         Pricing data to use in forward price calculation.
         Assets as columns, dates as index. Pricing data must
         span the factor analysis time period plus an additional buffer window
-        that is greater than the maximum number of expected days
+        that is greater than the maximum number of expected periods
         in the forward returns calculations.
-    days : sequence[int]
-        Days to compute forward returns on.
+    periods : sequence[int]
+        periods to compute forward returns on.
     filter_zscore : int or float
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
@@ -47,31 +47,31 @@ def compute_forward_returns(prices, days=(1, 5, 10), filter_zscore=None):
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
         [prices.index, prices.columns], names=['date', 'asset']))
 
-    for day in days:
-        delta = prices.pct_change(day).shift(-day)
+    for period in periods:
+        delta = prices.pct_change(period).shift(-period)
 
         if filter_zscore is not None:
             mask = abs(delta - delta.mean()) > (filter_zscore * delta.std())
             delta[mask] = np.nan
 
-        forward_returns[day] = delta.stack().add(1).pow(1./day).sub(1)
+        forward_returns[period] = delta.stack().add(1).pow(1./period).sub(1)
 
     forward_returns.index.rename(['date', 'asset'], inplace=True)
 
     return forward_returns
 
 
-def demean_forward_returns(forward_returns, by_sector=False):
+def demean_forward_returns(forward_returns, by_group=False):
     """
     Convert forward returns to returns relative to mean
-    daily all-universe or sector returns.
-    Sector-wise normalization incorporates the assumption of a
-    sector neutral portfolio constraint and thus allows allows the
-    factor to be evaluated across sectors.
+    period wise all-universe or group returns.
+    group-wise normalization incorporates the assumption of a
+    group neutral portfolio constraint and thus allows allows the
+    factor to be evaluated across groups.
 
-    For example, if AAPL 5 day return is 0.1% and mean 5 day
+    For example, if AAPL 5 period return is 0.1% and mean 5 period
     return for the Technology stocks in our universe was 0.5% in the
-    same period, the sector adjusted 5 day return for AAPL in this
+    same period, the group adjusted 5 period return for AAPL in this
     period is -0.4%.
 
     Parameters
@@ -79,17 +79,17 @@ def demean_forward_returns(forward_returns, by_sector=False):
     forward_returns : pd.DataFrame - MultiIndex
         Forward returns in indexed by date and asset.
         Separate column for each forward return window.
-    by_sector : bool
-        If True, demean according to sector.
+    by_group : bool
+        If True, demean according to group.
 
     Returns
     -------
     adjusted_forward_returns : pd.DataFrame - MultiIndex
         DataFrame of the same format as the input, but with each
-        security's returns normalized by sector.
+        security's returns normalized by group.
     """
 
-    grouper = ['date', 'sector'] if by_sector else ['date']
+    grouper = ['date', 'group'] if by_group else ['date']
 
     return forward_returns.groupby(level=grouper).apply(lambda x: x - x.mean())
 
@@ -130,14 +130,14 @@ def print_table(table, name=None, fmt=None):
 
 def get_clean_factor_and_forward_returns(factor,
                                          prices,
-                                         sectors=None,
-                                         days=(1, 5, 10),
+                                         groupby=None,
+                                         periods=(1, 5, 10),
                                          filter_zscore=20,
-                                         sector_names=None):
+                                         groupby_labels=None):
     """
-    Formats the factor data, pricing data, and sector mappings
+    Formats the factor data, pricing data, and group mappings
     into DataFrames and Series that contain aligned MultiIndex
-    indices containing date, asset, and sector.
+    indices containing date, asset, and group.
 
     Parameters
     ----------
@@ -147,27 +147,27 @@ def get_clean_factor_and_forward_returns(factor,
     prices : pd.DataFrame
         A wide form Pandas DataFrame indexed by date with assets
         in the columns. It is important to pass the
-        correct pricing data in depending on what time of day your
+        correct pricing data in depending on what time of period your
         signal was generated so to avoid lookahead bias, or
         delayed calculations. Pricing data must span the factor
         analysis time period plus an additional buffer window
-        that is greater than the maximum number of expected days
+        that is greater than the maximum number of expected periods
         in the forward returns calculations.
-    sectors : pd.Series - MultiIndex or dict
+    groupby : pd.Series - MultiIndex or dict
         Either A MultiIndex Series indexed by date and asset,
-        containing the daily sector codes for each asset, or
-        a dict of asset to sector mappings. If a dict is passed,
-        it is assumed that sector mappings are unchanged for the
+        containing the period wise group codes for each asset, or
+        a dict of asset to group mappings. If a dict is passed,
+        it is assumed that group mappings are unchanged for the
         entire time period of the passed factor data.
-    days : sequence[int]
-        Days to compute forward returns on.
+    periods : sequence[int]
+        periods to compute forward returns on.
     filter_zscore : int or float
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
         Caution: this outlier filtering incorporates lookahead bias.
-    sector_names : dict
-        A dictionary keyed by sector code with values corresponding
-        to the display name for each sector.
+    groupby_labels : dict
+        A dictionary keyed by group code with values corresponding
+        to the display name for each group.
 
     Returns
     -------
@@ -185,7 +185,7 @@ def get_clean_factor_and_forward_returns(factor,
     factor.index = factor.index.set_names(['date', 'asset'])
 
     forward_returns = compute_forward_returns(
-        prices, days, filter_zscore=filter_zscore)
+        prices, periods, filter_zscore=filter_zscore)
 
     merged_data = pd.merge(pd.DataFrame(factor),
                            forward_returns,
@@ -193,40 +193,40 @@ def get_clean_factor_and_forward_returns(factor,
                            left_index=True,
                            right_index=True)
 
-    if sectors is not None:
-        if isinstance(sectors, dict):
+    if groupby is not None:
+        if isinstance(groupby, dict):
             diff = set(factor.index.get_level_values(
-                'asset')) - set(sectors.keys())
+                'asset')) - set(groupby.keys())
             if len(diff) > 0:
                 raise KeyError(
-                    "Assets {} not in sector mapping".format(
+                    "Assets {} not in group mapping".format(
                         list(diff)))
 
-            ss = pd.Series(sectors)
-            sectors = pd.Series(index=factor.index,
+            ss = pd.Series(groupby)
+            groupby = pd.Series(index=factor.index,
                                 data=ss[factor.index.get_level_values('asset')].values)
 
-        if sector_names is not None:
-            diff = set(sectors.values) - set(sector_names.keys())
+        if groupby_labels is not None:
+            diff = set(groupby.values) - set(groupby_labels.keys())
             if len(diff) > 0:
                 raise KeyError(
-                    "Sectors {} not in passed sector names".format(
+                    "groups {} not in passed group names".format(
                         list(diff)))
 
-            sn = pd.Series(sector_names)
-            sectors = pd.Series(index=factor.index,
-                data=sn[sectors.values].values)
+            sn = pd.Series(groupby_labels)
+            groupby = pd.Series(index=factor.index,
+                                data=sn[groupby.values].values)
 
-        sectors.name = 'sector'
-        sectors.index = sectors.index.set_names(['date', 'asset'])
+        groupby.name = 'group'
+        groupby.index = groupby.index.set_names(['date', 'asset'])
 
-        merged_data = pd.merge(pd.DataFrame(sectors),
+        merged_data = pd.merge(pd.DataFrame(groupby),
                                merged_data,
                                how='left',
                                left_index=True,
                                right_index=True)
 
-        merged_data = merged_data.set_index('sector', append=True)
+        merged_data = merged_data.set_index('group', append=True)
 
     merged_data = merged_data.dropna()
 

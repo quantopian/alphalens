@@ -51,8 +51,8 @@ class PerformanceTestCase(TestCase):
     factor.index = factor.index.set_names(['date', 'asset'])
     factor.name = 'factor'
     factor = factor.reset_index()
-    factor['sector'] = [1, 1, 2, 2, 1, 1, 2, 2]
-    factor = factor.set_index(['date', 'asset', 'sector']).factor
+    factor['group'] = [1, 1, 2, 2, 1, 1, 2, 2]
+    factor = factor.set_index(['date', 'asset', 'group']).factor
 
     @parameterized.expand([(factor, [4, 3, 2, 1, 1, 2, 3, 4],
                             False, False,
@@ -67,22 +67,22 @@ class PerformanceTestCase(TestCase):
                            (factor, [1, 2, 3, 4, 4, 3, 2, 1],
                             False, True,
                             MultiIndex.from_product(
-                                [dr, [1, 2]], names=['date', 'sector']),
+                                [dr, [1, 2]], names=['date', 'group']),
                             [1., 1., 1., 1.],
                             ),
                            (factor, [1, 2, 3, 4, 4, 3, 2, 1],
                             True, True,
                             MultiIndex.from_product(
-                                [dr, [1, 2]], names=['date', 'sector']),
+                                [dr, [1, 2]], names=['date', 'group']),
                             [1., 1., 1., 1.],
                             )])
     def test_information_coefficient(self, factor, fr,
-                                     sector_adjust, by_sector,
+                                     group_adjust, by_group,
                                      expected_ix, expected_ic_val):
         fr_df = DataFrame(index=self.factor.index, columns=[1], data=fr)
 
         ic = factor_information_coefficient(
-            factor, fr_df, sector_adjust=sector_adjust, by_sector=by_sector)
+            factor, fr_df, group_adjust=group_adjust, by_group=by_group)
 
         expected_ic_df = DataFrame(index=expected_ix,
                                    columns=Int64Index([1], dtype='object'),
@@ -103,7 +103,7 @@ class PerformanceTestCase(TestCase):
                             ),
                            (factor, [1, 2, 3, 4, 4, 3, 2, 1],
                             None, True,
-                            Int64Index([1, 2], name='sector'),
+                            Int64Index([1, 2], name='group'),
                             [1., 1.],
                             ),
                            (factor, [1, 2, 3, 4, 4, 3, 2, 1],
@@ -111,17 +111,17 @@ class PerformanceTestCase(TestCase):
                             MultiIndex.from_product(
                                 [DatetimeIndex(['2015-01-04'],
                                                name='date', freq='W-SUN'),
-                                 [1, 2]], names=['date', 'sector']),
+                                 [1, 2]], names=['date', 'group']),
                             [1., 1.],
                             )])
     def test_mean_information_coefficient(self, factor, fr,
-                                          by_time, by_sector,
+                                          by_time, by_group,
                                           expected_ix, expected_ic_val):
         fr_df = DataFrame(index=self.factor.index, columns=[1], data=fr)
 
         ic = mean_information_coefficient(
-            factor, fr_df, sector_adjust=False, by_time=by_time,
-            by_sector=by_sector)
+            factor, fr_df, group_adjust=False, by_time=by_time,
+            by_group=by_group)
 
         expected_ic_df = DataFrame(index=expected_ix,
                                    columns=Int64Index([1], dtype='object'),
@@ -135,10 +135,10 @@ class PerformanceTestCase(TestCase):
                             [1, 1, 2, 2, 2, 2, 1, 1]),
                            (factor, 2, True,
                             [1, 2, 1, 2, 2, 1, 2, 1])])
-    def test_quantize_factor(self, factor, quantiles, by_sector, expected_vals):
+    def test_quantize_factor(self, factor, quantiles, by_group, expected_vals):
         quantized_factor = quantize_factor(factor,
                                            quantiles=quantiles,
-                                           by_sector=by_sector)
+                                           by_group=by_group)
         expected = Series(index=factor.index,
                           data=expected_vals,
                           name='quantile')
@@ -185,12 +185,11 @@ class PerformanceTestCase(TestCase):
 
 
     @parameterized.expand([([1, 2, 3, 4, 4, 3, 2, 1],
-
                             [4, 3, 2, 1, 1, 2, 3, 4],
-                            [-0.5, -0.5]),
+                            [-1.25000, -1.25000]),
                            ([1, 1, 1, 1, 1, 1, 1, 1],
                             [4, 3, 2, 1, 1, 2, 3, 4],
-                            [0., 0.])])
+                            [nan, nan])])
     def test_factor_returns(self, factor_vals, fwd_return_vals, expected_vals):
         factor = Series(index=self.factor.index, data=factor_vals)
 
@@ -212,7 +211,7 @@ class PerformanceTestCase(TestCase):
                                   columns=[1], data=fwd_return_vals)
 
         ab = factor_alpha_beta(None, fwd_return_df,
-                               factor_daily_returns=factor_returns)
+                               factor_returns=factor_returns)
 
         expected = DataFrame(columns=[1],
                              index=['Ann. alpha', 'beta'],
@@ -275,8 +274,8 @@ class PerformanceTestCase(TestCase):
                             [nan, -1.0, 1.0, -1.0])
                            ])
     def test_factor_rank_autocorrelation(self, factor_values,
-                                         sector_values, end_date,
-                                         time_rule, by_sector,
+                                         group_values, end_date,
+                                         time_rule, by_group,
                                          expected_vals):
         dr = date_range(start='2015-1-1', end=end_date)
         dr.name = 'date'
@@ -288,10 +287,10 @@ class PerformanceTestCase(TestCase):
         factor = Series(factor_df)
         factor.name = 'factor'
         factor = factor.reset_index()
-        factor['sector'] = sector_values
-        factor = factor.set_index(['date', 'asset', 'sector']).factor
+        factor['group'] = group_values
+        factor = factor.set_index(['date', 'asset', 'group']).factor
 
-        fa = factor_rank_autocorrelation(factor, time_rule, by_sector)
+        fa = factor_rank_autocorrelation(factor, time_rule, by_group)
         expected = Series(index=fa.index, data=expected_vals)
 
         assert_series_equal(fa, expected)

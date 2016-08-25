@@ -117,12 +117,12 @@ def summary_stats(ic_data,
     quantized_factor : pd.Series
         Factor quantiles indexed by date and asset.
     mean_ret_quantile : pd.DataFrame
-        Mean daily returns by specified factor quantile.
+        Mean period wise returns by specified factor quantile.
     autocorrelation_data : pd.Series
         Rolling 1 period (defined by time_rule) autocorrelation
         of factor values.
     mean_ret_spread_quantile : pd.Series
-        Daily difference in quantile returns.
+        Period wise difference in quantile returns.
     """
 
     ic_summary_table = pd.DataFrame()
@@ -151,13 +151,13 @@ def summary_stats(ic_data,
     returns_table = pd.DataFrame()
     returns_table = returns_table.append(alpha_beta)
     returns_table.loc[
-        "Mean Daily Return Top Quantile (bps)"] = mean_ret_quantile.loc[
+        "Mean Period Wise Return Top Quantile (bps)"] = mean_ret_quantile.loc[
         max_quantile] * DECIMAL_TO_BPS
     returns_table.loc[
-        "Mean Daily Return Bottom Quantile (bps)"] = mean_ret_quantile.loc[
+        "Mean Period Wise Return Bottom Quantile (bps)"] = mean_ret_quantile.loc[
         min_quantile] * DECIMAL_TO_BPS
     returns_table.loc[
-        "Mean Daily Spread (bps)"] = mean_ret_spread_quantile.mean() \
+        "Mean Period Wise Spread (bps)"] = mean_ret_spread_quantile.mean() \
         * DECIMAL_TO_BPS
 
     print("Returns Analysis")
@@ -169,14 +169,14 @@ def summary_stats(ic_data,
     utils.print_table(auto_corr.apply(lambda x: x.round(3)))
 
 
-def plot_daily_ic_ts(daily_ic, ax=None):
+def plot_ic_ts(ic, ax=None):
     """
     Plots Spearman Rank Information Coefficient and IC moving
     average for a given factor.
 
     Parameters
     ----------
-    daily_ic : pd.DataFrame
+    ic : pd.DataFrame
         DataFrame indexed by date, with IC for each forward return.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
@@ -187,14 +187,14 @@ def plot_daily_ic_ts(daily_ic, ax=None):
         The axes that were plotted on.
     """
 
-    daily_ic = daily_ic.copy()
+    ic = ic.copy()
 
-    num_plots = len(daily_ic.columns)
+    num_plots = len(ic.columns)
     if ax is None:
         f, ax = plt.subplots(num_plots, 1, figsize=(18, num_plots * 7))
         ax = ax.flatten()
 
-    for a, (days_num, ic) in zip(ax, daily_ic.iteritems()):
+    for a, (period_num, ic) in zip(ax, ic.iteritems()):
         ic.plot(alpha=0.7, ax=a, lw=0.7, color='steelblue')
         pd.rolling_mean(ic, 22).plot(ax=a,
                                      color='forestgreen', lw=2, alpha=0.8)
@@ -202,8 +202,8 @@ def plot_daily_ic_ts(daily_ic, ax=None):
         a.set(ylabel='IC', xlabel="")
         a.set_ylim([-0.25, 0.25])
         a.set_title(
-            "{} Day Forward Return Information Coefficient (IC)"
-            .format(days_num))
+            "{} Period Forward Return Information Coefficient (IC)"
+            .format(period_num))
         a.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
         a.legend(['IC', '1 month moving avg'], loc='upper right')
         a.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
@@ -215,13 +215,13 @@ def plot_daily_ic_ts(daily_ic, ax=None):
     return ax
 
 
-def plot_daily_ic_hist(daily_ic, ax=None):
+def plot_ic_hist(ic, ax=None):
     """
     Plots Spearman Rank Information Coefficient histogram for a given factor.
 
     Parameters
     ----------
-    daily_ic : pd.DataFrame
+    ic : pd.DataFrame
         DataFrame indexed by date, with IC for each forward return.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
@@ -232,9 +232,9 @@ def plot_daily_ic_hist(daily_ic, ax=None):
         The axes that were plotted on.
     """
 
-    daily_ic = daily_ic.copy()
+    ic = ic.copy()
 
-    num_plots = len(daily_ic.columns)
+    num_plots = len(ic.columns)
 
     v_spaces = ((num_plots - 1) // 3) + 1
 
@@ -242,9 +242,9 @@ def plot_daily_ic_hist(daily_ic, ax=None):
         f, ax = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
         ax = ax.flatten()
 
-    for a, (days_num, ic) in zip(ax, daily_ic.iteritems()):
+    for a, (period_num, ic) in zip(ax, ic.iteritems()):
         sns.distplot(ic.replace(np.nan, 0.), norm_hist=True, ax=a)
-        a.set(title="%s Day IC" % days_num, xlabel='IC')
+        a.set(title="%s Period IC" % period_num, xlabel='IC')
         a.set_xlim([-1, 1])
         a.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
                fontsize=16,
@@ -259,14 +259,14 @@ def plot_daily_ic_hist(daily_ic, ax=None):
     return ax
 
 
-def plot_daily_ic_qq(daily_ic, theoretical_dist=stats.norm, ax=None):
+def plot_ic_qq(ic, theoretical_dist=stats.norm, ax=None):
     """
     Plots Spearman Rank Information Coefficient "Q-Q" plot relative to
     a theoretical distribution.
 
     Parameters
     ----------
-    daily_ic : pd.DataFrame
+    ic : pd.DataFrame
         DataFrame indexed by date, with IC for each forward return.
     theoretical_dist : scipy.stats._continuous_distns
         Continuous distribution generator. scipy.stats.norm and
@@ -280,9 +280,9 @@ def plot_daily_ic_qq(daily_ic, theoretical_dist=stats.norm, ax=None):
         The axes that were plotted on.
     """
 
-    daily_ic = daily_ic.copy()
+    ic = ic.copy()
 
-    num_plots = len(daily_ic.columns)
+    num_plots = len(ic.columns)
 
     v_spaces = ((num_plots - 1) // 3) + 1
 
@@ -297,11 +297,11 @@ def plot_daily_ic_qq(daily_ic, theoretical_dist=stats.norm, ax=None):
     else:
         dist_name = 'Theoretical'
 
-    for a, (days_num, ic) in zip(ax, daily_ic.iteritems()):
+    for a, (period_num, ic) in zip(ax, ic.iteritems()):
         sm.qqplot(ic.replace(np.nan, 0.).values, theoretical_dist, fit=True,
                   line='45', ax=a)
-        a.set(title="{} Day IC {} Dist. Q-Q".format(
-              days_num, dist_name),
+        a.set(title="{} Period IC {} Dist. Q-Q".format(
+              period_num, dist_name),
               ylabel='Observed Quantile',
               xlabel='{} Distribution Quantile'.format(dist_name))
 
@@ -309,18 +309,18 @@ def plot_daily_ic_qq(daily_ic, theoretical_dist=stats.norm, ax=None):
 
 
 def plot_quantile_returns_bar(mean_ret_by_q,
-                              by_sector=False,
+                              by_group=False,
                               ylim_percentiles=None,
                               ax=None):
     """
-    Plots mean daily returns for factor quantiles.
+    Plots mean period wise returns for factor quantiles.
 
     Parameters
     ----------
     mean_ret_by_q : pd.DataFrame
-        DataFrame with quantile, (sector) and mean daily return values.
-    by_sector : bool
-        Disaggregated figures by sector.
+        DataFrame with quantile, (group) and mean period wise return values.
+    by_group : bool
+        Disaggregated figures by group.
     ylim_percentiles : tuple of integers
         Percentiles of observed data to use as y limits for plot.
     ax : matplotlib.Axes, optional
@@ -343,25 +343,25 @@ def plot_quantile_returns_bar(mean_ret_by_q,
         ymin = None
         ymax = None
 
-    if by_sector:
-        num_sector = len(
-            mean_ret_by_q.index.get_level_values('sector').unique())
+    if by_group:
+        num_group = len(
+            mean_ret_by_q.index.get_level_values('group').unique())
 
         if ax is None:
-            v_spaces = ((num_sector - 1) // 2) + 1
+            v_spaces = ((num_group - 1) // 2) + 1
             f, ax = plt.subplots(v_spaces, 2, sharex=False,
                                  sharey=True, figsize=(18, 6*v_spaces))
             ax = ax.flatten()
 
-        for a, (sc, cor) in zip(ax, mean_ret_by_q.groupby(level='sector')):
-            (cor.xs(sc, level='sector')
+        for a, (sc, cor) in zip(ax, mean_ret_by_q.groupby(level='group')):
+            (cor.xs(sc, level='group')
                 .multiply(DECIMAL_TO_BPS)
                 .plot(kind='bar', title=sc, ax=a))
 
-            a.set(xlabel='', ylabel='Mean Daily Return (bps)',
+            a.set(xlabel='', ylabel='Mean Return (bps)',
                   ylim=(ymin, ymax))
 
-        if num_sector < len(ax):
+        if num_group < len(ax):
             ax[-1].set_visible(False)
 
         return ax
@@ -372,23 +372,23 @@ def plot_quantile_returns_bar(mean_ret_by_q,
 
         (mean_ret_by_q.multiply(DECIMAL_TO_BPS)
             .plot(kind='bar',
-                  title="Mean Daily Return By Factor Quantile", ax=ax))
-        ax.set(xlabel='', ylabel='Mean Daily Return (bps)',
+                  title="Mean Return By Factor Quantile", ax=ax))
+        ax.set(xlabel='', ylabel='Mean Return (bps)',
                ylim=(ymin, ymax))
 
         return ax
 
 
-def plot_quantile_returns_violin(daily_return_by_q,
+def plot_quantile_returns_violin(return_by_q,
                                  ylim_percentiles=None,
                                  ax=None):
     """
-    Plots a violin box plot of daily returns for factor quantiles.
+    Plots a violin box plot of period wise returns for factor quantiles.
 
     Parameters
     ----------
-    daily_return_by_q : pd.DataFrame - MultiIndex
-        DataFrame with day and quantile as rows MultiIndex,
+    return_by_q : pd.DataFrame - MultiIndex
+        DataFrame with date and quantile as rows MultiIndex,
         forward return windows as columns, returns as values.
     ylim_percentiles : tuple of integers
         Percentiles of observed data to use as y limits for plot.
@@ -401,9 +401,9 @@ def plot_quantile_returns_violin(daily_return_by_q,
         The axes that were plotted on.
     """
     if ylim_percentiles is not None:
-        ymin = (np.percentile(daily_return_by_q.values,
+        ymin = (np.percentile(return_by_q.values,
                               ylim_percentiles[0]) * DECIMAL_TO_BPS)
-        ymax = (np.percentile(daily_return_by_q.values,
+        ymax = (np.percentile(return_by_q.values,
                               ylim_percentiles[1])  * DECIMAL_TO_BPS)
     else:
         ymin = None
@@ -412,25 +412,25 @@ def plot_quantile_returns_violin(daily_return_by_q,
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    daily_return_by_q = daily_return_by_q.copy()
+    return_by_q = return_by_q.copy()
 
-    unstacked_dr = (daily_return_by_q
+    unstacked_dr = (return_by_q
                     .multiply(DECIMAL_TO_BPS))
-    unstacked_dr.columns = unstacked_dr.columns.set_names('forward_days')
+    unstacked_dr.columns = unstacked_dr.columns.set_names('forward_periods')
     unstacked_dr = unstacked_dr.stack()
     unstacked_dr.name = 'return'
     unstacked_dr = unstacked_dr.reset_index()
 
     sns.violinplot(data=unstacked_dr,
                    x='quantile',
-                   hue='forward_days',
+                   hue='forward_periods',
                    y='return',
                    orient='v',
                    cut=0,
                    inner='quartile',
                    ax=ax)
-    ax.set(xlabel='', ylabel='Daily Return (bps)',
-           title="Daily Return By Factor Quantile",
+    ax.set(xlabel='', ylabel='Return (bps)',
+           title="Period Wise Return By Factor Quantile",
            ylim=(ymin, ymax))
 
     ax.axhline(0.0, linestyle='-', color='black', lw=0.7, alpha=0.6)
@@ -443,15 +443,15 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
                                                   bandwidth=1,
                                                   ax=None):
     """
-    Plots mean daily returns for factor quantiles.
+    Plots mean period wise returns for factor quantiles.
 
     Parameters
     ----------
     mean_returns_spread : pd.Series
-        Series with difference between quantile mean returns by day.
+        Series with difference between quantile mean returns by period.
     std_err : pd.Series
         Series with standard error of difference between quantile
-        mean returns each day.
+        mean returns each period.
     bandwidth : float
         Width of displayed error bands in standard deviations.
     ax : matplotlib.Axes, optional
@@ -475,9 +475,9 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
 
         return ax
 
-    days = mean_returns_spread.name
-    title = ('Top Minus Bottom Quantile Mean Return ({} Day Forward Return)'
-             .format(days if days is not None else ""))
+    periods = mean_returns_spread.name
+    title = ('Top Minus Bottom Quantile Mean Return ({} Period Forward Return)'
+             .format(periods if periods is not None else ""))
 
     if ax is None:
         f, ax = plt.subplots(figsize=(18, 6))
@@ -510,16 +510,16 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     return ax
 
 
-def plot_ic_by_sector(ic_sector, ax=None):
+def plot_ic_by_group(ic_group, ax=None):
     """
     Plots Spearman Rank Information Coefficient for a given
     factor over provided forward returns.
-    Separates by sector.
+    Separates by group.
 
     Parameters
     ----------
-    ic_sector : pd.DataFrame
-        Sector-wise mean daily returns.
+    ic_group : pd.DataFrame
+        group-wise mean period wise returns.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -530,13 +530,10 @@ def plot_ic_by_sector(ic_sector, ax=None):
     """
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
-    ic_sector.plot(kind='bar', ax=ax)
+    ic_group.plot(kind='bar', ax=ax)
 
-    ax.set(title="Information Coefficient By Sector", xlabel="")
-    ax.set_xticklabels(ax.xaxis.get_majorticklabels(),
-                       rotation=45,
-                       ha='right',
-                       fontsize=10)
+    ax.set(title="Information Coefficient By Group", xlabel="")
+    ax.set_xticklabels(ic_group.index, rotation=45)
 
     return ax
 
@@ -576,7 +573,7 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation, ax=None):
 
 def plot_top_bottom_quantile_turnover(quantized_factor, ax=None):
     """
-    Plots daily top and bottom quantile factor turnover.
+    Plots period wise top and bottom quantile factor turnover.
 
     Parameters
     ----------
@@ -597,7 +594,7 @@ def plot_top_bottom_quantile_turnover(quantized_factor, ax=None):
     turnover = pd.DataFrame()
     turnover['top quantile turnover'] = perf.quantile_turnover(quantized_factor, max_quantile)
     turnover['bottom quantile turnover'] = perf.quantile_turnover(quantized_factor, 1)
-    turnover.plot(title='Top and Bottom Quantile Daily Turnover', ax=ax, alpha=0.6, lw=0.8)
+    turnover.plot(title='Top and Bottom Quantile Turnover', ax=ax, alpha=0.6, lw=0.8)
     ax.set(ylabel='Proportion Of Names New To Quantile', xlabel="")
 
     return ax
@@ -610,7 +607,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     Parameters
     ----------
     mean_monthly_ic : pd.DataFrame
-        The mean monthly IC for N days forward.
+        The mean monthly IC for N periods forward.
 
     Returns
     -------
@@ -638,7 +635,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
         [new_index_year, new_index_month],
         names=["year", "month"])
 
-    for a, (days_num, ic) in zip(ax, mean_monthly_ic.iteritems()):
+    for a, (periods_num, ic) in zip(ax, mean_monthly_ic.iteritems()):
 
         sns.heatmap(
             ic.unstack(),
@@ -653,7 +650,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
             ax=a)
         a.set(ylabel='', xlabel='')
 
-        a.set_title("Monthly Mean {} Day IC".format(days_num))
+        a.set_title("Monthly Mean {} Period IC".format(periods_num))
 
     if num_plots < len(ax):
         ax[-1].set_visible(False)
@@ -668,7 +665,7 @@ def plot_cumulative_returns(factor_returns, ax=None):
     Parameters
     ----------
     factor_returns : pd.Series
-        Daily returns of dollar neutral portfolio weighted by factor value.
+        Period wise returns of dollar neutral portfolio weighted by factor value.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -692,13 +689,13 @@ def plot_cumulative_returns(factor_returns, ax=None):
     return ax
 
 
-def plot_cumulative_returns_by_quantile(quantile_daily_returns, ax=None):
+def plot_cumulative_returns_by_quantile(quantile_returns, ax=None):
     """
     Plots the cumulative returns of various factor quantiles.
 
     Parameters
     ----------
-    quantile_daily_returns : pd.DataFrame
+    quantile_returns : pd.DataFrame
         Cumulative returns by factor quantile.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
@@ -711,9 +708,9 @@ def plot_cumulative_returns_by_quantile(quantile_daily_returns, ax=None):
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    daily_ret_wide = quantile_daily_returns.reset_index()\
+    ret_wide = quantile_returns.reset_index()\
         .pivot(index='date', columns='quantile', values=1)
-    cum_ret = daily_ret_wide.add(1).cumprod()
+    cum_ret = ret_wide.add(1).cumprod()
     cum_ret = cum_ret.loc[:, ::-1]
     num_quant = len(cum_ret.columns)
 

@@ -24,12 +24,12 @@ from itertools import product
 @plotting.plotting_context
 def create_factor_tear_sheet(factor,
                              prices,
-                             sectors=None,
-                             show_sector_plots=True,
-                             days=(1, 5, 10),
+                             groupby=None,
+                             show_groupby_plots=True,
+                             periods=(1, 5, 10),
                              quantiles=5,
                              filter_zscore=10,
-                             sector_names=None):
+                             groupby_labels=None):
     """
     Creates a full tear sheet for analysis and evaluating single
     return predicting (alpha) factor.
@@ -57,50 +57,50 @@ def create_factor_tear_sheet(factor,
     prices : pd.DataFrame
         A wide form Pandas DataFrame indexed by date with assets
         in the columns. It is important to pass the
-        correct pricing data in depending on what time of day your
+        correct pricing data in depending on what time your
         signal was generated so to avoid lookahead bias, or
         delayed calculations. Pricing data must span the factor
         analysis time period plus an additional buffer window
-        that is greater than the maximum number of expected days
+        that is greater than the maximum number of expected periods
         in the forward returns calculations.
-    sectors : pd.Series - MultiIndex or dict
+    groupby : pd.Series - MultiIndex or dict
         Either A MultiIndex Series indexed by date and asset,
-        containing the daily sector codes for each asset, or
-        a dict of asset to sector mappings. If a dict is passed,
-        it is assumed that sector mappings are unchanged for the
+        containing the period wise group codes for each asset, or
+        a dict of asset to group mappings. If a dict is passed,
+        it is assumed that group mappings are unchanged for the
         entire time period of the passed factor data.
-    show_sector_plots : bool
-        If True create sector specific plots.
-    days : sequence[int]
-        Days to compute forward returns on.
+    show_groupby_plots : bool
+        If True create group specific plots.
+    periods : sequence[int]
+        periods to compute forward returns on.
     quantiles : int
         The number of buckets to parition the data into for analysis.
     filter_zscore : int or float
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
         Caution: this outlier filtering incorporates lookahead bias.
-    sector_names : dict
-        A dictionary keyed by sector code with values corresponding
-        to the display name for each sector.
+    groupby_labels : dict
+        A dictionary keyed by group code with values corresponding
+        to the display name for each group.
     """
 
-    days = list(days)
-    if 1 not in days:
-        days.insert(0, 1)
-    days.sort()
+    periods = list(periods)
+    if 1 not in periods:
+        periods.insert(0, 1)
+    periods.sort()
 
-    can_sector_adjust = sectors is not None
+    can_group_adjust = groupby is not None
     factor, forward_returns = utils.get_clean_factor_and_forward_returns(factor,
                                                                          prices,
-                                                                         sectors=sectors,
-                                                                         days=days,
+                                                                         groupby=groupby,
+                                                                         periods=periods,
                                                                          filter_zscore=filter_zscore,
-                                                                         sector_names=sector_names)
+                                                                         groupby_labels=groupby_labels)
 
-    daily_ic = perf.factor_information_coefficient(factor,
+    ic = perf.factor_information_coefficient(factor,
                                                    forward_returns,
-                                                   sector_adjust=False,
-                                                   by_sector=False)
+                                                   group_adjust=False,
+                                                   by_group=False)
 
     mean_monthly_ic = perf.mean_information_coefficient(factor,
                                                         forward_returns,
@@ -110,20 +110,20 @@ def create_factor_tear_sheet(factor,
 
     alpha_beta = perf.factor_alpha_beta(factor,
                                         forward_returns,
-                                        factor_daily_returns=factor_returns)
+                                        factor_returns=factor_returns)
 
     quantile_factor = perf.quantize_factor(factor,
-                                           by_sector=False,
+                                           by_group=False,
                                            quantiles=quantiles)
 
     mean_ret_quantile, std_quantile = perf.mean_return_by_quantile(quantile_factor,
                                                                    forward_returns,
-                                                                   by_sector=False)
+                                                                   by_group=False)
 
     mean_ret_quant_daily, std_quant_daily = perf.mean_return_by_quantile(quantile_factor,
                                                                          forward_returns,
                                                                          by_time='D',
-                                                                         by_sector=False)
+                                                                         by_group=False)
 
     mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(mean_ret_quant_daily,
                                                                                quantiles,
@@ -135,14 +135,14 @@ def create_factor_tear_sheet(factor,
 
 
     ## PLOTTING ##
-    plotting.summary_stats(daily_ic,
+    plotting.summary_stats(ic,
                            alpha_beta,
                            quantile_factor,
                            mean_ret_quantile,
                            factor_autocorrelation,
                            mean_ret_spread_quant)
 
-    fr_cols = len(days)
+    fr_cols = len(periods)
 
     # Returns
     vertical_sections = 4 + fr_cols
@@ -153,7 +153,7 @@ def create_factor_tear_sheet(factor,
     ax_quantile_returns_bar = plt.subplot(ret_gs[i, :])
     i += 1
     plotting.plot_quantile_returns_bar(mean_ret_quantile,
-                                       by_sector=False,
+                                       by_group=False,
                                        ylim_percentiles=None,
                                        ax=ax_quantile_returns_bar)
 
@@ -194,24 +194,24 @@ def create_factor_tear_sheet(factor,
     ic_gs = gridspec.GridSpec(vertical_sections, 2, wspace=0.4, hspace=0.3)
 
     i = 0
-    ax_daily_ic_ts = []
+    ax_ic_ts = []
     for j in range(fr_cols):
         p = plt.subplot(ic_gs[i, :])
-        ax_daily_ic_ts.append(p)
+        ax_ic_ts.append(p)
         i += 1
-    plotting.plot_daily_ic_ts(daily_ic, ax=ax_daily_ic_ts)
+    plotting.plot_ic_ts(ic, ax=ax_ic_ts)
 
-    ax_daily_ic_hist = []
-    ax_daily_ic_qq = []
+    ax_ic_hist = []
+    ax_ic_qq = []
     for j in range(fr_cols):
         p_hist = plt.subplot(ic_gs[j+i, 0])
         p_qq = plt.subplot(ic_gs[j+i, 1])
-        ax_daily_ic_hist.append(p_hist)
-        ax_daily_ic_qq.append(p_qq)
+        ax_ic_hist.append(p_hist)
+        ax_ic_qq.append(p_qq)
 
     i += fr_cols
-    plotting.plot_daily_ic_hist(daily_ic, ax=ax_daily_ic_hist)
-    plotting.plot_daily_ic_qq(daily_ic, ax=ax_daily_ic_qq)
+    plotting.plot_ic_hist(ic, ax=ax_ic_hist)
+    plotting.plot_ic_qq(ic, ax=ax_ic_qq)
 
     ax_monthly_ic_heatmap = []
     for j, k in ix_wide:
@@ -229,18 +229,18 @@ def create_factor_tear_sheet(factor,
     plotting.plot_factor_rank_auto_correlation(factor_autocorrelation,
                                                ax=ax_factor_rank_auto_correlation)
 
-    # Sector Specific Breakdown
-    if can_sector_adjust and show_sector_plots:
-        ic_by_sector = perf.mean_information_coefficient(factor,
-                                                         forward_returns,
-                                                         by_sector=True)
+    # Group Specific Breakdown
+    if can_group_adjust and show_groupby_plots:
+        ic_by_group = perf.mean_information_coefficient(factor,
+                                                        forward_returns,
+                                                        by_group=True)
 
-        mean_return_quantile_sector, mean_return_quantile_sector_std_err = perf.mean_return_by_quantile(quantile_factor,
-                                                                                                        forward_returns,
-                                                                                                        by_sector=True)
+        mean_return_quantile_group, mean_return_quantile_group_std_err = perf.mean_return_by_quantile(quantile_factor,
+                                                                                                      forward_returns,
+                                                                                                      by_group=True)
 
-        num_sectors = len(ic_by_sector.index.get_level_values('sector').unique())
-        rows_when_2_wide = (((num_sectors - 1) // 2) + 1)
+        num_groups = len(ic_by_group.index.get_level_values('group').unique())
+        rows_when_2_wide = (((num_groups - 1) // 2) + 1)
         ix_2_wide = product(range(rows_when_2_wide), range(2))
         vertical_sections = 1 + rows_when_2_wide
         fig = plt.figure(figsize=(14, vertical_sections * 7))
@@ -248,16 +248,16 @@ def create_factor_tear_sheet(factor,
         s_gs = gridspec.GridSpec(vertical_sections, 2, wspace=0.4, hspace=0.3)
         i = 0
 
-        ax_ic_by_sector = plt.subplot(s_gs[i, :])
+        ax_ic_by_group = plt.subplot(s_gs[i, :])
         i += 1
-        plotting.plot_ic_by_sector(ic_by_sector, ax=ax_ic_by_sector)
+        plotting.plot_ic_by_group(ic_by_group, ax=ax_ic_by_group)
 
-        ax_quantile_returns_bar_by_sector = []
+        ax_quantile_returns_bar_by_group = []
         for j, k in ix_2_wide:
             p = plt.subplot(s_gs[j+i, k])
-            ax_quantile_returns_bar_by_sector.append(p)
+            ax_quantile_returns_bar_by_group.append(p)
         i += rows_when_wide
-        plotting.plot_quantile_returns_bar(mean_return_quantile_sector,
-                                           by_sector=True,
+        plotting.plot_quantile_returns_bar(mean_return_quantile_group,
+                                           by_group=True,
                                            ylim_percentiles=(5, 95),
-                                           ax=ax_quantile_returns_bar_by_sector)
+                                           ax=ax_quantile_returns_bar_by_group)
