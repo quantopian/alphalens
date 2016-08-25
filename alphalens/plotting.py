@@ -533,10 +533,7 @@ def plot_ic_by_group(ic_group, ax=None):
     ic_group.plot(kind='bar', ax=ax)
 
     ax.set(title="Information Coefficient By Group", xlabel="")
-    ax.set_xticklabels(ax.xaxis.get_majorticklabels(),
-                       rotation=45,
-                       ha='right',
-                       fontsize=10)
+    ax.set_xticklabels(ic_group.index, rotation=45)
 
     return ax
 
