@@ -35,9 +35,11 @@ def factor_information_coefficient(factor,
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        Factor values indexed by date and asset.
+        Factor values indexed by date and asset and
+        optional a custom group.
     forward_returns : pd.DataFrame - MultiIndex
-        Forward returns in indexed by date and asset.
+        Forward returns in indexed by date and asset and
+        optional a custom group.
         Separate column for each forward return window.
     group_adjust : bool
         Demean forward returns by group before computing IC.
@@ -93,9 +95,11 @@ def mean_information_coefficient(factor,
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        Factor values indexed by date and asset.
+        Factor values indexed by date and asset and
+        optional a custom group.
     forward_returns : pd.DataFrame - MultiIndex
-        Period wise forward returns in indexed by date and asset.
+        Period wise forward returns in indexed by date and asset and
+        optional a custom group.
         Separate column for each forward return window.
     group_adjust : bool
         Demean forward returns by group before computing IC.
@@ -229,7 +233,8 @@ def quantize_factor(factor, quantiles=5, by_group=False):
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        Factor values indexed by date and asset
+        Factor values indexed by date and asset and
+        optional a custom group.
     quantiles : int
         Number of quantile buckets to use in factor bucketing.
     by_group : bool
@@ -264,10 +269,12 @@ def mean_return_by_quantile(quantized_factor,
     Parameters
     ----------
     quantized_factor : pd.Series - MultiIndex
-        DataFrame with date, asset index and factor quantile as a column.
+        DataFrame with date, asset and optional a custom group
+         index and factor quantile as a column.
         See quantile_bucket_factor for more detail.
     forward_returns : pd.DataFrame - MultiIndex
-        Period wise forward returns in indexed by date and asset.
+        Period wise forward returns in indexed by date and asset and
+        optional a custom group.
         Separate column for each forward return window.
     by_time : str
         The pandas str code for time grouping.
@@ -399,7 +406,8 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_group=False):
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        Factor values indexed by date and asset.
+        Factor values indexed by date and asset and
+        optional a custom group.
     time_rule : str, optional
         Time span to use in factor grouping mean reduction.
         See http://pandas.pydata.org/pandas-docs/stable/timeseries.html
