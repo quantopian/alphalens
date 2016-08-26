@@ -294,15 +294,15 @@ def mean_return_by_quantile(quantized_factor,
     """
 
     if demeaned:
-        demeaned_fr = utils.demean_forward_returns(forward_returns,
+        adjusted_fr = utils.demean_forward_returns(forward_returns,
                                                    by_group=by_group)
     else:
-        demeaned_fr = forward_returns.copy()
+        adjusted_fr = forward_returns.copy()
 
     quantized_factor = quantized_factor.copy()
     quantized_factor.name = 'quantile'
     forward_returns_quantile = (pd.DataFrame(quantized_factor)
-                                .merge(demeaned_fr,
+                                .merge(adjusted_fr,
                                        how='left',
                                        left_index=True,
                                        right_index=True)
