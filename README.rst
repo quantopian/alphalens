@@ -99,6 +99,8 @@ Credits
 -  Jessica Stauth (jstauth@quantopian.com)
 -  `Taso Petridis <https://github.com/tasopetridis>`_
 
+For a full list of contributors see the `contributors page. <https://github.com/quantopian/alphalens/graphs/contributors>`_
+
 Example Tear Sheet
 ------------------
 
