@@ -30,7 +30,8 @@ def create_factor_tear_sheet(factor,
                              quantiles=5,
                              filter_zscore=10,
                              groupby_labels=None,
-                             long_short=True):
+                             long_short=True,
+                             avgretplot=(5, 15) ):
     """
     Creates a full tear sheet for analysis and evaluating single
     return predicting (alpha) factor.
@@ -85,6 +86,8 @@ def create_factor_tear_sheet(factor,
         to the display name for each group.
     long_short : bool
         Should this computation happen on a long short portfolio?
+    avgretplot: tuple (int, int) - (before, after)
+        If not None, plot quantile average cumulative returns
     """
 
     periods = list(periods)
@@ -101,9 +104,9 @@ def create_factor_tear_sheet(factor,
                                                                          groupby_labels=groupby_labels)
 
     ic = perf.factor_information_coefficient(factor,
-                                                   forward_returns,
-                                                   group_adjust=False,
-                                                   by_group=False)
+                                             forward_returns,
+                                             group_adjust=False,
+                                             by_group=False)
 
     mean_monthly_ic = perf.mean_information_coefficient(factor,
                                                         forward_returns,
@@ -138,7 +141,6 @@ def create_factor_tear_sheet(factor,
     factor_autocorrelation = perf.factor_rank_autocorrelation(factor,
                                                               time_rule='D')
 
-
     ## PLOTTING ##
     plotting.summary_stats(ic,
                            alpha_beta,
@@ -150,7 +152,7 @@ def create_factor_tear_sheet(factor,
     fr_cols = len(periods)
 
     # Returns
-    vertical_sections = 4 + fr_cols
+    vertical_sections = 4 + fr_cols + (0 if avgretplot is None else 1)
     fig = plt.figure(figsize=(14, vertical_sections * 7))
     ret_gs = gridspec.GridSpec(vertical_sections, 2, wspace=0.4, hspace=0.3)
 
@@ -189,6 +191,37 @@ def create_factor_tear_sheet(factor,
                                                            bandwidth=0.5,
                                                            ax=ax_mean_quantile_returns_spread_ts)
 
+    # Avg Quantile Cumulative Returns
+    if avgretplot is not None:
+    
+        before, after = avgretplot
+        after = max(after, max(periods) + 1)
+        
+        ax_avg_cumulative_returns = plt.subplot(ret_gs[i, :])
+        i += 1
+        plotting.plot_quantile_average_cumulative_return(quantile_factor, forward_returns[1],
+                                                         by_quantile=False,
+                                                         periods_before=before, periods_after=after,
+                                                         std_bar=False, ax=ax_avg_cumulative_returns)
+
+        rows_when_2_wide = (((quantiles - 1) // 2) + 1)
+        ix_2_wide = product(range(rows_when_2_wide), range(2))
+        vertical_sections = 1 + rows_when_2_wide
+        fig = plt.figure(figsize=(14, vertical_sections * 7))
+
+        s_gs = gridspec.GridSpec(vertical_sections, 2, wspace=0.4, hspace=0.3)
+        i = 0
+        ax_avg_cumulative_returns_by_q = []
+        for j, k in ix_2_wide:
+            p = plt.subplot(s_gs[j + i, k])
+            ax_avg_cumulative_returns_by_q.append(p)
+        i += rows_when_2_wide
+
+        plotting.plot_quantile_average_cumulative_return(quantile_factor, forward_returns[1],
+                                                         by_quantile=True,
+                                                         periods_before=before, periods_after=after,
+                                                         std_bar=True, ax=ax_avg_cumulative_returns_by_q)
+                                                             
     # IC
     columns_wide = 2
 
@@ -262,7 +295,7 @@ def create_factor_tear_sheet(factor,
         for j, k in ix_2_wide:
             p = plt.subplot(s_gs[j+i, k])
             ax_quantile_returns_bar_by_group.append(p)
-        i += rows_when_wide
+        i += rows_when_2_wide
         plotting.plot_quantile_returns_bar(mean_return_quantile_group,
                                            by_group=True,
                                            ylim_percentiles=(5, 95),
