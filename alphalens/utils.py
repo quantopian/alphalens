@@ -234,3 +234,52 @@ def get_clean_factor_and_forward_returns(factor,
     forward_returns = merged_data
 
     return factor, forward_returns
+
+
+def common_start_returns(factor, returns, before, after):
+    """
+    A date and equity pair is extracted from each index row in the factor dataframe and for each of 
+    these pairs a return series is built starting from 'before' returns before the date and ending
+    'after' returns after the date specified in the pair. All those returns series are then aligned
+    to a common index (-before to after) and returned as a single DataFrame
+
+    Parameters
+    ----------
+    factor : pd.DataFrame
+        DataFrame with at least date and equity as index, the columns are irrelevant
+    returns : pd.DataFrame
+        Returns for the equities in factor. Equities as columns, dates as index.
+    before:
+        How many returns to load before factor date
+    after:
+        How many returns to load after factor date
+    Returns
+    -------
+    aligned_returns : pd.DataFrame
+        Dataframe containing returns series for each factor aligned to the same index:
+        -before to after
+    """
+   
+    all_returns = []
+
+    for timestamp, df in factor.groupby(level=0):  # group by date
+
+        equities = df.index.get_level_values(1)
+
+        try:
+            day_zero_index = returns.index.get_loc(timestamp)
+        except KeyError:
+            continue
+
+        starting_index = max(day_zero_index - before, 0)
+        ending_index = min(day_zero_index + after + 1, 
+                           len(returns.index) - 1)
+
+        series = returns.ix[starting_index:ending_index, equities]
+        series.index = range(starting_index - day_zero_index,
+                             ending_index - day_zero_index)
+
+        all_returns.append(series)
+
+    return pd.concat(all_returns, axis=1)
+

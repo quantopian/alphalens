@@ -730,3 +730,110 @@ def plot_cumulative_returns_by_quantile(quantile_returns, ax=None):
     ax.axhline(1.0, linestyle='-', color='black', lw=1)
 
     return ax
+
+
+def plot_quantile_average_cumulative_return(quantized_factor, forward_returns, by_quantile=False,
+                                            periods_before=10, periods_after=15,
+                                            std_bar=False, demeaned=True, ax=None):
+    """
+    Plots sector-wise mean daily returns for factor quantiles 
+    across provided forward price movement columns.
+    
+    Parameters
+    ----------
+    quantized_factor : pd.Series
+        Factor quantiles indexed by date and asset.
+    forward_returns : pd.Series - MultiIndex
+        Daily forward returns indexed by date and asset and
+        optional a custom group.
+    by_quantile : boolean, optional
+        Disaggregated figures by quantile (useful to clearly see std dev bars)
+    periods_before : int, optional
+        How many periods before factor to plot
+    periods_after  : int, optional
+        How many periods after factor to plot
+    std_bar : boolean, optional
+        Plot standard deviation plot
+    demeaned : bool, optional
+        Compute demeaned mean returns (long short portfolio)        
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    Returns
+    -------
+    ax : matplotlib.Axes
+    """
+
+    if demeaned:
+        returns = utils.demean_forward_returns(forward_returns,
+                                               by_group=False)
+    else:
+        returns = forward_returns.copy()
+        
+    if 'group' in returns.index.names:
+        returns.index = returns.index.droplevel(level='group')
+    returns = returns.unstack(level=['asset'])
+            
+    quantized_factor = quantized_factor.dropna()
+    quantiles = len(quantized_factor.unique())
+
+    cumulative_returns = {}
+    for q, q_fact in quantized_factor.groupby(quantized_factor):
+        q_returns = utils.common_start_returns(q_fact, returns,
+                                               periods_before, periods_after)
+        q_returns = q_returns.add(1).cumprod() - 1
+
+        if periods_before > 0:
+            q_returns -= q_returns.iloc[periods_before, :]
+
+        cumulative_returns[q] = q_returns.multiply(DECIMAL_TO_BPS)
+
+    palette = cm.RdYlGn_r(np.linspace(0, 1, quantiles))
+
+    if by_quantile:
+
+        if ax is None:
+            v_spaces = ((quantiles - 1) // 2) + 1
+            f, ax = plt.subplots(v_spaces, 2, sharex=False,
+                                 sharey=False, figsize=(18, 6 * v_spaces))
+            ax = ax.flatten()
+
+        for i, (quantile, q_ret) in enumerate(cumulative_returns.items()):
+
+            mean = q_ret.mean(axis=1)
+            mean.name = 'Quantile ' + str(quantile)
+            mean.plot(ax=ax[i], color=palette[i])
+            ax[i].set_ylabel('Mean Return (bps)')
+
+            if std_bar:
+                std = q_ret.std(axis=1)
+                ax[i].errorbar(q_ret.index, mean, yerr=std,
+                               fmt=None, ecolor=palette[i], label=None)
+
+            ax[i].axvline(x=0, color='k', linestyle='--')
+            ax[i].legend()
+            i += 1
+
+    else:
+
+        if ax is None:
+            f, ax = plt.subplots(1, 1, figsize=(18, 6))
+
+        for i, (quantile, q_ret) in enumerate(cumulative_returns.items()):
+
+            mean = q_ret.mean(axis=1)
+            mean.name = 'Quantile ' + str(quantile)
+            mean.plot(ax=ax, color=palette[i])
+
+            if std_bar:
+                std = q_ret.std(axis=1)
+                ax.errorbar(q_ret.index, mean, yerr=std,
+                            fmt=None, ecolor=palette[i], label='none')
+            i += 1
+
+        ax.axvline(x=0, color='k', linestyle='--')
+        ax.legend()
+        ax.set(ylabel='Mean Return (bps)',
+               title="Average Cumulative Returns by Quantile",
+               xlabel='Periods')
+
+    return ax
