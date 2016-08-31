@@ -263,24 +263,23 @@ def common_start_returns(factor, returns, before, after):
     all_returns = []
 
     for timestamp, df in factor.groupby(level=0):  # group by date
+
         equities = df.index.get_level_values(1)
+
         try:
-            # it raises an exception if not present
             day_zero_index = returns.index.get_loc(timestamp)
-
-            starting_index = max(day_zero_index - before, 0)
-            ending_index = min(day_zero_index + after +
-                               1, len(returns.index) - 1)
-
-            series = returns.iloc[
-                starting_index:ending_index, :].loc[:, equities]
-
-            # Reset index to have the same offset (it might raise an exception)
-            series.index = range(starting_index - day_zero_index,
-                                 ending_index - day_zero_index)
-        except:
+        except KeyError:
             print("skipping %s data" % str(timestamp))
             continue
+
+        starting_index = max(day_zero_index - before, 0)
+        ending_index = min(day_zero_index + after + 1, 
+                           len(returns.index) - 1)
+
+        series = returns.ix[starting_index:ending_index, equities]
+        series.index = range(starting_index - day_zero_index,
+                             ending_index - day_zero_index)
+
         all_returns.append(series)
 
     return pd.concat(all_returns, axis=1)
