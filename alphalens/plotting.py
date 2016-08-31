@@ -733,26 +733,26 @@ def plot_cumulative_returns_by_quantile(quantile_returns, ax=None):
 
 
 def plot_quantile_average_cumulative_return(quantized_factor, forward_returns, by_quantile=False,
-                                            periods_before=15, periods_after=15,
+                                            periods_before=10, periods_after=15,
                                             std_bar=False, ax=None):
     """
     Plots sector-wise mean daily returns for factor quantiles 
     across provided forward price movement columns.
+    
     Parameters
     ----------
     quantized_factor : pd.Series
         Factor quantiles indexed by date and asset.
-    forward_returns : pd.DataFrame - MultiIndex
-        Period wise forward returns in indexed by date and asset and
+    forward_returns : pd.Series - MultiIndex
+        Daily forward returns indexed by date and asset and
         optional a custom group.
-        Separate column for each forward return window..
-    by_quantile : boolean
+    by_quantile : boolean, optional
         Disaggregated figures by quantile (useful to clearly see std dev bars)
-    periods_before : int
+    periods_before : int, optional
         How many periods before factor to plot
-    periods_after  : int
+    periods_after  : int, optional
         How many periods after factor to plot
-    std_bar : boolean
+    std_bar : boolean, optional
         Plot standard deviation plot
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
@@ -761,8 +761,8 @@ def plot_quantile_average_cumulative_return(quantized_factor, forward_returns, b
     ax : matplotlib.Axes
     """
 
-    quantiles_list = list(quantized_factor.dropna().unique())
-    quantiles = len(quantiles_list)
+    quantized_factor = quantized_factor.dropna()
+    quantiles = len(quantized_factor.unique())
 
     returns = forward_returns.copy()
     if 'group' in returns.index.names:
@@ -770,9 +770,7 @@ def plot_quantile_average_cumulative_return(quantized_factor, forward_returns, b
     returns = returns.unstack(level=['asset'])
 
     cumulative_returns = {}
-
-    for q in quantiles_list:
-        q_fact = quantized_factor[quantized_factor == q]
+    for q, q_fact in quantized_factor.groupby(quantized_factor):
         q_returns = utils.common_start_returns(q_fact, returns,
                                                periods_before, periods_after)
         q_returns = q_returns.add(1).cumprod() - 1
@@ -792,19 +790,17 @@ def plot_quantile_average_cumulative_return(quantized_factor, forward_returns, b
                                  sharey=False, figsize=(18, 6 * v_spaces))
             ax = ax.flatten()
 
-        i = 0
-        for quantile, q_ret in cumulative_returns.items():
+        for i, (quantile, q_ret) in enumerate(cumulative_returns.items()):
 
-            color = palette[i]
             mean = q_ret.mean(axis=1)
             mean.name = 'Quantile ' + str(quantile)
-            mean.plot(ax=ax[i], color=color)
+            mean.plot(ax=ax[i], color=palette[i])
             ax[i].set_ylabel('Mean Return (bps)')
 
             if std_bar:
                 std = q_ret.std(axis=1)
                 ax[i].errorbar(q_ret.index, mean, yerr=std,
-                               fmt=None, ecolor=color, label=None)
+                               fmt=None, ecolor=palette[i], label=None)
 
             ax[i].axvline(x=0, color='k', linestyle='--')
             ax[i].legend()
@@ -815,18 +811,16 @@ def plot_quantile_average_cumulative_return(quantized_factor, forward_returns, b
         if ax is None:
             f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-        i = 0
-        for quantile, q_ret in cumulative_returns.items():
+        for i, (quantile, q_ret) in enumerate(cumulative_returns.items()):
 
-            color = palette[i]
             mean = q_ret.mean(axis=1)
             mean.name = 'Quantile ' + str(quantile)
-            mean.plot(ax=ax, color=color)
+            mean.plot(ax=ax, color=palette[i])
 
             if std_bar:
                 std = q_ret.std(axis=1)
                 ax.errorbar(q_ret.index, mean, yerr=std,
-                            fmt=None, ecolor=color, label='none')
+                            fmt=None, ecolor=palette[i], label='none')
             i += 1
 
         ax.axvline(x=0, color='k', linestyle='--')
