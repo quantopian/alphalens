@@ -202,7 +202,8 @@ def create_factor_tear_sheet(factor,
         plotting.plot_quantile_average_cumulative_return(quantile_factor, forward_returns[1],
                                                          by_quantile=False,
                                                          periods_before=before, periods_after=after,
-                                                         std_bar=False, ax=ax_avg_cumulative_returns)
+                                                         std_bar=False, demeaned=long_short,
+                                                         ax=ax_avg_cumulative_returns)
 
         rows_when_2_wide = (((quantiles - 1) // 2) + 1)
         ix_2_wide = product(range(rows_when_2_wide), range(2))
@@ -220,7 +221,8 @@ def create_factor_tear_sheet(factor,
         plotting.plot_quantile_average_cumulative_return(quantile_factor, forward_returns[1],
                                                          by_quantile=True,
                                                          periods_before=before, periods_after=after,
-                                                         std_bar=True, ax=ax_avg_cumulative_returns_by_q)
+                                                         std_bar=True, demeaned=long_short,
+                                                         ax=ax_avg_cumulative_returns_by_q)
                                                              
     # IC
     columns_wide = 2

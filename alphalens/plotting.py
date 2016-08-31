@@ -734,7 +734,7 @@ def plot_cumulative_returns_by_quantile(quantile_returns, ax=None):
 
 def plot_quantile_average_cumulative_return(quantized_factor, forward_returns, by_quantile=False,
                                             periods_before=10, periods_after=15,
-                                            std_bar=False, ax=None):
+                                            std_bar=False, demeaned=True, ax=None):
     """
     Plots sector-wise mean daily returns for factor quantiles 
     across provided forward price movement columns.
@@ -754,6 +754,8 @@ def plot_quantile_average_cumulative_return(quantized_factor, forward_returns, b
         How many periods after factor to plot
     std_bar : boolean, optional
         Plot standard deviation plot
+    demeaned : bool, optional
+        Compute demeaned mean returns (long short portfolio)        
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     Returns
@@ -761,13 +763,18 @@ def plot_quantile_average_cumulative_return(quantized_factor, forward_returns, b
     ax : matplotlib.Axes
     """
 
-    quantized_factor = quantized_factor.dropna()
-    quantiles = len(quantized_factor.unique())
-
-    returns = forward_returns.copy()
+    if demeaned:
+        returns = utils.demean_forward_returns(forward_returns,
+                                               by_group=False)
+    else:
+        returns = forward_returns.copy()
+        
     if 'group' in returns.index.names:
         returns.index = returns.index.droplevel(level='group')
     returns = returns.unstack(level=['asset'])
+            
+    quantized_factor = quantized_factor.dropna()
+    quantiles = len(quantized_factor.unique())
 
     cumulative_returns = {}
     for q, q_fact in quantized_factor.groupby(quantized_factor):
