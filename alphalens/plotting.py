@@ -832,7 +832,7 @@ def plot_quantile_average_cumulative_return(quantized_factor, forward_returns, b
         ax.axvline(x=0, color='k', linestyle='--')
         ax.legend()
         ax.set(ylabel='Mean Return (bps)',
-               title="Average Quantile Cumulative returns",
-               xlabel='Days')
+               title="Average Cumulative Returns by Quantile",
+               xlabel='Periods')
 
     return ax
