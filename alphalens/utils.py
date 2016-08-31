@@ -269,7 +269,6 @@ def common_start_returns(factor, returns, before, after):
         try:
             day_zero_index = returns.index.get_loc(timestamp)
         except KeyError:
-            print("skipping %s data" % str(timestamp))
             continue
 
         starting_index = max(day_zero_index - before, 0)
