@@ -208,20 +208,20 @@ def create_factor_tear_sheet(factor,
         before, after = avgretplot
         after = max(after, max(periods) + 1)
         
+        avg_cumulative_returns = perf.average_cumulative_return_by_quantile(quantile_factor,
+                                                                            forward_returns[1],
+                                                                            periods_before=before,
+                                                                            periods_after=after,
+                                                                            demeaned=long_short)
+
         vertical_sections = 1 + (((quantiles - 1) // 2) + 1)
         gf = GridFigure(rows=vertical_sections, cols=2)
-        plotting.plot_quantile_average_cumulative_return(quantile_factor, forward_returns[1],
-                                                         by_quantile=False,
-                                                         periods_before=before, periods_after=after,
-                                                         std_bar=False, demeaned=long_short,
-                                                         ax=gf.next_row())
+        plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=False,
+                                                         std_bar=False, ax=gf.next_row())
 
         ax_avg_cumulative_returns_by_q = [ gf.next_cell() for x in range(quantiles) ]
-        plotting.plot_quantile_average_cumulative_return(quantile_factor, forward_returns[1],
-                                                         by_quantile=True,
-                                                         periods_before=before, periods_after=after,
-                                                         std_bar=True, demeaned=long_short,
-                                                         ax=ax_avg_cumulative_returns_by_q)
+        plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=True,
+                                                         std_bar=True, ax=ax_avg_cumulative_returns_by_q)
                                                              
     # IC
     columns_wide = 2
