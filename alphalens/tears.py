@@ -149,75 +149,74 @@ def create_factor_tear_sheet(factor,
                            factor_autocorrelation,
                            mean_ret_spread_quant)
 
-    fr_cols = len(periods)
-
+    # it makes life easier with grid plots
+    class GridFigure(object):
+    
+        def __init__(self, rows, cols):
+            self.rows = rows
+            self.cols = cols
+            self.fig  = plt.figure(figsize=(14, rows * 7))
+            self.gs   = gridspec.GridSpec(rows, cols, wspace=0.4, hspace=0.3)
+            self.curr_row = 0
+            self.curr_col = 0
+            
+        def next_row(self):
+            if self.curr_col != 0:
+                self.curr_row += 1
+                self.curr_col = 0
+            subplt = plt.subplot(self.gs[self.curr_row, :])
+            self.curr_row += 1
+            return subplt 
+            
+        def next_cell(self):
+            if self.curr_col >= self.cols:
+                self.curr_row += 1
+                self.curr_col = 0
+            subplt = plt.subplot(self.gs[self.curr_row, self.curr_col])
+            self.curr_col += 1
+            return subplt
+            
     # Returns
-    vertical_sections = 4 + fr_cols + (0 if avgretplot is None else 1)
-    fig = plt.figure(figsize=(14, vertical_sections * 7))
-    ret_gs = gridspec.GridSpec(vertical_sections, 2, wspace=0.4, hspace=0.3)
+    fr_cols = len(periods)
+    vertical_sections = 4 + fr_cols
+    gf = GridFigure(rows=vertical_sections, cols=1)
 
-    i = 0
-    ax_quantile_returns_bar = plt.subplot(ret_gs[i, :])
-    i += 1
     plotting.plot_quantile_returns_bar(mean_ret_quantile,
                                        by_group=False,
                                        ylim_percentiles=None,
-                                       ax=ax_quantile_returns_bar)
+                                       ax=gf.next_row())
 
-    ax_quantile_returns_violin = plt.subplot(ret_gs[i, :])
-    i += 1
     plotting.plot_quantile_returns_violin(mean_ret_quant_daily,
                                           ylim_percentiles=(1, 99),
-                                          ax=ax_quantile_returns_violin)
+                                          ax=gf.next_row())
 
-    ax_cumulative_returns = plt.subplot(ret_gs[i, :])
-    i += 1
     plotting.plot_cumulative_returns(factor_returns[1],
-                                     ax=ax_cumulative_returns)
+                                     ax=gf.next_row())
 
-    ax_cumulative_returns_by_quantile = plt.subplot(ret_gs[i, :])
-    i += 1
     plotting.plot_cumulative_returns_by_quantile(mean_ret_quant_daily[1],
-                                                 ax=ax_cumulative_returns_by_quantile)
+                                                 ax=gf.next_row())
 
-    ax_mean_quantile_returns_spread_ts = []
-    for j in range(fr_cols):
-        p = plt.subplot(ret_gs[i, :])
-        ax_mean_quantile_returns_spread_ts.append(p)
-        i += 1
-
+    ax_mean_quantile_returns_spread_ts = [ gf.next_row() for x in range(fr_cols) ]
     plotting.plot_mean_quantile_returns_spread_time_series(mean_ret_spread_quant,
                                                            std_err=std_spread_quant,
                                                            bandwidth=0.5,
                                                            ax=ax_mean_quantile_returns_spread_ts)
 
-    # Avg Quantile Cumulative Returns
+    # Average Cumulative Returns
     if avgretplot is not None:
     
         before, after = avgretplot
         after = max(after, max(periods) + 1)
         
-        ax_avg_cumulative_returns = plt.subplot(ret_gs[i, :])
-        i += 1
+        vertical_sections = 1 + (((quantiles - 1) // 2) + 1)
+        gf = GridFigure(rows=vertical_sections, cols=2)
         plotting.plot_quantile_average_cumulative_return(quantile_factor, forward_returns[1],
                                                          by_quantile=False,
                                                          periods_before=before, periods_after=after,
                                                          std_bar=False, demeaned=long_short,
-                                                         ax=ax_avg_cumulative_returns)
+                                                         ax=gf.next_row())
 
-        rows_when_2_wide = (((quantiles - 1) // 2) + 1)
-        ix_2_wide = product(range(rows_when_2_wide), range(2))
-        vertical_sections = 1 + rows_when_2_wide
-        fig = plt.figure(figsize=(14, vertical_sections * 7))
-
-        s_gs = gridspec.GridSpec(vertical_sections, 2, wspace=0.4, hspace=0.3)
-        i = 0
-        ax_avg_cumulative_returns_by_q = []
-        for j, k in ix_2_wide:
-            p = plt.subplot(s_gs[j + i, k])
-            ax_avg_cumulative_returns_by_q.append(p)
-        i += rows_when_2_wide
-
+        ax_avg_cumulative_returns_by_q = [ gf.next_cell() for x in range(quantiles) ]
         plotting.plot_quantile_average_cumulative_return(quantile_factor, forward_returns[1],
                                                          by_quantile=True,
                                                          periods_before=before, periods_after=after,
@@ -226,48 +225,23 @@ def create_factor_tear_sheet(factor,
                                                              
     # IC
     columns_wide = 2
-
     rows_when_wide = (((fr_cols - 1) // columns_wide) + 1)
-    ix_wide = list(product(range(rows_when_wide), range(columns_wide)))
-    vertical_sections = fr_cols + 3 * rows_when_wide + 2
-    fig = plt.figure(figsize=(14, vertical_sections * 7))
-    ic_gs = gridspec.GridSpec(vertical_sections, 2, wspace=0.4, hspace=0.3)
+    vertical_sections = fr_cols + 3 * rows_when_wide + 2    
+    gf = GridFigure(rows=vertical_sections, cols=columns_wide)
 
-    i = 0
-    ax_ic_ts = []
-    for j in range(fr_cols):
-        p = plt.subplot(ic_gs[i, :])
-        ax_ic_ts.append(p)
-        i += 1
+    ax_ic_ts = [ gf.next_row() for x in range(fr_cols) ]
     plotting.plot_ic_ts(ic, ax=ax_ic_ts)
 
-    ax_ic_hist = []
-    ax_ic_qq = []
-    for j in range(fr_cols):
-        p_hist = plt.subplot(ic_gs[j+i, 0])
-        p_qq = plt.subplot(ic_gs[j+i, 1])
-        ax_ic_hist.append(p_hist)
-        ax_ic_qq.append(p_qq)
+    ax_ic_hqq = [ gf.next_cell() for x in range(fr_cols * 2) ]
+    plotting.plot_ic_hist(ic, ax=ax_ic_hqq[::2])
+    plotting.plot_ic_qq(ic, ax=ax_ic_hqq[1::2])
 
-    i += fr_cols
-    plotting.plot_ic_hist(ic, ax=ax_ic_hist)
-    plotting.plot_ic_qq(ic, ax=ax_ic_qq)
-
-    ax_monthly_ic_heatmap = []
-    for j, k in ix_wide:
-        p = plt.subplot(ic_gs[j+i, k])
-        ax_monthly_ic_heatmap.append(p)
-    i += rows_when_wide
+    ax_monthly_ic_heatmap = [ gf.next_cell() for x in range(fr_cols) ]
     plotting.plot_monthly_ic_heatmap(mean_monthly_ic, ax=ax_monthly_ic_heatmap)
 
-    ax_top_bottom_quantile_turnover = plt.subplot(ic_gs[i, :])
-    plotting.plot_top_bottom_quantile_turnover(quantile_factor,
-                                               ax=ax_top_bottom_quantile_turnover)
-    i += 1
+    plotting.plot_top_bottom_quantile_turnover(quantile_factor, ax=gf.next_row())
 
-    ax_factor_rank_auto_correlation = plt.subplot(ic_gs[i, :])
-    plotting.plot_factor_rank_auto_correlation(factor_autocorrelation,
-                                               ax=ax_factor_rank_auto_correlation)
+    plotting.plot_factor_rank_auto_correlation(factor_autocorrelation, ax=gf.next_row())
 
     # Group Specific Breakdown
     if can_group_adjust and show_groupby_plots:
@@ -282,22 +256,12 @@ def create_factor_tear_sheet(factor,
 
         num_groups = len(ic_by_group.index.get_level_values('group').unique())
         rows_when_2_wide = (((num_groups - 1) // 2) + 1)
-        ix_2_wide = product(range(rows_when_2_wide), range(2))
         vertical_sections = 1 + rows_when_2_wide
-        fig = plt.figure(figsize=(14, vertical_sections * 7))
+        gf = GridFigure(rows=vertical_sections, cols=2)
+        
+        plotting.plot_ic_by_group(ic_by_group, ax=gf.next_row())
 
-        s_gs = gridspec.GridSpec(vertical_sections, 2, wspace=0.4, hspace=0.3)
-        i = 0
-
-        ax_ic_by_group = plt.subplot(s_gs[i, :])
-        i += 1
-        plotting.plot_ic_by_group(ic_by_group, ax=ax_ic_by_group)
-
-        ax_quantile_returns_bar_by_group = []
-        for j, k in ix_2_wide:
-            p = plt.subplot(s_gs[j+i, k])
-            ax_quantile_returns_bar_by_group.append(p)
-        i += rows_when_2_wide
+        ax_quantile_returns_bar_by_group = [ gf.next_cell() for x in range(num_groups) ]
         plotting.plot_quantile_returns_bar(mean_return_quantile_group,
                                            by_group=True,
                                            ylim_percentiles=(5, 95),
