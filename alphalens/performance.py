@@ -445,3 +445,55 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_group=False):
     autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(1), axis=1)
 
     return autocorr
+
+def average_cumulative_return_by_quantile(quantized_factor, forward_returns,
+                                          periods_before=10, periods_after=15,
+                                          demeaned=True):
+    """
+    Plots sector-wise mean daily returns for factor quantiles 
+    across provided forward price movement columns.
+    
+    Parameters
+    ----------
+    quantized_factor : pd.Series
+        Factor quantiles indexed by date and asset.
+    forward_returns : pd.Series - MultiIndex
+        Daily forward returns indexed by date and asset and
+        optional a custom group.
+    periods_before : int, optional
+        How many periods before factor to plot
+    periods_after  : int, optional
+        How many periods after factor to plot
+    demeaned : bool, optional
+        Compute demeaned mean returns (long short portfolio)        
+    Returns
+    -------
+    pd.DataFrame indexed by quantile (level 0) and mean/std
+    (level 1) and the values on the columns in range from
+    -periods_before to periods_after
+    """
+
+    if demeaned:
+        returns = utils.demean_forward_returns(forward_returns,
+                                               by_group=False)
+    else:
+        returns = forward_returns.copy()
+
+    if 'group' in returns.index.names:
+        returns.index = returns.index.droplevel(level='group')
+    returns = returns.unstack(level=['asset'])
+
+    quantized_factor = quantized_factor.dropna()
+
+    def f(q_fact):
+        q_returns = utils.common_start_returns(q_fact, returns,
+                                               periods_before, periods_after)
+        q_returns = q_returns.add(1).cumprod() - 1
+
+        if periods_before > 0:
+            q_returns -= q_returns.iloc[periods_before, :]
+
+        return pd.DataFrame( {'mean': q_returns.mean(axis=1), 'std': q_returns.std(axis=1)} ).T
+
+    return quantized_factor.groupby(quantized_factor).apply(f)
+
