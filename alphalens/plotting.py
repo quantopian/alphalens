@@ -682,12 +682,11 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
     factor_returns = factor_returns.copy()
 
     if period > 1:
-        daily_returns = lambda ret, period: (
-            np.nanmean(ret) ** (1. / period)) - 1
+        daily_returns = lambda ret, period: ( np.nanmean(ret)**(1./period) ) - 1
         factor_period_returns = factor_returns.add(1)**period
-        factor_returns = factor_period_returns.rolling(
-            period, min_periods=1).apply(daily_returns, args=(period,))
-
+        factor_returns = pd.rolling_apply(factor_period_returns, period, daily_returns,
+                                    min_periods=1, args=(period,))
+                                    
     factor_returns.add(1).cumprod().plot(
         ax=ax, lw=3, color='forestgreen', alpha=0.6)
     ax.set(ylabel='Cumulative Returns',
@@ -724,11 +723,10 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
         .pivot(index='date', columns='quantile', values=period)
 
     if period > 1:
-        daily_returns = lambda ret, period: (
-            np.nanmean(ret) ** (1. / period)) - 1
+        daily_returns = lambda ret, period: ( np.nanmean(ret)**(1./period) ) - 1
         period_ret_wide = ret_wide.add(1)**period
-        ret_wide = period_ret_wide.rolling(
-            period, min_periods=1).apply(daily_returns, args=(period,))
+        ret_wide = pd.rolling_apply(period_ret_wide, period, daily_returns,
+                                    min_periods=1, args=(period,))
 
     cum_ret = ret_wide.add(1).cumprod()
     cum_ret = cum_ret.loc[:, ::-1]
