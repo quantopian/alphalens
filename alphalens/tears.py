@@ -191,10 +191,10 @@ def create_factor_tear_sheet(factor,
                                           ax=gf.next_row())
     
     for p in periods:
+    
         plotting.plot_cumulative_returns(factor_returns[p], period=p,
                                          ax=gf.next_row())
-    
-    for p in periods:
+                                         
         plotting.plot_cumulative_returns_by_quantile(mean_ret_quant_daily[p], period=p,
                                                      ax=gf.next_row())
 
