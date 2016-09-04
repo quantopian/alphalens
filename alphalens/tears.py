@@ -178,7 +178,7 @@ def create_factor_tear_sheet(factor,
             
     # Returns
     fr_cols = len(periods)
-    vertical_sections = 4 + fr_cols
+    vertical_sections = 2 + fr_cols * 3
     gf = GridFigure(rows=vertical_sections, cols=1)
 
     plotting.plot_quantile_returns_bar(mean_ret_quantile,
@@ -189,12 +189,14 @@ def create_factor_tear_sheet(factor,
     plotting.plot_quantile_returns_violin(mean_ret_quant_daily,
                                           ylim_percentiles=(1, 99),
                                           ax=gf.next_row())
-
-    plotting.plot_cumulative_returns(factor_returns[1],
-                                     ax=gf.next_row())
-
-    plotting.plot_cumulative_returns_by_quantile(mean_ret_quant_daily[1],
-                                                 ax=gf.next_row())
+    
+    for p in periods:
+    
+        plotting.plot_cumulative_returns(factor_returns[p], period=p,
+                                         ax=gf.next_row())
+                                         
+        plotting.plot_cumulative_returns_by_quantile(mean_ret_quant_daily[p], period=p,
+                                                     ax=gf.next_row())
 
     ax_mean_quantile_returns_spread_ts = [ gf.next_row() for x in range(fr_cols) ]
     plotting.plot_mean_quantile_returns_spread_time_series(mean_ret_spread_quant,

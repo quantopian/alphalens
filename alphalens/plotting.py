@@ -350,7 +350,7 @@ def plot_quantile_returns_bar(mean_ret_by_q,
         if ax is None:
             v_spaces = ((num_group - 1) // 2) + 1
             f, ax = plt.subplots(v_spaces, 2, sharex=False,
-                                 sharey=True, figsize=(18, 6*v_spaces))
+                                 sharey=True, figsize=(18, 6 * v_spaces))
             ax = ax.flatten()
 
         for a, (sc, cor) in zip(ax, mean_ret_by_q.groupby(level='group')):
@@ -404,7 +404,7 @@ def plot_quantile_returns_violin(return_by_q,
         ymin = (np.percentile(return_by_q.values,
                               ylim_percentiles[0]) * DECIMAL_TO_BPS)
         ymax = (np.percentile(return_by_q.values,
-                              ylim_percentiles[1])  * DECIMAL_TO_BPS)
+                              ylim_percentiles[1]) * DECIMAL_TO_BPS)
     else:
         ymin = None
         ymax = None
@@ -658,7 +658,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     return ax
 
 
-def plot_cumulative_returns(factor_returns, ax=None):
+def plot_cumulative_returns(factor_returns, period=1, ax=None):
     """
     Plots the cumulative returns of the returns series passed in.
 
@@ -666,6 +666,8 @@ def plot_cumulative_returns(factor_returns, ax=None):
     ----------
     factor_returns : pd.Series
         Period wise returns of dollar neutral portfolio weighted by factor value.
+    period: int, optional
+        Period over which the daily returns are calculated        
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -679,17 +681,24 @@ def plot_cumulative_returns(factor_returns, ax=None):
 
     factor_returns = factor_returns.copy()
 
+    if period > 1:
+        daily_returns = lambda ret, period: ( np.nanmean(ret)**(1./period) ) - 1
+        factor_period_returns = factor_returns.add(1)**period
+        factor_returns = pd.rolling_apply(factor_period_returns, period, daily_returns,
+                                    min_periods=1, args=(period,))
+                                    
     factor_returns.add(1).cumprod().plot(
         ax=ax, lw=3, color='forestgreen', alpha=0.6)
     ax.set(ylabel='Cumulative Returns',
-           title='Factor Weighted Long/Short Portfolio Cumulative Return',
+           title='Factor Weighted Long/Short Portfolio Cumulative Return ({} Fwd Period)'.format(
+               period),
            xlabel='')
     ax.axhline(1.0, linestyle='-', color='black', lw=1)
 
     return ax
 
 
-def plot_cumulative_returns_by_quantile(quantile_returns, ax=None):
+def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
     """
     Plots the cumulative returns of various factor quantiles.
 
@@ -697,6 +706,8 @@ def plot_cumulative_returns_by_quantile(quantile_returns, ax=None):
     ----------
     quantile_returns : pd.DataFrame
         Cumulative returns by factor quantile.
+    period: int, optional
+        Period over which the daily returns are calculated 
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -709,7 +720,14 @@ def plot_cumulative_returns_by_quantile(quantile_returns, ax=None):
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
     ret_wide = quantile_returns.reset_index()\
-        .pivot(index='date', columns='quantile', values=1)
+        .pivot(index='date', columns='quantile', values=period)
+
+    if period > 1:
+        daily_returns = lambda ret, period: ( np.nanmean(ret)**(1./period) ) - 1
+        period_ret_wide = ret_wide.add(1)**period
+        ret_wide = pd.rolling_apply(period_ret_wide, period, daily_returns,
+                                    min_periods=1, args=(period,))
+
     cum_ret = ret_wide.add(1).cumprod()
     cum_ret = cum_ret.loc[:, ::-1]
     num_quant = len(cum_ret.columns)
@@ -720,7 +738,8 @@ def plot_cumulative_returns_by_quantile(quantile_returns, ax=None):
     ax.legend()
     ymin, ymax = cum_ret.min().min(), cum_ret.max().max()
     ax.set(ylabel='Log Cumulative Returns',
-           title='Cumulative Return by Quantile',
+           title='Cumulative Return by Quantile ({} Period Forward Return)'.format(
+               period),
            xlabel='',
            yscale='symlog',
            yticks=np.linspace(ymin, ymax, 5),
@@ -738,7 +757,7 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
     """
     Plots sector-wise mean daily returns for factor quantiles 
     across provided forward price movement columns.
-    
+
     Parameters
     ----------
     avg_cumulative_returns: pd.Dataframe
@@ -769,13 +788,13 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
 
         for i, (quantile, q_ret) in enumerate(avg_cumulative_returns.groupby(level='quantile')):
 
-            mean = q_ret.loc[ (quantile, 'mean') ]
+            mean = q_ret.loc[(quantile, 'mean')]
             mean.name = 'Quantile ' + str(quantile)
             mean.plot(ax=ax[i], color=palette[i])
             ax[i].set_ylabel('Mean Return (bps)')
 
             if std_bar:
-                std = q_ret.loc[ (quantile, 'std') ]
+                std = q_ret.loc[(quantile, 'std')]
                 ax[i].errorbar(std.index, mean, yerr=std,
                                fmt=None, ecolor=palette[i], label=None)
 
@@ -790,12 +809,12 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
 
         for i, (quantile, q_ret) in enumerate(avg_cumulative_returns.groupby(level='quantile')):
 
-            mean = q_ret.loc[ (quantile, 'mean') ]
+            mean = q_ret.loc[(quantile, 'mean')]
             mean.name = 'Quantile ' + str(quantile)
             mean.plot(ax=ax, color=palette[i])
 
             if std_bar:
-                std = q_ret.loc[ (quantile, 'std') ]
+                std = q_ret.loc[(quantile, 'std')]
                 ax.errorbar(std.index, mean, yerr=std,
                             fmt=None, ecolor=palette[i], label='none')
             i += 1
