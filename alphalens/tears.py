@@ -19,6 +19,7 @@ from . import utils
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 from itertools import product
+import pandas as pd
 
 
 @plotting.plotting_context
@@ -138,9 +139,9 @@ def create_factor_tear_sheet(factor,
                                                                                1,
                                                                                std_err=std_quant_daily)
 
-    factor_autocorrelation = perf.factor_rank_autocorrelation(factor,
-                                                              time_rule='D')
-
+    factor_autocorrelation = pd.concat(
+        [perf.factor_rank_autocorrelation(factor, period=p) for p in periods], axis=1)
+        
     ## PLOTTING ##
     plotting.summary_stats(ic,
                            alpha_beta,
@@ -228,7 +229,7 @@ def create_factor_tear_sheet(factor,
     # IC
     columns_wide = 2
     rows_when_wide = (((fr_cols - 1) // columns_wide) + 1)
-    vertical_sections = fr_cols + 3 * rows_when_wide + 2    
+    vertical_sections = fr_cols + 3 * rows_when_wide + len(periods) + 1
     gf = GridFigure(rows=vertical_sections, cols=columns_wide)
 
     ax_ic_ts = [ gf.next_row() for x in range(fr_cols) ]
@@ -243,7 +244,9 @@ def create_factor_tear_sheet(factor,
 
     plotting.plot_top_bottom_quantile_turnover(quantile_factor, ax=gf.next_row())
 
-    plotting.plot_factor_rank_auto_correlation(factor_autocorrelation, ax=gf.next_row())
+    for p in periods:
+        plotting.plot_factor_rank_auto_correlation(
+            factor_autocorrelation[p], period=p, ax=gf.next_row())
 
     # Group Specific Breakdown
     if can_group_adjust and show_groupby_plots:

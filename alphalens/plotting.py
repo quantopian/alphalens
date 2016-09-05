@@ -145,8 +145,9 @@ def summary_stats(ic_data,
         perf.quantile_turnover(quantized_factor, min_quantile).mean()]
 
     auto_corr = pd.DataFrame()
-    auto_corr.loc[
-        "Mean Factor Rank Autocorrelation", " "] = autocorrelation_data.mean()
+    for period, p_data in autocorrelation_data.iteritems():
+        auto_corr.loc["Mean Factor Rank Autocorrelation",
+                      "{}".format(period)] = p_data.mean()
 
     returns_table = pd.DataFrame()
     returns_table = returns_table.append(alpha_beta)
@@ -538,7 +539,9 @@ def plot_ic_by_group(ic_group, ax=None):
     return ax
 
 
-def plot_factor_rank_auto_correlation(factor_autocorrelation, ax=None):
+def plot_factor_rank_auto_correlation(factor_autocorrelation,
+                                      period,
+                                      ax=None):
     """
     Plots factor rank autocorrelation over time.
     See factor_rank_autocorrelation for more details.
@@ -548,6 +551,8 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation, ax=None):
     factor_autocorrelation : pd.Series
         Rolling 1 period (defined by time_rule) autocorrelation
         of factor values.
+    period: int, optional
+        Period over which the autocorrelation is calculated
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -559,7 +564,8 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation, ax=None):
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    factor_autocorrelation.plot(title='Factor Rank Autocorrelation', ax=ax)
+    factor_autocorrelation.plot(title='{} Period Factor Rank Autocorrelation'.format(
+                                period), ax=ax)
     ax.set(ylabel='Autocorrelation Coefficient', xlabel='')
     ax.axhline(0.0, linestyle='-', color='black', lw=1)
     ax.text(.05, .95, "Mean %.3f" % factor_autocorrelation.mean(),
