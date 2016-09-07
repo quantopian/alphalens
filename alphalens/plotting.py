@@ -138,13 +138,14 @@ def summary_stats(ic_data,
 
     max_quantile = quantized_factor.values.max()
     min_quantile = quantized_factor.values.min()
+    quantiles = sorted(quantized_factor.unique())
     periods = list(autocorrelation_data.columns)
+
     turnover_table = pd.DataFrame()
     for period in periods:
-        turnover_table.loc["Top Quantile Mean Turnover ", "{}".format(
-            period)] = perf.quantile_turnover(quantized_factor, max_quantile, period).mean()
-        turnover_table.loc["Bottom Quantile Mean Turnover ", "{}".format(
-            period)] = perf.quantile_turnover(quantized_factor, min_quantile, period).mean()
+        for quantile in quantiles:
+            turnover_table.loc["Quantile {} Mean Turnover ".format(quantile), "{}".format(
+                period)] = perf.quantile_turnover(quantized_factor, quantile, period).mean()
 
     auto_corr = pd.DataFrame()
     for period, p_data in autocorrelation_data.iteritems():
