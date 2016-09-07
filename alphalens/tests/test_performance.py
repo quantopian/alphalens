@@ -228,7 +228,6 @@ class PerformanceTestCase(TestCase):
                              2, 1, 1, 2, 2, 1, 1, 2, 2],
                             '2015-1-4',
                             1,
-                            'D',
                             False,
                             [nan, 1.0, 1.0, 1.0]),
                            ([[4.0, 3.0, 2.0, 1.0],
@@ -239,7 +238,6 @@ class PerformanceTestCase(TestCase):
                              2, 1, 1, 2, 2, 1, 1, 2, 2],
                             '2015-1-4',
                             1,
-                            'D',
                             False,
                            [nan, -1.0, -1.0, -1.0]),
                            ([[1.0, 2.0, 3.0, 4.0],
@@ -261,10 +259,11 @@ class PerformanceTestCase(TestCase):
                              1, 1, 2, 2, 1, 1, 2, 2,
                              1, 1, 2, 2, 1, 1, 2, 2],
                             '2015-1-12',
-                            1,
-                            'W',
+                            3,
                             False,
-                            [nan, 0.768221, -0.400819]),
+                            [nan, nan, nan, 1.0, 1.0,
+                             1.0, -1.0, 1.0, -1.0, 1.0,
+                              1.0, -1.0]),
                            ([[1.0, 2.0, 3.0, 4.0],
                             [2.0, 1.0, 4.0, 3.0],
                             [4.0, 3.0, 2.0, 1.0],
@@ -273,14 +272,13 @@ class PerformanceTestCase(TestCase):
                              2, 1, 1, 2, 2, 1, 1, 2, 2],
                             '2015-1-4',
                             1,
-                            'D',
                             True,
                             [nan, -1.0, 1.0, -1.0])
                            ])
     def test_factor_rank_autocorrelation(self, factor_values,
                                          group_values, end_date,
-                                         period, time_rule,
-                                         by_group, expected_vals):
+                                         period, by_group,
+                                         expected_vals):
         dr = date_range(start='2015-1-1', end=end_date)
         dr.name = 'date'
         tickers = ['A', 'B', 'C', 'D']
@@ -294,7 +292,7 @@ class PerformanceTestCase(TestCase):
         factor['group'] = group_values
         factor = factor.set_index(['date', 'asset', 'group']).factor
 
-        fa = factor_rank_autocorrelation(factor, period, time_rule, by_group)
+        fa = factor_rank_autocorrelation(factor, period, by_group)
         expected = Series(index=fa.index, data=expected_vals)
         expected.name = period
 
