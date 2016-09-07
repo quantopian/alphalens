@@ -372,7 +372,7 @@ def compute_mean_returns_spread(mean_returns,
     return mean_return_difference, joint_std_err
 
 
-def quantile_turnover(quantile_factor, quantile):
+def quantile_turnover(quantile_factor, quantile, period=1):
     """
     Computes the proportion of names in a factor quantile that were
     not in that quantile in the previous period.
@@ -383,7 +383,8 @@ def quantile_turnover(quantile_factor, quantile):
         DataFrame with date, asset and factor quantile.
     quantile : int
         Quantile on which to perform turnover analysis.
-
+    period: int, optional
+        Period over which to calculate the turnover     
     Returns
     -------
     quant_turnover : pd.Series
@@ -393,7 +394,7 @@ def quantile_turnover(quantile_factor, quantile):
     quant_names = quantile_factor[quantile_factor == quantile]
     quant_name_sets = quant_names.groupby(level=['date']).apply(
         lambda x: set(x.index.get_level_values('asset')))
-    new_names = (quant_name_sets - quant_name_sets.shift(1)).dropna()
+    new_names = (quant_name_sets - quant_name_sets.shift(period)).dropna()
     quant_turnover = new_names.apply(
         lambda x: len(x)) / quant_name_sets.apply(lambda x: len(x))
 

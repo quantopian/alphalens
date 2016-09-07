@@ -229,7 +229,7 @@ def create_factor_tear_sheet(factor,
     # IC
     columns_wide = 2
     rows_when_wide = (((fr_cols - 1) // columns_wide) + 1)
-    vertical_sections = fr_cols + 3 * rows_when_wide + len(periods) + 1
+    vertical_sections = fr_cols + 3 * rows_when_wide + 2 * len(periods)
     gf = GridFigure(rows=vertical_sections, cols=columns_wide)
 
     ax_ic_ts = [ gf.next_row() for x in range(fr_cols) ]
@@ -242,9 +242,10 @@ def create_factor_tear_sheet(factor,
     ax_monthly_ic_heatmap = [ gf.next_cell() for x in range(fr_cols) ]
     plotting.plot_monthly_ic_heatmap(mean_monthly_ic, ax=ax_monthly_ic_heatmap)
 
-    plotting.plot_top_bottom_quantile_turnover(quantile_factor, ax=gf.next_row())
-
     for p in periods:
+
+        plotting.plot_top_bottom_quantile_turnover(quantile_factor, period=p, ax=gf.next_row())
+
         plotting.plot_factor_rank_auto_correlation(
             factor_autocorrelation[p], period=p, ax=gf.next_row())
 

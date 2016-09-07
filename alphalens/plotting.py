@@ -138,11 +138,13 @@ def summary_stats(ic_data,
 
     max_quantile = quantized_factor.values.max()
     min_quantile = quantized_factor.values.min()
-    turnover_table = pd.DataFrame(
-        columns=["Top Quantile", "Bottom Quantile"])
-    turnover_table.loc["Mean Turnover"] = [
-        perf.quantile_turnover(quantized_factor, max_quantile).mean(),
-        perf.quantile_turnover(quantized_factor, min_quantile).mean()]
+    periods = list(autocorrelation_data.columns)
+    turnover_table = pd.DataFrame()
+    for period in periods:
+        turnover_table.loc["Top Quantile Mean Turnover ", "{}".format(
+            period)] = perf.quantile_turnover(quantized_factor, max_quantile, period).mean()
+        turnover_table.loc["Bottom Quantile Mean Turnover ", "{}".format(
+            period)] = perf.quantile_turnover(quantized_factor, min_quantile, period).mean()
 
     auto_corr = pd.DataFrame()
     for period, p_data in autocorrelation_data.iteritems():
@@ -577,7 +579,7 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation,
     return ax
 
 
-def plot_top_bottom_quantile_turnover(quantized_factor, ax=None):
+def plot_top_bottom_quantile_turnover(quantized_factor, period=1, ax=None):
     """
     Plots period wise top and bottom quantile factor turnover.
 
@@ -585,6 +587,8 @@ def plot_top_bottom_quantile_turnover(quantized_factor, ax=None):
     ----------
     quantized_factor : pd.Series
         Factor quantiles indexed by date and asset.
+    period: int, optional
+        Period over which to calculate the turnover        
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -598,9 +602,12 @@ def plot_top_bottom_quantile_turnover(quantized_factor, ax=None):
 
     max_quantile = quantized_factor.values.max()
     turnover = pd.DataFrame()
-    turnover['top quantile turnover'] = perf.quantile_turnover(quantized_factor, max_quantile)
-    turnover['bottom quantile turnover'] = perf.quantile_turnover(quantized_factor, 1)
-    turnover.plot(title='Top and Bottom Quantile Turnover', ax=ax, alpha=0.6, lw=0.8)
+    turnover['top quantile turnover'] = perf.quantile_turnover(
+        quantized_factor, max_quantile, period)
+    turnover['bottom quantile turnover'] = perf.quantile_turnover(
+        quantized_factor, 1, period)
+    turnover.plot(title='{} Period Top and Bottom Quantile Turnover'.format(period),
+                  ax=ax, alpha=0.6, lw=0.8)
     ax.set(ylabel='Proportion Of Names New To Quantile', xlabel="")
 
     return ax
