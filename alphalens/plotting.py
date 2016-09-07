@@ -540,7 +540,7 @@ def plot_ic_by_group(ic_group, ax=None):
 
 
 def plot_factor_rank_auto_correlation(factor_autocorrelation,
-                                      period,
+                                      period=1,
                                       ax=None):
     """
     Plots factor rank autocorrelation over time.
