@@ -32,7 +32,8 @@ def create_factor_tear_sheet(factor,
                              filter_zscore=10,
                              groupby_labels=None,
                              long_short=True,
-                             avgretplot=(5, 15) ):
+                             avgretplot=(5, 15),
+                             turnover_for_all_periods=False ):
     """
     Creates a full tear sheet for analysis and evaluating single
     return predicting (alpha) factor.
@@ -89,6 +90,10 @@ def create_factor_tear_sheet(factor,
         Should this computation happen on a long short portfolio?
     avgretplot: tuple (int, int) - (before, after)
         If not None, plot quantile average cumulative returns
+    turnover_for_all_periods: boolean, optional
+        If True, diplay quantile turnover and factor autocorrelation
+        plots for every periods. If False, only period of 1 is
+        plotted
     """
 
     periods = list(periods)
@@ -242,7 +247,7 @@ def create_factor_tear_sheet(factor,
     ax_monthly_ic_heatmap = [ gf.next_cell() for x in range(fr_cols) ]
     plotting.plot_monthly_ic_heatmap(mean_monthly_ic, ax=ax_monthly_ic_heatmap)
 
-    for p in periods:
+    for p in ( periods if turnover_for_all_periods else [1] ):
 
         plotting.plot_top_bottom_quantile_turnover(quantile_factor, period=p, ax=gf.next_row())
 
