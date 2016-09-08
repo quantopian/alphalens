@@ -372,7 +372,7 @@ def compute_mean_returns_spread(mean_returns,
     return mean_return_difference, joint_std_err
 
 
-def quantile_turnover(quantile_factor, quantile):
+def quantile_turnover(quantile_factor, quantile, period=1):
     """
     Computes the proportion of names in a factor quantile that were
     not in that quantile in the previous period.
@@ -383,7 +383,8 @@ def quantile_turnover(quantile_factor, quantile):
         DataFrame with date, asset and factor quantile.
     quantile : int
         Quantile on which to perform turnover analysis.
-
+    period: int, optional
+        Period over which to calculate the turnover     
     Returns
     -------
     quant_turnover : pd.Series
@@ -393,14 +394,14 @@ def quantile_turnover(quantile_factor, quantile):
     quant_names = quantile_factor[quantile_factor == quantile]
     quant_name_sets = quant_names.groupby(level=['date']).apply(
         lambda x: set(x.index.get_level_values('asset')))
-    new_names = (quant_name_sets - quant_name_sets.shift(1)).dropna()
+    new_names = (quant_name_sets - quant_name_sets.shift(period)).dropna()
     quant_turnover = new_names.apply(
         lambda x: len(x)) / quant_name_sets.apply(lambda x: len(x))
 
     return quant_turnover
 
 
-def factor_rank_autocorrelation(factor, time_rule='W', by_group=False):
+def factor_rank_autocorrelation(factor, period=1, by_group=False):
     """
     Computes autocorrelation of mean factor ranks in specified time spans.
     We must compare period to period factor ranks rather than factor values
@@ -414,11 +415,9 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_group=False):
     factor : pd.Series - MultiIndex
         Factor values indexed by date and asset and
         optional a custom group.
-    time_rule : str, optional
-        Time span to use in factor grouping mean reduction.
-        See http://pandas.pydata.org/pandas-docs/stable/timeseries.html
-        for available options.
-    by_group : bool
+    period: int, optional
+        Period over which to calculate the autocorrelation        
+    by_group : bool, optional
         If True, compute autocorrelation separately for each group.
 
     Returns
@@ -438,12 +437,8 @@ def factor_rank_autocorrelation(factor, time_rule='W', by_group=False):
                                                         columns='asset',
                                                         values='factor')
 
-    if time_rule is not None:
-        asset_factor_rank = asset_factor_rank.resample(time_rule, how='mean')\
-            .dropna(how='all')
-
-    autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(1), axis=1)
-
+    autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(period), axis=1)
+    autocorr.name = period
     return autocorr
 
 def average_cumulative_return_by_quantile(quantized_factor, forward_returns,
