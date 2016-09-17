@@ -141,10 +141,12 @@ class PerformanceTestCase(TestCase):
                             [1, 1, 2, 2, 2, 2, 1, 1]),
                            (factor, 2, True,
                             [1, 2, 1, 2, 2, 1, 2, 1]),
-                           (setup_factor(dr, tickers, size=1, data=[1]), 4, False,
-                            [1]*2),
-                           (setup_factor(dr, tickers, size=4, data=[1]*4), 4, False,
-                            [1]*8)
+                           (setup_factor(dr, tickers, size=1, data=[1]),
+                            4, False,
+                            [1] * 2),
+                           (setup_factor(dr, tickers, size=4, data=[1] * 4),
+                            4, False,
+                            [2] * 8)
                            ])
     def test_quantize_factor(self, factor, quantiles, by_group, expected_vals):
         quantized_factor = quantize_factor(factor,
@@ -154,6 +156,23 @@ class PerformanceTestCase(TestCase):
                           data=expected_vals,
                           name='quantile')
         assert_series_equal(quantized_factor, expected)
+
+    @parameterized.expand([(setup_factor(dr, tickers, size=4, data=[1,1,2,3]),
+                            4, False)
+                           ])
+    def test_quantize_factor_exception(self, factor, quantiles, by_group):
+        """
+        This documents an case when we meet confusing boundary
+
+        Some solution discussed at:
+        - http://stackoverflow.com/questions/20158597/how-to-qcut-with-non-unique-bin-edges
+        - https://github.com/pydata/pandas/issues/7751#issue-37814702
+
+        """
+        with self.assertRaises(ValueError):
+            quantized_factor = quantize_factor(factor,
+                                               quantiles=quantiles,
+                                               by_group=by_group)
 
     @parameterized.expand([([[1.0, 2.0, 3.0, 4.0],
                              [4.0, 3.0, 2.0, 1.0],

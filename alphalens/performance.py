@@ -252,10 +252,8 @@ def quantize_factor(factor, quantiles=5, by_group=False):
         except ValueError as e:
             # This is the case when we have quantiles of the same
             # ValueError: Bin edges must be unique: array([1, 1, 1, 1, 1])
-            # Some solution discussed at:
-            # - http://stackoverflow.com/questions/20158597/how-to-qcut-with-non-unique-bin-edges
-            # - https://github.com/pydata/pandas/issues/7751#issue-37814702
-            # But there's nothing satisfying yet
+            if x.nunique() == 1:
+                return x.rank().astype('int')
             raise e
 
     grouper = ['date', 'group'] if by_group else ['date']
