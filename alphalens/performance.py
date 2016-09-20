@@ -260,7 +260,7 @@ def quantize_factor(factor, quantiles=5, by_group=False):
 
 def mean_return_by_quantile(quantized_factor,
                             forward_returns,
-                            by_time=None,
+                            by_date=False,
                             by_group=False,
                             demeaned=True):
     """
@@ -277,8 +277,8 @@ def mean_return_by_quantile(quantized_factor,
         Period wise forward returns in indexed by date and asset and
         optional a custom group.
         Separate column for each forward return window.
-    by_time : str
-        The pandas str code for time grouping.
+    by_date : bool
+        If True, compute quantile bucket returns separately for each date.
     by_group : bool
         If True, compute quantile bucket returns separately for each group.
         Returns demeaning will occur on the group level.
@@ -309,8 +309,9 @@ def mean_return_by_quantile(quantized_factor,
                                 .set_index('quantile', append=True))
 
     grouper = []
-    if by_time is not None:
-        grouper.append(pd.TimeGrouper(by_time, level='date'))
+    if by_date:
+        grouper.append(
+            forward_returns_quantile.index.get_level_values('date'))        
 
     if by_group:
         grouper.append(
