@@ -135,7 +135,7 @@ def create_factor_tear_sheet(factor,
 
     mean_ret_quant_daily, std_quant_daily = perf.mean_return_by_quantile(quantile_factor,
                                                                          forward_returns,
-                                                                         by_time='D',
+                                                                         by_date=True,
                                                                          by_group=False,
                                                                          demeaned=long_short)
 
