@@ -23,7 +23,6 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 
-from . import performance as perf
 from . import utils
 
 from functools import wraps
@@ -100,6 +99,7 @@ def summary_stats(ic_data,
                   alpha_beta,
                   quantized_factor,
                   mean_ret_quantile,
+                  quantile_turnover,
                   autocorrelation_data,
                   mean_ret_spread_quantile):
     """
@@ -118,9 +118,10 @@ def summary_stats(ic_data,
         Factor quantiles indexed by date and asset.
     mean_ret_quantile : pd.DataFrame
         Mean period wise returns by specified factor quantile.
-    autocorrelation_data : pd.Series
-        Rolling 1 period (defined by time_rule) autocorrelation
-        of factor values.
+    quantile_turnover: dict{int:pd.Dataframe}
+        Quantile turnover (each DataFrame column a quantile) for each period.
+    autocorrelation_data : pd.Dataframe
+        Rolling autocorrelation of factor values for each period.
     mean_ret_spread_quantile : pd.Series
         Period wise difference in quantile returns.
     """
@@ -138,14 +139,12 @@ def summary_stats(ic_data,
 
     max_quantile = quantized_factor.values.max()
     min_quantile = quantized_factor.values.min()
-    quantiles = sorted(quantized_factor.unique())
-    periods = list(autocorrelation_data.columns)
 
     turnover_table = pd.DataFrame()
-    for period in periods:
-        for quantile in quantiles:
-            turnover_table.loc["Quantile {} Mean Turnover ".format(quantile), "{}".format(
-                period)] = perf.quantile_turnover(quantized_factor, quantile, period).mean()
+    for period in sorted(quantile_turnover.keys()):
+        for quantile, p_data in quantile_turnover[period].iteritems():
+            turnover_table.loc["Quantile {} Mean Turnover ".format(quantile),
+                               "{}".format(period)] = p_data.mean()
 
     auto_corr = pd.DataFrame()
     for period, p_data in autocorrelation_data.iteritems():
@@ -580,14 +579,14 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation,
     return ax
 
 
-def plot_top_bottom_quantile_turnover(quantized_factor, period=1, ax=None):
+def plot_top_bottom_quantile_turnover(quantile_turnover, period=1, ax=None):
     """
     Plots period wise top and bottom quantile factor turnover.
 
     Parameters
     ----------
-    quantized_factor : pd.Series
-        Factor quantiles indexed by date and asset.
+    quantile_turnover: int:pd.Dataframe
+        Quantile turnover (each DataFrame column a quantile).
     period: int, optional
         Period over which to calculate the turnover        
     ax : matplotlib.Axes, optional
@@ -601,12 +600,11 @@ def plot_top_bottom_quantile_turnover(quantized_factor, period=1, ax=None):
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    max_quantile = quantized_factor.values.max()
+    max_quantile = quantile_turnover.columns.max()
+    min_quantile = quantile_turnover.columns.min()
     turnover = pd.DataFrame()
-    turnover['top quantile turnover'] = perf.quantile_turnover(
-        quantized_factor, max_quantile, period)
-    turnover['bottom quantile turnover'] = perf.quantile_turnover(
-        quantized_factor, 1, period)
+    turnover['top quantile turnover'] = quantile_turnover[max_quantile]
+    turnover['bottom quantile turnover'] = quantile_turnover[min_quantile]
     turnover.plot(title='{} Period Top and Bottom Quantile Turnover'.format(period),
                   ax=ax, alpha=0.6, lw=0.8)
     ax.set(ylabel='Proportion Of Names New To Quantile', xlabel="")

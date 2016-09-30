@@ -18,7 +18,6 @@ from . import performance as perf
 from . import utils
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
-from itertools import product
 import pandas as pd
 
 
@@ -33,7 +32,7 @@ def create_factor_tear_sheet(factor,
                              groupby_labels=None,
                              long_short=True,
                              avgretplot=(5, 15),
-                             turnover_for_all_periods=False ):
+                             turnover_for_all_periods=False):
     """
     Creates a full tear sheet for analysis and evaluating single
     return predicting (alpha) factor.
@@ -96,18 +95,18 @@ def create_factor_tear_sheet(factor,
         plotted
     """
 
-    periods = list(periods)
-    if 1 not in periods:
-        periods.insert(0, 1)
-    periods.sort()
+    periods = sorted(list(periods))
+    turnover_periods = periods if turnover_for_all_periods else [1]
 
     can_group_adjust = groupby is not None
     factor, forward_returns = utils.get_clean_factor_and_forward_returns(factor,
                                                                          prices,
                                                                          groupby=groupby,
-                                                                         periods=periods,
+                                                                         periods=sorted(set([1] + periods)),
                                                                          filter_zscore=filter_zscore,
                                                                          groupby_labels=groupby_labels)
+    forward_returns_period_1 = forward_returns[1]
+    forward_returns = forward_returns[periods]
 
     ic = perf.factor_information_coefficient(factor,
                                              forward_returns,
@@ -144,14 +143,18 @@ def create_factor_tear_sheet(factor,
                                                                                1,
                                                                                std_err=std_quant_daily)
 
+    quantile_turnover = {p: pd.concat([perf.quantile_turnover(
+        quantile_factor, q, p) for q in range(1, quantiles + 1)], axis=1) for p in turnover_periods}
+
     factor_autocorrelation = pd.concat(
-        [perf.factor_rank_autocorrelation(factor, period=p) for p in periods], axis=1)
-        
+        [perf.factor_rank_autocorrelation(factor, period=p) for p in turnover_periods], axis=1)
+
     ## PLOTTING ##
     plotting.summary_stats(ic,
                            alpha_beta,
                            quantile_factor,
                            mean_ret_quantile,
+                           quantile_turnover,
                            factor_autocorrelation,
                            mean_ret_spread_quant)
 
@@ -217,7 +220,7 @@ def create_factor_tear_sheet(factor,
         after = max(after, max(periods) + 1)
         
         avg_cumulative_returns = perf.average_cumulative_return_by_quantile(quantile_factor,
-                                                                            forward_returns[1],
+                                                                            forward_returns_period_1,
                                                                             periods_before=before,
                                                                             periods_after=after,
                                                                             demeaned=long_short)
@@ -230,7 +233,7 @@ def create_factor_tear_sheet(factor,
         ax_avg_cumulative_returns_by_q = [ gf.next_cell() for x in range(quantiles) ]
         plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=True,
                                                          std_bar=True, ax=ax_avg_cumulative_returns_by_q)
-                                                             
+
     # IC
     columns_wide = 2
     rows_when_wide = (((fr_cols - 1) // columns_wide) + 1)
@@ -247,9 +250,9 @@ def create_factor_tear_sheet(factor,
     ax_monthly_ic_heatmap = [ gf.next_cell() for x in range(fr_cols) ]
     plotting.plot_monthly_ic_heatmap(mean_monthly_ic, ax=ax_monthly_ic_heatmap)
 
-    for p in ( periods if turnover_for_all_periods else [1] ):
+    for p in turnover_periods:
 
-        plotting.plot_top_bottom_quantile_turnover(quantile_factor, period=p, ax=gf.next_row())
+        plotting.plot_top_bottom_quantile_turnover(quantile_turnover[p], period=p, ax=gf.next_row())
 
         plotting.plot_factor_rank_auto_correlation(
             factor_autocorrelation[p], period=p, ax=gf.next_row())
