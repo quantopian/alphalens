@@ -585,7 +585,7 @@ def plot_top_bottom_quantile_turnover(quantile_turnover, period=1, ax=None):
 
     Parameters
     ----------
-    quantile_turnover: int:pd.Dataframe
+    quantile_turnover: pd.Dataframe
         Quantile turnover (each DataFrame column a quantile).
     period: int, optional
         Period over which to calculate the turnover        
