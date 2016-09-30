@@ -180,6 +180,7 @@ class PerformanceTestCase(TestCase):
 
         expected = Series(
             index=quantized_test_factor.index.levels[0], data=expected_vals)
+        expected.name = test_quantile
 
         assert_series_equal(to, expected)
 
