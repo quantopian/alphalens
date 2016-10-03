@@ -95,7 +95,7 @@ def create_factor_tear_sheet(factor,
         plotted
     """
 
-    periods = sorted(list(periods))
+    periods = sorted(periods)
     turnover_periods = periods if turnover_for_all_periods else [1]
 
     can_group_adjust = groupby is not None
