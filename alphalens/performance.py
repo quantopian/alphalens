@@ -398,7 +398,7 @@ def quantile_turnover(quantile_factor, quantile, period=1):
     new_names = (quant_name_sets - quant_name_sets.shift(period)).dropna()
     quant_turnover = new_names.apply(
         lambda x: len(x)) / quant_name_sets.apply(lambda x: len(x))
-
+    quant_turnover.name = quantile
     return quant_turnover
 
 
