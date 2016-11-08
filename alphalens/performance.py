@@ -220,7 +220,7 @@ def factor_alpha_beta(factor, forward_returns, factor_returns=None):
         t_alpha = reg_fit.tvalues[0]
         alpha, beta = reg_fit.params
 
-        alpha_beta.loc['Ann. alpha', period] = (1 + alpha) ** 252 - 1
+        alpha_beta.loc['Ann. alpha', period] = (1 + alpha) ** (252.0/period) - 1
         alpha_beta.loc['beta', period] = beta
 
     return alpha_beta
@@ -481,15 +481,16 @@ def average_cumulative_return_by_quantile(quantized_factor, forward_returns,
 
     quantized_factor = quantized_factor.dropna()
 
-    def f(q_fact):
+    def average_cumulative_return(q_fact):
         q_returns = utils.common_start_returns(q_fact, returns,
                                                periods_before, periods_after)
-        q_returns = q_returns.add(1).cumprod() - 1
+
+        q_returns = q_returns.fillna(0.).add(1).cumprod() - 1
 
         if periods_before > 0:
             q_returns -= q_returns.iloc[periods_before, :]
 
         return pd.DataFrame( {'mean': q_returns.mean(axis=1), 'std': q_returns.std(axis=1)} ).T
 
-    return quantized_factor.groupby(quantized_factor).apply(f)
+    return quantized_factor.groupby(quantized_factor).apply(average_cumulative_return)
 
