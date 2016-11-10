@@ -96,17 +96,15 @@ def create_factor_tear_sheet(factor,
     """
 
     periods = sorted(periods)
-    turnover_periods = periods if turnover_for_all_periods else [1]
+    turnover_periods = list(periods) if turnover_for_all_periods else [1]
 
     can_group_adjust = groupby is not None
     factor, forward_returns = utils.get_clean_factor_and_forward_returns(factor,
                                                                          prices,
                                                                          groupby=groupby,
-                                                                         periods=sorted(set([1] + periods)),
+                                                                         periods=periods,
                                                                          filter_zscore=filter_zscore,
                                                                          groupby_labels=groupby_labels)
-    forward_returns_period_1 = forward_returns[1]
-    forward_returns = forward_returns[periods]
 
     ic = perf.factor_information_coefficient(factor,
                                              forward_returns,
@@ -229,7 +227,7 @@ def create_factor_tear_sheet(factor,
         after = max(after, max(periods) + 1)
         
         avg_cumulative_returns = perf.average_cumulative_return_by_quantile(quantile_factor,
-                                                                            forward_returns_period_1,
+                                                                            prices,
                                                                             periods_before=before,
                                                                             periods_after=after,
                                                                             demeaned=long_short)

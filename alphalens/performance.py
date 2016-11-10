@@ -442,7 +442,7 @@ def factor_rank_autocorrelation(factor, period=1, by_group=False):
     autocorr.name = period
     return autocorr
 
-def average_cumulative_return_by_quantile(quantized_factor, forward_returns,
+def average_cumulative_return_by_quantile(quantized_factor, prices,
                                           periods_before=10, periods_after=15,
                                           demeaned=True):
     """
@@ -453,9 +453,11 @@ def average_cumulative_return_by_quantile(quantized_factor, forward_returns,
     ----------
     quantized_factor : pd.Series
         Factor quantiles indexed by date and asset.
-    forward_returns : pd.Series - MultiIndex
-        Daily forward returns indexed by date and asset and
-        optional a custom group.
+    prices : pd.DataFrame
+        A wide form Pandas DataFrame indexed by date with assets
+        in the columns. Pricing data should span the factor
+        analysis time period plus/minus an additional buffer window
+        corresponding to periods_after/periods_before parameters.
     periods_before : int, optional
         How many periods before factor to plot
     periods_after  : int, optional
@@ -469,27 +471,13 @@ def average_cumulative_return_by_quantile(quantized_factor, forward_returns,
     -periods_before to periods_after
     """
 
-    if demeaned:
-        returns = utils.demean_forward_returns(forward_returns,
-                                               by_group=False)
-    else:
-        returns = forward_returns.copy()
-
-    if 'group' in returns.index.names:
-        returns.index = returns.index.droplevel(level='group')
-    returns = returns.unstack(level=['asset'])
-
     quantized_factor = quantized_factor.dropna()
 
     def average_cumulative_return(q_fact):
-        q_returns = utils.common_start_returns(q_fact, returns,
-                                               periods_before, periods_after)
-
+        q_returns = utils.common_start_returns(q_fact, prices,
+                             periods_before, periods_after, demeaned)
         q_returns = q_returns.fillna(0.).add(1).cumprod() - 1
-
-        if periods_before > 0:
-            q_returns -= q_returns.iloc[periods_before, :]
-
+        q_returns -= q_returns.iloc[periods_before, :]
         return pd.DataFrame( {'mean': q_returns.mean(axis=1), 'std': q_returns.std(axis=1)} ).T
 
     return quantized_factor.groupby(quantized_factor).apply(average_cumulative_return)

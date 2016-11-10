@@ -236,7 +236,7 @@ def get_clean_factor_and_forward_returns(factor,
     return factor, forward_returns
 
 
-def common_start_returns(factor, returns, before, after):
+def common_start_returns(factor, prices, before, after, demeaned):
     """
     A date and equity pair is extracted from each index row in the factor dataframe and for each of 
     these pairs a return series is built starting from 'before' returns before the date and ending
@@ -247,19 +247,28 @@ def common_start_returns(factor, returns, before, after):
     ----------
     factor : pd.DataFrame
         DataFrame with at least date and equity as index, the columns are irrelevant
-    returns : pd.DataFrame
-        Returns for the equities in factor. Equities as columns, dates as index.
+    prices : pd.DataFrame
+        A wide form Pandas DataFrame indexed by date with assets
+        in the columns. Pricing data should span the factor
+        analysis time period plus/minus an additional buffer window
+        corresponding to after/before period parameters.
     before:
         How many returns to load before factor date
     after:
         How many returns to load after factor date
+    demeaned : bool, optional
+        Compute demeaned mean returns (long short portfolio)            
     Returns
     -------
     aligned_returns : pd.DataFrame
         Dataframe containing returns series for each factor aligned to the same index:
         -before to after
     """
-   
+
+    returns = prices.pct_change(axis=0)
+    if demeaned:   
+        returns = returns.sub(returns.mean(axis=1), axis=0)
+
     all_returns = []
 
     for timestamp, df in factor.groupby(level=0):  # group by date
@@ -273,7 +282,7 @@ def common_start_returns(factor, returns, before, after):
 
         starting_index = max(day_zero_index - before, 0)
         ending_index = min(day_zero_index + after + 1, 
-                           len(returns.index) - 1)
+                           len(returns.index))
 
         series = returns.ix[starting_index:ending_index, equities]
         series.index = range(starting_index - day_zero_index,
