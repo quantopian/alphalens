@@ -197,13 +197,13 @@ def plot_ic_ts(ic, ax=None):
         f, ax = plt.subplots(num_plots, 1, figsize=(18, num_plots * 7))
         ax = ax.flatten()
 
+    ymin, ymax = (None, None)
     for a, (period_num, ic) in zip(ax, ic.iteritems()):
         ic.plot(alpha=0.7, ax=a, lw=0.7, color='steelblue')
         pd.rolling_mean(ic, 22).plot(ax=a,
                                      color='forestgreen', lw=2, alpha=0.8)
 
         a.set(ylabel='IC', xlabel="")
-        a.set_ylim([-0.25, 0.25])
         a.set_title(
             "{} Period Forward Return Information Coefficient (IC)"
             .format(period_num))
@@ -214,6 +214,13 @@ def plot_ic_ts(ic, ax=None):
                bbox={'facecolor': 'white', 'alpha': 1, 'pad': 5},
                transform=a.transAxes,
                verticalalignment='top')
+
+        curr_ymin, curr_ymax = a.get_ylim()
+        ymin = curr_ymin if ymin is None else min(ymin, curr_ymin)
+        ymax = curr_ymax if ymax is None else max(ymax, curr_ymax)                                                          
+
+    for a in ax:
+        a.set_ylim([ymin, ymax])
 
     return ax
 
@@ -470,11 +477,18 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
         if ax is None:
             ax = [None for a in mean_returns_spread.columns]
 
+        ymin, ymax = (None, None)
         for a, (name, fr_column) in zip(ax, mean_returns_spread.iteritems()):
             stdn = None if std_err is None else std_err[name]
             plot_mean_quantile_returns_spread_time_series(fr_column,
                                                           std_err=stdn,
                                                           ax=a)
+            curr_ymin, curr_ymax = a.get_ylim()
+            ymin = curr_ymin if ymin is None else min(ymin, curr_ymin)
+            ymax = curr_ymax if ymax is None else max(ymax, curr_ymax)                                                          
+
+        for a in ax:
+            a.set_ylim([ymin, ymax])
 
         return ax
 
