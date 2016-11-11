@@ -247,7 +247,11 @@ def quantize_factor(factor, quantiles=5, by_group=False):
     """
 
     def quantile_calc(x, quantiles):
-        return pd.qcut(x, quantiles, labels=False) + 1
+        try:
+            return pd.qcut(x, quantiles, labels=False) + 1
+        except ValueError:
+            # This is supposed to fix "ValueError: Bin edges must be unique"
+            return pd.qcut(x.rank(method='first'), quantiles, labels=False) + 1
 
     grouper = ['date', 'group'] if by_group else ['date']
 
