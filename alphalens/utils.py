@@ -236,12 +236,13 @@ def get_clean_factor_and_forward_returns(factor,
     return factor, forward_returns
 
 
-def common_start_returns(factor, prices, before, after, demeaned):
+def common_start_returns(factor, prices, before, after, mean_by_date, demeaned):
     """
-    A date and equity pair is extracted from each index row in the factor dataframe and for each of 
-    these pairs a return series is built starting from 'before' returns before the date and ending
-    'after' returns after the date specified in the pair. All those returns series are then aligned
-    to a common index (-before to after) and returned as a single DataFrame
+    A date and equity pair is extracted from each index row in the factor
+    dataframe and for each of these pairs a return series is built starting
+    from 'before' the date and ending 'after' the date specified in the pair.
+    All those returns series are then aligned to a common index (-before to after)
+    and returned as a single DataFrame
 
     Parameters
     ----------
@@ -256,6 +257,9 @@ def common_start_returns(factor, prices, before, after, demeaned):
         How many returns to load before factor date
     after:
         How many returns to load after factor date
+    mean_by_date : bool
+        If True, compute mean returns for each date and return that
+        instead of a return series for each asset
     demeaned : bool, optional
         Compute demeaned mean returns (long short portfolio)            
     Returns
@@ -287,6 +291,8 @@ def common_start_returns(factor, prices, before, after, demeaned):
         series = returns.ix[starting_index:ending_index, equities]
         series.index = range(starting_index - day_zero_index,
                              ending_index - day_zero_index)
+        if mean_by_date:
+            series = series.mean(axis=1)
 
         all_returns.append(series)
 
