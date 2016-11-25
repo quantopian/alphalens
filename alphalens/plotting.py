@@ -341,7 +341,7 @@ def plot_quantile_returns_bar(mean_ret_by_q,
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
-      
+
     mean_ret_by_q = mean_ret_by_q.copy()
 
     if ylim_percentiles is not None:
