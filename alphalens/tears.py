@@ -96,17 +96,15 @@ def create_factor_tear_sheet(factor,
     """
 
     periods = sorted(periods)
-    turnover_periods = periods if turnover_for_all_periods else [1]
+    turnover_periods = list(periods) if turnover_for_all_periods else [1]
 
     can_group_adjust = groupby is not None
     factor, forward_returns = utils.get_clean_factor_and_forward_returns(factor,
                                                                          prices,
                                                                          groupby=groupby,
-                                                                         periods=sorted(set([1] + periods)),
+                                                                         periods=periods,
                                                                          filter_zscore=filter_zscore,
                                                                          groupby_labels=groupby_labels)
-    forward_returns_period_1 = forward_returns[1]
-    forward_returns = forward_returns[periods]
 
     ic = perf.factor_information_coefficient(factor,
                                              forward_returns,
@@ -127,10 +125,16 @@ def create_factor_tear_sheet(factor,
                                            by_group=False,
                                            quantiles=quantiles)
 
+    def compound_returns(period_ret):
+        period = int(period_ret.name)
+        return period_ret.add(1).pow(1./period).sub(1)
+
     mean_ret_quantile, std_quantile = perf.mean_return_by_quantile(quantile_factor,
                                                                    forward_returns,
                                                                    by_group=False,
                                                                    demeaned=long_short)
+                                                                   
+    mean_compret_quantile = mean_ret_quantile.apply(compound_returns, axis=0)
 
     mean_ret_quant_daily, std_quant_daily = perf.mean_return_by_quantile(quantile_factor,
                                                                          forward_returns,
@@ -138,10 +142,13 @@ def create_factor_tear_sheet(factor,
                                                                          by_group=False,
                                                                          demeaned=long_short)
 
-    mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(mean_ret_quant_daily,
+    mean_compret_quant_daily = mean_ret_quant_daily.apply(compound_returns, axis=0)
+    compstd_quant_daily = std_quant_daily.apply(compound_returns, axis=0)
+
+    mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(mean_compret_quant_daily,
                                                                                quantiles,
                                                                                1,
-                                                                               std_err=std_quant_daily)
+                                                                               std_err=compstd_quant_daily)
 
     quantile_turnover = {p: pd.concat([perf.quantile_turnover(
         quantile_factor, q, p) for q in range(1, quantiles + 1)], axis=1) for p in turnover_periods}
@@ -153,7 +160,7 @@ def create_factor_tear_sheet(factor,
     plotting.summary_stats(ic,
                            alpha_beta,
                            quantile_factor,
-                           mean_ret_quantile,
+                           mean_compret_quantile,
                            quantile_turnover,
                            factor_autocorrelation,
                            mean_ret_spread_quant)
@@ -190,12 +197,12 @@ def create_factor_tear_sheet(factor,
     vertical_sections = 2 + fr_cols * 3
     gf = GridFigure(rows=vertical_sections, cols=1)
 
-    plotting.plot_quantile_returns_bar(mean_ret_quantile,
+    plotting.plot_quantile_returns_bar(mean_compret_quantile,
                                        by_group=False,
                                        ylim_percentiles=None,
                                        ax=gf.next_row())
 
-    plotting.plot_quantile_returns_violin(mean_ret_quant_daily,
+    plotting.plot_quantile_returns_violin(mean_compret_quant_daily,
                                           ylim_percentiles=(1, 99),
                                           ax=gf.next_row())
     
@@ -220,7 +227,7 @@ def create_factor_tear_sheet(factor,
         after = max(after, max(periods) + 1)
         
         avg_cumulative_returns = perf.average_cumulative_return_by_quantile(quantile_factor,
-                                                                            forward_returns_period_1,
+                                                                            prices,
                                                                             periods_before=before,
                                                                             periods_after=after,
                                                                             demeaned=long_short)
@@ -267,7 +274,8 @@ def create_factor_tear_sheet(factor,
                                                                                                       forward_returns,
                                                                                                       by_group=True,
                                                                                                       demeaned=True)
-
+        mean_compret_quantile_group = mean_return_quantile_group.apply(compound_returns, axis=0)
+        
         num_groups = len(ic_by_group.index.get_level_values('group').unique())
         rows_when_2_wide = (((num_groups - 1) // 2) + 1)
         vertical_sections = 1 + rows_when_2_wide
@@ -276,7 +284,7 @@ def create_factor_tear_sheet(factor,
         plotting.plot_ic_by_group(ic_by_group, ax=gf.next_row())
 
         ax_quantile_returns_bar_by_group = [ gf.next_cell() for x in range(num_groups) ]
-        plotting.plot_quantile_returns_bar(mean_return_quantile_group,
+        plotting.plot_quantile_returns_bar(mean_compret_quantile_group,
                                            by_group=True,
                                            ylim_percentiles=(5, 95),
                                            ax=ax_quantile_returns_bar_by_group)

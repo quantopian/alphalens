@@ -410,6 +410,9 @@ def plot_quantile_returns_violin(return_by_q,
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
+
+    return_by_q = return_by_q.copy()
+        
     if ylim_percentiles is not None:
         ymin = (np.percentile(return_by_q.values,
                               ylim_percentiles[0]) * DECIMAL_TO_BPS)
@@ -421,8 +424,6 @@ def plot_quantile_returns_violin(return_by_q,
 
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
-
-    return_by_q = return_by_q.copy()
 
     unstacked_dr = (return_by_q
                     .multiply(DECIMAL_TO_BPS))
@@ -708,10 +709,9 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
     factor_returns = factor_returns.copy()
 
     if period > 1:
-        daily_returns = lambda ret, period: ( np.nanmean(ret)**(1./period) ) - 1
-        factor_period_returns = factor_returns.add(1)**period
-        factor_returns = pd.rolling_apply(factor_period_returns, period, daily_returns,
-                                    min_periods=1, args=(period,))
+        compound_returns = lambda ret, period: ( (np.nanmean(ret) + 1)**(1./period) ) - 1
+        factor_returns = pd.rolling_apply(factor_returns, period, compound_returns,
+                                          min_periods=1, args=(period,))
                                     
     factor_returns.add(1).cumprod().plot(
         ax=ax, lw=3, color='forestgreen', alpha=0.6)
@@ -749,9 +749,8 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
         .pivot(index='date', columns='quantile', values=period)
 
     if period > 1:
-        daily_returns = lambda ret, period: ( np.nanmean(ret)**(1./period) ) - 1
-        period_ret_wide = ret_wide.add(1)**period
-        ret_wide = pd.rolling_apply(period_ret_wide, period, daily_returns,
+        compound_returns = lambda ret, period: ( (np.nanmean(ret) + 1)**(1./period) ) - 1
+        ret_wide = pd.rolling_apply(ret_wide, period, compound_returns,
                                     min_periods=1, args=(period,))
 
     cum_ret = ret_wide.add(1).cumprod()
