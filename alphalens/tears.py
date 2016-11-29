@@ -300,7 +300,7 @@ def create_factor_tear_sheet(factor,
             for group, g_factor in quantile_factor.groupby(level='group'):
             
                 avg_cumulative_returns = perf.average_cumulative_return_by_quantile(g_factor,
-                                                                                    forward_returns_period_1,
+                                                                                    prices,
                                                                                     periods_before=before,
                                                                                     periods_after=after,
                                                                                     demeaned=long_short)
