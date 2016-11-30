@@ -778,7 +778,9 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
 
 def plot_quantile_average_cumulative_return(avg_cumulative_returns,
                                             by_quantile=False,
-                                            std_bar=False, ax=None):
+                                            std_bar=False, 
+                                            title=None,
+                                            ax=None):
     """
     Plots sector-wise mean daily returns for factor quantiles 
     across provided forward price movement columns.
@@ -792,6 +794,8 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
         Disaggregated figures by quantile (useful to clearly see std dev bars)
     std_bar : boolean, optional
         Plot standard deviation plot
+    title: string, optional
+        Custom title        
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     Returns
@@ -847,7 +851,7 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
         ax.axvline(x=0, color='k', linestyle='--')
         ax.legend()
         ax.set(ylabel='Mean Return (bps)',
-               title="Average Cumulative Returns by Quantile",
+               title=("Average Cumulative Returns by Quantile" if title is None else title),
                xlabel='Periods')
 
     return ax
