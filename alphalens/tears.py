@@ -303,7 +303,7 @@ def create_factor_tear_sheet(factor,
                                                                                     prices,
                                                                                     periods_before=before,
                                                                                     periods_after=after,
-                                                                                    demeaned=long_short)
+                                                                                    demeaned=True)
 
                 plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=False,
                                                                  std_bar=False, title=group, ax=gf.next_cell())
