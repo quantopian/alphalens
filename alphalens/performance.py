@@ -171,12 +171,12 @@ def factor_returns(factor, forward_returns, long_short=True):
     weights = factor.groupby(level=['date']).apply(to_weights, long_short)
     weighted_returns = forward_returns.multiply(weights, axis=0)
 
-    factor_returns = weighted_returns.groupby(level='date').sum()
+    long_short_adjusted_factor_returns = weighted_returns.groupby(level='date').sum()
 
-    return factor_returns
+    return long_short_adjusted_factor_returns
 
 
-def factor_alpha_beta(factor, forward_returns, factor_returns=None):
+def factor_alpha_beta(factor, forward_returns, long_short_adjusted_factor_returns=None):
     """
     Computes the alpha (excess returns), alpha t-stat (alpha significance),
     and beta (market exposure) of a factor. A regression is run with
@@ -191,7 +191,7 @@ def factor_alpha_beta(factor, forward_returns, factor_returns=None):
     forward_returns : pd.DataFrame - MultiIndex
         Period wise forward returns in indexed by date and asset.
         Separate column for each forward return window.
-    factor_returns : pd.DataFrame
+    long_short_adjusted_factor_returns : pd.DataFrame
         Period wise returns of dollar neutral portfolio weighted by factor value.
 
     Returns
@@ -200,24 +200,23 @@ def factor_alpha_beta(factor, forward_returns, factor_returns=None):
         A list containing the alpha, beta, a t-stat(alpha)
         for the given factor and forward returns.
     """
-    if factor_returns is None:
-        factor_returns = factor_returns(factor, forward_returns)
+    if long_short_adjusted_factor_returns is None:
+        long_short_adjusted_factor_returns = factor_returns(factor, forward_returns)
 
     universe_ret = (forward_returns.groupby(level='date').mean()
-                          .loc[factor_returns.index])
+                          .loc[long_short_adjusted_factor_returns.index])
 
-    if isinstance(factor_returns, pd.Series):
-        factor_returns.name = universe_ret.columns.values[0]
-        factor_returns = pd.DataFrame(factor_returns)
+    if isinstance(long_short_adjusted_factor_returns, pd.Series):
+        long_short_adjusted_factor_returns.name = universe_ret.columns.values[0]
+        long_short_adjusted_factor_returns = pd.DataFrame(long_short_adjusted_factor_returns)
 
     alpha_beta = pd.DataFrame()
-    for period in factor_returns.columns.values:
+    for period in long_short_adjusted_factor_returns.columns.values:
         x = universe_ret[period].values
-        y = factor_returns[period].values
+        y = long_short_adjusted_factor_returns[period].values
 
         x = add_constant(x)
         reg_fit = OLS(y, x).fit()
-        t_alpha = reg_fit.tvalues[0]
         alpha, beta = reg_fit.params
 
         alpha_beta.loc['Ann. alpha', period] = (1 + alpha) ** (252.0/period) - 1
@@ -246,8 +245,8 @@ def quantize_factor(factor, quantiles=5, by_group=False):
         Factor quantiles indexed by date and asset.
     """
 
-    def quantile_calc(x, quantiles):
-        return pd.qcut(x, quantiles, labels=False) + 1
+    def quantile_calc(x, _quantiles):
+        return pd.qcut(x, _quantiles, labels=False) + 1
 
     grouper = ['date', 'group'] if by_group else ['date']
 
@@ -482,3 +481,82 @@ def average_cumulative_return_by_quantile(quantized_factor, prices,
 
     return quantized_factor.groupby(quantized_factor).apply(average_cumulative_return)
 
+
+def compute_returns_statistics(factor,
+                               forward_returns,
+                               quantiles,
+                               long_short,
+                               by_group=False):
+
+    long_short_adjusted_factor_returns = factor_returns(factor,
+                                                        forward_returns,
+                                                        long_short)
+
+    alpha_beta = factor_alpha_beta(factor,
+                                   forward_returns,
+                                   long_short_adjusted_factor_returns)
+
+    quantile_factor = quantize_factor(factor, quantiles, by_group)
+
+    mean_ret_quantile, std_quantile = mean_return_by_quantile(
+        quantile_factor,
+        forward_returns,
+        by_group=by_group,
+        demeaned=long_short)
+
+    mean_compret_quantile = mean_ret_quantile.apply(utils.compound_returns, axis=0)
+
+    mean_ret_quant_daily, std_quant_daily = mean_return_by_quantile(
+        quantile_factor,
+        forward_returns,
+        by_date=True,
+        by_group=by_group,
+        demeaned=long_short)
+
+    mean_compret_quant_daily = mean_ret_quant_daily.apply(utils.compound_returns,
+                                                          axis=0)
+
+    compstd_quant_daily = std_quant_daily.apply(utils.compound_returns, axis=0)
+
+    mean_ret_spread_quant, std_spread_quant = compute_mean_returns_spread(
+        mean_compret_quant_daily,
+        quantiles,
+        1,
+        std_err=compstd_quant_daily)
+
+    return alpha_beta, long_short_adjusted_factor_returns,\
+           mean_compret_quant_daily, mean_compret_quantile,\
+           mean_ret_quant_daily, mean_ret_quantile, mean_ret_spread_quant,\
+           quantile_factor, std_spread_quant
+
+
+def compute_turnover_statistics(factor, quantiles, turnover_periods, by_group=False):
+
+    quantile_factor = quantize_factor(factor,
+                                      quantiles,
+                                      by_group)
+
+    each_quantile_turnover = {p: pd.concat([quantile_turnover(
+        quantile_factor, q, p) for q in range(1, quantiles + 1)], axis=1)
+                         for p in turnover_periods}
+
+    factor_autocorrelation = pd.concat(
+        [factor_rank_autocorrelation(factor, period=p) for p in
+         turnover_periods], axis=1)
+    return factor_autocorrelation, each_quantile_turnover
+
+
+def compute_information_statistics(factor,
+                                   forward_returns,
+                                   group_adjust=False,
+                                   by_group=False):
+
+    ic = factor_information_coefficient(factor,
+                                        forward_returns,
+                                        group_adjust,
+                                        by_group)
+
+    mean_monthly_ic = mean_information_coefficient(factor,
+                                                   forward_returns,
+                                                   by_time="M")
+    return ic, mean_monthly_ic
