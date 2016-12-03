@@ -126,52 +126,6 @@ def summary_stats(ic_data,
         Period wise difference in quantile returns.
     """
 
-    plot_information_table(ic_data)
-    plot_turnover_table(autocorrelation_data, quantile_turnover)
-    plot_returns_table(alpha_beta,
-                       mean_ret_quantile,
-                       mean_ret_spread_quantile,
-                       quantized_factor)
-
-
-def plot_returns_table(alpha_beta, mean_ret_quantile, mean_ret_spread_quantile,
-                       quantized_factor):
-    max_quantile = quantized_factor.values.max()
-    min_quantile = quantized_factor.values.min()
-    returns_table = pd.DataFrame()
-    returns_table = returns_table.append(alpha_beta)
-    returns_table.loc[
-        "Mean Period Wise Return Top Quantile (bps)"] = mean_ret_quantile.loc[
-                                                            max_quantile] * DECIMAL_TO_BPS
-    returns_table.loc[
-        "Mean Period Wise Return Bottom Quantile (bps)"] = \
-    mean_ret_quantile.loc[
-        min_quantile] * DECIMAL_TO_BPS
-    returns_table.loc[
-        "Mean Period Wise Spread (bps)"] = mean_ret_spread_quantile.mean() \
-                                           * DECIMAL_TO_BPS
-
-    print("Returns Analysis")
-    utils.print_table(returns_table.apply(lambda x: x.round(3)))
-
-
-def plot_turnover_table(autocorrelation_data, quantile_turnover):
-    turnover_table = pd.DataFrame()
-    for period in sorted(quantile_turnover.keys()):
-        for quantile, p_data in quantile_turnover[period].iteritems():
-            turnover_table.loc["Quantile {} Mean Turnover ".format(quantile),
-                               "{}".format(period)] = p_data.mean()
-    auto_corr = pd.DataFrame()
-    for period, p_data in autocorrelation_data.iteritems():
-        auto_corr.loc["Mean Factor Rank Autocorrelation",
-                      "{}".format(period)] = p_data.mean()
-
-    print("Turnover Analysis")
-    utils.print_table(turnover_table.apply(lambda x: x.round(3)))
-    utils.print_table(auto_corr.apply(lambda x: x.round(3)))
-
-
-def plot_information_table(ic_data):
     ic_summary_table = pd.DataFrame()
     ic_summary_table["IC Mean"] = ic_data.mean()
     ic_summary_table["IC Std."] = ic_data.std()
@@ -181,11 +135,41 @@ def plot_information_table(ic_data):
     ic_summary_table["IC Skew"] = stats.skew(ic_data)
     ic_summary_table["IC Kurtosis"] = stats.kurtosis(ic_data)
     ic_summary_table["Ann. IR"] = (
-                                      ic_data.mean() / ic_data.std()) * np.sqrt(
-        252)
+        ic_data.mean() / ic_data.std()) * np.sqrt(252)
 
+    max_quantile = quantized_factor.values.max()
+    min_quantile = quantized_factor.values.min()
+
+    turnover_table = pd.DataFrame()
+    for period in sorted(quantile_turnover.keys()):
+        for quantile, p_data in quantile_turnover[period].iteritems():
+            turnover_table.loc["Quantile {} Mean Turnover ".format(quantile),
+                               "{}".format(period)] = p_data.mean()
+
+    auto_corr = pd.DataFrame()
+    for period, p_data in autocorrelation_data.iteritems():
+        auto_corr.loc["Mean Factor Rank Autocorrelation",
+                      "{}".format(period)] = p_data.mean()
+
+    returns_table = pd.DataFrame()
+    returns_table = returns_table.append(alpha_beta)
+    returns_table.loc[
+        "Mean Period Wise Return Top Quantile (bps)"] = mean_ret_quantile.loc[
+        max_quantile] * DECIMAL_TO_BPS
+    returns_table.loc[
+        "Mean Period Wise Return Bottom Quantile (bps)"] = mean_ret_quantile.loc[
+        min_quantile] * DECIMAL_TO_BPS
+    returns_table.loc[
+        "Mean Period Wise Spread (bps)"] = mean_ret_spread_quantile.mean() \
+        * DECIMAL_TO_BPS
+
+    print("Returns Analysis")
+    utils.print_table(returns_table.apply(lambda x: x.round(3)))
     print("Information Analysis")
     utils.print_table(ic_summary_table.apply(lambda x: x.round(3)).T)
+    print("Turnover Analysis")
+    utils.print_table(turnover_table.apply(lambda x: x.round(3)))
+    utils.print_table(auto_corr.apply(lambda x: x.round(3)))
 
 
 def plot_ic_ts(ic, ax=None):

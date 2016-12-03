@@ -298,8 +298,3 @@ def common_start_returns(factor, prices, before, after, mean_by_date, demeaned):
 
     return pd.concat(all_returns, axis=1)
 
-
-def compound_returns(period_ret):
-    period = int(period_ret.name)
-    return period_ret.add(1).pow(1. / period).sub(1)
-
