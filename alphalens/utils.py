@@ -236,7 +236,8 @@ def get_clean_factor_and_forward_returns(factor,
     return factor, forward_returns
 
 
-def common_start_returns(factor, prices, before, after, mean_by_date, demeaned):
+def common_start_returns(factor, prices, before, after, cumulative,
+                         mean_by_date, demeaned):
     """
     A date and equity pair is extracted from each index row in the factor
     dataframe and for each of these pairs a return series is built starting
@@ -257,6 +258,8 @@ def common_start_returns(factor, prices, before, after, mean_by_date, demeaned):
         How many returns to load before factor date
     after:
         How many returns to load after factor date
+    cumulative: bool
+        Return cumulative returns
     mean_by_date : bool
         If True, compute mean returns for each date and return that
         instead of a return series for each asset
@@ -270,14 +273,12 @@ def common_start_returns(factor, prices, before, after, mean_by_date, demeaned):
     """
 
     returns = prices.pct_change(axis=0)
-    if demeaned:   
-        returns = returns.sub(returns.mean(axis=1), axis=0)
 
     all_returns = []
 
-    for timestamp, df in factor.groupby(level=0):  # group by date
+    for timestamp, df in factor.groupby(level='date'):
 
-        equities = df.index.get_level_values(1)
+        equities = df.index.get_level_values('asset')
 
         try:
             day_zero_index = returns.index.get_loc(timestamp)
@@ -288,9 +289,19 @@ def common_start_returns(factor, prices, before, after, mean_by_date, demeaned):
         ending_index = min(day_zero_index + after + 1, 
                            len(returns.index))
 
-        series = returns.ix[starting_index:ending_index, equities]
+        series = returns.iloc[starting_index:ending_index, :]
         series.index = range(starting_index - day_zero_index,
                              ending_index - day_zero_index)
+
+        if cumulative:
+            series = series.fillna(0.).add(1).cumprod()
+            series = (series / series.loc[0, :]) - 1
+
+        if demeaned:
+            series = series.sub(series.mean(axis=1), axis=0)
+
+        series = series.loc[:, equities]
+
         if mean_by_date:
             series = series.mean(axis=1)
 

@@ -471,13 +471,13 @@ def average_cumulative_return_by_quantile(quantized_factor, prices,
     -periods_before to periods_after
     """
 
-    quantized_factor = quantized_factor.dropna()
+    assets = list(set(quantized_factor.index.get_level_values('asset')))
+    prices = prices[assets]
 
     def average_cumulative_return(q_fact):
         q_returns = utils.common_start_returns(q_fact, prices,
-                          periods_before, periods_after, True, demeaned)
-        q_returns = q_returns.fillna(0.).add(1).cumprod() - 1
-        q_returns -= q_returns.iloc[periods_before, :]
+                                               periods_before, periods_after,
+                                               True, True, demeaned)
         return pd.DataFrame( {'mean': q_returns.mean(axis=1), 'std': q_returns.std(axis=1)} ).T
 
     return quantized_factor.groupby(quantized_factor).apply(average_cumulative_return)
