@@ -95,7 +95,8 @@ def context(context='notebook', font_scale=1.5, rc=None):
     return sns.plotting_context(context=context, font_scale=font_scale, rc=rc)
 
 
-def summary_stats(ic_data,
+def summary_stats(factor,
+                  ic_data,
                   alpha_beta,
                   quantized_factor,
                   mean_ret_quantile,
@@ -126,6 +127,9 @@ def summary_stats(ic_data,
         Period wise difference in quantile returns.
     """
 
+    quantile_stats = pd.concat([factor, quantized_factor], axis=1)\
+      .groupby('quantile').agg(['min', 'max', 'mean', 'std', 'count'])['factor']
+
     ic_summary_table = pd.DataFrame()
     ic_summary_table["IC Mean"] = ic_data.mean()
     ic_summary_table["IC Std."] = ic_data.std()
@@ -137,8 +141,8 @@ def summary_stats(ic_data,
     ic_summary_table["Ann. IR"] = (
         ic_data.mean() / ic_data.std()) * np.sqrt(252)
 
-    max_quantile = quantized_factor.values.max()
-    min_quantile = quantized_factor.values.min()
+    max_quantile = quantized_factor.max()
+    min_quantile = quantized_factor.min()
 
     turnover_table = pd.DataFrame()
     for period in sorted(quantile_turnover.keys()):
@@ -163,6 +167,8 @@ def summary_stats(ic_data,
         "Mean Period Wise Spread (bps)"] = mean_ret_spread_quantile.mean() \
         * DECIMAL_TO_BPS
 
+    print("Quantiles statistics")
+    utils.print_table(quantile_stats)
     print("Returns Analysis")
     utils.print_table(returns_table.apply(lambda x: x.round(3)))
     print("Information Analysis")
