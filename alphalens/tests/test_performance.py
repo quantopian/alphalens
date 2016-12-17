@@ -205,6 +205,24 @@ class PerformanceTestCase(TestCase):
 
         assert_frame_equal(factor_returns_s, expected)
 
+    @parameterized.expand([([1, 2, 3, 4, 4, 3, 2, 1],
+                            [4, 3, 2, 1, 1, 2, 3, 4],
+                            [-0.5, -0.5]),
+                           ([1, 2, 3, 4, 1, 2, 3, 4],
+                            [1, 4, 1, 2, 1, 2, 2, 1],
+                            [1.0, 0.0]),                            
+                           ([1, 1, 1, 1, 1, 1, 1, 1],
+                            [4, 3, 2, 1, 1, 2, 3, 4],
+                            [nan, nan])])
+    def test_factor_group_neutral_returns(self, factor_vals, fwd_return_vals,
+                                          expected_vals):
+        factor = Series(index=self.factor.index, data=factor_vals)
+        fwd_return_df = DataFrame(index=self.factor.index,
+                                  columns=[1], data=fwd_return_vals)
+        factor_returns_s = factor_returns(factor, fwd_return_df, group_neutral=True)
+        expected = DataFrame(index=self.dr, data=expected_vals, columns=[1])
+        assert_frame_equal(factor_returns_s, expected)
+        
     @parameterized.expand([([1, 2, 3, 4, 1, 1, 1, 1],
                             [3.5, 2.0],
                             (2.**252)-1, 1.)])

@@ -139,7 +139,7 @@ def mean_information_coefficient(factor,
     return ic
 
 
-def factor_returns(factor, forward_returns, long_short=True):
+def factor_returns(factor, forward_returns, long_short=True, group_neutral=False):
     """
     Computes period wise returns for portfolio weighted by factor
     values. Weights are computed by demeaning factors and dividing
@@ -148,12 +148,16 @@ def factor_returns(factor, forward_returns, long_short=True):
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        Factor values indexed by date and asset
+        Factor values indexed by date and asset and
+        optional a custom group.
     forward_returns : pd.DataFrame - MultiIndex
         Period wise forward returns in indexed by date and asset.
         Separate column for each forward return window.
     long_short : bool
         Should this computation happen on a long short portfolio?
+    group_neutral : bool
+        If True, compute group neutral returns: each group will weight
+        the same and returns demeaning will occur on the group level.
 
     Returns
     -------
@@ -168,7 +172,13 @@ def factor_returns(factor, forward_returns, long_short=True):
         else:
             return group / group.abs().sum()
 
-    weights = factor.groupby(level=['date']).apply(to_weights, long_short)
+    grouper = ['date', 'group'] if group_neutral else ['date']
+
+    weights = factor.groupby(level=grouper).apply(to_weights, long_short)
+
+    if group_neutral:
+        weights = weights.groupby(level='date').apply(to_weights, False)
+
     weighted_returns = forward_returns.multiply(weights, axis=0)
 
     factor_returns = weighted_returns.groupby(level='date').sum()
