@@ -43,19 +43,25 @@ from .. performance import (factor_information_coefficient,
 
 from .. utils import (get_clean_factor_and_forward_returns)
 
-class PerformanceTestCase(TestCase):
-    dr = date_range(start='2015-1-1', end='2015-1-2')
-    dr.name = 'date'
-    tickers = ['A', 'B', 'C', 'D']
-    factor = (DataFrame(index=dr, columns=tickers,
-                        data=[[1, 2, 3, 4],
-                              [4, 3, 2, 1]])
+def setup_factor(dr, tickers, size=4, data=range(1,5)):
+    assert size <= 4, "Cannot create factor larger than 4 yet"
+    factor = (DataFrame(index=dr, columns=tickers[0:size],
+                        data=[data,
+                              list(reversed(data))])
               .stack())
     factor.index = factor.index.set_names(['date', 'asset'])
     factor.name = 'factor'
     factor = factor.reset_index()
-    factor['group'] = [1, 1, 2, 2, 1, 1, 2, 2]
+    factor['group'] = [1, 1, 2, 2][0:size] * 2
     factor = factor.set_index(['date', 'asset', 'group']).factor
+    return factor
+
+
+class PerformanceTestCase(TestCase):
+    dr = date_range(start='2015-1-1', end='2015-1-2')
+    dr.name = 'date'
+    tickers = ['A', 'B', 'C', 'D']
+    factor = setup_factor(dr, tickers, size=4)
 
     @parameterized.expand([(factor, [4, 3, 2, 1, 1, 2, 3, 4],
                             False, False,
@@ -137,7 +143,14 @@ class PerformanceTestCase(TestCase):
                            (factor, 2, False,
                             [1, 1, 2, 2, 2, 2, 1, 1]),
                            (factor, 2, True,
-                            [1, 2, 1, 2, 2, 1, 2, 1])])
+                            [1, 2, 1, 2, 2, 1, 2, 1]),
+                           (setup_factor(dr, tickers, size=1, data=[1]),
+                            4, False,
+                            [1] * 2),
+                           (setup_factor(dr, tickers, size=4, data=[1] * 4),
+                            4, False,
+                            [2] * 8)
+                           ])
     def test_quantize_factor(self, factor, quantiles, by_group, expected_vals):
         quantized_factor = quantize_factor(factor,
                                            quantiles=quantiles,
@@ -146,6 +159,23 @@ class PerformanceTestCase(TestCase):
                           data=expected_vals,
                           name='quantile')
         assert_series_equal(quantized_factor, expected)
+
+    @parameterized.expand([(setup_factor(dr, tickers, size=4, data=[1,1,2,3]),
+                            4, False)
+                           ])
+    def test_quantize_factor_exception(self, factor, quantiles, by_group):
+        """
+        This documents an case when we meet confusing boundary
+
+        Some solution discussed at:
+        - http://stackoverflow.com/questions/20158597/how-to-qcut-with-non-unique-bin-edges
+        - https://github.com/pydata/pandas/issues/7751#issue-37814702
+
+        """
+        with self.assertRaises(ValueError):
+            quantized_factor = quantize_factor(factor,
+                                               quantiles=quantiles,
+                                               by_group=by_group)
 
     @parameterized.expand([([[1.0, 2.0, 3.0, 4.0],
                              [4.0, 3.0, 2.0, 1.0],
