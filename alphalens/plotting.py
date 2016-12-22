@@ -127,8 +127,10 @@ def summary_stats(factor,
         Period wise difference in quantile returns.
     """
 
-    quantile_stats = pd.concat([factor, quantized_factor], axis=1)\
-      .groupby('quantile').agg(['min', 'max', 'mean', 'std', 'count'])['factor']
+    quantile_stats = (pd.concat([factor, quantized_factor], axis=1)
+                               .groupby('quantile')
+                               .agg(['min', 'max', 'mean', 'std', 'count']))['factor']
+    quantile_stats['count %'] = quantile_stats['count'] / quantile_stats['count'].sum() * 100.
 
     ic_summary_table = pd.DataFrame()
     ic_summary_table["IC Mean"] = ic_data.mean()
