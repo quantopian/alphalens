@@ -28,6 +28,7 @@ def create_factor_tear_sheet(factor,
                              show_groupby_plots=True,
                              periods=(1, 5, 10),
                              quantiles=5,
+                             bins=None,
                              filter_zscore=10,
                              groupby_labels=None,
                              long_short=True,
@@ -76,8 +77,14 @@ def create_factor_tear_sheet(factor,
         If True create group specific plots.
     periods : sequence[int]
         periods to compute forward returns on.
-    quantiles : int
-        The number of buckets to parition the data into for analysis.
+    quantiles : int or sequence[float]
+        Number of equal-sized quantile buckets to use in factor bucketing.
+        Alternately sequence of quantiles, e.g. [0, .10, .5, .90, 1.]
+        Only one of 'quantiles' or 'bins' can be not-None
+    bins : int or sequence[float]
+        Number of equal-width bins to use in factor bucketing.
+        Alternately sequence of bin edges allowing for non-uniform bin width
+        Only one of 'quantiles' or 'bins' can be not-None
     filter_zscore : int or float
         Sets forward returns greater than X standard deviations
         from the the mean to nan.
@@ -123,7 +130,10 @@ def create_factor_tear_sheet(factor,
 
     quantile_factor = perf.quantize_factor(factor,
                                            by_group=False,
-                                           quantiles=quantiles)
+                                           quantiles=quantiles,
+                                           bins=bins)
+
+    num_quant = quantile_factor.max()
 
     def compound_returns(period_ret):
         period = int(period_ret.name)
@@ -146,18 +156,19 @@ def create_factor_tear_sheet(factor,
     compstd_quant_daily = std_quant_daily.apply(compound_returns, axis=0)
 
     mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(mean_compret_quant_daily,
-                                                                               quantiles,
+                                                                               num_quant,
                                                                                1,
                                                                                std_err=compstd_quant_daily)
 
     quantile_turnover = {p: pd.concat([perf.quantile_turnover(
-        quantile_factor, q, p) for q in range(1, quantiles + 1)], axis=1) for p in turnover_periods}
+        quantile_factor, q, p) for q in range(1, num_quant + 1)], axis=1) for p in turnover_periods}
 
     factor_autocorrelation = pd.concat(
         [perf.factor_rank_autocorrelation(factor, period=p) for p in turnover_periods], axis=1)
 
     ## PLOTTING ##
-    plotting.summary_stats(ic,
+    plotting.summary_stats(factor,
+                           ic,
                            alpha_beta,
                            quantile_factor,
                            mean_compret_quantile,
@@ -233,12 +244,12 @@ def create_factor_tear_sheet(factor,
                                                                             periods_after=after,
                                                                             demeaned=long_short)
 
-        vertical_sections = 1 + (((quantiles - 1) // 2) + 1)
+        vertical_sections = 1 + (((num_quant - 1) // 2) + 1)
         gf = GridFigure(rows=vertical_sections, cols=2)
         plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=False,
                                                          std_bar=False, ax=gf.next_row())
 
-        ax_avg_cumulative_returns_by_q = [ gf.next_cell() for x in range(quantiles) ]
+        ax_avg_cumulative_returns_by_q = [ gf.next_cell() for x in range(num_quant) ]
         plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=True,
                                                          std_bar=True, ax=ax_avg_cumulative_returns_by_q)
 

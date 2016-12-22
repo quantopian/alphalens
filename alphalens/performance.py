@@ -236,7 +236,7 @@ def factor_alpha_beta(factor, forward_returns, factor_returns=None):
     return alpha_beta
 
 
-def quantize_factor(factor, quantiles=5, by_group=False):
+def quantize_factor(factor, quantiles=5, bins=None, by_group=False):
     """
     Computes period wise factor quantiles.
 
@@ -245,8 +245,14 @@ def quantize_factor(factor, quantiles=5, by_group=False):
     factor : pd.Series - MultiIndex
         Factor values indexed by date and asset and
         optional a custom group.
-    quantiles : int
-        Number of quantile buckets to use in factor bucketing.
+    quantiles : int or sequence[float]
+        Number of equal-sized quantile buckets to use in factor bucketing.
+        Alternately sequence of quantiles, e.g. [0, .10, .5, .90, 1.]
+        Only one of 'quantiles' or 'bins' can be not-None
+    bins : int or sequence[float]
+        Number of equal-width bins to use in factor bucketing.
+        Alternately sequence of bin edges allowing for non-uniform bin width
+        Only one of 'quantiles' or 'bins' can be not-None
     by_group : bool
         If True, compute quantile buckets separately for each group.
 
@@ -256,13 +262,18 @@ def quantize_factor(factor, quantiles=5, by_group=False):
         Factor quantiles indexed by date and asset.
     """
 
-    def quantile_calc(x, quantiles):
-        return pd.qcut(x, quantiles, labels=False) + 1
+    def quantile_calc(x, quantiles, bins):
+        if quantiles: 
+            return pd.qcut(x, quantiles, labels=False) + 1
+        else:
+            return pd.cut(x, bins, labels=False) + 1
 
     grouper = ['date', 'group'] if by_group else ['date']
 
-    factor_percentile = factor.groupby(level=grouper)
-    factor_quantile = factor_percentile.apply(quantile_calc, quantiles=quantiles)
+    factor_percentile = factor.groupby(level=grouper) 
+    factor_quantile = factor_percentile.apply(quantile_calc,
+                                              quantiles=quantiles,
+                                              bins=bins)
     factor_quantile.name = 'quantile'
 
     return factor_quantile
