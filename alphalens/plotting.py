@@ -487,11 +487,12 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
             ax = [None for a in mean_returns_spread.columns]
 
         ymin, ymax = (None, None)
-        for a, (name, fr_column) in zip(ax, mean_returns_spread.iteritems()):
+        for (i, a), (name, fr_column) in zip(enumerate(ax), mean_returns_spread.iteritems()):
             stdn = None if std_err is None else std_err[name]
-            plot_mean_quantile_returns_spread_time_series(fr_column,
-                                                          std_err=stdn,
-                                                          ax=a)
+            a = plot_mean_quantile_returns_spread_time_series(fr_column,
+                                                                   std_err=stdn,
+                                                                   ax=a)
+            ax[i] = a
             curr_ymin, curr_ymax = a.get_ylim()
             ymin = curr_ymin if ymin is None else min(ymin, curr_ymin)
             ymax = curr_ymax if ymax is None else max(ymax, curr_ymax)                                                          
