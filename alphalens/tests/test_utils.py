@@ -117,7 +117,8 @@ class UtilsTestCase(TestCase):
         factor.index = factor.index.set_names(['date', 'asset'])
         factor.name = 'factor'
 
-        cmrt = common_start_returns(factor, prices, before, after, False, mean_by_date, demeaned)
+        cmrt = common_start_returns(factor, prices, before, after, False, mean_by_date,
+                                    factor if demeaned else None)
         cmrt = DataFrame( {'mean': cmrt.mean(axis=1), 'std': cmrt.std(axis=1)} )
         expected = DataFrame(index=range(-before, after+1), columns=['mean', 'std'], data=expected_vals)
         assert_frame_equal(cmrt, expected)
