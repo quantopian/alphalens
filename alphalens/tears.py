@@ -289,26 +289,23 @@ def create_factor_tear_sheet(factor,
         mean_compret_quantile_group = mean_return_quantile_group.apply(compound_returns, axis=0)
         
         num_groups = len(ic_by_group.index.get_level_values('group').unique())
-        vertical_sections = 1 + (((num_groups - 1) // 2) + 1)
-        gf = GridFigure(rows=vertical_sections, cols=2)
-        
+        group_rows = (((num_groups - 1) // 2) + 1) if avgretplot is None else num_groups
+        gf = GridFigure(rows=1+group_rows, cols=2)
+
         plotting.plot_ic_by_group(ic_by_group, ax=gf.next_row())
 
-        ax_quantile_returns_bar_by_group = [ gf.next_cell() for x in range(num_groups) ]
+        gaxes = [ gf.next_cell() for _ in range(group_rows*2) ]
+
+        ax_quantile_returns_bar_by_group = gaxes if avgretplot is None else gaxes[0::2] 
         plotting.plot_quantile_returns_bar(mean_compret_quantile_group,
                                            by_group=True,
                                            ylim_percentiles=(5, 95),
                                            ax=ax_quantile_returns_bar_by_group)
-                                           
-                                               
+
         if avgretplot is not None:
-            
             before, after = avgretplot
-            num_group = len(quantile_factor.index.get_level_values('group').unique())
-            vertical_sections = ((num_groups - 1) // 2) + 1
-            gf = GridFigure(rows=vertical_sections, cols=2)
             
-            for group, g_factor in quantile_factor.groupby(level='group'):
+            for ax, (group, g_factor) in zip(gaxes[1::2], quantile_factor.groupby(level='group')):
             
                 avg_cumulative_returns = perf.average_cumulative_return_by_quantile(g_factor,
                                                                                     prices,
@@ -317,6 +314,5 @@ def create_factor_tear_sheet(factor,
                                                                                     demeaned=True)
 
                 plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=False,
-                                                                 std_bar=False, title=group, ax=gf.next_cell())
-
+                                                                 std_bar=False, title=group, ax=ax)
 
