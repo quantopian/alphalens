@@ -473,7 +473,8 @@ def average_cumulative_return_by_quantile(quantized_factor, prices,
     Parameters
     ----------
     quantized_factor : pd.Series
-        Factor quantiles indexed by date and asset.
+        Factor quantiles indexed by date and asset and
+        optional a custom group.
     prices : pd.DataFrame
         A wide form Pandas DataFrame indexed by date with assets
         in the columns. Pricing data should span the factor
@@ -492,13 +493,11 @@ def average_cumulative_return_by_quantile(quantized_factor, prices,
     -periods_before to periods_after
     """
 
-    assets = list(set(quantized_factor.index.get_level_values('asset')))
-    prices = prices[assets]
-
     def average_cumulative_return(q_fact):
+        demean = quantized_factor if demeaned else None
         q_returns = utils.common_start_returns(q_fact, prices,
                                                periods_before, periods_after,
-                                               True, True, demeaned)
+                                               True, True, demean)
         return pd.DataFrame( {'mean': q_returns.mean(axis=1), 'std': q_returns.std(axis=1)} ).T
 
     return quantized_factor.groupby(quantized_factor).apply(average_cumulative_return)

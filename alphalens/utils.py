@@ -236,8 +236,8 @@ def get_clean_factor_and_forward_returns(factor,
     return factor, forward_returns
 
 
-def common_start_returns(factor, prices, before, after, cumulative,
-                         mean_by_date, demeaned):
+def common_start_returns(factor, prices, before, after,
+                         cumulative=False, mean_by_date=False, demean=None):
     """
     A date and equity pair is extracted from each index row in the factor
     dataframe and for each of these pairs a return series is built starting
@@ -258,13 +258,16 @@ def common_start_returns(factor, prices, before, after, cumulative,
         How many returns to load before factor date
     after:
         How many returns to load after factor date
-    cumulative: bool
+    cumulative: bool, optional
         Return cumulative returns
-    mean_by_date : bool
+    mean_by_date: bool, optional
         If True, compute mean returns for each date and return that
         instead of a return series for each asset
-    demeaned : bool, optional
-        Compute demeaned mean returns (long short portfolio)            
+    demean: pd.DataFrame, optional
+        DataFrame with at least date and equity as index, the columns are irrelevant
+        For each date a list of equities is extracted from 'demean' index and used 
+        as universe to compute demeaned mean returns (long short portfolio)
+    
     Returns
     -------
     aligned_returns : pd.DataFrame
@@ -294,11 +297,13 @@ def common_start_returns(factor, prices, before, after, cumulative,
                              ending_index - day_zero_index)
 
         if cumulative:
-            series = series.fillna(0.).add(1).cumprod()
+            series = series.add(1).cumprod()
             series = (series / series.loc[0, :]) - 1
 
-        if demeaned:
-            series = series.sub(series.mean(axis=1), axis=0)
+        if demean is not None:
+            demean_equities = demean[timestamp].index.get_level_values('asset')
+            mean   = series[demean_equities].mean(axis=1)
+            series = series.sub(mean, axis=0)
 
         series = series.loc[:, equities]
 

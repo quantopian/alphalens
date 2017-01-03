@@ -406,25 +406,8 @@ class PerformanceTestCase(TestCase):
         dr.name = 'date'
         tickers = ['A', 'B', 'C', 'D']
         r1, r2, r3, r4 = (1.25, 1.50, 1.00, 0.50)
-        prices = DataFrame(index=dr, columns=tickers,
-                           data=[[r1**1,  r2**1,  r3**1,  r4**1 ],
-                                 [r1**2,  r2**2,  r3**2,  r4**2 ],
-                                 [r1**3,  r2**3,  r3**3,  r4**3 ],
-                                 [r1**4,  r2**4,  r3**4,  r4**4 ],
-                                 [r1**5,  r2**5,  r3**5,  r4**5 ],
-                                 [r1**6,  r2**6,  r3**6,  r4**6 ],
-                                 [r1**7,  r2**7,  r3**7,  r4**7 ],
-                                 [r1**8,  r2**8,  r3**8,  r4**8 ],
-                                 [r1**9,  r2**9,  r3**9,  r4**9 ],
-                                 [r1**10, r2**10, r3**10, r4**10],
-                                 [r1**11, r2**11, r3**11, r4**11],
-                                 [r1**12, r2**12, r3**12, r4**12],
-                                 [r1**13, r2**13, r3**13, r4**13],
-                                 [r1**14, r2**14, r3**14, r4**14],
-                                 [r1**15, r2**15, r3**15, r4**15],
-                                 [r1**16, r2**16, r3**16, r4**16],
-                                 [r1**17, r2**17, r3**17, r4**17],
-                                 [r1**18, r2**18, r3**18, r4**18]])
+        data=[[r1**i,  r2**i,  r3**i,  r4**i] for i in range(1, 19)]
+        prices = DataFrame(index=dr, columns=tickers, data=data)
         dr2 = date_range(start='2015-1-21', end='2015-1-26')
         factor = DataFrame(index=dr2, columns=tickers,
                            data=[[3, 4, 2, 1], [3, 4, 2, 1], [3, 4, 2, 1],
@@ -438,9 +421,69 @@ class PerformanceTestCase(TestCase):
         avgrt = average_cumulative_return_by_quantile(quantile_factor, prices, before, after, demeaned)
         arrays = []
         for q in range(1, quantiles+1):
-            arrays.append( (q,'mean') )
-            arrays.append( (q,'std')  )
+            arrays.append((q, 'mean'))
+            arrays.append((q, 'std'))
         index = MultiIndex.from_tuples(arrays, names=['quantile', None])
         expected = DataFrame(index=index, columns=range(-before,after+1), data=expected_vals)
         assert_frame_equal(avgrt, expected)
 
+    @parameterized.expand([(0, 2, False, 4,
+                            [[ 0.0,  -0.50, -0.75],
+                             [ 0.0,   0.0,    0.0],
+                             [ 0.0,   0.0,    0.0],
+                             [ 0.0,   0.0,    0.0],
+                             [ 0.0,   0.25,   0.5625],
+                             [ 0.0,   0.0,    0.0],
+                             [ 0.0,   0.50,   1.25],
+                             [ 0.0,   0.0,    0.0]]),
+                           (0, 3, True, 4,
+                            [[ 0.0, -0.5625, -1.015625, -1.488281],
+                             [ 0.0,  0.0,     0.0,       0.0],
+                             [ 0.0, -0.0625, -0.265625, -0.613281],
+                             [ 0.0,  0.0,     0.0,       0.0],
+                             [ 0.0,  0.1875,  0.296875,  0.339844],
+                             [ 0.0,  0.0,     0.0,       0.0],
+                             [ 0.0,  0.4375,  0.984375,  1.761719],
+                             [ 0.0,  0.0,     0.0,       0.0]]),
+                           (0, 3, False, 2,
+                            [[ 0.0, -0.25, -0.375,  -0.4375],
+                             [ 0.0,  0.0,  0.0,  0.0],
+                             [ 0.0,  0.375,  0.90625,   1.664062],
+                             [ 0.0,  0.0,  0.0,  0.0]]),
+                           (0, 3, True, 2,
+                            [[ 0.0, -0.3125, -0.640625, -1.050781],
+                             [ 0.0,  0.0,  0.0,  0.0],
+                             [ 0.0,  0.3125,  0.640625,  1.050781],
+                             [ 0.0,  0.0,  0.0,  0.0]]),
+                          ])
+    def test_average_cumulative_return_by_quantile_2(self, before, after,
+                                                   demeaned, quantiles,
+                                                   expected_vals):
+        """
+        Test varying factor asset universe: at differnt dates there might be
+        different assets
+        """
+        dr = date_range(start='2015-1-15', end='2015-1-25')
+        dr.name = 'date'
+        tickers = ['A', 'B', 'C', 'D', 'E', 'F']
+        r1, r2, r3, r4 = (1.25, 1.50, 1.00, 0.50)
+        data=[[r1**i,  r2**i,  r3**i,  r4**i,  r2**i,  r3**i] for i in range(1, 12)]
+        prices = DataFrame(index=dr, columns=tickers, data=data)
+        dr2 = date_range(start='2015-1-18', end='2015-1-21')
+        factor = DataFrame(index=dr2, columns=tickers,
+                           data=[[3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
+                                 [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2]]).stack()
+
+        factor, forward_returns = get_clean_factor_and_forward_returns(factor,
+                                                                       prices,
+                                                                       periods=range(0,after+1),
+                                                                       filter_zscore=False)
+        quantile_factor = quantize_factor(factor, by_group=False, quantiles=quantiles)
+        avgrt = average_cumulative_return_by_quantile(quantile_factor, prices, before, after, demeaned)
+        arrays = []
+        for q in range(1, quantiles+1):
+            arrays.append((q, 'mean'))
+            arrays.append((q, 'std'))
+        index = MultiIndex.from_tuples(arrays, names=['quantile', None])
+        expected = DataFrame(index=index, columns=range(-before,after+1), data=expected_vals)
+        assert_frame_equal(avgrt, expected)
