@@ -79,11 +79,13 @@ def create_factor_tear_sheet(factor,
         periods to compute forward returns on.
     quantiles : int or sequence[float]
         Number of equal-sized quantile buckets to use in factor bucketing.
-        Alternately sequence of quantiles, e.g. [0, .10, .5, .90, 1.]
+        Alternately sequence of quantiles, allowing non-equal-sized buckets
+        e.g. [0, .10, .5, .90, 1.] or [.05, .5, .95]
         Only one of 'quantiles' or 'bins' can be not-None
     bins : int or sequence[float]
-        Number of equal-width bins to use in factor bucketing.
+        Number of equal-width (valuewise) bins to use in factor bucketing.
         Alternately sequence of bin edges allowing for non-uniform bin width
+        e.g. [-4, -2, -0.5, 0, 10]
         Only one of 'quantiles' or 'bins' can be not-None
     filter_zscore : int or float
         Sets forward returns greater than X standard deviations
@@ -133,7 +135,7 @@ def create_factor_tear_sheet(factor,
                                            quantiles=quantiles,
                                            bins=bins)
 
-    num_quant = quantile_factor.max()
+    num_quant = int(quantile_factor.max())
 
     def compound_returns(period_ret):
         period = int(period_ret.name)
