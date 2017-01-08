@@ -314,3 +314,10 @@ def common_start_returns(factor, prices, before, after,
 
     return pd.concat(all_returns, axis=1)
 
+def rate_of_return(period_ret):
+    """
+    1-period Growth Rate: the average rate of 1-period returns
+    """
+    period = int(period_ret.name)
+    return period_ret.add(1).pow(1./period).sub(1)
+
