@@ -135,16 +135,12 @@ def create_factor_tear_sheet(factor,
 
     num_quant = quantile_factor.max()
 
-    def compound_returns(period_ret):
-        period = int(period_ret.name)
-        return period_ret.add(1).pow(1./period).sub(1)
-
     mean_ret_quantile, std_quantile = perf.mean_return_by_quantile(quantile_factor,
                                                                    forward_returns,
                                                                    by_group=False,
                                                                    demeaned=long_short)
                                                                    
-    mean_compret_quantile = mean_ret_quantile.apply(compound_returns, axis=0)
+    mean_compret_quantile = mean_ret_quantile.apply(utils.rate_of_return, axis=0)
 
     mean_ret_quant_daily, std_quant_daily = perf.mean_return_by_quantile(quantile_factor,
                                                                          forward_returns,
@@ -152,8 +148,8 @@ def create_factor_tear_sheet(factor,
                                                                          by_group=False,
                                                                          demeaned=long_short)
 
-    mean_compret_quant_daily = mean_ret_quant_daily.apply(compound_returns, axis=0)
-    compstd_quant_daily = std_quant_daily.apply(compound_returns, axis=0)
+    mean_compret_quant_daily = mean_ret_quant_daily.apply(utils.rate_of_return, axis=0)
+    compstd_quant_daily = std_quant_daily.apply(utils.rate_of_return, axis=0)
 
     mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(mean_compret_quant_daily,
                                                                                num_quant,
@@ -286,7 +282,7 @@ def create_factor_tear_sheet(factor,
                                                                                                       forward_returns,
                                                                                                       by_group=True,
                                                                                                       demeaned=True)
-        mean_compret_quantile_group = mean_return_quantile_group.apply(compound_returns, axis=0)
+        mean_compret_quantile_group = mean_return_quantile_group.apply(utils.rate_of_return, axis=0)
         
         num_groups = len(ic_by_group.index.get_level_values('group').unique())
         group_rows = (((num_groups - 1) // 2) + 1) if avgretplot is None else num_groups
