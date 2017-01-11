@@ -146,8 +146,12 @@ class PerformanceTestCase(TestCase):
                             [1, 2, 3, 3, 3, 3, 2, 1]),
                            (factor, [0, .5, 1.], None, False,
                             [1, 1, 2, 2, 2, 2, 1, 1]),
+                           (factor, [.25, .5, .75], None, False,
+                            [nan, 1, 2, nan, nan, 2, 1, nan]),
                            (factor, [0, .5, 1.], None, True,
                             [1, 2, 1, 2, 2, 1, 2, 1]),
+                           (factor, [.5, 1.], None, True,
+                            [nan, 1, nan, 1, 1, nan, 1, nan]),
                            (factor, [0, 1.], None, True,
                             [1, 1, 1, 1, 1, 1, 1, 1]),
                            (factor, None, 4, False,
@@ -160,6 +164,8 @@ class PerformanceTestCase(TestCase):
                             [1, 3, 6, 8, 8, 6, 3, 1]),
                            (factor, None, [0, 1, 2, 3, 5], False,
                             [1, 2, 3, 4, 4, 3, 2, 1]),
+                           (factor, None, [1, 2, 3], False,
+                            [nan, 1, 2, nan, nan, 2, 1, nan]),
                            (factor, None, [0, 2, 5], False,
                             [1, 1, 2, 2, 2, 2, 1, 1]),
                            (factor, None, [0.5, 2.5, 4.5], False,
@@ -176,7 +182,7 @@ class PerformanceTestCase(TestCase):
                                            by_group=by_group)
         expected = Series(index=factor.index,
                           data=expected_vals,
-                          name='quantile')
+                          name='quantile').dropna()
         assert_series_equal(quantized_factor, expected)
 
     @parameterized.expand([([[1.0, 2.0, 3.0, 4.0],
