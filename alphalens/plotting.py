@@ -235,7 +235,6 @@ def plot_ic_ts(ic, ax=None):
     num_plots = len(ic.columns)
     if ax is None:
         f, ax = plt.subplots(num_plots, 1, figsize=(18, num_plots * 7))
-        ax = ax.flatten()
         ax = np.asarray([ax]).flatten()
 
     ymin, ymax = (None, None)
