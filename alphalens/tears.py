@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-@plotting.plotting_context
+@plotting.customize
 def create_factor_tear_sheet(factor,
                              prices,
                              groupby=None,
