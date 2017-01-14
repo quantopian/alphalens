@@ -17,6 +17,8 @@ import pandas as pd
 import numpy as np
 from IPython.display import display
 
+from . performance import quantize_factor
+
 
 def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
     """
@@ -54,7 +56,7 @@ def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
             mask = abs(delta - delta.mean()) > (filter_zscore * delta.std())
             delta[mask] = np.nan
 
-        forward_returns[period] = delta.stack()
+        forward_returns['%s_return' % period] = delta.stack()
 
     forward_returns.index.rename(['date', 'asset'], inplace=True)
 
@@ -131,6 +133,9 @@ def print_table(table, name=None, fmt=None):
 def get_clean_factor_and_forward_returns(factor,
                                          prices,
                                          groupby=None,
+                                         by_group=False,
+                                         quantiles=5,
+                                         bins=None,
                                          periods=(1, 5, 10),
                                          filter_zscore=20,
                                          groupby_labels=None):
@@ -159,6 +164,18 @@ def get_clean_factor_and_forward_returns(factor,
         a dict of asset to group mappings. If a dict is passed,
         it is assumed that group mappings are unchanged for the
         entire time period of the passed factor data.
+    by_group : bool
+        If True, compute statistics separately for each group.
+    quantiles : int or sequence[float]
+        Number of equal-sized quantile buckets to use in factor bucketing.
+        Alternately sequence of quantiles, allowing non-equal-sized buckets
+        e.g. [0, .10, .5, .90, 1.] or [.05, .5, .95]
+        Only one of 'quantiles' or 'bins' can be not-None
+    bins : int or sequence[float]
+        Number of equal-width (valuewise) bins to use in factor bucketing.
+        Alternately sequence of bin edges allowing for non-uniform bin width
+        e.g. [-4, -2, -0.5, 0, 10]
+        Only one of 'quantiles' or 'bins' can be not-None
     periods : sequence[int]
         periods to compute forward returns on.
     filter_zscore : int or float
@@ -171,12 +188,11 @@ def get_clean_factor_and_forward_returns(factor,
 
     Returns
     -------
-    factor : pd.Series - MultiIndex
+    merged_data : pd.DataFrame - MultiIndex
         A MultiIndex Series indexed by date (level 0) and asset (level 1),
-        containing the values for a single alpha factor.
-    forward_returns : pd.DataFrame - MultiIndex
-        Forward returns in indexed by date and asset.
-        Separate column for each forward return window.
+        containing the values for a single alpha factor, forward returns for each period,
+        The factor quantile/bin that factor value belongs too, and (optionally) the group the
+        asset belongs to.
     """
 
     factor = factor.copy()
@@ -184,14 +200,18 @@ def get_clean_factor_and_forward_returns(factor,
     factor.name = 'factor'
     factor.index = factor.index.set_names(['date', 'asset'])
 
-    forward_returns = compute_forward_returns(
-        prices, periods, filter_zscore=filter_zscore)
+    forward_returns = compute_forward_returns(prices, periods, filter_zscore)
 
     merged_data = pd.merge(pd.DataFrame(factor),
                            forward_returns,
                            how='left',
                            left_index=True,
                            right_index=True)
+
+    merged_data['factor_quantile'] = quantize_factor(factor,
+                                                     quantiles,
+                                                     bins,
+                                                     by_group)
 
     if groupby is not None:
         if isinstance(groupby, dict):
@@ -204,7 +224,8 @@ def get_clean_factor_and_forward_returns(factor,
 
             ss = pd.Series(groupby)
             groupby = pd.Series(index=factor.index,
-                                data=ss[factor.index.get_level_values('asset')].values)
+                                data=ss[factor.index.get_level_values(
+                                    'asset')].values)
 
         if groupby_labels is not None:
             diff = set(groupby.values) - set(groupby_labels.keys())
@@ -219,21 +240,11 @@ def get_clean_factor_and_forward_returns(factor,
 
         groupby.name = 'group'
         groupby.index = groupby.index.set_names(['date', 'asset'])
-
-        merged_data = pd.merge(pd.DataFrame(groupby),
-                               merged_data,
-                               how='left',
-                               left_index=True,
-                               right_index=True)
-
-        merged_data = merged_data.set_index('group', append=True)
+        merged_data['group'] = groupby
 
     merged_data = merged_data.dropna()
 
-    factor = merged_data.pop("factor")
-    forward_returns = merged_data
-
-    return factor, forward_returns
+    return merged_data
 
 
 def common_start_returns(factor, prices, before, after,
