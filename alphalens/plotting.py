@@ -236,6 +236,7 @@ def plot_ic_ts(ic, ax=None):
     if ax is None:
         f, ax = plt.subplots(num_plots, 1, figsize=(18, num_plots * 7))
         ax = ax.flatten()
+        ax = np.asarray([ax]).flatten()
 
     ymin, ymax = (None, None)
     for a, (period_num, ic) in zip(ax, ic.iteritems()):
