@@ -94,44 +94,44 @@ def context(context='notebook', font_scale=1.5, rc=None):
 
     return sns.plotting_context(context=context, font_scale=font_scale, rc=rc)
 
+def plot_returns_table(alpha_beta, mean_ret_quantile, mean_ret_spread_quantile,
+                       quantized_factor):
+    max_quantile = quantized_factor.values.max()
+    min_quantile = quantized_factor.values.min()
+    returns_table = pd.DataFrame()
+    returns_table = returns_table.append(alpha_beta)
+    returns_table.loc[
+        "Mean Period Wise Return Top Quantile (bps)"] = mean_ret_quantile.loc[
+                                                            max_quantile] * DECIMAL_TO_BPS
+    returns_table.loc[
+        "Mean Period Wise Return Bottom Quantile (bps)"] = \
+    mean_ret_quantile.loc[
+        min_quantile] * DECIMAL_TO_BPS
+    returns_table.loc[
+        "Mean Period Wise Spread (bps)"] = mean_ret_spread_quantile.mean() \
+                                           * DECIMAL_TO_BPS
 
-def summary_stats(factor,
-                  ic_data,
-                  alpha_beta,
-                  quantized_factor,
-                  mean_ret_quantile,
-                  quantile_turnover,
-                  autocorrelation_data,
-                  mean_ret_spread_quantile):
-    """
-    Generates a pretty printed table of summary statistics for
-    the alpha factor.
+    print("Returns Analysis")
+    utils.print_table(returns_table.apply(lambda x: x.round(3)))
 
-    Parameters
-    ----------
-    ic_data : pd.DataFrame
-        Spearman Rank correlation between factor and
-        provided forward price movement windows.
-    alpha_beta : pd.Series
-        A list containing the alpha, beta, a t-stat(alpha) for the
-        given factor and forward returns.
-    quantized_factor : pd.Series
-        Factor quantiles indexed by date and asset.
-    mean_ret_quantile : pd.DataFrame
-        Mean period wise returns by specified factor quantile.
-    quantile_turnover: dict{int:pd.Dataframe}
-        Quantile turnover (each DataFrame column a quantile) for each period.
-    autocorrelation_data : pd.Dataframe
-        Rolling autocorrelation of factor values for each period.
-    mean_ret_spread_quantile : pd.Series
-        Period wise difference in quantile returns.
-    """
 
-    quantile_stats = (pd.concat([factor, quantized_factor], axis=1)
-                               .groupby('quantile')
-                               .agg(['min', 'max', 'mean', 'std', 'count']))['factor']
-    quantile_stats['count %'] = quantile_stats['count'] / quantile_stats['count'].sum() * 100.
+def plot_turnover_table(autocorrelation_data, quantile_turnover):
+    turnover_table = pd.DataFrame()
+    for period in sorted(quantile_turnover.keys()):
+        for quantile, p_data in quantile_turnover[period].iteritems():
+            turnover_table.loc["Quantile {} Mean Turnover ".format(quantile),
+                               "{}".format(period)] = p_data.mean()
+    auto_corr = pd.DataFrame()
+    for period, p_data in autocorrelation_data.iteritems():
+        auto_corr.loc["Mean Factor Rank Autocorrelation",
+                      "{}".format(period)] = p_data.mean()
 
+    print("Turnover Analysis")
+    utils.print_table(turnover_table.apply(lambda x: x.round(3)))
+    utils.print_table(auto_corr.apply(lambda x: x.round(3)))
+
+
+def plot_information_table(ic_data):
     ic_summary_table = pd.DataFrame()
     ic_summary_table["IC Mean"] = ic_data.mean()
     ic_summary_table["IC Std."] = ic_data.std()
@@ -141,43 +141,11 @@ def summary_stats(factor,
     ic_summary_table["IC Skew"] = stats.skew(ic_data)
     ic_summary_table["IC Kurtosis"] = stats.kurtosis(ic_data)
     ic_summary_table["Ann. IR"] = (
-        ic_data.mean() / ic_data.std()) * np.sqrt(252)
+                                      ic_data.mean() / ic_data.std()) * np.sqrt(
+        252)
 
-    max_quantile = quantized_factor.max()
-    min_quantile = quantized_factor.min()
-
-    turnover_table = pd.DataFrame()
-    for period in sorted(quantile_turnover.keys()):
-        for quantile, p_data in quantile_turnover[period].iteritems():
-            turnover_table.loc["Quantile {} Mean Turnover ".format(quantile),
-                               "{}".format(period)] = p_data.mean()
-
-    auto_corr = pd.DataFrame()
-    for period, p_data in autocorrelation_data.iteritems():
-        auto_corr.loc["Mean Factor Rank Autocorrelation",
-                      "{}".format(period)] = p_data.mean()
-
-    returns_table = pd.DataFrame()
-    returns_table = returns_table.append(alpha_beta)
-    returns_table.loc[
-        "Mean Period Wise Return Top Quantile (bps)"] = mean_ret_quantile.loc[
-        max_quantile] * DECIMAL_TO_BPS
-    returns_table.loc[
-        "Mean Period Wise Return Bottom Quantile (bps)"] = mean_ret_quantile.loc[
-        min_quantile] * DECIMAL_TO_BPS
-    returns_table.loc[
-        "Mean Period Wise Spread (bps)"] = mean_ret_spread_quantile.mean() \
-        * DECIMAL_TO_BPS
-
-    print("Quantiles statistics")
-    utils.print_table(quantile_stats)
-    print("Returns Analysis")
-    utils.print_table(returns_table.apply(lambda x: x.round(3)))
     print("Information Analysis")
     utils.print_table(ic_summary_table.apply(lambda x: x.round(3)).T)
-    print("Turnover Analysis")
-    utils.print_table(turnover_table.apply(lambda x: x.round(3)))
-    utils.print_table(auto_corr.apply(lambda x: x.round(3)))
 
 
 def plot_ic_ts(ic, ax=None):

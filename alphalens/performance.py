@@ -23,8 +23,7 @@ from statsmodels.tools.tools import add_constant
 from . import utils
 
 
-def factor_information_coefficient(factor,
-                                   forward_returns,
+def factor_information_coefficient(factor_data,
                                    group_adjust=False,
                                    by_group=False):
     """
@@ -53,38 +52,30 @@ def factor_information_coefficient(factor,
         provided forward returns.
     """
 
-    factor = factor.copy()
-    forward_returns = forward_returns.copy()
-
     def src_ic(group):
-        f = group.pop('factor')
-        _ic = group.apply(lambda x: stats.spearmanr(x, f)[0])
+        f = group['factor']
+        _ic = group.filter(regex='^[1-9]\d*$', axis=1).apply(lambda x: stats.spearmanr(x, f)[0])
         return _ic
 
+    factor_data = factor_data.copy()
+
+    grouper = [factor_data.index.get_level_values('date')]
+    if by_group:
+        grouper.append('group')
+
     if group_adjust:
-        forward_returns = utils.demean_forward_returns(forward_returns,
-                                                       by_group=True)
+        factor_data = utils.demean_forward_returns(factor_data, grouper + ['group'])
 
-    factor.name = 'factor'
-    factor_and_fp = pd.merge(pd.DataFrame(factor),
-                             forward_returns,
-                             how='left',
-                             left_index=True,
-                             right_index=True)
-
-    grouper = ['date', 'group'] if by_group else ['date']
-    ic = factor_and_fp.groupby(level=grouper).apply(src_ic)
-
+    ic = factor_data.groupby(grouper).apply(src_ic)
     ic.columns = pd.Int64Index(ic.columns)
 
     return ic
 
 
-def mean_information_coefficient(factor,
-                                 forward_returns,
+def mean_information_coefficient(factor_data,
                                  group_adjust=False,
-                                 by_time=None,
-                                 by_group=False):
+                                 by_group=False,
+                                 by_time=None):
     """
     Get the mean information coefficient of specified groups.
     Answers questions like:
@@ -117,10 +108,7 @@ def mean_information_coefficient(factor,
         forward price movement windows.
     """
 
-    ic = factor_information_coefficient(factor,
-                                        forward_returns,
-                                        group_adjust=group_adjust,
-                                        by_group=by_group)
+    ic = factor_information_coefficient(factor_data, group_adjust, by_group)
 
     grouper = []
     if by_time is not None:
@@ -236,52 +224,6 @@ def factor_alpha_beta(factor, forward_returns, factor_returns=None):
     return alpha_beta
 
 
-def quantize_factor(factor, quantiles=5, bins=None, by_group=False):
-    """
-    Computes period wise factor quantiles.
-
-    Parameters
-    ----------
-    factor : pd.Series - MultiIndex
-        Factor values indexed by date and asset and
-        optional a custom group.
-    quantiles : int or sequence[float]
-        Number of equal-sized quantile buckets to use in factor bucketing.
-        Alternately sequence of quantiles, allowing non-equal-sized buckets
-        e.g. [0, .10, .5, .90, 1.] or [.05, .5, .95]
-        Only one of 'quantiles' or 'bins' can be not-None
-    bins : int or sequence[float]
-        Number of equal-width (valuewise) bins to use in factor bucketing.
-        Alternately sequence of bin edges allowing for non-uniform bin width
-        e.g. [-4, -2, -0.5, 0, 10]
-        Only one of 'quantiles' or 'bins' can be not-None
-    by_group : bool
-        If True, compute quantile buckets separately for each group.
-
-    Returns
-    -------
-    factor_quantile : pd.Series
-        Factor quantiles indexed by date and asset.
-    """
-
-    def quantile_calc(x, quantiles, bins):
-        if quantiles is not None: 
-            return pd.qcut(x, quantiles, labels=False) + 1
-        elif bins is not None:
-            return pd.cut(x, bins, labels=False) + 1
-        raise ValueError('quantiles or bins should be provided')
-
-    grouper = ['date', 'group'] if by_group else ['date']
-
-    factor_percentile = factor.groupby(level=grouper) 
-    factor_quantile = factor_percentile.apply(quantile_calc,
-                                              quantiles=quantiles,
-                                              bins=bins)
-    factor_quantile.name = 'quantile'
-
-    return factor_quantile.dropna()
-
-
 def mean_return_by_quantile(quantized_factor,
                             forward_returns,
                             by_date=False,
@@ -319,7 +261,7 @@ def mean_return_by_quantile(quantized_factor,
 
     if demeaned:
         adjusted_fr = utils.demean_forward_returns(forward_returns,
-                                                   by_group=by_group)
+                                                   grouper=by_group)
     else:
         adjusted_fr = forward_returns.copy()
 
@@ -505,3 +447,16 @@ def average_cumulative_return_by_quantile(quantized_factor, prices,
 
     return quantized_factor.groupby(quantized_factor).apply(average_cumulative_return)
 
+
+def compute_information_statistics(factor_data,
+                                   group_adjust=False,
+                                   by_group=False):
+
+
+    ic = factor_information_coefficient(factor_data, group_adjust, by_group)
+
+    mean_monthly_ic = mean_information_coefficient(factor_data,
+                                                   group_adjust,
+                                                   by_group,
+                                                   "M")
+    return ic, mean_monthly_ic

@@ -17,7 +17,51 @@ import pandas as pd
 import numpy as np
 from IPython.display import display
 
-from . performance import quantize_factor
+
+def quantize_factor(factor, quantiles=5, bins=None, by_group=False):
+    """
+    Computes period wise factor quantiles.
+
+    Parameters
+    ----------
+    factor : pd.Series - MultiIndex
+        Factor values indexed by date and asset and
+        optional a custom group.
+    quantiles : int or sequence[float]
+        Number of equal-sized quantile buckets to use in factor bucketing.
+        Alternately sequence of quantiles, allowing non-equal-sized buckets
+        e.g. [0, .10, .5, .90, 1.] or [.05, .5, .95]
+        Only one of 'quantiles' or 'bins' can be not-None
+    bins : int or sequence[float]
+        Number of equal-width (valuewise) bins to use in factor bucketing.
+        Alternately sequence of bin edges allowing for non-uniform bin width
+        e.g. [-4, -2, -0.5, 0, 10]
+        Only one of 'quantiles' or 'bins' can be not-None
+    by_group : bool
+        If True, compute quantile buckets separately for each group.
+
+    Returns
+    -------
+    factor_quantile : pd.Series
+        Factor quantiles indexed by date and asset.
+    """
+
+    def quantile_calc(x, quantiles, bins):
+        if quantiles is not None:
+            return pd.qcut(x, quantiles, labels=False) + 1
+        elif bins is not None:
+            return pd.cut(x, bins, labels=False) + 1
+        raise ValueError('quantiles or bins should be provided')
+
+    grouper = ['date', 'group'] if by_group else ['date']
+
+    factor_percentile = factor.groupby(level=grouper)
+    factor_quantile = factor_percentile.apply(quantile_calc,
+                                              quantiles=quantiles,
+                                              bins=bins)
+    factor_quantile.name = 'quantile'
+
+    return factor_quantile.dropna()
 
 
 def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
@@ -56,14 +100,14 @@ def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
             mask = abs(delta - delta.mean()) > (filter_zscore * delta.std())
             delta[mask] = np.nan
 
-        forward_returns['%s_return' % period] = delta.stack()
+        forward_returns[period] = delta.stack()
 
     forward_returns.index.rename(['date', 'asset'], inplace=True)
 
     return forward_returns
 
 
-def demean_forward_returns(forward_returns, by_group=False):
+def demean_forward_returns(factor_data, grouper=None):
     """
     Convert forward returns to returns relative to mean
     period wise all-universe or group returns.
@@ -78,10 +122,10 @@ def demean_forward_returns(forward_returns, by_group=False):
 
     Parameters
     ----------
-    forward_returns : pd.DataFrame - MultiIndex
+    factor_data : pd.DataFrame - MultiIndex
         Forward returns in indexed by date and asset.
         Separate column for each forward return window.
-    by_group : bool
+    grouper : list
         If True, demean according to group.
 
     Returns
@@ -91,9 +135,13 @@ def demean_forward_returns(forward_returns, by_group=False):
         security's returns normalized by group.
     """
 
-    grouper = ['date', 'group'] if by_group else ['date']
+    def demean(x):
+        return x - x.mean()
 
-    return forward_returns.groupby(level=grouper).apply(lambda x: x - x.mean())
+    forward_returns_columns = factor_data.filter(regex='^[1-9]\d*$', axis=1).columns
+    factor_data[forward_returns_columns] = factor_data.groupby(grouper)[forward_returns_columns].apply(demean)
+
+    return factor_data
 
 
 def print_table(table, name=None, fmt=None):
@@ -141,8 +189,8 @@ def get_clean_factor_and_forward_returns(factor,
                                          groupby_labels=None):
     """
     Formats the factor data, pricing data, and group mappings
-    into DataFrames and Series that contain aligned MultiIndex
-    indices containing date, asset, and group.
+    into a DataFrame that contains aligned MultiIndex
+    indices of date and asset.
 
     Parameters
     ----------
