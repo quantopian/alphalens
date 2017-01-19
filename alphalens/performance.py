@@ -446,17 +446,3 @@ def average_cumulative_return_by_quantile(quantized_factor, prices,
         return pd.DataFrame( {'mean': q_returns.mean(axis=1), 'std': q_returns.std(axis=1)} ).T
 
     return quantized_factor.groupby(quantized_factor).apply(average_cumulative_return)
-
-
-def compute_information_statistics(factor_data,
-                                   group_adjust=False,
-                                   by_group=False):
-
-
-    ic = factor_information_coefficient(factor_data, group_adjust, by_group)
-
-    mean_monthly_ic = mean_information_coefficient(factor_data,
-                                                   group_adjust,
-                                                   by_group,
-                                                   "M")
-    return ic, mean_monthly_ic

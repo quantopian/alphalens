@@ -46,9 +46,9 @@ def quantize_factor(factor, quantiles=5, bins=None, by_group=False):
         Factor quantiles indexed by date and asset.
     """
 
-    def quantile_calc(x, quantiles, bins):
-        if quantiles is not None:
-            return pd.qcut(x, quantiles, labels=False) + 1
+    def quantile_calc(x, _quantiles, bins):
+        if _quantiles is not None:
+            return pd.qcut(x, _quantiles, labels=False) + 1
         elif bins is not None:
             return pd.cut(x, bins, labels=False) + 1
         raise ValueError('quantiles or bins should be provided')
@@ -56,9 +56,7 @@ def quantize_factor(factor, quantiles=5, bins=None, by_group=False):
     grouper = ['date', 'group'] if by_group else ['date']
 
     factor_percentile = factor.groupby(level=grouper)
-    factor_quantile = factor_percentile.apply(quantile_calc,
-                                              quantiles=quantiles,
-                                              bins=bins)
+    factor_quantile = factor_percentile.apply(quantile_calc, quantiles, bins)
     factor_quantile.name = 'quantile'
 
     return factor_quantile.dropna()
@@ -165,12 +163,12 @@ def print_table(table, name=None, fmt=None):
     if isinstance(table, pd.Series):
         table = pd.DataFrame(table)
 
-    if fmt is not None:
-        prev_option = pd.get_option('display.float_format')
-        pd.set_option('display.float_format', lambda x: fmt.format(x))
-
-    if name is not None:
+    if isinstance(table, pd.DataFrame):
         table.columns.name = name
+
+    prev_option = pd.get_option('display.float_format')
+    if fmt is not None:
+        pd.set_option('display.float_format', lambda x: fmt.format(x))
 
     display(table)
 
