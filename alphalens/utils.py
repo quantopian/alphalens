@@ -300,7 +300,8 @@ def common_start_returns(factor, prices, before, after,
             demean_equities = demean.loc[timestamp].index.get_level_values('asset')
             equities_slice |= set(demean_equities)
 
-        series = returns.ix[starting_index:ending_index, equities_slice]
+        series = returns.loc[returns.index[starting_index:ending_index],
+                             equities_slice]
         series.index = range(starting_index - day_zero_index,
                              ending_index - day_zero_index)
 
