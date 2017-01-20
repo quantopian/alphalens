@@ -94,19 +94,15 @@ def context(context='notebook', font_scale=1.5, rc=None):
 
     return sns.plotting_context(context=context, font_scale=font_scale, rc=rc)
 
-def plot_returns_table(alpha_beta, mean_ret_quantile, mean_ret_spread_quantile,
-                       quantized_factor):
-    max_quantile = quantized_factor.values.max()
-    min_quantile = quantized_factor.values.min()
+def plot_returns_table(alpha_beta, mean_ret_quantile, mean_ret_spread_quantile):
     returns_table = pd.DataFrame()
     returns_table = returns_table.append(alpha_beta)
     returns_table.loc[
-        "Mean Period Wise Return Top Quantile (bps)"] = mean_ret_quantile.loc[
-                                                            max_quantile] * DECIMAL_TO_BPS
+        "Mean Period Wise Return Top Quantile (bps)"] = \
+        mean_ret_quantile.iloc[-1] * DECIMAL_TO_BPS
     returns_table.loc[
         "Mean Period Wise Return Bottom Quantile (bps)"] = \
-    mean_ret_quantile.loc[
-        min_quantile] * DECIMAL_TO_BPS
+    mean_ret_quantile.iloc[0] * DECIMAL_TO_BPS
     returns_table.loc[
         "Mean Period Wise Spread (bps)"] = mean_ret_spread_quantile.mean() \
                                            * DECIMAL_TO_BPS
@@ -409,7 +405,7 @@ def plot_quantile_returns_violin(return_by_q,
     unstacked_dr = unstacked_dr.reset_index()
 
     sns.violinplot(data=unstacked_dr,
-                   x='quantile',
+                   x='factor_quantile',
                    hue='forward_periods',
                    y='return',
                    orient='v',
@@ -723,7 +719,7 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
     ret_wide = quantile_returns.reset_index()\
-        .pivot(index='date', columns='quantile', values=period)
+        .pivot(index='date', columns='factor_quantile', values=period)
 
     if period > 1:
         compound_returns = lambda ret, period: ( (np.nanmean(ret) + 1)**(1./period) ) - 1

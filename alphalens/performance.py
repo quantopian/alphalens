@@ -127,7 +127,7 @@ def mean_information_coefficient(factor_data,
     return ic
 
 
-def factor_returns(factor, forward_returns, long_short=True, group_neutral=False):
+def factor_returns(factor_data, long_short=True, group_neutral=False):
     """
     Computes period wise returns for portfolio weighted by factor
     values. Weights are computed by demeaning factors and dividing
@@ -149,7 +149,7 @@ def factor_returns(factor, forward_returns, long_short=True, group_neutral=False
 
     Returns
     -------
-    factor_returns : pd.DataFrame
+    returns : pd.DataFrame
         Period wise returns of dollar neutral portfolio weighted by factor value.
     """
 
@@ -160,21 +160,23 @@ def factor_returns(factor, forward_returns, long_short=True, group_neutral=False
         else:
             return group / group.abs().sum()
 
-    grouper = ['date', 'group'] if group_neutral else ['date']
+    grouper = [factor_data.index.get_level_values('date')]
+    if group_neutral:
+        grouper.append('group')
 
-    weights = factor.groupby(level=grouper).apply(to_weights, long_short)
+    weights = factor_data.groupby(grouper)['factor'].apply(to_weights, long_short)
 
     if group_neutral:
         weights = weights.groupby(level='date').apply(to_weights, False)
 
-    weighted_returns = forward_returns.multiply(weights, axis=0)
+    weighted_returns = factor_data.filter(regex='^[1-9]\d*$', axis=1).multiply(weights, axis=0)
 
-    factor_returns = weighted_returns.groupby(level='date').sum()
+    returns = weighted_returns.groupby(level='date').sum()
 
-    return factor_returns
+    return returns
 
 
-def factor_alpha_beta(factor, forward_returns, factor_returns=None):
+def factor_alpha_beta(factor_data):
     """
     Computes the alpha (excess returns), alpha t-stat (alpha significance),
     and beta (market exposure) of a factor. A regression is run with
@@ -184,13 +186,8 @@ def factor_alpha_beta(factor, forward_returns, factor_returns=None):
 
     Parameters
     ----------
-    factor : pd.Series - MultiIndex
+    factor_data : pd.DataFrame - MultiIndex
         Factor values indexed by date and asset
-    forward_returns : pd.DataFrame - MultiIndex
-        Period wise forward returns in indexed by date and asset.
-        Separate column for each forward return window.
-    factor_returns : pd.DataFrame
-        Period wise returns of dollar neutral portfolio weighted by factor value.
 
     Returns
     -------
@@ -198,24 +195,23 @@ def factor_alpha_beta(factor, forward_returns, factor_returns=None):
         A list containing the alpha, beta, a t-stat(alpha)
         for the given factor and forward returns.
     """
-    if factor_returns is None:
-        factor_returns = factor_returns(factor, forward_returns)
 
-    universe_ret = (forward_returns.groupby(level='date').mean()
-                          .loc[factor_returns.index])
+    returns = factor_returns(factor_data, long_short=True)
+    forward_returns_columns = factor_data.filter(regex='^[1-9]\d*$', axis=1).columns
 
-    if isinstance(factor_returns, pd.Series):
-        factor_returns.name = universe_ret.columns.values[0]
-        factor_returns = pd.DataFrame(factor_returns)
+    universe_ret = factor_data.groupby(level='date')[forward_returns_columns].mean().loc[returns.index]
+
+    if isinstance(returns, pd.Series):
+        returns.name = universe_ret.columns.values[0]
+        returns = pd.DataFrame(returns)
 
     alpha_beta = pd.DataFrame()
-    for period in factor_returns.columns.values:
+    for period in returns.columns.values:
         x = universe_ret[period].values
-        y = factor_returns[period].values
+        y = returns[period].values
 
         x = add_constant(x)
         reg_fit = OLS(y, x).fit()
-        t_alpha = reg_fit.tvalues[0]
         alpha, beta = reg_fit.params
 
         alpha_beta.loc['Ann. alpha', period] = (1 + alpha) ** (252.0/period) - 1
@@ -224,8 +220,7 @@ def factor_alpha_beta(factor, forward_returns, factor_returns=None):
     return alpha_beta
 
 
-def mean_return_by_quantile(quantized_factor,
-                            forward_returns,
+def mean_return_by_quantile(factor_data,
                             by_date=False,
                             by_group=False,
                             demeaned=True):
@@ -260,33 +255,20 @@ def mean_return_by_quantile(quantized_factor,
     """
 
     if demeaned:
-        adjusted_fr = utils.demean_forward_returns(forward_returns,
-                                                   grouper=by_group)
+        factor_data = utils.demean_forward_returns(factor_data)
     else:
-        adjusted_fr = forward_returns.copy()
+        factor_data = factor_data.copy()
 
-    quantized_factor = quantized_factor.copy()
-    quantized_factor.name = 'quantile'
-    forward_returns_quantile = (pd.DataFrame(quantized_factor)
-                                .merge(adjusted_fr,
-                                       how='left',
-                                       left_index=True,
-                                       right_index=True)
-                                .set_index('quantile', append=True))
-
-    grouper = []
+    grouper = ['factor_quantile']
     if by_date:
-        grouper.append(
-            forward_returns_quantile.index.get_level_values('date'))        
+        grouper.append(factor_data.index.get_level_values('date'))
 
     if by_group:
-        grouper.append(
-            forward_returns_quantile.index.get_level_values('group'))
+        grouper.append('group')
 
-    grouper.append(forward_returns_quantile.index.get_level_values('quantile'))
+    forward_returns_columns = factor_data.filter(regex='^[1-9]\d*$', axis=1).columns
 
-    group_stats = forward_returns_quantile.groupby(grouper)\
-        .agg(['mean', 'std', 'count'])
+    group_stats = factor_data.groupby(grouper)[forward_returns_columns].agg(['mean', 'std', 'count'])
 
     mean_ret = group_stats.T.xs('mean', level=1).T
 
@@ -329,11 +311,11 @@ def compute_mean_returns_spread(mean_returns,
         Period wise standard error of the difference in quantile returns.
     """
 
-    mean_return_difference = mean_returns.xs(upper_quant, level='quantile') - \
-        mean_returns.xs(lower_quant, level='quantile')
+    mean_return_difference = mean_returns.xs(upper_quant, level='factor_quantile') - \
+        mean_returns.xs(lower_quant, level='factor_quantile')
 
-    std1 = std_err.xs(upper_quant, level='quantile')
-    std2 = std_err.xs(lower_quant, level='quantile')
+    std1 = std_err.xs(upper_quant, level='factor_quantile')
+    std2 = std_err.xs(lower_quant, level='factor_quantile')
     joint_std_err = np.sqrt(std1**2 + std2**2)
 
     return mean_return_difference, joint_std_err
@@ -407,6 +389,7 @@ def factor_rank_autocorrelation(factor, period=1, by_group=False):
     autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(period), axis=1)
     autocorr.name = period
     return autocorr
+
 
 def average_cumulative_return_by_quantile(quantized_factor, prices,
                                           periods_before=10, periods_after=15,

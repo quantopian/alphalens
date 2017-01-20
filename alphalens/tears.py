@@ -84,58 +84,75 @@ class GridFigure(object):
 #         plotting.plot_top_bottom_quantile_turnover(quantile_turnover[p], period=p, ax=gf.next_row())
 
 
-# @plotting.plotting_context
-# def create_returns_tear_sheet(factor_data,
-#                               long_short,
-#                               by_group=False):
-#
-#
-#     fr_cols = len(forward_returns.columns)
-#     vertical_sections = 2 + fr_cols * 3
-#     gf = GridFigure(rows=vertical_sections, cols=1)
-#
-#     plotting.plot_returns_table(alpha_beta,
-#                                 mean_ret_quantile,
-#                                 mean_ret_spread_quant,
-#                                 quantile_factor)
-#
-#     plotting.plot_quantile_returns_bar(mean_compret_quantile,
-#                                        by_group=False,
-#                                        ylim_percentiles=None,
-#                                        ax=gf.next_row())
-#
-#     plotting.plot_quantile_returns_violin(mean_compret_quant_daily,
-#                                           ylim_percentiles=(1, 99),
-#                                           ax=gf.next_row())
-#
-#     for p in forward_returns.columns:
-#
-#         plotting.plot_cumulative_returns(factor_returns[p],
-#                                          period=p,
-#                                          ax=gf.next_row())
-#
-#         plotting.plot_cumulative_returns_by_quantile(mean_ret_quant_daily[p],
-#                                                      period=p,
-#                                                      ax=gf.next_row())
-#
-#     ax_mean_quantile_returns_spread_ts = [ gf.next_row() for x in range(fr_cols) ]
-#     plotting.plot_mean_quantile_returns_spread_time_series(mean_ret_spread_quant,
-#                                                            std_err=std_spread_quant,
-#                                                            bandwidth=0.5,
-#                                                            ax=ax_mean_quantile_returns_spread_ts)
+@plotting.plotting_context
+def create_returns_tear_sheet(factor_data, long_short=True):
+
+    factor_returns = perf.factor_returns(factor_data, long_short)
+
+    mean_ret_quantile, std_quantile = perf.mean_return_by_quantile(factor_data,
+                                                                   by_group=False,
+                                                                   demeaned=long_short)
+
+    mean_compret_quantile = mean_ret_quantile.apply(utils.rate_of_return, axis=0)
+
+    mean_ret_quant_daily, std_quant_daily = perf.mean_return_by_quantile(factor_data,
+                                                                         by_date=True,
+                                                                         by_group=False,
+                                                                         demeaned=long_short)
+
+    mean_compret_quant_daily = mean_ret_quant_daily.apply(utils.rate_of_return,
+                                                          axis=0)
+    compstd_quant_daily = std_quant_daily.apply(utils.rate_of_return, axis=0)
+
+    alpha_beta = perf.factor_alpha_beta(factor_data)
+
+    mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(
+        mean_compret_quant_daily,
+        factor_data['factor_quantile'].max(),
+        factor_data['factor_quantile'].min(),
+        std_err=compstd_quant_daily)
+
+    fr_cols = len(factor_returns.columns)
+    vertical_sections = 2 + fr_cols * 3
+    gf = GridFigure(rows=vertical_sections, cols=1)
+
+    plotting.plot_returns_table(alpha_beta, mean_ret_quantile, mean_ret_spread_quant)
+
+    plotting.plot_quantile_returns_bar(mean_compret_quantile,
+                                       by_group=False,
+                                       ylim_percentiles=None,
+                                       ax=gf.next_row())
+
+    plotting.plot_quantile_returns_violin(mean_compret_quant_daily,
+                                          ylim_percentiles=(1, 99),
+                                          ax=gf.next_row())
+
+    for p in factor_returns:
+
+        plotting.plot_cumulative_returns(factor_returns[p],
+                                         period=p,
+                                         ax=gf.next_row())
+
+        plotting.plot_cumulative_returns_by_quantile(mean_ret_quant_daily[p],
+                                                     period=p,
+                                                     ax=gf.next_row())
+
+    ax_mean_quantile_returns_spread_ts = [ gf.next_row() for x in range(fr_cols) ]
+    plotting.plot_mean_quantile_returns_spread_time_series(mean_ret_spread_quant,
+                                                           std_err=std_spread_quant,
+                                                           bandwidth=0.5,
+                                                           ax=ax_mean_quantile_returns_spread_ts)
 
 
 @plotting.plotting_context
-def create_information_tear_sheet(factor_data,
-                                  group_adjust=False,
-                                  by_group=False):
+def create_information_tear_sheet(factor_data, group_adjust=False):
 
 
-    ic = perf.factor_information_coefficient(factor_data, group_adjust, by_group)
+    ic = perf.factor_information_coefficient(factor_data, group_adjust)
 
     mean_monthly_ic = perf.mean_information_coefficient(factor_data,
                                                         group_adjust,
-                                                        by_group,
+                                                        False,
                                                         "M")
 
     plotting.plot_information_table(ic)

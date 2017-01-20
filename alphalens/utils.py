@@ -46,11 +46,11 @@ def quantize_factor(factor, quantiles=5, bins=None, by_group=False):
         Factor quantiles indexed by date and asset.
     """
 
-    def quantile_calc(x, _quantiles, bins):
+    def quantile_calc(x, _quantiles, _bins):
         if _quantiles is not None:
             return pd.qcut(x, _quantiles, labels=False) + 1
-        elif bins is not None:
-            return pd.cut(x, bins, labels=False) + 1
+        elif _bins is not None:
+            return pd.cut(x, _bins, labels=False) + 1
         raise ValueError('quantiles or bins should be provided')
 
     grouper = ['date', 'group'] if by_group else ['date']
@@ -135,6 +135,9 @@ def demean_forward_returns(factor_data, grouper=None):
 
     def demean(x):
         return x - x.mean()
+
+    if not grouper:
+        grouper = factor_data.index.get_level_values('date')
 
     forward_returns_columns = factor_data.filter(regex='^[1-9]\d*$', axis=1).columns
     factor_data[forward_returns_columns] = factor_data.groupby(grouper)[forward_returns_columns].apply(demean)
