@@ -48,40 +48,76 @@ class GridFigure(object):
         return subplt
 
 
-# @plotting.plotting_context
-# def create_summary_tearsheet(factor_data,
-#                              long_short=True,
-#                              turnover_for_all_periods=False):
-#
-#
-#
-#
-#     ic, mean_monthly_ic = perf.compute_information_statistics(factor,
-#                                                               forward_returns)
-#
-#     factor_autocorrelation, quantile_turnover = perf.compute_turnover_statistics(
-#         factor, quantiles, turnover_periods)
-#
-#     fr_cols = len(periods)
-#     vertical_sections = 2 + fr_cols * 3
-#     gf = GridFigure(rows=vertical_sections, cols=1)
-#
-#
-#     plotting.summary_stats(ic,
-#                            alpha_beta,
-#                            quantile_factor,
-#                            mean_compret_quantile,
-#                            quantile_turnover,
-#                            factor_autocorrelation,
-#                            mean_ret_spread_quant)
-#
-#     plotting.plot_quantile_returns_bar(mean_compret_quantile,
-#                                        by_group=False,
-#                                        ylim_percentiles=None,
-#                                        ax=gf.next_row())
-#
-#     for p in turnover_periods:
-#         plotting.plot_top_bottom_quantile_turnover(quantile_turnover[p], period=p, ax=gf.next_row())
+@plotting.plotting_context
+def create_summary_tearsheet(factor_data, long_short=True):
+
+    # Returns Analysis
+    factor_returns = perf.factor_returns(factor_data, long_short)
+
+    mean_ret_quantile, std_quantile = perf.mean_return_by_quantile(factor_data,
+                                                                   by_group=False,
+                                                                   demeaned=long_short)
+
+    mean_compret_quantile = mean_ret_quantile.apply(utils.rate_of_return, axis=0)
+
+    mean_ret_quant_daily, std_quant_daily = perf.mean_return_by_quantile(factor_data,
+                                                                         by_date=True,
+                                                                         by_group=False,
+                                                                         demeaned=long_short)
+
+    mean_compret_quant_daily = mean_ret_quant_daily.apply(utils.rate_of_return,
+                                                          axis=0)
+    compstd_quant_daily = std_quant_daily.apply(utils.rate_of_return, axis=0)
+
+    alpha_beta = perf.factor_alpha_beta(factor_data)
+
+    mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(
+        mean_compret_quant_daily,
+        factor_data['factor_quantile'].max(),
+        factor_data['factor_quantile'].min(),
+        std_err=compstd_quant_daily)
+
+    fr_cols = len(factor_returns.columns)
+    vertical_sections = 2 + fr_cols * 3
+    gf = GridFigure(rows=vertical_sections, cols=1)
+
+    plotting.plot_returns_table(alpha_beta, mean_ret_quantile, mean_ret_spread_quant)
+
+    plotting.plot_quantile_returns_bar(mean_compret_quantile,
+                                       by_group=False,
+                                       ylim_percentiles=None,
+                                       ax=gf.next_row())
+
+    # Information Analysis
+    ic = perf.factor_information_coefficient(factor_data)
+    plotting.plot_information_table(ic)
+
+    # Turnover Analysis
+    turnover_periods = factor_data.filter(regex='^[1-9]\d*$', axis=1).columns
+    factor = factor_data['factor']
+    quantile_factor = factor_data['factor_quantile']
+
+    quantile_turnover = {p: pd.concat([perf.quantile_turnover(
+        quantile_factor, q, p) for q in range(1, quantile_factor.max() + 1)],
+                                           axis=1)
+                              for p in turnover_periods}
+
+    autocorrelation = pd.concat(
+        [perf.factor_rank_autocorrelation(factor, period) for period in
+         turnover_periods], axis=1)
+
+    plotting.plot_turnover_table(autocorrelation, quantile_turnover)
+
+    fr_cols = len(turnover_periods)
+    columns_wide = 1
+    rows_when_wide = (((fr_cols - 1) // 1) + 1)
+    vertical_sections = fr_cols + 3 * rows_when_wide + 2 * fr_cols
+    gf = GridFigure(rows=vertical_sections, cols=columns_wide)
+
+    for period in sorted(quantile_turnover.keys()):
+        plotting.plot_top_bottom_quantile_turnover(quantile_turnover[period],
+                                                   period=period,
+                                                   ax=gf.next_row())
 
 
 @plotting.plotting_context
