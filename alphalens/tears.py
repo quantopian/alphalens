@@ -245,85 +245,78 @@ def create_turnover_tear_sheet(factor_data):
                                                    ax=gf.next_row())
 
 
-# @plotting.plotting_context
-# def create_full_tear_sheet(factor_data,
-#                            avgretplot=(5, 15),
-#                            turnover_for_all_periods=False):
-#     """
-#     Creates a full tear sheet for analysis and evaluating single
-#     return predicting (alpha) factor.
-#
-#     Parameters
-#     ----------
-#     factor : pd.Series - MultiIndex
-#         A MultiIndex Series indexed by date (level 0) and asset (level 1), containing
-#         the values for a single alpha factor.
-#         ::
-#             -----------------------------------
-#                 date    |    asset   |
-#             -----------------------------------
-#                         |   AAPL     |   0.5
-#                         -----------------------
-#                         |   BA       |  -1.1
-#                         -----------------------
-#             2014-01-01  |   CMG      |   1.7
-#                         -----------------------
-#                         |   DAL      |  -0.1
-#                         -----------------------
-#                         |   LULU     |   2.7
-#                         -----------------------
-#
-#     prices : pd.DataFrame
-#         A wide form Pandas DataFrame indexed by date with assets
-#         in the columns. It is important to pass the
-#         correct pricing data in depending on what time your
-#         signal was generated so to avoid lookahead bias, or
-#         delayed calculations. Pricing data must span the factor
-#         analysis time period plus an additional buffer window
-#         that is greater than the maximum number of expected periods
-#         in the forward returns calculations.
-#     groupby : pd.Series - MultiIndex or dict
-#         Either A MultiIndex Series indexed by date and asset,
-#         containing the period wise group codes for each asset, or
-#         a dict of asset to group mappings. If a dict is passed,
-#         it is assumed that group mappings are unchanged for the
-#         entire time period of the passed factor data.
-#     show_groupby_plots : bool
-#         If True create group specific plots.
-#     periods : sequence[int]
-#         periods to compute forward returns on.
-#     quantiles : int
-#         The number of buckets to parition the data into for analysis.
-#     filter_zscore : int or float
-#         Sets forward returns greater than X standard deviations
-#         from the the mean to nan.
-#         Caution: this outlier filtering incorporates lookahead bias.
-#     groupby_labels : dict
-#         A dictionary keyed by group code with values corresponding
-#         to the display name for each group.
-#     long_short : bool
-#         Should this computation happen on a long short portfolio?
-#     avgretplot: tuple (int, int) - (before, after)
-#         If not None, plot quantile average cumulative returns
-#     turnover_for_all_periods: boolean, optional
-#         If True, diplay quantile turnover and factor autocorrelation
-#         plots for every periods. If False, only period of 1 is
-#         plotted
-#     """
-#
-#     factor, forward_returns, periods, \
-#     turnover_periods, can_group_adjust = tear_sheet_setup(factor=factor,
-#                                                           prices=prices,
-#                                                           groupby=groupby,
-#                                                           periods=periods,
-#                                                           filter_zscore=filter_zscore,
-#                                                           groupby_labels=groupby_labels,
-#                                                           turnover_for_all_periods=turnover_for_all_periods)
-#
-#     create_returns_tear_sheet(factor, forward_returns, quantiles, long_short)
-#     create_information_tear_sheet(factor, forward_returns)
-#     create_turnover_tear_sheet(factor, quantiles, turnover_periods)
-#
+@plotting.plotting_context
+def create_full_tear_sheet(factor_data,
+                           long_short=True,
+                           group_adjust=False,
+                           avgretplot=(5, 15)):
+    """
+    Creates a full tear sheet for analysis and evaluating single
+    return predicting (alpha) factor.
+
+    Parameters
+    ----------
+    factor : pd.Series - MultiIndex
+        A MultiIndex Series indexed by date (level 0) and asset (level 1), containing
+        the values for a single alpha factor.
+        ::
+            -----------------------------------
+                date    |    asset   |
+            -----------------------------------
+                        |   AAPL     |   0.5
+                        -----------------------
+                        |   BA       |  -1.1
+                        -----------------------
+            2014-01-01  |   CMG      |   1.7
+                        -----------------------
+                        |   DAL      |  -0.1
+                        -----------------------
+                        |   LULU     |   2.7
+                        -----------------------
+
+    prices : pd.DataFrame
+        A wide form Pandas DataFrame indexed by date with assets
+        in the columns. It is important to pass the
+        correct pricing data in depending on what time your
+        signal was generated so to avoid lookahead bias, or
+        delayed calculations. Pricing data must span the factor
+        analysis time period plus an additional buffer window
+        that is greater than the maximum number of expected periods
+        in the forward returns calculations.
+    groupby : pd.Series - MultiIndex or dict
+        Either A MultiIndex Series indexed by date and asset,
+        containing the period wise group codes for each asset, or
+        a dict of asset to group mappings. If a dict is passed,
+        it is assumed that group mappings are unchanged for the
+        entire time period of the passed factor data.
+    show_groupby_plots : bool
+        If True create group specific plots.
+    periods : sequence[int]
+        periods to compute forward returns on.
+    quantiles : int
+        The number of buckets to parition the data into for analysis.
+    filter_zscore : int or float
+        Sets forward returns greater than X standard deviations
+        from the the mean to nan.
+        Caution: this outlier filtering incorporates lookahead bias.
+    groupby_labels : dict
+        A dictionary keyed by group code with values corresponding
+        to the display name for each group.
+    long_short : bool
+        Should this computation happen on a long short portfolio?
+    avgretplot: tuple (int, int) - (before, after)
+        If not None, plot quantile average cumulative returns
+    turnover_for_all_periods: boolean, optional
+        If True, diplay quantile turnover and factor autocorrelation
+        plots for every periods. If False, only period of 1 is
+        plotted
+    """
+
+    create_returns_tear_sheet(factor_data, long_short)
+    create_information_tear_sheet(factor_data, group_adjust=group_adjust)
+    create_turnover_tear_sheet(factor_data)
+
+
 #     quantile_factor = perf.quantize_factor(factor, quantiles, False)
 #
 #     # Average Cumulative Returns
