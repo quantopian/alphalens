@@ -50,6 +50,21 @@ class GridFigure(object):
 
 @plotting.plotting_context
 def create_summary_tearsheet(factor_data, long_short=True):
+    """
+    Creates a small summary tear sheet with returns, information, and turnover
+    analysis.
+
+    Parameters
+    ----------
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex Series indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for each period,
+        The factor quantile/bin that factor value belongs too, and (optionally) the group the
+        asset belongs to.
+    long_short : bool
+        Should this computation happen on a long short portfolio?
+    """
+
 
     # Returns Analysis
     factor_returns = perf.factor_returns(factor_data, long_short)
@@ -93,8 +108,7 @@ def create_summary_tearsheet(factor_data, long_short=True):
     plotting.plot_information_table(ic)
 
     # Turnover Analysis
-    turnover_periods = factor_data.filter(regex='^[1-9]\d*$', axis=1).columns
-    factor = factor_data['factor']
+    turnover_periods = utils.get_forward_returns_columns(factor_data.columns)
     quantile_factor = factor_data['factor_quantile']
 
     quantile_turnover = {p: pd.concat([perf.quantile_turnover(
@@ -103,25 +117,30 @@ def create_summary_tearsheet(factor_data, long_short=True):
                               for p in turnover_periods}
 
     autocorrelation = pd.concat(
-        [perf.factor_rank_autocorrelation(factor, period) for period in
+        [perf.factor_rank_autocorrelation(factor_data, period) for period in
          turnover_periods], axis=1)
 
     plotting.plot_turnover_table(autocorrelation, quantile_turnover)
 
-    fr_cols = len(turnover_periods)
-    columns_wide = 1
-    rows_when_wide = (((fr_cols - 1) // 1) + 1)
-    vertical_sections = fr_cols + 3 * rows_when_wide + 2 * fr_cols
-    gf = GridFigure(rows=vertical_sections, cols=columns_wide)
-
-    for period in sorted(quantile_turnover.keys()):
-        plotting.plot_top_bottom_quantile_turnover(quantile_turnover[period],
-                                                   period=period,
-                                                   ax=gf.next_row())
-
 
 @plotting.plotting_context
-def create_returns_tear_sheet(factor_data, long_short=True):
+def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
+    """
+    Creates a tear sheet for returns analysis of a factor.
+
+    Parameters
+    ----------
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex Series indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for each period,
+        The factor quantile/bin that factor value belongs too, and (optionally) the group the
+        asset belongs to.
+    long_short : bool
+        Should this computation happen on a long short portfolio?
+    by_group : bool
+        If True, perform calcuations, and display graphs separately for
+        each group.
+    """
 
     factor_returns = perf.factor_returns(factor_data, long_short)
 
@@ -136,8 +155,7 @@ def create_returns_tear_sheet(factor_data, long_short=True):
                                                                          by_group=False,
                                                                          demeaned=long_short)
 
-    mean_compret_quant_daily = mean_ret_quant_daily.apply(utils.rate_of_return,
-                                                          axis=0)
+    mean_compret_quant_daily = mean_ret_quant_daily.apply(utils.rate_of_return, axis=0)
     compstd_quant_daily = std_quant_daily.apply(utils.rate_of_return, axis=0)
 
     alpha_beta = perf.factor_alpha_beta(factor_data)
@@ -179,17 +197,48 @@ def create_returns_tear_sheet(factor_data, long_short=True):
                                                            bandwidth=0.5,
                                                            ax=ax_mean_quantile_returns_spread_ts)
 
+    if by_group:
+        mean_return_quantile_group, mean_return_quantile_group_std_err = perf.mean_return_by_quantile(factor_data,
+                                                                                                      by_date=False,
+                                                                                                      by_group=by_group,
+                                                                                                      demeaned=True)
+
+        mean_compret_quantile_group = mean_return_quantile_group.apply(utils.rate_of_return, axis=0)
+
+        num_groups = len(mean_compret_quantile_group.index.get_level_values('group').unique())
+        vertical_sections = 1 + (((num_groups - 1) // 2) + 1)
+        gf = GridFigure(rows=vertical_sections, cols=2)
+
+        ax_quantile_returns_bar_by_group = [gf.next_cell() for _ in range(num_groups)]
+        plotting.plot_quantile_returns_bar(mean_compret_quantile_group,
+                                           by_group=True,
+                                           ylim_percentiles=(5, 95),
+                                           ax=ax_quantile_returns_bar_by_group)
+
 
 @plotting.plotting_context
-def create_information_tear_sheet(factor_data, group_adjust=False):
+def create_information_tear_sheet(factor_data,
+                                  group_adjust=False,
+                                  by_group=False):
+    """
+    Creates a tear sheet for information analysis of a factor.
+
+    Parameters
+    ----------
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex Series indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for each period,
+        The factor quantile/bin that factor value belongs too, and (optionally) the group the
+        asset belongs to.
+    group_adjust : bool
+        Demean forward returns by group before computing IC.
+    by_group : bool
+        If True, compute period wise IC, and display graphs separately for
+        each group.
+    """
 
 
     ic = perf.factor_information_coefficient(factor_data, group_adjust)
-
-    mean_monthly_ic = perf.mean_information_coefficient(factor_data,
-                                                        group_adjust,
-                                                        False,
-                                                        "M")
 
     plotting.plot_information_table(ic)
 
@@ -206,15 +255,37 @@ def create_information_tear_sheet(factor_data, group_adjust=False):
     plotting.plot_ic_hist(ic, ax=ax_ic_hqq[::2])
     plotting.plot_ic_qq(ic, ax=ax_ic_hqq[1::2])
 
-    ax_monthly_ic_heatmap = [gf.next_cell() for x in range(fr_cols)]
-    plotting.plot_monthly_ic_heatmap(mean_monthly_ic, ax=ax_monthly_ic_heatmap)
+    if not by_group:
+
+        mean_monthly_ic = perf.mean_information_coefficient(factor_data,
+                                                            group_adjust,
+                                                            by_group,
+                                                            "M")
+        ax_monthly_ic_heatmap = [gf.next_cell() for x in range(fr_cols)]
+        plotting.plot_monthly_ic_heatmap(mean_monthly_ic, ax=ax_monthly_ic_heatmap)
+
+    if by_group:
+        mean_group_ic = perf.mean_information_coefficient(factor_data,
+                                                          by_group=True)
+
+        plotting.plot_ic_by_group(mean_group_ic, ax=gf.next_row())
 
 
 @plotting.plotting_context
 def create_turnover_tear_sheet(factor_data):
+    """
+    Creates a tear sheet for analyzing the turnover properties of a factor.
 
-    turnover_periods = factor_data.filter(regex='^[1-9]\d*$', axis=1).columns
-    factor = factor_data['factor']
+    Parameters
+    ----------
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex Series indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for each period,
+        The factor quantile/bin that factor value belongs too, and (optionally) the group the
+        asset belongs to.
+    """
+
+    turnover_periods = utils.get_forward_returns_columns(factor_data.columns)
     quantile_factor = factor_data['factor_quantile']
 
     quantile_turnover = {p: pd.concat([perf.quantile_turnover(
@@ -223,7 +294,7 @@ def create_turnover_tear_sheet(factor_data):
                               for p in turnover_periods}
 
     autocorrelation = pd.concat(
-        [perf.factor_rank_autocorrelation(factor, period) for period in
+        [perf.factor_rank_autocorrelation(factor_data, period) for period in
          turnover_periods], axis=1)
 
     plotting.plot_turnover_table(autocorrelation, quantile_turnover)
@@ -249,139 +320,93 @@ def create_turnover_tear_sheet(factor_data):
 def create_full_tear_sheet(factor_data,
                            long_short=True,
                            group_adjust=False,
-                           avgretplot=(5, 15)):
+                           by_group=False):
     """
     Creates a full tear sheet for analysis and evaluating single
     return predicting (alpha) factor.
 
     Parameters
     ----------
-    factor : pd.Series - MultiIndex
-        A MultiIndex Series indexed by date (level 0) and asset (level 1), containing
-        the values for a single alpha factor.
-        ::
-            -----------------------------------
-                date    |    asset   |
-            -----------------------------------
-                        |   AAPL     |   0.5
-                        -----------------------
-                        |   BA       |  -1.1
-                        -----------------------
-            2014-01-01  |   CMG      |   1.7
-                        -----------------------
-                        |   DAL      |  -0.1
-                        -----------------------
-                        |   LULU     |   2.7
-                        -----------------------
-
-    prices : pd.DataFrame
-        A wide form Pandas DataFrame indexed by date with assets
-        in the columns. It is important to pass the
-        correct pricing data in depending on what time your
-        signal was generated so to avoid lookahead bias, or
-        delayed calculations. Pricing data must span the factor
-        analysis time period plus an additional buffer window
-        that is greater than the maximum number of expected periods
-        in the forward returns calculations.
-    groupby : pd.Series - MultiIndex or dict
-        Either A MultiIndex Series indexed by date and asset,
-        containing the period wise group codes for each asset, or
-        a dict of asset to group mappings. If a dict is passed,
-        it is assumed that group mappings are unchanged for the
-        entire time period of the passed factor data.
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex Series indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for each period,
+        The factor quantile/bin that factor value belongs too, and (optionally) the group the
+        asset belongs to.
     show_groupby_plots : bool
         If True create group specific plots.
-    periods : sequence[int]
-        periods to compute forward returns on.
-    quantiles : int
-        The number of buckets to parition the data into for analysis.
-    filter_zscore : int or float
-        Sets forward returns greater than X standard deviations
-        from the the mean to nan.
-        Caution: this outlier filtering incorporates lookahead bias.
-    groupby_labels : dict
-        A dictionary keyed by group code with values corresponding
-        to the display name for each group.
     long_short : bool
         Should this computation happen on a long short portfolio?
-    avgretplot: tuple (int, int) - (before, after)
-        If not None, plot quantile average cumulative returns
-    turnover_for_all_periods: boolean, optional
-        If True, diplay quantile turnover and factor autocorrelation
-        plots for every periods. If False, only period of 1 is
-        plotted
     """
 
-    create_returns_tear_sheet(factor_data, long_short)
-    create_information_tear_sheet(factor_data, group_adjust=group_adjust)
+    create_returns_tear_sheet(factor_data, long_short, by_group)
+    create_information_tear_sheet(factor_data, group_adjust, by_group)
     create_turnover_tear_sheet(factor_data)
 
 
-#     quantile_factor = perf.quantize_factor(factor, quantiles, False)
-#
-#     # Average Cumulative Returns
-#     if avgretplot is not None:
-#
-#         before, after = avgretplot
-#         after = max(after, max(periods) + 1)
-#         avgretplot = before, after
-#
-#         avg_cumulative_returns = perf.average_cumulative_return_by_quantile(quantile_factor,
-#                                                                             prices,
-#                                                                             periods_before=before,
-#                                                                             periods_after=after,
-#                                                                             demeaned=long_short)
-#
-#         vertical_sections = 1 + (((quantiles - 1) // 2) + 1)
-#         gf = GridFigure(rows=vertical_sections, cols=2)
-#         plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=False,
-#                                                          std_bar=False, ax=gf.next_row())
-#
-#         ax_avg_cumulative_returns_by_q = [ gf.next_cell() for _ in range(quantiles) ]
-#         plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=True,
-#                                                          std_bar=True, ax=ax_avg_cumulative_returns_by_q)
-#
-#     # Group Specific Breakdown
-#     if can_group_adjust and show_groupby_plots:
-#         ic_by_group = perf.mean_information_coefficient(factor,
-#                                                         forward_returns,
-#                                                         by_group=True)
-#
-#         mean_return_quantile_group, mean_return_quantile_group_std_err = perf.mean_return_by_quantile(quantile_factor,
-#                                                                                                       forward_returns,
-#                                                                                                       by_group=True,
-#                                                                                                       demeaned=True)
-#         mean_compret_quantile_group = mean_return_quantile_group.apply(utils.compound_returns, axis=0)
-#
-#         num_groups = len(ic_by_group.index.get_level_values('group').unique())
-#         vertical_sections = 1 + (((num_groups - 1) // 2) + 1)
-#         gf = GridFigure(rows=vertical_sections, cols=2)
-#
-#         plotting.plot_ic_by_group(ic_by_group, ax=gf.next_row())
-#
-#         ax_quantile_returns_bar_by_group = [ gf.next_cell() for _ in range(num_groups) ]
-#         plotting.plot_quantile_returns_bar(mean_compret_quantile_group,
-#                                            by_group=True,
-#                                            ylim_percentiles=(5, 95),
-#                                            ax=ax_quantile_returns_bar_by_group)
-#
-#
-#         if avgretplot is not None:
-#
-#             before, after = avgretplot
-#             num_group = len(quantile_factor.index.get_level_values('group').unique())
-#             vertical_sections = ((num_groups - 1) // 2) + 1
-#             gf = GridFigure(rows=vertical_sections, cols=2)
-#
-#             for group, g_factor in quantile_factor.groupby(level='group'):
-#
-#                 avg_cumulative_returns = perf.average_cumulative_return_by_quantile(g_factor,
-#                                                                                     prices,
-#                                                                                     periods_before=before,
-#                                                                                     periods_after=after,
-#                                                                                     demeaned=long_short)
-#
-#                 plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=False,
-#                                                                  std_bar=False, title=group, ax=gf.next_cell())
+@plotting.plotting_context
+def create_event_returns_tear_sheet(factor_data,
+                                    prices,
+                                    avgretplot=(5, 15),
+                                    long_short=True,
+                                    by_group=False):
+        """
+            Creates a tear sheet to view the average cumulative returns for a
+            factor within a window (pre and post event).
+
+            Parameters
+            ----------
+            factor_data : pd.DataFrame - MultiIndex
+                A MultiIndex Series indexed by date (level 0) and asset (level 1),
+                containing the values for a single alpha factor, forward returns for each period,
+                The factor quantile/bin that factor value belongs too, and (optionally) the group the
+                asset belongs to.
+            prices : pd.DataFrame
+                A wide form Pandas DataFrame indexed by date with assets
+                in the columns. Pricing data should span the factor
+                analysis time period plus/minus an additional buffer window
+                corresponding to periods_after/periods_before parameters.
+            avgretplot: tuple (int, int) - (before, after)
+                If not None, plot quantile average cumulative returns
+            long_short : bool
+                Should this computation happen on a long short portfolio?
+            by_group : bool
+                If True, view the average cumulative returns for each group.
+        """
+
+        before, after = avgretplot
+        after = max(after, max(utils.get_forward_returns_columns(factor_data.columns)) + 1)
+
+        avg_cumulative_returns = perf.average_cumulative_return_by_quantile(factor_data['factor_quantile'],
+                                                                            prices,
+                                                                            periods_before=before,
+                                                                            periods_after=after,
+                                                                            demeaned=long_short)
+
+        num_quantiles = max(factor_data['factor_quantile'])
+
+        vertical_sections = 1 + (((num_quantiles - 1) // 2) + 1)
+        gf = GridFigure(rows=vertical_sections, cols=2)
+        plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=False,
+                                                         std_bar=False, ax=gf.next_row())
+
+        ax_avg_cumulative_returns_by_q = [gf.next_cell() for _ in range(num_quantiles)]
+        plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=True,
+                                                         std_bar=True, ax=ax_avg_cumulative_returns_by_q)
+
+        if by_group:
+            num_groups = len(factor_data['group'].unique())
+            vertical_sections = ((num_groups - 1) // 2) + 1
+            gf = GridFigure(rows=vertical_sections, cols=2)
+
+            for group, g_factor in factor_data.groupby('group'):
+                avg_cumulative_returns = perf.average_cumulative_return_by_quantile(g_factor['factor_quantile'],
+                                                                                    prices,
+                                                                                    periods_before=before,
+                                                                                    periods_after=after,
+                                                                                    demeaned=long_short)
+
+
+                plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=False,
+                                                                 std_bar=False, title=group, ax=gf.next_cell())
 
 

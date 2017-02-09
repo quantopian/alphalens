@@ -54,7 +54,7 @@ def factor_information_coefficient(factor_data,
 
     def src_ic(group):
         f = group['factor']
-        _ic = group.filter(regex='^[1-9]\d*$', axis=1).apply(lambda x: stats.spearmanr(x, f)[0])
+        _ic = group[utils.get_forward_returns_columns(factor_data.columns)].apply(lambda x: stats.spearmanr(x, f)[0])
         return _ic
 
     factor_data = factor_data.copy()
@@ -169,7 +169,7 @@ def factor_returns(factor_data, long_short=True, group_neutral=False):
     if group_neutral:
         weights = weights.groupby(level='date').apply(to_weights, False)
 
-    weighted_returns = factor_data.filter(regex='^[1-9]\d*$', axis=1).multiply(weights, axis=0)
+    weighted_returns = factor_data[utils.get_forward_returns_columns(factor_data.columns)].multiply(weights, axis=0)
 
     returns = weighted_returns.groupby(level='date').sum()
 
@@ -197,9 +197,8 @@ def factor_alpha_beta(factor_data):
     """
 
     returns = factor_returns(factor_data, long_short=True)
-    forward_returns_columns = factor_data.filter(regex='^[1-9]\d*$', axis=1).columns
 
-    universe_ret = factor_data.groupby(level='date')[forward_returns_columns].mean().loc[returns.index]
+    universe_ret = factor_data.groupby(level='date')[utils.get_forward_returns_columns(factor_data.columns)].mean().loc[returns.index]
 
     if isinstance(returns, pd.Series):
         returns.name = universe_ret.columns.values[0]
@@ -266,9 +265,8 @@ def mean_return_by_quantile(factor_data,
     if by_group:
         grouper.append('group')
 
-    forward_returns_columns = factor_data.filter(regex='^[1-9]\d*$', axis=1).columns
 
-    group_stats = factor_data.groupby(grouper)[forward_returns_columns].agg(['mean', 'std', 'count'])
+    group_stats = factor_data.groupby(grouper)[utils.get_forward_returns_columns(factor_data.columns)].agg(['mean', 'std', 'count'])
 
     mean_ret = group_stats.T.xs('mean', level=1).T
 
@@ -350,7 +348,7 @@ def quantile_turnover(quantile_factor, quantile, period=1):
     return quant_turnover
 
 
-def factor_rank_autocorrelation(factor, period=1, by_group=False):
+def factor_rank_autocorrelation(factor_data, period=1):
     """
     Computes autocorrelation of mean factor ranks in specified time spans.
     We must compare period to period factor ranks rather than factor values
@@ -365,9 +363,7 @@ def factor_rank_autocorrelation(factor, period=1, by_group=False):
         Factor values indexed by date and asset and
         optional a custom group.
     period: int, optional
-        Period over which to calculate the autocorrelation        
-    by_group : bool, optional
-        If True, compute autocorrelation separately for each group.
+        Period over which to calculate the autocorrelation
 
     Returns
     -------
@@ -377,22 +373,23 @@ def factor_rank_autocorrelation(factor, period=1, by_group=False):
 
     """
 
-    grouper = ['date', 'group'] if by_group else ['date']
+    grouper = [factor_data.index.get_level_values('date')]
 
-    ranks = factor.groupby(level=grouper).rank()
-    ranks.name = "factor"
+    ranks = factor_data.groupby(grouper)['factor'].rank()
 
     asset_factor_rank = ranks.reset_index().pivot(index='date',
-                                                        columns='asset',
-                                                        values='factor')
+                                                  columns='asset',
+                                                  values='factor')
 
     autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(period), axis=1)
     autocorr.name = period
     return autocorr
 
 
-def average_cumulative_return_by_quantile(quantized_factor, prices,
-                                          periods_before=10, periods_after=15,
+def average_cumulative_return_by_quantile(quantized_factor,
+                                          prices,
+                                          periods_before=10,
+                                          periods_after=15,
                                           demeaned=True):
     """
     Plots sector-wise mean daily returns for factor quantiles 

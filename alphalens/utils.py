@@ -133,14 +133,11 @@ def demean_forward_returns(factor_data, grouper=None):
         security's returns normalized by group.
     """
 
-    def demean(x):
-        return x - x.mean()
-
     if not grouper:
         grouper = factor_data.index.get_level_values('date')
 
-    forward_returns_columns = factor_data.filter(regex='^[1-9]\d*$', axis=1).columns
-    factor_data[forward_returns_columns] = factor_data.groupby(grouper)[forward_returns_columns].apply(demean)
+    cols = get_forward_returns_columns(factor_data.columns)
+    factor_data[cols] = factor_data.groupby(grouper)[cols].transform(lambda x: x - x.mean())
 
     return factor_data
 
@@ -196,8 +193,23 @@ def get_clean_factor_and_forward_returns(factor,
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        A MultiIndex Series indexed by date (level 0) and asset (level 1),
-        containing the values for a single alpha factor.
+        A MultiIndex Series indexed by date (level 0) and asset (level 1), containing
+        the values for a single alpha factor.
+        ::
+            -----------------------------------
+                date    |    asset   |
+            -----------------------------------
+                        |   AAPL     |   0.5
+                        -----------------------
+                        |   BA       |  -1.1
+                        -----------------------
+            2014-01-01  |   CMG      |   1.7
+                        -----------------------
+                        |   DAL      |  -0.1
+                        -----------------------
+                        |   LULU     |   2.7
+                        -----------------------
+
     prices : pd.DataFrame
         A wide form Pandas DataFrame indexed by date with assets
         in the columns. It is important to pass the
@@ -244,23 +256,11 @@ def get_clean_factor_and_forward_returns(factor,
         asset belongs to.
     """
 
+    merged_data = compute_forward_returns(prices, periods, filter_zscore)
+
     factor = factor.copy()
-
-    factor.name = 'factor'
-    factor.index = factor.index.set_names(['date', 'asset'])
-
-    forward_returns = compute_forward_returns(prices, periods, filter_zscore)
-
-    merged_data = pd.merge(pd.DataFrame(factor),
-                           forward_returns,
-                           how='left',
-                           left_index=True,
-                           right_index=True)
-
-    merged_data['factor_quantile'] = quantize_factor(factor,
-                                                     quantiles,
-                                                     bins,
-                                                     by_group)
+    factor.index.rename(['date', 'asset'], inplace=True)
+    merged_data['factor'] = factor
 
     if groupby is not None:
         if isinstance(groupby, dict):
@@ -287,11 +287,14 @@ def get_clean_factor_and_forward_returns(factor,
             groupby = pd.Series(index=factor.index,
                                 data=sn[groupby.values].values)
 
-        groupby.name = 'group'
-        groupby.index = groupby.index.set_names(['date', 'asset'])
-        merged_data['group'] = groupby
+        merged_data['group'] = groupby.astype('category')
 
     merged_data = merged_data.dropna()
+
+    merged_data['factor_quantile'] = quantize_factor(merged_data['factor'],
+                                                     quantiles,
+                                                     bins,
+                                                     by_group)
 
     return merged_data
 
@@ -378,6 +381,8 @@ def rate_of_return(period_ret):
     """
     1-period Growth Rate: the average rate of 1-period returns
     """
-    period = int(period_ret.name)
-    return period_ret.add(1).pow(1./period).sub(1)
+    return period_ret.add(1).pow(1./period_ret.name).sub(1)
 
+
+def get_forward_returns_columns(columns):
+    return columns[columns.astype('str').str.isdigit()]

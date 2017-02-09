@@ -788,7 +788,7 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
                                  sharey=False, figsize=(18, 6 * v_spaces))
             ax = ax.flatten()
 
-        for i, (quantile, q_ret) in enumerate(avg_cumulative_returns.groupby(level='quantile')):
+        for i, (quantile, q_ret) in enumerate(avg_cumulative_returns.groupby(level='factor_quantile')):
 
             mean = q_ret.loc[(quantile, 'mean')]
             mean.name = 'Quantile ' + str(quantile)
@@ -809,7 +809,7 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
         if ax is None:
             f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-        for i, (quantile, q_ret) in enumerate(avg_cumulative_returns.groupby(level='quantile')):
+        for i, (quantile, q_ret) in enumerate(avg_cumulative_returns.groupby(level='factor_quantile')):
 
             mean = q_ret.loc[(quantile, 'mean')]
             mean.name = 'Quantile ' + str(quantile)
