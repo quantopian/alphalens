@@ -18,15 +18,17 @@ import numpy as np
 from IPython.display import display
 
 
-def quantize_factor(factor, quantiles=5, bins=None, by_group=False):
+def quantize_factor(factor_data, quantiles=5, bins=None, by_group=False):
     """
     Computes period wise factor quantiles.
 
     Parameters
     ----------
-    factor : pd.Series - MultiIndex
-        Factor values indexed by date and asset and
-        optional a custom group.
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for each period,
+        The factor quantile/bin that factor value belongs too, and (optionally) the group the
+        asset belongs to.
     quantiles : int or sequence[float]
         Number of equal-sized quantile buckets to use in factor bucketing.
         Alternately sequence of quantiles, allowing non-equal-sized buckets
@@ -53,11 +55,12 @@ def quantize_factor(factor, quantiles=5, bins=None, by_group=False):
             return pd.cut(x, _bins, labels=False) + 1
         raise ValueError('quantiles or bins should be provided')
 
-    grouper = ['date', 'group'] if by_group else ['date']
+    grouper = [factor_data.index.get_level_values('date')]
+    if by_group:
+        grouper.append('group')
 
-    factor_percentile = factor.groupby(level=grouper)
-    factor_quantile = factor_percentile.apply(quantile_calc, quantiles, bins)
-    factor_quantile.name = 'quantile'
+    factor_quantile = factor_data.groupby(grouper)['factor'].apply(quantile_calc, quantiles, bins)
+    factor_quantile.name = 'factor_quantile'
 
     return factor_quantile.dropna()
 
@@ -291,7 +294,7 @@ def get_clean_factor_and_forward_returns(factor,
 
     merged_data = merged_data.dropna()
 
-    merged_data['factor_quantile'] = quantize_factor(merged_data['factor'],
+    merged_data['factor_quantile'] = quantize_factor(merged_data,
                                                      quantiles,
                                                      bins,
                                                      by_group)
@@ -299,8 +302,13 @@ def get_clean_factor_and_forward_returns(factor,
     return merged_data
 
 
-def common_start_returns(factor, prices, before, after,
-                         cumulative=False, mean_by_date=False, demean=None):
+def common_start_returns(factor,
+                         prices,
+                         before,
+                         after,
+                         cumulative=False,
+                         mean_by_date=False,
+                         demean=None):
     """
     A date and equity pair is extracted from each index row in the factor
     dataframe and for each of these pairs a return series is built starting
@@ -376,6 +384,7 @@ def common_start_returns(factor, prices, before, after,
         all_returns.append(series)
 
     return pd.concat(all_returns, axis=1)
+
 
 def rate_of_return(period_ret):
     """

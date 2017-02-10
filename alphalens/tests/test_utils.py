@@ -30,11 +30,26 @@ from pandas.util.testing import (assert_frame_equal,
                                  assert_series_equal)
 
 from .. utils import (compute_forward_returns,
-                      demean_forward_returns,
+                      quantize_factor,
                       common_start_returns)
 
 
 class UtilsTestCase(TestCase):
+    dr = date_range(start='2015-1-1', end='2015-1-2')
+    dr.name = 'date'
+    tickers = ['A', 'B', 'C', 'D']
+    factor = DataFrame(index=dr,
+                       columns=tickers,
+                       data=[[1, 2, 3, 4],
+                             [4, 3, 2, 1]]).stack()
+    factor.index = factor.index.set_names(['date', 'asset'])
+    factor.name = 'factor'
+    factor_data = DataFrame()
+    factor_data['factor'] = factor
+    factor_data['group'] = Series(index=factor.index,
+                                  data=[1, 1, 2, 2, 1, 1, 2, 2],
+                                  dtype="category")
+
 
     def test_compute_forward_returns(self):
         dr = date_range(start='2015-1-1', end='2015-1-3')
@@ -50,6 +65,60 @@ class UtilsTestCase(TestCase):
         expected[2] = [1., 0., nan, nan, nan, nan]
 
         assert_frame_equal(fp, expected)
+
+
+    @parameterized.expand([(factor_data, 4, None, False,
+                            [1, 2, 3, 4, 4, 3, 2, 1]),
+                           (factor_data, 2, None, False,
+                            [1, 1, 2, 2, 2, 2, 1, 1]),
+                           (factor_data, 2, None, True,
+                            [1, 2, 1, 2, 2, 1, 2, 1]),
+                           (factor_data, [0, .25, .5, .75, 1.], None, False,
+                            [1, 2, 3, 4, 4, 3, 2, 1]),
+                           (factor_data, [0, .5, .75, 1.], None, False,
+                            [1, 1, 2, 3, 3, 2, 1, 1]),
+                           (factor_data, [0, .25, .5, 1.], None, False,
+                            [1, 2, 3, 3, 3, 3, 2, 1]),
+                           (factor_data, [0, .5, 1.], None, False,
+                            [1, 1, 2, 2, 2, 2, 1, 1]),
+                           (factor_data, [.25, .5, .75], None, False,
+                            [nan, 1, 2, nan, nan, 2, 1, nan]),
+                           (factor_data, [0, .5, 1.], None, True,
+                            [1, 2, 1, 2, 2, 1, 2, 1]),
+                           (factor_data, [.5, 1.], None, True,
+                            [nan, 1, nan, 1, 1, nan, 1, nan]),
+                           (factor_data, [0, 1.], None, True,
+                            [1, 1, 1, 1, 1, 1, 1, 1]),
+                           (factor_data, None, 4, False,
+                            [1, 2, 3, 4, 4, 3, 2, 1]),
+                           (factor_data, None, 2, False,
+                            [1, 1, 2, 2, 2, 2, 1, 1]),
+                           (factor_data, None, 3, False,
+                            [1, 1, 2, 3, 3, 2, 1, 1]),
+                           (factor_data, None, 8, False,
+                            [1, 3, 6, 8, 8, 6, 3, 1]),
+                           (factor_data, None, [0, 1, 2, 3, 5], False,
+                            [1, 2, 3, 4, 4, 3, 2, 1]),
+                           (factor_data, None, [1, 2, 3], False,
+                            [nan, 1, 2, nan, nan, 2, 1, nan]),
+                           (factor_data, None, [0, 2, 5], False,
+                            [1, 1, 2, 2, 2, 2, 1, 1]),
+                           (factor_data, None, [0.5, 2.5, 4.5], False,
+                            [1, 1, 2, 2, 2, 2, 1, 1]),
+                           (factor_data, None, [0.5, 2.5], True,
+                            [1, 1, nan, nan, nan, nan, 1, 1]),
+                           (factor_data, None, 2, True,
+                            [1, 2, 1, 2, 2, 1, 2, 1])])
+    def test_quantize_factor(self, factor, quantiles, bins, by_group,
+                             expected_vals):
+        quantized_factor = quantize_factor(factor,
+                                           quantiles=quantiles,
+                                           bins=bins,
+                                           by_group=by_group)
+        expected = Series(index=factor.index,
+                          data=expected_vals,
+                          name='factor_quantile').dropna()
+        assert_series_equal(quantized_factor, expected)
 
     @parameterized.expand([(2, 3, False, False,
                             [[0.075, 0.241868],[0.075, 0.241868],[0.075, 0.241868],

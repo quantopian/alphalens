@@ -57,7 +57,7 @@ def create_summary_tearsheet(factor_data, long_short=True):
     Parameters
     ----------
     factor_data : pd.DataFrame - MultiIndex
-        A MultiIndex Series indexed by date (level 0) and asset (level 1),
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
         containing the values for a single alpha factor, forward returns for each period,
         The factor quantile/bin that factor value belongs too, and (optionally) the group the
         asset belongs to.
@@ -131,7 +131,7 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
     Parameters
     ----------
     factor_data : pd.DataFrame - MultiIndex
-        A MultiIndex Series indexed by date (level 0) and asset (level 1),
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
         containing the values for a single alpha factor, forward returns for each period,
         The factor quantile/bin that factor value belongs too, and (optionally) the group the
         asset belongs to.
@@ -226,7 +226,7 @@ def create_information_tear_sheet(factor_data,
     Parameters
     ----------
     factor_data : pd.DataFrame - MultiIndex
-        A MultiIndex Series indexed by date (level 0) and asset (level 1),
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
         containing the values for a single alpha factor, forward returns for each period,
         The factor quantile/bin that factor value belongs too, and (optionally) the group the
         asset belongs to.
@@ -279,7 +279,7 @@ def create_turnover_tear_sheet(factor_data):
     Parameters
     ----------
     factor_data : pd.DataFrame - MultiIndex
-        A MultiIndex Series indexed by date (level 0) and asset (level 1),
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
         containing the values for a single alpha factor, forward returns for each period,
         The factor quantile/bin that factor value belongs too, and (optionally) the group the
         asset belongs to.
@@ -328,7 +328,7 @@ def create_full_tear_sheet(factor_data,
     Parameters
     ----------
     factor_data : pd.DataFrame - MultiIndex
-        A MultiIndex Series indexed by date (level 0) and asset (level 1),
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
         containing the values for a single alpha factor, forward returns for each period,
         The factor quantile/bin that factor value belongs too, and (optionally) the group the
         asset belongs to.

@@ -94,6 +94,7 @@ def context(context='notebook', font_scale=1.5, rc=None):
 
     return sns.plotting_context(context=context, font_scale=font_scale, rc=rc)
 
+
 def plot_returns_table(alpha_beta, mean_ret_quantile, mean_ret_spread_quantile):
     returns_table = pd.DataFrame()
     returns_table = returns_table.append(alpha_beta)

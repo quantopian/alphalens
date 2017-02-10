@@ -33,13 +33,11 @@ def factor_information_coefficient(factor_data,
 
     Parameters
     ----------
-    factor : pd.Series - MultiIndex
-        Factor values indexed by date and asset and
-        optional a custom group.
-    forward_returns : pd.DataFrame - MultiIndex
-        Forward returns in indexed by date and asset and
-        optional a custom group.
-        Separate column for each forward return window.
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for each period,
+        The factor quantile/bin that factor value belongs too, and (optionally) the group the
+        asset belongs to.
     group_adjust : bool
         Demean forward returns by group before computing IC.
     by_group : bool
@@ -84,22 +82,19 @@ def mean_information_coefficient(factor_data,
     What is the mean IC for for each group, each week?
 
     Parameters
-    ----------
-    factor : pd.Series - MultiIndex
-        Factor values indexed by date and asset and
-        optional a custom group.
-    forward_returns : pd.DataFrame - MultiIndex
-        Period wise forward returns in indexed by date and asset and
-        optional a custom group.
-        Separate column for each forward return window.
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for each period,
+        The factor quantile/bin that factor value belongs too, and (optionally) the group the
+        asset belongs to.
     group_adjust : bool
         Demean forward returns by group before computing IC.
+    by_group : bool
+        If True, take the mean IC for each group.
     by_time : str (pd time_rule), optional
         Time window to use when taking mean IC.
         See http://pandas.pydata.org/pandas-docs/stable/timeseries.html
         for available options.
-    by_group : bool
-        If True, take the mean IC for each group.
 
     Returns
     -------
@@ -135,12 +130,11 @@ def factor_returns(factor_data, long_short=True, group_neutral=False):
 
     Parameters
     ----------
-    factor : pd.Series - MultiIndex
-        Factor values indexed by date and asset and
-        optional a custom group.
-    forward_returns : pd.DataFrame - MultiIndex
-        Period wise forward returns in indexed by date and asset.
-        Separate column for each forward return window.
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for each period,
+        The factor quantile/bin that factor value belongs too, and (optionally) the group the
+        asset belongs to.
     long_short : bool
         Should this computation happen on a long short portfolio?
     group_neutral : bool
@@ -187,7 +181,10 @@ def factor_alpha_beta(factor_data):
     Parameters
     ----------
     factor_data : pd.DataFrame - MultiIndex
-        Factor values indexed by date and asset
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for each period,
+        The factor quantile/bin that factor value belongs too, and (optionally) the group the
+        asset belongs to.
 
     Returns
     -------
@@ -208,8 +205,8 @@ def factor_alpha_beta(factor_data):
     for period in returns.columns.values:
         x = universe_ret[period].values
         y = returns[period].values
-
         x = add_constant(x)
+
         reg_fit = OLS(y, x).fit()
         alpha, beta = reg_fit.params
 
@@ -229,14 +226,11 @@ def mean_return_by_quantile(factor_data,
 
     Parameters
     ----------
-    quantized_factor : pd.Series - MultiIndex
-        DataFrame with date, asset and optional a custom group
-         index and factor quantile as a column.
-        See quantile_bucket_factor for more detail.
-    forward_returns : pd.DataFrame - MultiIndex
-        Period wise forward returns in indexed by date and asset and
-        optional a custom group.
-        Separate column for each forward return window.
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for each period,
+        The factor quantile/bin that factor value belongs too, and (optionally) the group the
+        asset belongs to.
     by_date : bool
         If True, compute quantile bucket returns separately for each date.
     by_group : bool
@@ -359,9 +353,11 @@ def factor_rank_autocorrelation(factor_data, period=1):
 
     Parameters
     ----------
-    factor : pd.Series - MultiIndex
-        Factor values indexed by date and asset and
-        optional a custom group.
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for each period,
+        The factor quantile/bin that factor value belongs too, and (optionally) the group the
+        asset belongs to.
     period: int, optional
         Period over which to calculate the autocorrelation
 
