@@ -346,7 +346,10 @@ def common_start_returns(factor,
         -before to after
     """
 
-    returns = prices.pct_change(axis=0)
+    if cumulative:
+        returns = prices
+    else:
+        returns = prices.pct_change(axis=0)
 
     all_returns = []
 
@@ -363,20 +366,23 @@ def common_start_returns(factor,
         ending_index = min(day_zero_index + after + 1, 
                            len(returns.index))
 
-        series = returns.iloc[starting_index:ending_index, :]
+        equities_slice = set(equities)
+        if demean is not None:
+            demean_equities = demean.loc[timestamp].index.get_level_values('asset')
+            equities_slice |= set(demean_equities)
+
+        series = returns.loc[returns.index[starting_index:ending_index],
+                             equities_slice]
         series.index = range(starting_index - day_zero_index,
                              ending_index - day_zero_index)
 
         if cumulative:
-            series = series.add(1).cumprod()
             series = (series / series.loc[0, :]) - 1
 
         if demean is not None:
-            demean_equities = demean[timestamp].index.get_level_values('asset')
-            mean   = series[demean_equities].mean(axis=1)
+            mean   = series.loc[:, demean_equities].mean(axis=1)
+            series = series.loc[:, equities]
             series = series.sub(mean, axis=0)
-
-        series = series.loc[:, equities]
 
         if mean_by_date:
             series = series.mean(axis=1)
