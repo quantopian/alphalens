@@ -13,12 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from . import plotting
-from . import performance as perf
-from . import utils
+
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import pandas as pd
+
+from . import plotting
+from . import performance as perf
+from . import utils
 
 
 # it makes life easier with grid plots
@@ -48,8 +50,8 @@ class GridFigure(object):
         return subplt
 
 
-@plotting.plotting_context
-def create_summary_tearsheet(factor_data, long_short=True):
+@plotting.customize
+def create_summary_tear_sheet(factor_data, long_short=True):
     """
     Creates a small summary tear sheet with returns, information, and turnover
     analysis.
@@ -123,7 +125,7 @@ def create_summary_tearsheet(factor_data, long_short=True):
     plotting.plot_turnover_table(autocorrelation, quantile_turnover)
 
 
-@plotting.plotting_context
+@plotting.customize
 def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
     """
     Creates a tear sheet for returns analysis of a factor.
@@ -216,7 +218,7 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
                                            ax=ax_quantile_returns_bar_by_group)
 
 
-@plotting.plotting_context
+@plotting.customize
 def create_information_tear_sheet(factor_data,
                                   group_adjust=False,
                                   by_group=False):
@@ -233,7 +235,7 @@ def create_information_tear_sheet(factor_data,
     group_adjust : bool
         Demean forward returns by group before computing IC.
     by_group : bool
-        If True, compute period wise IC, and display graphs separately for
+        If True, perform calcuations, and display graphs separately for
         each group.
     """
 
@@ -271,7 +273,7 @@ def create_information_tear_sheet(factor_data,
         plotting.plot_ic_by_group(mean_group_ic, ax=gf.next_row())
 
 
-@plotting.plotting_context
+@plotting.customize
 def create_turnover_tear_sheet(factor_data):
     """
     Creates a tear sheet for analyzing the turnover properties of a factor.
@@ -316,7 +318,7 @@ def create_turnover_tear_sheet(factor_data):
                                                    ax=gf.next_row())
 
 
-@plotting.plotting_context
+@plotting.customize
 def create_full_tear_sheet(factor_data,
                            long_short=True,
                            group_adjust=False,
@@ -332,8 +334,11 @@ def create_full_tear_sheet(factor_data,
         containing the values for a single alpha factor, forward returns for each period,
         The factor quantile/bin that factor value belongs too, and (optionally) the group the
         asset belongs to.
-    show_groupby_plots : bool
-        If True create group specific plots.
+    group_adjust : bool
+        Demean forward returns by group before computing IC.
+    by_group : bool
+        If True, perform calcuations, and display graphs separately for
+        each group.
     long_short : bool
         Should this computation happen on a long short portfolio?
     """
@@ -343,7 +348,7 @@ def create_full_tear_sheet(factor_data,
     create_turnover_tear_sheet(factor_data)
 
 
-@plotting.plotting_context
+@plotting.customize
 def create_event_returns_tear_sheet(factor_data,
                                     prices,
                                     avgretplot=(5, 15),

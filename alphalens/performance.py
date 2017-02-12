@@ -349,7 +349,7 @@ def factor_rank_autocorrelation(factor_data, period=1):
     to account for systematic shifts in the factor values of all names or names
     within a group. This metric is useful for measuring the turnover of a
     factor. If the value of a factor for each name changes randomly from period
-     to period, we'd expect an autocorrelation of 0.
+    to period, we'd expect an autocorrelation of 0.
 
     Parameters
     ----------

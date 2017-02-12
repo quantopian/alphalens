@@ -18,6 +18,10 @@ import numpy as np
 from IPython.display import display
 
 
+class NonMatchingTimezoneError(Exception):
+    pass
+
+
 def quantize_factor(factor_data, quantiles=5, bins=None, by_group=False):
     """
     Computes period wise factor quantiles.
@@ -103,7 +107,7 @@ def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
 
         forward_returns[period] = delta.stack()
 
-    forward_returns.index.rename(['date', 'asset'], inplace=True)
+    forward_returns.index = forward_returns.index.rename(['date', 'asset'])
 
     return forward_returns
 
@@ -259,10 +263,15 @@ def get_clean_factor_and_forward_returns(factor,
         asset belongs to.
     """
 
+    if factor.index.get_level_values('date').tz != prices.index.tz:
+        raise NonMatchingTimezoneError("The timezone of 'factor' is not the "
+                                       "same as the timezone of 'prices'. See "
+                                       "the pandas method tz_localize.")
+
     merged_data = compute_forward_returns(prices, periods, filter_zscore)
 
     factor = factor.copy()
-    factor.index.rename(['date', 'asset'], inplace=True)
+    factor.index = factor.index.rename(['date', 'asset'])
     merged_data['factor'] = factor
 
     if groupby is not None:

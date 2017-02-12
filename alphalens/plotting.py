@@ -23,9 +23,9 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 
-from . import utils
-
 from functools import wraps
+
+from . import utils
 
 DECIMAL_TO_BPS = 10000
 
@@ -169,9 +169,7 @@ def plot_information_table(ic_data):
     ic_summary_table["p-value(IC)"] = p_value
     ic_summary_table["IC Skew"] = stats.skew(ic_data)
     ic_summary_table["IC Kurtosis"] = stats.kurtosis(ic_data)
-    ic_summary_table["Ann. IR"] = (
-                                      ic_data.mean() / ic_data.std()) * np.sqrt(
-        252)
+    ic_summary_table["Ann. IR"] = (ic_data.mean() / ic_data.std()) * np.sqrt(252)
 
     print("Information Analysis")
     utils.print_table(ic_summary_table.apply(lambda x: x.round(3)).T)

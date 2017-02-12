@@ -373,6 +373,7 @@ class PerformanceTestCase(TestCase):
         data=[[r1**i,  r2**i,  r3**i,  r4**i] for i in range(1, 19)]
         prices = DataFrame(index=dr, columns=tickers, data=data)
         dr2 = date_range(start='2015-1-21', end='2015-1-26')
+        dr2.name = 'date'
         factor = DataFrame(index=dr2, columns=tickers,
                            data=[[3, 4, 2, 1], [3, 4, 2, 1], [3, 4, 2, 1],
                                  [3, 4, 2, 1], [3, 4, 2, 1], [3, 4, 2, 1]]).stack()
@@ -429,7 +430,7 @@ class PerformanceTestCase(TestCase):
                                                    demeaned, quantiles,
                                                    expected_vals):
         """
-        Test varying factor asset universe: at differnt dates there might be
+        Test varying factor asset universe: at different dates there might be
         different assets
         """
         dr = date_range(start='2015-1-15', end='2015-1-25')
@@ -439,6 +440,7 @@ class PerformanceTestCase(TestCase):
         data=[[r1**i,  r2**i,  r3**i,  r4**i,  r2**i,  r3**i] for i in range(1, 12)]
         prices = DataFrame(index=dr, columns=tickers, data=data)
         dr2 = date_range(start='2015-1-18', end='2015-1-21')
+        dr2.name = 'date'
         factor = DataFrame(index=dr2, columns=tickers,
                            data=[[3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
                                  [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2]]).stack()
