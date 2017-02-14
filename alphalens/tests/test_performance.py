@@ -16,7 +16,7 @@
 from __future__ import division
 from unittest import TestCase
 from nose_parameterized import parameterized
-from numpy import (nan, inf)
+from numpy import (nan, inf, array)
 from pandas import (
     Series,
     DataFrame,
@@ -28,64 +28,75 @@ from pandas import (
     Int64Index,
     DatetimeIndex
 )
+
 from pandas.util.testing import (assert_frame_equal,
                                  assert_series_equal)
 
-
 from .. performance import (factor_information_coefficient,
                             mean_information_coefficient,
-                            quantize_factor,
                             quantile_turnover,
                             factor_rank_autocorrelation,
                             factor_returns, factor_alpha_beta,
                             mean_return_by_quantile,
                             average_cumulative_return_by_quantile)
 
-from .. utils import (get_clean_factor_and_forward_returns)
+from .. utils import (get_forward_returns_columns,
+                      get_clean_factor_and_forward_returns,
+                      quantize_factor)
+
 
 class PerformanceTestCase(TestCase):
     dr = date_range(start='2015-1-1', end='2015-1-2')
     dr.name = 'date'
     tickers = ['A', 'B', 'C', 'D']
-    factor = (DataFrame(index=dr, columns=tickers,
-                        data=[[1, 2, 3, 4],
-                              [4, 3, 2, 1]])
-              .stack())
+    factor = DataFrame(index=dr,
+                       columns=tickers,
+                       data=[[1, 2, 3, 4],
+                             [4, 3, 2, 1]]).stack()
     factor.index = factor.index.set_names(['date', 'asset'])
     factor.name = 'factor'
-    factor = factor.reset_index()
-    factor['group'] = [1, 1, 2, 2, 1, 1, 2, 2]
-    factor = factor.set_index(['date', 'asset', 'group']).factor
+    factor_data = DataFrame()
+    factor_data['factor'] = factor
+    factor_data['group'] = Series(index=factor.index,
+                                  data=[1, 1, 2, 2, 1, 1, 2, 2],
+                                  dtype="category")
 
-    @parameterized.expand([(factor, [4, 3, 2, 1, 1, 2, 3, 4],
+    @parameterized.expand([(factor_data, [4, 3, 2, 1, 1, 2, 3, 4],
                             False, False,
                             dr,
                             [-1., -1.],
                             ),
-                           (factor, [1, 2, 3, 4, 4, 3, 2, 1],
+                           (factor_data, [1, 2, 3, 4, 4, 3, 2, 1],
                             False, False,
                             dr,
                             [1., 1.],
                             ),
-                           (factor, [1, 2, 3, 4, 4, 3, 2, 1],
+                           (factor_data, [1, 2, 3, 4, 4, 3, 2, 1],
                             False, True,
                             MultiIndex.from_product(
                                 [dr, [1, 2]], names=['date', 'group']),
                             [1., 1., 1., 1.],
                             ),
-                           (factor, [1, 2, 3, 4, 4, 3, 2, 1],
+                           (factor_data, [1, 2, 3, 4, 4, 3, 2, 1],
                             True, True,
                             MultiIndex.from_product(
                                 [dr, [1, 2]], names=['date', 'group']),
                             [1., 1., 1., 1.],
                             )])
-    def test_information_coefficient(self, factor, fr,
-                                     group_adjust, by_group,
-                                     expected_ix, expected_ic_val):
-        fr_df = DataFrame(index=self.factor.index, columns=[1], data=fr)
+    def test_information_coefficient(self,
+                                     factor_data,
+                                     forward_returns,
+                                     group_adjust,
+                                     by_group,
+                                     expected_ix,
+                                     expected_ic_val):
 
-        ic = factor_information_coefficient(
-            factor, fr_df, group_adjust=group_adjust, by_group=by_group)
+        factor_data[1] = Series(index=factor_data.index,
+                                data=forward_returns)
+
+        ic = factor_information_coefficient(factor_data=factor_data,
+                                            group_adjust=group_adjust,
+                                            by_group=by_group)
 
         expected_ic_df = DataFrame(index=expected_ix,
                                    columns=Int64Index([1], dtype='object'),
@@ -93,38 +104,56 @@ class PerformanceTestCase(TestCase):
 
         assert_frame_equal(ic, expected_ic_df)
 
-    @parameterized.expand([(factor, [4, 3, 2, 1, 1, 2, 3, 4],
-                            'D', False,
+    @parameterized.expand([(factor_data,
+                            [4, 3, 2, 1, 1, 2, 3, 4],
+                            False,
+                            False,
+                            'D',
                             dr,
-                            [-1., -1.],
-                            ),
-                           (factor, [1, 2, 3, 4, 4, 3, 2, 1],
-                            'W', False,
+                            [-1., -1.]),
+                           (factor_data,
+                            [1, 2, 3, 4, 4, 3, 2, 1],
+                            False,
+                            False,
+                            'W',
                             DatetimeIndex(['2015-01-04'],
-                                          name='date', freq='W-SUN'),
-                            [1.],
-                            ),
-                           (factor, [1, 2, 3, 4, 4, 3, 2, 1],
-                            None, True,
+                                          name='date',
+                                          freq='W-SUN'),
+                            [1.]),
+                           (factor_data,
+                            [1, 2, 3, 4, 4, 3, 2, 1],
+                            False,
+                            True,
+                            None,
                             Int64Index([1, 2], name='group'),
-                            [1., 1.],
-                            ),
-                           (factor, [1, 2, 3, 4, 4, 3, 2, 1],
-                            'W', True,
+                            [1., 1.]),
+                           (factor_data,
+                            [1, 2, 3, 4, 4, 3, 2, 1],
+                            False,
+                            True,
+                            'W',
                             MultiIndex.from_product(
                                 [DatetimeIndex(['2015-01-04'],
-                                               name='date', freq='W-SUN'),
+                                               name='date',
+                                               freq='W-SUN'),
                                  [1, 2]], names=['date', 'group']),
-                            [1., 1.],
-                            )])
-    def test_mean_information_coefficient(self, factor, fr,
-                                          by_time, by_group,
-                                          expected_ix, expected_ic_val):
-        fr_df = DataFrame(index=self.factor.index, columns=[1], data=fr)
+                            [1., 1.])])
+    def test_mean_information_coefficient(self,
+                                          factor_data,
+                                          forward_returns,
+                                          group_adjust,
+                                          by_group,
+                                          by_time,
+                                          expected_ix,
+                                          expected_ic_val):
 
-        ic = mean_information_coefficient(
-            factor, fr_df, group_adjust=False, by_time=by_time,
-            by_group=by_group)
+        factor_data[1] = Series(index=factor_data.index,
+                                data=forward_returns)
+
+        ic = mean_information_coefficient(factor_data,
+                                          group_adjust=group_adjust,
+                                          by_group=by_group,
+                                          by_time=by_time)
 
         expected_ic_df = DataFrame(index=expected_ix,
                                    columns=Int64Index([1], dtype='object'),
@@ -132,58 +161,6 @@ class PerformanceTestCase(TestCase):
 
         assert_frame_equal(ic, expected_ic_df)
 
-    @parameterized.expand([(factor, 4, None, False,
-                            [1, 2, 3, 4, 4, 3, 2, 1]),
-                           (factor, 2, None, False,
-                            [1, 1, 2, 2, 2, 2, 1, 1]),
-                           (factor, 2, None, True,
-                            [1, 2, 1, 2, 2, 1, 2, 1]),
-                           (factor, [0, .25, .5, .75, 1.], None, False,
-                            [1, 2, 3, 4, 4, 3, 2, 1]),
-                           (factor, [0, .5, .75, 1.], None, False,
-                            [1, 1, 2, 3, 3, 2, 1, 1]),
-                           (factor, [0, .25, .5, 1.], None, False,
-                            [1, 2, 3, 3, 3, 3, 2, 1]),
-                           (factor, [0, .5, 1.], None, False,
-                            [1, 1, 2, 2, 2, 2, 1, 1]),
-                           (factor, [.25, .5, .75], None, False,
-                            [nan, 1, 2, nan, nan, 2, 1, nan]),
-                           (factor, [0, .5, 1.], None, True,
-                            [1, 2, 1, 2, 2, 1, 2, 1]),
-                           (factor, [.5, 1.], None, True,
-                            [nan, 1, nan, 1, 1, nan, 1, nan]),
-                           (factor, [0, 1.], None, True,
-                            [1, 1, 1, 1, 1, 1, 1, 1]),
-                           (factor, None, 4, False,
-                            [1, 2, 3, 4, 4, 3, 2, 1]),
-                           (factor, None, 2, False,
-                            [1, 1, 2, 2, 2, 2, 1, 1]),
-                           (factor, None, 3, False,
-                            [1, 1, 2, 3, 3, 2, 1, 1]),
-                           (factor, None, 8, False,
-                            [1, 3, 6, 8, 8, 6, 3, 1]),
-                           (factor, None, [0, 1, 2, 3, 5], False,
-                            [1, 2, 3, 4, 4, 3, 2, 1]),
-                           (factor, None, [1, 2, 3], False,
-                            [nan, 1, 2, nan, nan, 2, 1, nan]),
-                           (factor, None, [0, 2, 5], False,
-                            [1, 1, 2, 2, 2, 2, 1, 1]),
-                           (factor, None, [0.5, 2.5, 4.5], False,
-                            [1, 1, 2, 2, 2, 2, 1, 1]),
-                           (factor, None, [0.5, 2.5], True,
-                            [1, 1, nan, nan, nan, nan, 1, 1]),
-                           (factor, None, 2, True,
-                            [1, 2, 1, 2, 2, 1, 2, 1])])
-    def test_quantize_factor(self, factor, quantiles, bins, by_group,
-                             expected_vals):
-        quantized_factor = quantize_factor(factor,
-                                           quantiles=quantiles,
-                                           bins=bins,
-                                           by_group=by_group)
-        expected = Series(index=factor.index,
-                          data=expected_vals,
-                          name='quantile').dropna()
-        assert_series_equal(quantized_factor, expected)
 
     @parameterized.expand([([[1.0, 2.0, 3.0, 4.0],
                              [4.0, 3.0, 2.0, 1.0],
@@ -228,50 +205,55 @@ class PerformanceTestCase(TestCase):
 
     @parameterized.expand([([1, 2, 3, 4, 4, 3, 2, 1],
                             [4, 3, 2, 1, 1, 2, 3, 4],
+                            False,
                             [-1.25000, -1.25000]),
                            ([1, 1, 1, 1, 1, 1, 1, 1],
                             [4, 3, 2, 1, 1, 2, 3, 4],
-                            [nan, nan])])
-    def test_factor_returns(self, factor_vals, fwd_return_vals, expected_vals):
-        factor = Series(index=self.factor.index, data=factor_vals)
-
-        fwd_return_df = DataFrame(index=self.factor.index,
-                                  columns=[1], data=fwd_return_vals)
-
-        factor_returns_s = factor_returns(factor, fwd_return_df)
-        expected = DataFrame(index=self.dr, data=expected_vals, columns=[1])
-
-        assert_frame_equal(factor_returns_s, expected)
-
-    @parameterized.expand([([1, 2, 3, 4, 4, 3, 2, 1],
+                            False,
+                            [nan, nan]),
+                           ([1, 2, 3, 4, 4, 3, 2, 1],
                             [4, 3, 2, 1, 1, 2, 3, 4],
+                            True,
                             [-0.5, -0.5]),
                            ([1, 2, 3, 4, 1, 2, 3, 4],
                             [1, 4, 1, 2, 1, 2, 2, 1],
-                            [1.0, 0.0]),                            
+                            True,
+                            [1.0, 0.0]),
                            ([1, 1, 1, 1, 1, 1, 1, 1],
                             [4, 3, 2, 1, 1, 2, 3, 4],
-                            [nan, nan])])
-    def test_factor_group_neutral_returns(self, factor_vals, fwd_return_vals,
-                                          expected_vals):
-        factor = Series(index=self.factor.index, data=factor_vals)
-        fwd_return_df = DataFrame(index=self.factor.index,
-                                  columns=[1], data=fwd_return_vals)
-        factor_returns_s = factor_returns(factor, fwd_return_df, group_neutral=True)
-        expected = DataFrame(index=self.dr, data=expected_vals, columns=[1])
-        assert_frame_equal(factor_returns_s, expected)
-        
-    @parameterized.expand([([1, 2, 3, 4, 1, 1, 1, 1],
-                            [3.5, 2.0],
-                            (2.**252)-1, 1.)])
-    def test_factor_alpha_beta(self, fwd_return_vals, factor_returns_vals,
-                               alpha, beta):
-        factor_returns = Series(index=self.dr, data=factor_returns_vals)
-        fwd_return_df = DataFrame(index=self.factor.index,
-                                  columns=[1], data=fwd_return_vals)
+                            True,
+                            [nan, nan])
+                           ])
+    def test_factor_returns(self,
+                            factor_vals,
+                            fwd_return_vals,
+                            group_neutral,
+                            expected_vals):
 
-        ab = factor_alpha_beta(None, fwd_return_df,
-                               factor_returns=factor_returns)
+        factor_data = self.factor_data.copy()
+        factor_data[1] = fwd_return_vals
+        factor_data['factor'] = factor_vals
+
+        factor_returns_s = factor_returns(factor_data=factor_data,
+                                          long_short=True,
+                                          group_neutral=group_neutral)
+
+        expected = DataFrame(index=self.dr,
+                             data=expected_vals,
+                             columns=get_forward_returns_columns(factor_data.columns))
+
+        assert_frame_equal(factor_returns_s, expected)
+
+
+    @parameterized.expand([([1, 2, 3, 4, 1, 1, 1, 1],
+                            -1,
+                            5./6.)])
+    def test_factor_alpha_beta(self, fwd_return_vals, alpha, beta):
+
+        factor_data = self.factor_data.copy()
+        factor_data[1] = fwd_return_vals
+
+        ab = factor_alpha_beta(factor_data=factor_data)
 
         expected = DataFrame(columns=[1],
                              index=['Ann. alpha', 'beta'],
@@ -284,21 +266,15 @@ class PerformanceTestCase(TestCase):
                             [1.0, 2.0, 3.0, 4.0],
                             [1.0, 2.0, 3.0, 4.0],
                             [1.0, 2.0, 3.0, 4.0]],
-                            [1, 1, 2, 2, 1, 1, 2,
-                             2, 1, 1, 2, 2, 1, 1, 2, 2],
                             '2015-1-4',
                             1,
-                            False,
                             [nan, 1.0, 1.0, 1.0]),
                            ([[4.0, 3.0, 2.0, 1.0],
                             [1.0, 2.0, 3.0, 4.0],
                             [4.0, 3.0, 2.0, 1.0],
                             [1.0, 2.0, 3.0, 4.0]],
-                            [1, 1, 2, 2, 1, 1, 2,
-                             2, 1, 1, 2, 2, 1, 1, 2, 2],
                             '2015-1-4',
                             1,
-                            False,
                            [nan, -1.0, -1.0, -1.0]),
                            ([[1.0, 2.0, 3.0, 4.0],
                             [2.0, 1.0, 4.0, 3.0],
@@ -312,48 +288,30 @@ class PerformanceTestCase(TestCase):
                             [2.0, 1.0, 4.0, 3.0],
                             [2.0, 1.0, 4.0, 3.0],
                             [4.0, 3.0, 2.0, 1.0]],
-                            [1, 1, 2, 2, 1, 1, 2, 2,
-                             1, 1, 2, 2, 1, 1, 2, 2,
-                             1, 1, 2, 2, 1, 1, 2, 2,
-                             1, 1, 2, 2, 1, 1, 2, 2,
-                             1, 1, 2, 2, 1, 1, 2, 2,
-                             1, 1, 2, 2, 1, 1, 2, 2],
                             '2015-1-12',
                             3,
-                            False,
                             [nan, nan, nan, 1.0, 1.0,
                              1.0, 0.6, -0.6, -1.0, 1.0,
-                             -0.6, -1.0]),
-                           ([[1.0, 2.0, 3.0, 4.0],
-                            [2.0, 1.0, 4.0, 3.0],
-                            [4.0, 3.0, 2.0, 1.0],
-                            [1.0, 2.0, 3.0, 4.0]],
-                            [1, 1, 2, 2, 1, 1, 2,
-                             2, 1, 1, 2, 2, 1, 1, 2, 2],
-                            '2015-1-4',
-                            1,
-                            True,
-                            [nan, -1.0, 1.0, -1.0])
+                             -0.6, -1.0])
                            ])
-    def test_factor_rank_autocorrelation(self, factor_values,
-                                         group_values, end_date,
-                                         period, by_group,
+    def test_factor_rank_autocorrelation(self,
+                                         factor_values,
+                                         end_date,
+                                         period,
                                          expected_vals):
         dr = date_range(start='2015-1-1', end=end_date)
         dr.name = 'date'
         tickers = ['A', 'B', 'C', 'D']
-        factor_df = DataFrame(index=dr, columns=tickers, data=factor_values)\
-            .stack()
-        factor_df.index = factor_df.index.set_names(['date', 'asset'])
+        factor = DataFrame(index=dr,
+                           columns=tickers,
+                           data=factor_values).stack()
+        factor.index = factor.index.set_names(['date', 'asset'])
 
-        factor = Series(factor_df)
-        factor.name = 'factor'
-        factor = factor.reset_index()
-        factor['group'] = group_values
-        factor = factor.set_index(['date', 'asset', 'group']).factor
+        factor_df = DataFrame()
+        factor_df['factor'] = factor
 
-        fa = factor_rank_autocorrelation(factor, period, by_group)
-        expected = Series(index=fa.index, data=expected_vals)
+        fa = factor_rank_autocorrelation(factor_df, period)
+        expected = Series(index=dr, data=expected_vals)
         expected.name = period
 
         assert_series_equal(fa, expected)
@@ -415,21 +373,27 @@ class PerformanceTestCase(TestCase):
         data=[[r1**i,  r2**i,  r3**i,  r4**i] for i in range(1, 19)]
         prices = DataFrame(index=dr, columns=tickers, data=data)
         dr2 = date_range(start='2015-1-21', end='2015-1-26')
+        dr2.name = 'date'
         factor = DataFrame(index=dr2, columns=tickers,
                            data=[[3, 4, 2, 1], [3, 4, 2, 1], [3, 4, 2, 1],
                                  [3, 4, 2, 1], [3, 4, 2, 1], [3, 4, 2, 1]]).stack()
 
-        factor, forward_returns = get_clean_factor_and_forward_returns(factor,
-                                                                       prices,
-                                                                       periods=range(0,after+1),
-                                                                       filter_zscore=False)
-        quantile_factor = quantize_factor(factor, by_group=False, quantiles=quantiles)
-        avgrt = average_cumulative_return_by_quantile(quantile_factor, prices, before, after, demeaned)
+        factor_data = get_clean_factor_and_forward_returns(factor,
+                                                           prices,
+                                                           quantiles=quantiles,
+                                                           periods=range(0,after+1),
+                                                           filter_zscore=False)
+
+        avgrt = average_cumulative_return_by_quantile(factor_data['factor_quantile'],
+                                                      prices,
+                                                      before,
+                                                      after,
+                                                      demeaned)
         arrays = []
         for q in range(1, quantiles+1):
             arrays.append((q, 'mean'))
             arrays.append((q, 'std'))
-        index = MultiIndex.from_tuples(arrays, names=['quantile', None])
+        index = MultiIndex.from_tuples(arrays, names=['factor_quantile', None])
         expected = DataFrame(index=index, columns=range(-before,after+1), data=expected_vals)
         assert_frame_equal(avgrt, expected)
 
@@ -466,7 +430,7 @@ class PerformanceTestCase(TestCase):
                                                    demeaned, quantiles,
                                                    expected_vals):
         """
-        Test varying factor asset universe: at differnt dates there might be
+        Test varying factor asset universe: at different dates there might be
         different assets
         """
         dr = date_range(start='2015-1-15', end='2015-1-25')
@@ -476,20 +440,26 @@ class PerformanceTestCase(TestCase):
         data=[[r1**i,  r2**i,  r3**i,  r4**i,  r2**i,  r3**i] for i in range(1, 12)]
         prices = DataFrame(index=dr, columns=tickers, data=data)
         dr2 = date_range(start='2015-1-18', end='2015-1-21')
+        dr2.name = 'date'
         factor = DataFrame(index=dr2, columns=tickers,
                            data=[[3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
                                  [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2]]).stack()
 
-        factor, forward_returns = get_clean_factor_and_forward_returns(factor,
-                                                                       prices,
-                                                                       periods=range(0,after+1),
-                                                                       filter_zscore=False)
-        quantile_factor = quantize_factor(factor, by_group=False, quantiles=quantiles)
-        avgrt = average_cumulative_return_by_quantile(quantile_factor, prices, before, after, demeaned)
+        factor_data = get_clean_factor_and_forward_returns(factor,
+                                                           prices,
+                                                           quantiles=quantiles,
+                                                           periods=range(0,after+1),
+                                                           filter_zscore=False)
+
+        avgrt = average_cumulative_return_by_quantile(factor_data['factor_quantile'],
+                                                      prices,
+                                                      before,
+                                                      after,
+                                                      demeaned)
         arrays = []
         for q in range(1, quantiles+1):
             arrays.append((q, 'mean'))
             arrays.append((q, 'std'))
-        index = MultiIndex.from_tuples(arrays, names=['quantile', None])
+        index = MultiIndex.from_tuples(arrays, names=['factor_quantile', None])
         expected = DataFrame(index=index, columns=range(-before,after+1), data=expected_vals)
         assert_frame_equal(avgrt, expected)

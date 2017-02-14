@@ -29,8 +29,8 @@ extra_reqs = {
 if __name__ == "__main__":
     setup(
         name='alphalens',
-        version='0.0.0',
-        description='Factor analysis tools',
+        version='0.1.0',
+        description='Performance analysis of predictive (alpha) stock factors',
         author='Quantopian Inc.',
         author_email='opensource@quantopian.com',
         packages=find_packages(include='alphalens.*'),
