@@ -308,6 +308,8 @@ def get_clean_factor_and_forward_returns(factor,
                                                      bins,
                                                      by_group)
 
+    merged_data = merged_data.dropna()
+
     return merged_data
 
 

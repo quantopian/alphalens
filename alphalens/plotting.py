@@ -175,6 +175,15 @@ def plot_information_table(ic_data):
     utils.print_table(ic_summary_table.apply(lambda x: x.round(3)).T)
 
 
+def plot_quantile_statistics_table(factor_data):
+
+    quantile_stats = factor_data.groupby('factor_quantile').agg(['min', 'max', 'mean', 'std', 'count'])['factor']
+    quantile_stats['count %'] = quantile_stats['count'] / quantile_stats['count'].sum() * 100.
+
+    print("Quantiles Statistics")
+    utils.print_table(quantile_stats)
+
+
 def plot_ic_ts(ic, ax=None):
     """
     Plots Spearman Rank Information Coefficient and IC moving

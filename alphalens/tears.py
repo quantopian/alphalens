@@ -98,6 +98,9 @@ def create_summary_tear_sheet(factor_data, long_short=True):
     vertical_sections = 2 + fr_cols * 3
     gf = GridFigure(rows=vertical_sections, cols=1)
 
+
+    plotting.plot_quantile_statistics_table(factor_data)
+
     plotting.plot_returns_table(alpha_beta, mean_ret_quantile, mean_ret_spread_quant)
 
     plotting.plot_quantile_returns_bar(mean_compret_quantile,
@@ -114,7 +117,7 @@ def create_summary_tear_sheet(factor_data, long_short=True):
     quantile_factor = factor_data['factor_quantile']
 
     quantile_turnover = {p: pd.concat([perf.quantile_turnover(
-        quantile_factor, q, p) for q in range(1, quantile_factor.max() + 1)],
+        quantile_factor, q, p) for q in range(1, int(quantile_factor.max()) + 1)],
                                            axis=1)
                               for p in turnover_periods}
 
@@ -291,7 +294,7 @@ def create_turnover_tear_sheet(factor_data):
     quantile_factor = factor_data['factor_quantile']
 
     quantile_turnover = {p: pd.concat([perf.quantile_turnover(
-        quantile_factor, q, p) for q in range(1, quantile_factor.max() + 1)],
+        quantile_factor, q, p) for q in range(1, int(quantile_factor.max()) + 1)],
                                            axis=1)
                               for p in turnover_periods}
 
@@ -343,6 +346,7 @@ def create_full_tear_sheet(factor_data,
         Should this computation happen on a long short portfolio?
     """
 
+    plotting.plot_quantile_statistics_table(factor_data)
     create_returns_tear_sheet(factor_data, long_short, by_group)
     create_information_tear_sheet(factor_data, group_adjust, by_group)
     create_turnover_tear_sheet(factor_data)
