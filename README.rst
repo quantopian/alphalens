@@ -19,18 +19,26 @@ and plots about an alpha factor, including:
 -  Returns Analysis
 -  Information Coefficient Analysis
 -  Turnover Analysis
--  Sector Analysis
+-  Grouped Analysis
 
 Getting started
 ---------------
 
-With a signal and pricing data creating a factor "tear sheet" is just:
+With a signal and pricing data creating a factor "tear sheet" is a two step process:
 
 .. code:: python
 
     import alphalens
+    
+    # Ingest and format data
+    factor_data = alphalens.utils.get_clean_factor_and_forward_returns(my_factor, 
+                                                                       pricing, 
+                                                                       quantiles=5,
+                                                                       groupby=ticker_sector,
+                                                                       groupby_labels=sector_names)
 
-    alphalens.tears.create_factor_tear_sheet(my_factor, pricing)
+    # Run analysis
+    alphalens.tears.create_full_tear_sheet(factor_data)
 
 
 Learn more
