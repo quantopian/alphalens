@@ -140,6 +140,8 @@ def demean_forward_returns(factor_data, grouper=None):
         security's returns normalized by group.
     """
 
+    factor_data = factor_data.copy()
+
     if not grouper:
         grouper = factor_data.index.get_level_values('date')
 
