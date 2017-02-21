@@ -8,3 +8,17 @@
 build/
 docs/build/
 .ipynb_checkpoints
+
+# Tox puts virtualenvs here by default.
+.tox/
+
+# coverage.py outputs.
+cover
+.coverage
+
+# Intermediate outputs from building distributions for PyPI.
+dist
+*.egg-info/
+
+# Emacs temp files.
+*~
