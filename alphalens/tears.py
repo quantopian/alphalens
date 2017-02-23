@@ -419,3 +419,100 @@ def create_event_returns_tear_sheet(factor_data,
                                                                  std_bar=False, title=group, ax=gf.next_cell())
 
 
+
+@utils.deprecated('This function is deprecated and will be removed in the'
+                  ' future. Please use the new API instead.')
+def create_factor_tear_sheet(factor,
+                             prices,
+                             groupby=None,
+                             show_groupby_plots=True,
+                             periods=(1, 5, 10),
+                             quantiles=5,
+                             bins=None,
+                             filter_zscore=10,
+                             groupby_labels=None,
+                             long_short=True,
+                             avgretplot=(5, 15),
+                             turnover_for_all_periods=False):
+    """
+
+        ######## DEPRECATED ########
+        Some functionality will be missing or has been moved. Please use the
+        new API instead.
+        ############################
+
+        Creates a full tear sheet for analysis and evaluating single
+        return predicting (alpha) factor.
+        Parameters
+        ----------
+        factor : pd.Series - MultiIndex
+            A MultiIndex Series indexed by date (level 0) and asset (level 1), containing
+            the values for a single alpha factor.
+            ::
+                -----------------------------------
+                    date    |    asset   |
+                -----------------------------------
+                            |   AAPL     |   0.5
+                            -----------------------
+                            |   BA       |  -1.1
+                            -----------------------
+                2014-01-01  |   CMG      |   1.7
+                            -----------------------
+                            |   DAL      |  -0.1
+                            -----------------------
+                            |   LULU     |   2.7
+                            -----------------------
+        prices : pd.DataFrame
+            A wide form Pandas DataFrame indexed by date with assets
+            in the columns. It is important to pass the
+            correct pricing data in depending on what time your
+            signal was generated so to avoid lookahead bias, or
+            delayed calculations. Pricing data must span the factor
+            analysis time period plus an additional buffer window
+            that is greater than the maximum number of expected periods
+            in the forward returns calculations.
+        groupby : pd.Series - MultiIndex or dict
+            Either A MultiIndex Series indexed by date and asset,
+            containing the period wise group codes for each asset, or
+            a dict of asset to group mappings. If a dict is passed,
+            it is assumed that group mappings are unchanged for the
+            entire time period of the passed factor data.
+        show_groupby_plots : bool
+            If True create group specific plots.
+        periods : sequence[int]
+            periods to compute forward returns on.
+        quantiles : int or sequence[float]
+            Number of equal-sized quantile buckets to use in factor bucketing.
+            Alternately sequence of quantiles, e.g. [0, .10, .5, .90, 1.]
+            Only one of 'quantiles' or 'bins' can be not-None
+        bins : int or sequence[float]
+            Number of equal-width bins to use in factor bucketing.
+            Alternately sequence of bin edges allowing for non-uniform bin width
+            Only one of 'quantiles' or 'bins' can be not-None
+        filter_zscore : int or float
+            Sets forward returns greater than X standard deviations
+            from the the mean to nan.
+            Caution: this outlier filtering incorporates lookahead bias.
+        groupby_labels : dict
+            A dictionary keyed by group code with values corresponding
+            to the display name for each group.
+        long_short : bool
+            Should this computation happen on a long short portfolio?
+        avgretplot: tuple (int, int) - (before, after)
+            If not None, plot quantile average cumulative returns
+        turnover_for_all_periods: boolean, optional
+            If True, diplay quantile turnover and factor autocorrelation
+            plots for every periods. If False, only period of 1 is
+            plotted
+        """
+
+    factor_data = utils.get_clean_factor_and_forward_returns(factor,
+                                                             prices,
+                                                             quantiles=quantiles,
+                                                             bins=bins,
+                                                             periods=periods,
+                                                             groupby=groupby,
+                                                             filter_zscore=filter_zscore,
+                                                             groupby_labels=groupby_labels)
+
+    create_full_tear_sheet(factor_data, long_short, by_group=show_groupby_plots)

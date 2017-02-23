@@ -52,7 +52,7 @@ Installation
 
 ::
 
-    pip install alphalens
+    pip install git+https://github.com/quantopian/alphalens
 
 Alphalens depends on:
 
