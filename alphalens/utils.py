@@ -295,10 +295,10 @@ def get_clean_factor_and_forward_returns(factor,
         asset belongs to.
     """
 
-    if factor.index.get_level_values('date').tz != prices.index.tz:
+    if factor.index.levels[0].tz != prices.index.tz:
         raise NonMatchingTimezoneError("The timezone of 'factor' is not the "
                                        "same as the timezone of 'prices'. See "
-                                       "the pandas method tz_localize.")
+                                       "the pandas methods tz_localize and tz_convert.")
 
     merged_data = compute_forward_returns(prices, periods, filter_zscore)
 
