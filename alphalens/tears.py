@@ -391,7 +391,7 @@ def create_event_returns_tear_sheet(factor_data,
                                                                             periods_after=after,
                                                                             demeaned=long_short)
 
-        num_quantiles = max(factor_data['factor_quantile'])
+        num_quantiles = int(factor_data['factor_quantile'].max())
 
         vertical_sections = 1 + (((num_quantiles - 1) // 2) + 1)
         gf = GridFigure(rows=vertical_sections, cols=2)
