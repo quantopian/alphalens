@@ -768,11 +768,8 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
 
     cum_ret = ret_wide.add(1).cumprod()
     cum_ret = cum_ret.loc[:, ::-1]
-    num_quant = len(cum_ret.columns)
 
-    colors = cm.RdYlGn_r(np.linspace(0, 1, num_quant))
-
-    cum_ret.plot(lw=2, ax=ax, color=colors)
+    cum_ret.plot(lw=2, ax=ax, cmap=cm.RdYlGn_r)
     ax.legend()
     ymin, ymax = cum_ret.min().min(), cum_ret.max().max()
     ax.set(ylabel='Log Cumulative Returns',
