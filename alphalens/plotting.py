@@ -357,9 +357,9 @@ def plot_quantile_returns_bar(mean_ret_by_q,
     mean_ret_by_q = mean_ret_by_q.copy()
 
     if ylim_percentiles is not None:
-        ymin = (np.percentile(mean_ret_by_q.values,
+        ymin = (np.nanpercentile(mean_ret_by_q.values,
                               ylim_percentiles[0]) * DECIMAL_TO_BPS)
-        ymax = (np.percentile(mean_ret_by_q.values,
+        ymax = (np.nanpercentile(mean_ret_by_q.values,
                               ylim_percentiles[1]) * DECIMAL_TO_BPS)
     else:
         ymin = None
@@ -426,9 +426,9 @@ def plot_quantile_returns_violin(return_by_q,
     return_by_q = return_by_q.copy()
         
     if ylim_percentiles is not None:
-        ymin = (np.percentile(return_by_q.values,
+        ymin = (np.nanpercentile(return_by_q.values,
                               ylim_percentiles[0]) * DECIMAL_TO_BPS)
-        ymax = (np.percentile(return_by_q.values,
+        ymax = (np.nanpercentile(return_by_q.values,
                               ylim_percentiles[1]) * DECIMAL_TO_BPS)
     else:
         ymin = None
@@ -531,7 +531,7 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
                         alpha=0.3,
                         color='steelblue')
 
-    ylim = np.percentile(abs(mean_returns_spread_bps.values), 95)
+    ylim = np.nanpercentile(abs(mean_returns_spread_bps.values), 95)
     ax.set(ylabel='Difference In Quantile Mean Return (bps)',
            xlabel='',
            title=title,
