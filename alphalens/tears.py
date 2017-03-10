@@ -347,9 +347,9 @@ def create_full_tear_sheet(factor_data,
     """
 
     plotting.plot_quantile_statistics_table(factor_data)
-    create_returns_tear_sheet(factor_data, long_short, by_group)
-    create_information_tear_sheet(factor_data, group_adjust, by_group)
-    create_turnover_tear_sheet(factor_data)
+    create_returns_tear_sheet(factor_data, long_short, by_group, set_context=False)
+    create_information_tear_sheet(factor_data, group_adjust, by_group, set_context=False)
+    create_turnover_tear_sheet(factor_data, set_context=False)
 
 
 @plotting.customize
