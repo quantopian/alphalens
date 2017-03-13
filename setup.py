@@ -39,7 +39,7 @@ if __name__ == "__main__":
         },
         long_description=long_description,
         classifiers=[
-            'Development Status :: 4 - Beta',
+            'Development Status :: 5 - Stable',
             'Intended Audience :: Developers',
             'License :: OSI Approved :: Apache Software License',
             'Natural Language :: English',
