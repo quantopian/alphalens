@@ -631,6 +631,18 @@ def std_conversion(period_std):
 def std_conversion(period_std):
     """
     1-period standard deviation (or standard error) approximation
+    
+    Parameters
+    ----------
+    period_std: pd.DataFrame
+        DataFrame containing standard deviation or standard error values
+        with column headings representing the return period.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame in same format as input but with one-period
+        standard deviation/error values.
     """
     period_len = period_std.name
     return period_std / np.sqrt(period_len)
