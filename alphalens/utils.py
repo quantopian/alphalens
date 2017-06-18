@@ -442,5 +442,13 @@ def rate_of_return(period_ret):
     return period_ret.add(1).pow(1./period_ret.name).sub(1)
 
 
+def std_conversion(period_std):
+    """
+    1-period standard deviation (or standard error) approximation
+    """
+    period_len = period_std.name
+    return period_std / np.sqrt(period_len)
+
+
 def get_forward_returns_columns(columns):
     return columns[columns.astype('str').str.isdigit()]
