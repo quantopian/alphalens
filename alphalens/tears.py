@@ -101,7 +101,7 @@ def create_summary_tear_sheet(factor_data, long_short=True):
 
     plotting.plot_quantile_statistics_table(factor_data)
 
-    plotting.plot_returns_table(alpha_beta, mean_ret_quantile, mean_ret_spread_quant)
+    plotting.plot_returns_table(alpha_beta, mean_compret_quantile, mean_ret_spread_quant)
 
     plotting.plot_quantile_returns_bar(mean_compret_quantile,
                                        by_group=False,
@@ -175,7 +175,7 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
     vertical_sections = 2 + fr_cols * 3
     gf = GridFigure(rows=vertical_sections, cols=1)
 
-    plotting.plot_returns_table(alpha_beta, mean_ret_quantile, mean_ret_spread_quant)
+    plotting.plot_returns_table(alpha_beta, mean_compret_quantile, mean_ret_spread_quant)
 
     plotting.plot_quantile_returns_bar(mean_compret_quantile,
                                        by_group=False,
