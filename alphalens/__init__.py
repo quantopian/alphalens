@@ -3,4 +3,4 @@ from . import plotting
 from . import tears
 from . import utils
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
