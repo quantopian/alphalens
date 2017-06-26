@@ -8,9 +8,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Alphalens &mdash; Alphalens 0.1 documentation</title>
+  <title>Alphalens &mdash; Alphalens 0.1.1 documentation</title>
   
 
+  
+  
   
   
 
@@ -30,7 +32,10 @@
   
 
   
-    <link rel="top" title="Alphalens 0.1 documentation" href="#"/> 
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Alphalens 0.1.1 documentation" href="#"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -39,6 +44,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -58,7 +64,7 @@
             
             
               <div class="version">
-                0.1
+                0.1.1
               </div>
             
           
@@ -79,8 +85,11 @@
           
             
             
-                <!-- Local TOC -->
-                <div class="local-toc"><ul>
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
 <li><a class="reference internal" href="#">Alphalens</a><ul>
 <li><a class="reference internal" href="#getting-started">Getting started</a></li>
 <li><a class="reference internal" href="#learn-more">Learn more</a></li>
@@ -105,8 +114,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="#">Alphalens</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Alphalens</a>
+        
       </nav>
 
 
@@ -115,29 +126,47 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="#">Docs</a> &raquo;</li>
-      
-    <li>Alphalens</li>
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>Alphalens</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/index.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="alphalens">
+  <img alt="https://media.quantopian.com/logos/open_source/alphalens-logo-03.png" class="align-center" src="https://media.quantopian.com/logos/open_source/alphalens-logo-03.png" />
+<div class="section" id="alphalens">
 <h1>Alphalens<a class="headerlink" href="#alphalens" title="Permalink to this headline">¶</a></h1>
 <a class="reference external image-reference" href="https://travis-ci.org/quantopian/alphalens"><img alt="https://travis-ci.org/quantopian/alphalens.svg?branch=master" src="https://travis-ci.org/quantopian/alphalens.svg?branch=master" /></a>
 <p>Alphalens is a Python Library for performance analysis of predictive
@@ -151,14 +180,22 @@ and plots about an alpha factor, including:</p>
 <li>Returns Analysis</li>
 <li>Information Coefficient Analysis</li>
 <li>Turnover Analysis</li>
-<li>Sector Analysis</li>
+<li>Grouped Analysis</li>
 </ul>
 <div class="section" id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
-<p>With a signal and pricing data creating a factor &#8220;tear sheet&#8221; is just:</p>
+<p>With a signal and pricing data creating a factor “tear sheet” is a two step process:</p>
 <div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">alphalens</span>
 
-<span class="n">alphalens</span><span class="o">.</span><span class="n">tears</span><span class="o">.</span><span class="n">create_factor_tear_sheet</span><span class="p">(</span><span class="n">my_factor</span><span class="p">,</span> <span class="n">pricing</span><span class="p">)</span>
+<span class="c1"># Ingest and format data</span>
+<span class="n">factor_data</span> <span class="o">=</span> <span class="n">alphalens</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_clean_factor_and_forward_returns</span><span class="p">(</span><span class="n">my_factor</span><span class="p">,</span>
+                                                                   <span class="n">pricing</span><span class="p">,</span>
+                                                                   <span class="n">quantiles</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                                                                   <span class="n">groupby</span><span class="o">=</span><span class="n">ticker_sector</span><span class="p">,</span>
+                                                                   <span class="n">groupby_labels</span><span class="o">=</span><span class="n">sector_names</span><span class="p">)</span>
+
+<span class="c1"># Run analysis</span>
+<span class="n">alphalens</span><span class="o">.</span><span class="n">tears</span><span class="o">.</span><span class="n">create_full_tear_sheet</span><span class="p">(</span><span class="n">factor_data</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -169,7 +206,7 @@ the factor tear sheet.</p>
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">alphalens</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">quantopian</span><span class="o">/</span><span class="n">alphalens</span>
 </pre></div>
 </div>
 <p>Alphalens depends on:</p>
@@ -216,7 +253,9 @@ issues</a>.</p>
 <li><a class="reference external" href="https://github.com/twiecki">Thomas Wiecki</a></li>
 <li><a class="reference external" href="https://github.com/marketneutral">Jonathan Larkin</a></li>
 <li>Jessica Stauth (<a class="reference external" href="mailto:jstauth&#37;&#52;&#48;quantopian&#46;com">jstauth<span>&#64;</span>quantopian<span>&#46;</span>com</a>)</li>
+<li><a class="reference external" href="https://github.com/tasopetridis">Taso Petridis</a></li>
 </ul>
+<p>For a full list of contributors see the <a class="reference external" href="https://github.com/quantopian/alphalens/graphs/contributors">contributors page.</a></p>
 </div>
 <div class="section" id="example-tear-sheet">
 <h2>Example Tear Sheet<a class="headerlink" href="#example-tear-sheet" title="Permalink to this headline">¶</a></h2>
@@ -239,6 +278,9 @@ issues</a>.</p>
 </div>
 
 
+           </div>
+           <div class="articleComments">
+            
            </div>
           </div>
           <footer>
@@ -270,10 +312,11 @@ issues</a>.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1',
+            VERSION:'0.1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

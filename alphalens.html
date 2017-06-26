@@ -8,9 +8,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Alphalens &mdash; Alphalens 0.1 documentation</title>
+  <title>Alphalens &mdash; Alphalens 0.1.1 documentation</title>
   
 
+  
+  
   
   
 
@@ -30,7 +32,10 @@
   
 
   
-    <link rel="top" title="Alphalens 0.1 documentation" href="index.html"/> 
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Alphalens 0.1.1 documentation" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -39,6 +44,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -58,7 +64,7 @@
             
             
               <div class="version">
-                0.1
+                0.1.1
               </div>
             
           
@@ -79,8 +85,11 @@
           
             
             
-                <!-- Local TOC -->
-                <div class="local-toc"><ul>
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
 <li><a class="reference internal" href="#">Alphalens</a><ul>
 <li><a class="reference internal" href="#module-alphalens.tears">Tear Sheets</a></li>
 <li><a class="reference internal" href="#module-alphalens.performance">Performance</a></li>
@@ -100,8 +109,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Alphalens</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Alphalens</a>
+        
       </nav>
 
 
@@ -110,23 +121,40 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Alphalens</li>
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Alphalens</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/alphalens.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/alphalens.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -136,61 +164,280 @@
 <h1>Alphalens<a class="headerlink" href="#alphalens" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-alphalens.tears">
 <span id="tear-sheets"></span><h2>Tear Sheets<a class="headerlink" href="#module-alphalens.tears" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="alphalens.tears.GridFigure">
+<em class="property">class </em><code class="descclassname">alphalens.tears.</code><code class="descname">GridFigure</code><span class="sig-paren">(</span><em>rows</em>, <em>cols</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tears.GridFigure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="alphalens.tears.GridFigure.next_cell">
+<code class="descname">next_cell</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tears.GridFigure.next_cell" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tears.GridFigure.next_row">
+<code class="descname">next_row</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tears.GridFigure.next_row" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="function">
-<dt id="alphalens.tears.create_factor_tear_sheet">
-<code class="descclassname">alphalens.tears.</code><code class="descname">create_factor_tear_sheet</code><span class="sig-paren">(</span><em>factor</em>, <em>prices</em>, <em>sectors=None</em>, <em>sector_plots=True</em>, <em>days=(1</em>, <em>5</em>, <em>10)</em>, <em>quantiles=5</em>, <em>filter_zscore=10</em>, <em>sector_names=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tears.create_factor_tear_sheet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a full tear sheet for analysis and evaluating single
-return predicting (alpha) factors.</p>
+<dt id="alphalens.tears.create_event_returns_tear_sheet">
+<code class="descclassname">alphalens.tears.</code><code class="descname">create_event_returns_tear_sheet</code><span class="sig-paren">(</span><em>factor_data</em>, <em>prices</em>, <em>avgretplot=(5</em>, <em>15)</em>, <em>long_short=True</em>, <em>by_group=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tears.create_event_returns_tear_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a tear sheet to view the average cumulative returns for a
+factor within a window (pre and post event).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series - MultiIndex</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_data</strong> : pd.DataFrame - MultiIndex</p>
 <blockquote>
-<div><p>A MultiIndex Series indexed by date and asset, containing
-the values for a single alpha factor.</p>
+<div><p>A MultiIndex Series indexed by date (level 0) and asset (level 1),
+containing the values for a single alpha factor, forward returns for each period,
+The factor quantile/bin that factor value belongs too, and (optionally) the group the
+asset belongs to.</p>
 </div></blockquote>
 <p><strong>prices</strong> : pd.DataFrame</p>
 <blockquote>
-<div><p>A wide form Pandas DataFrame indexed by date with equities
+<div><p>A wide form Pandas DataFrame indexed by date with assets
+in the columns. Pricing data should span the factor
+analysis time period plus/minus an additional buffer window
+corresponding to periods_after/periods_before parameters.</p>
+</div></blockquote>
+<p><strong>avgretplot: tuple (int, int) - (before, after)</strong></p>
+<blockquote>
+<div><p>If not None, plot quantile average cumulative returns</p>
+</div></blockquote>
+<p><strong>long_short</strong> : bool</p>
+<blockquote>
+<div><p>Should this computation happen on a long short portfolio? if so then factor returns
+will be demeaned across the factor universe</p>
+</div></blockquote>
+<p><strong>by_group</strong> : bool</p>
+<blockquote class="last">
+<div><p>If True, view the average cumulative returns for each group.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alphalens.tears.create_factor_tear_sheet">
+<code class="descclassname">alphalens.tears.</code><code class="descname">create_factor_tear_sheet</code><span class="sig-paren">(</span><em>factor</em>, <em>prices</em>, <em>groupby=None</em>, <em>show_groupby_plots=False</em>, <em>periods=(1</em>, <em>5</em>, <em>10)</em>, <em>quantiles=5</em>, <em>bins=None</em>, <em>filter_zscore=10</em>, <em>groupby_labels=None</em>, <em>long_short=True</em>, <em>avgretplot=(5</em>, <em>15)</em>, <em>turnover_for_all_periods=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tears.create_factor_tear_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>######## DEPRECATED ########
+Some functionality will be missing or has been moved. Please use the
+new API instead.
+############################</p>
+<p>Creates a full tear sheet for analysis and evaluating single
+return predicting (alpha) factor.
+Parameters
+———-
+factor : pd.Series - MultiIndex</p>
+<blockquote>
+<div><p>A MultiIndex Series indexed by date (level 0) and asset (level 1), containing
+the values for a single alpha factor.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">-----------------------------------</span>
+    <span class="n">date</span>    <span class="o">|</span>    <span class="n">asset</span>   <span class="o">|</span>
+<span class="o">-----------------------------------</span>
+            <span class="o">|</span>   <span class="n">AAPL</span>     <span class="o">|</span>   <span class="mf">0.5</span>
+            <span class="o">-----------------------</span>
+            <span class="o">|</span>   <span class="n">BA</span>       <span class="o">|</span>  <span class="o">-</span><span class="mf">1.1</span>
+            <span class="o">-----------------------</span>
+<span class="mi">2014</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span>  <span class="o">|</span>   <span class="n">CMG</span>      <span class="o">|</span>   <span class="mf">1.7</span>
+            <span class="o">-----------------------</span>
+            <span class="o">|</span>   <span class="n">DAL</span>      <span class="o">|</span>  <span class="o">-</span><span class="mf">0.1</span>
+            <span class="o">-----------------------</span>
+            <span class="o">|</span>   <span class="n">LULU</span>     <span class="o">|</span>   <span class="mf">2.7</span>
+            <span class="o">-----------------------</span>
+</pre></div>
+</div>
+</div></blockquote>
+<dl class="docutils">
+<dt>prices <span class="classifier-delimiter">:</span> <span class="classifier">pd.DataFrame</span></dt>
+<dd>A wide form Pandas DataFrame indexed by date with assets
 in the columns. It is important to pass the
-correct pricing data in depending on what time of day your
+correct pricing data in depending on what time your
 signal was generated so to avoid lookahead bias, or
 delayed calculations. Pricing data must span the factor
 analysis time period plus an additional buffer window
-that is greater than the maximum number of expected days
-in the forward returns calculations.</p>
-</div></blockquote>
-<p><strong>sectors</strong> : pd.Series - MultiIndex or dict</p>
-<blockquote>
-<div><p>Either A MultiIndex Series indexed by date and asset,
-containing the daily sector codes for each asset, or
-a dict of asset to sector mappings. If a dict is passed,
-it is assumed that sector mappings are unchanged for the
-entire time period of the passed factor data.</p>
-</div></blockquote>
-<p><strong>sector_plots</strong> : bool</p>
-<blockquote>
-<div><p>If True create sector specific plots.</p>
-</div></blockquote>
-<p><strong>days</strong> : list</p>
-<blockquote>
-<div><p>Days to compute forward returns on.</p>
-</div></blockquote>
-<p><strong>quantiles</strong> : int</p>
-<blockquote>
-<div><p>The number of buckets to parition the data into for analysis.</p>
-</div></blockquote>
-<p><strong>filter_zscore</strong> : int</p>
-<blockquote>
-<div><p>Sets forward returns greater than X standard deviations
+that is greater than the maximum number of expected periods
+in the forward returns calculations.</dd>
+<dt>groupby <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series - MultiIndex or dict</span></dt>
+<dd>Either A MultiIndex Series indexed by date and asset,
+containing the period wise group codes for each asset, or
+a dict of asset to group mappings. If a dict is passed,
+it is assumed that group mappings are unchanged for the
+entire time period of the passed factor data.</dd>
+<dt>show_groupby_plots <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>If True create group specific plots.</dd>
+<dt>periods <span class="classifier-delimiter">:</span> <span class="classifier">sequence[int]</span></dt>
+<dd>periods to compute forward returns on.</dd>
+<dt>quantiles <span class="classifier-delimiter">:</span> <span class="classifier">int or sequence[float]</span></dt>
+<dd>Number of equal-sized quantile buckets to use in factor bucketing.
+Alternately sequence of quantiles, e.g. [0, .10, .5, .90, 1.]
+Only one of ‘quantiles’ or ‘bins’ can be not-None</dd>
+<dt>bins <span class="classifier-delimiter">:</span> <span class="classifier">int or sequence[float]</span></dt>
+<dd>Number of equal-width bins to use in factor bucketing.
+Alternately sequence of bin edges allowing for non-uniform bin width
+Only one of ‘quantiles’ or ‘bins’ can be not-None</dd>
+<dt>filter_zscore <span class="classifier-delimiter">:</span> <span class="classifier">int or float</span></dt>
+<dd>Sets forward returns greater than X standard deviations
 from the the mean to nan.
-Caution: this outlier filtering incorporates lookahead bias.</p>
+Caution: this outlier filtering incorporates lookahead bias.</dd>
+<dt>groupby_labels <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd>A dictionary keyed by group code with values corresponding
+to the display name for each group.</dd>
+<dt>long_short <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>Should this computation happen on a long short portfolio?</dd>
+<dt>avgretplot: tuple (int, int) - (before, after)</dt>
+<dd>If not None, plot quantile average cumulative returns</dd>
+<dt>turnover_for_all_periods: boolean, optional</dt>
+<dd>If True, diplay quantile turnover and factor autocorrelation
+plots for every periods. If False, only period of 1 is
+plotted</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="alphalens.tears.create_full_tear_sheet">
+<code class="descclassname">alphalens.tears.</code><code class="descname">create_full_tear_sheet</code><span class="sig-paren">(</span><em>factor_data</em>, <em>long_short=True</em>, <em>group_adjust=False</em>, <em>by_group=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tears.create_full_tear_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a full tear sheet for analysis and evaluating single
+return predicting (alpha) factor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_data</strong> : pd.DataFrame - MultiIndex</p>
+<blockquote>
+<div><p>A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+containing the values for a single alpha factor, forward returns for each period,
+The factor quantile/bin that factor value belongs too, and (optionally) the group the
+asset belongs to.</p>
 </div></blockquote>
-<p><strong>sector_names</strong> : dict</p>
+<p><strong>group_adjust</strong> : bool</p>
+<blockquote>
+<div><p>Demean forward returns by group before computing IC.</p>
+</div></blockquote>
+<p><strong>by_group</strong> : bool</p>
+<blockquote>
+<div><p>If True, perform calcuations, and display graphs separately for
+each group.</p>
+</div></blockquote>
+<p><strong>long_short</strong> : bool</p>
 <blockquote class="last">
-<div><p>A dictionary keyed by sector code with values corresponding
-to the display name for each sector.</p>
+<div><p>Should this computation happen on a long short portfolio? if so then factor returns
+will be demeaned across the factor universe</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alphalens.tears.create_information_tear_sheet">
+<code class="descclassname">alphalens.tears.</code><code class="descname">create_information_tear_sheet</code><span class="sig-paren">(</span><em>factor_data</em>, <em>group_adjust=False</em>, <em>by_group=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tears.create_information_tear_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a tear sheet for information analysis of a factor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_data</strong> : pd.DataFrame - MultiIndex</p>
+<blockquote>
+<div><p>A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+containing the values for a single alpha factor, forward returns for each period,
+The factor quantile/bin that factor value belongs too, and (optionally) the group the
+asset belongs to.</p>
+</div></blockquote>
+<p><strong>group_adjust</strong> : bool</p>
+<blockquote>
+<div><p>Demean forward returns by group before computing IC.</p>
+</div></blockquote>
+<p><strong>by_group</strong> : bool</p>
+<blockquote class="last">
+<div><p>If True, perform calcuations, and display graphs separately for
+each group.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alphalens.tears.create_returns_tear_sheet">
+<code class="descclassname">alphalens.tears.</code><code class="descname">create_returns_tear_sheet</code><span class="sig-paren">(</span><em>factor_data</em>, <em>long_short=True</em>, <em>by_group=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tears.create_returns_tear_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a tear sheet for returns analysis of a factor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_data</strong> : pd.DataFrame - MultiIndex</p>
+<blockquote>
+<div><p>A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+containing the values for a single alpha factor, forward returns for each period,
+The factor quantile/bin that factor value belongs too, and (optionally) the group the
+asset belongs to.</p>
+</div></blockquote>
+<p><strong>long_short</strong> : bool</p>
+<blockquote>
+<div><p>Should this computation happen on a long short portfolio? if so then factor returns
+will be demeaned across the factor universe</p>
+</div></blockquote>
+<p><strong>by_group</strong> : bool</p>
+<blockquote class="last">
+<div><p>If True, perform calcuations, and display graphs separately for
+each group.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alphalens.tears.create_summary_tear_sheet">
+<code class="descclassname">alphalens.tears.</code><code class="descname">create_summary_tear_sheet</code><span class="sig-paren">(</span><em>factor_data</em>, <em>long_short=True</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tears.create_summary_tear_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a small summary tear sheet with returns, information, and turnover
+analysis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_data</strong> : pd.DataFrame - MultiIndex</p>
+<blockquote>
+<div><p>A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+containing the values for a single alpha factor, forward returns for each period,
+The factor quantile/bin that factor value belongs too, and (optionally) the group the
+asset belongs to.</p>
+</div></blockquote>
+<p><strong>long_short</strong> : bool</p>
+<blockquote class="last">
+<div><p>Should this computation happen on a long short portfolio? if so then factor returns
+will be demeaned across the factor universe</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alphalens.tears.create_turnover_tear_sheet">
+<code class="descclassname">alphalens.tears.</code><code class="descname">create_turnover_tear_sheet</code><span class="sig-paren">(</span><em>factor_data</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tears.create_turnover_tear_sheet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a tear sheet for analyzing the turnover properties of a factor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_data</strong> : pd.DataFrame - MultiIndex</p>
+<blockquote class="last">
+<div><p>A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+containing the values for a single alpha factor, forward returns for each period,
+The factor quantile/bin that factor value belongs too, and (optionally) the group the
+asset belongs to.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -202,10 +449,54 @@ to the display name for each sector.</p>
 <div class="section" id="module-alphalens.performance">
 <span id="performance"></span><h2>Performance<a class="headerlink" href="#module-alphalens.performance" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
+<dt id="alphalens.performance.average_cumulative_return_by_quantile">
+<code class="descclassname">alphalens.performance.</code><code class="descname">average_cumulative_return_by_quantile</code><span class="sig-paren">(</span><em>quantized_factor</em>, <em>prices</em>, <em>periods_before=10</em>, <em>periods_after=15</em>, <em>demeaned=True</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.average_cumulative_return_by_quantile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots sector-wise mean daily returns for factor quantiles 
+across provided forward price movement columns.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quantized_factor</strong> : pd.Series</p>
+<blockquote>
+<div><p>Factor quantiles indexed by date and asset and
+optional a custom group.</p>
+</div></blockquote>
+<p><strong>prices</strong> : pd.DataFrame</p>
+<blockquote>
+<div><p>A wide form Pandas DataFrame indexed by date with assets
+in the columns. Pricing data should span the factor
+analysis time period plus/minus an additional buffer window
+corresponding to periods_after/periods_before parameters.</p>
+</div></blockquote>
+<p><strong>periods_before</strong> : int, optional</p>
+<blockquote>
+<div><p>How many periods before factor to plot</p>
+</div></blockquote>
+<p><strong>periods_after</strong> : int, optional</p>
+<blockquote>
+<div><p>How many periods after factor to plot</p>
+</div></blockquote>
+<p><strong>demeaned</strong> : bool, optional</p>
+<blockquote>
+<div><p>Compute demeaned mean returns (long short portfolio)</p>
+</div></blockquote>
+<p><strong>Returns</strong></p>
+<p><strong>——-</strong></p>
+<p><strong>pd.DataFrame indexed by quantile (level 0) and mean/std</strong></p>
+<p><strong>(level 1) and the values on the columns in range from</strong></p>
+<p class="last"><strong>-periods_before to periods_after</strong></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="alphalens.performance.compute_mean_returns_spread">
 <code class="descclassname">alphalens.performance.</code><code class="descname">compute_mean_returns_spread</code><span class="sig-paren">(</span><em>mean_returns</em>, <em>upper_quant</em>, <em>lower_quant</em>, <em>std_err=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.compute_mean_returns_spread" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the difference between the mean returns of
-two quantiles. Optionally, computes the standard deviation
+two quantiles. Optionally, computes the standard error
 of this difference.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -213,7 +504,7 @@ of this difference.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mean_returns</strong> : pd.DataFrame</p>
 <blockquote>
-<div><p>DataFrame of mean daily returns by quantile.
+<div><p>DataFrame of mean period wise returns by quantile.
 MultiIndex containing date and quantile.
 See mean_return_by_quantile.</p>
 </div></blockquote>
@@ -227,20 +518,20 @@ wish to subtract lower quantile mean return.</p>
 <div><p>Quantile of mean return we wish to subtract
 from upper quantile mean return.</p>
 </div></blockquote>
-<p><strong>std_err</strong> : pd.DataFrame (optional)</p>
+<p><strong>std_err</strong> : pd.DataFrame</p>
 <blockquote>
-<div><p>Daily standard error in mean return by quantile.
+<div><p>Period wise standard error in mean return by quantile.
 Takes the same form as mean_returns.</p>
 </div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>mean_return_difference</strong> : pd.Series</p>
 <blockquote>
-<div><p>Daily difference in quantile returns.</p>
+<div><p>Period wise difference in quantile returns.</p>
 </div></blockquote>
-<p><strong>joint_std</strong> : pd.Series</p>
+<p><strong>joint_std_err</strong> : pd.Series</p>
 <blockquote class="last">
-<div><p>Daily standard deviation of the difference in quantile returns.</p>
+<div><p>Period wise standard error of the difference in quantile returns.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -250,28 +541,22 @@ Takes the same form as mean_returns.</p>
 
 <dl class="function">
 <dt id="alphalens.performance.factor_alpha_beta">
-<code class="descclassname">alphalens.performance.</code><code class="descname">factor_alpha_beta</code><span class="sig-paren">(</span><em>factor</em>, <em>forward_returns</em>, <em>factor_daily_returns=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.factor_alpha_beta" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">alphalens.performance.</code><code class="descname">factor_alpha_beta</code><span class="sig-paren">(</span><em>factor_data</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.factor_alpha_beta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the alpha (excess returns), alpha t-stat (alpha significance),
 and beta (market exposure) of a factor. A regression is run with
-the daily factor universe mean return as the dependent variable
-and mean daily return from a dollar-neutral portfolio weighted
-by factor values as the independent variable.</p>
+the period wise factor universe mean return as the independent variable
+and mean period wise return from a dollar-neutral portfolio weighted
+by factor values as the dependent variable.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series - MultiIndex</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_data</strong> : pd.DataFrame - MultiIndex</p>
 <blockquote>
-<div><p>A list of equities and their factor values indexed by date.</p>
-</div></blockquote>
-<p><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
-<blockquote>
-<div><p>Daily forward returns in indexed by date and symbol.
-Separate column for each forward return window.</p>
-</div></blockquote>
-<p><strong>factor_daily_returns</strong> : pd.DataFrame</p>
-<blockquote>
-<div><p>Daily returns of dollar neutral portfolio weighted by factor value.</p>
+<div><p>A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+containing the values for a single alpha factor, forward returns for each period,
+The factor quantile/bin that factor value belongs too, and (optionally) the group the
+asset belongs to.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -288,37 +573,35 @@ for the given factor and forward returns.</p>
 
 <dl class="function">
 <dt id="alphalens.performance.factor_information_coefficient">
-<code class="descclassname">alphalens.performance.</code><code class="descname">factor_information_coefficient</code><span class="sig-paren">(</span><em>factor</em>, <em>forward_returns</em>, <em>sector_adjust=False</em>, <em>by_sector=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.factor_information_coefficient" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes Spearman Rank Correlation based Information Coefficient (IC)
-between factor values and N day forward returns for each day in
+<code class="descclassname">alphalens.performance.</code><code class="descname">factor_information_coefficient</code><span class="sig-paren">(</span><em>factor_data</em>, <em>group_adjust=False</em>, <em>by_group=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.factor_information_coefficient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the Spearman Rank Correlation based Information Coefficient (IC)
+between factor values and N period forward returns for each period in
 the factor index.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series - MultiIndex</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_data</strong> : pd.DataFrame - MultiIndex</p>
 <blockquote>
-<div><p>Factor values indexed by date and symbol.</p>
+<div><p>A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+containing the values for a single alpha factor, forward returns for each period,
+The factor quantile/bin that factor value belongs too, and (optionally) the group the
+asset belongs to.</p>
 </div></blockquote>
-<p><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
+<p><strong>group_adjust</strong> : bool</p>
 <blockquote>
-<div><p>Daily forward returns in indexed by date and symbol.
-Separate column for each forward return window.</p>
+<div><p>Demean forward returns by group before computing IC.</p>
 </div></blockquote>
-<p><strong>sector_adjust</strong> : bool</p>
+<p><strong>by_group</strong> : bool</p>
 <blockquote>
-<div><p>Demean forward returns by sector before computing IC.</p>
-</div></blockquote>
-<p><strong>by_sector</strong> : bool</p>
-<blockquote>
-<div><p>If True, compute daily IC separately for each sector.</p>
+<div><p>If True, compute period wise IC separately for each group.</p>
 </div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ic</strong> : pd.DataFrame</p>
 <blockquote class="last">
 <div><p>Spearman Rank correlation between factor and
-provided forward price movement windows.</p>
+provided forward returns.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -328,34 +611,34 @@ provided forward price movement windows.</p>
 
 <dl class="function">
 <dt id="alphalens.performance.factor_rank_autocorrelation">
-<code class="descclassname">alphalens.performance.</code><code class="descname">factor_rank_autocorrelation</code><span class="sig-paren">(</span><em>factor</em>, <em>time_rule='W'</em>, <em>by_sector=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.factor_rank_autocorrelation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes autocorrelation of mean factor ranks in specified timespans.
-We must compare week to week factor ranks rather than factor values to account for
-systematic shifts in the factor values of all names or names within a sector.
-This metric is useful for measuring the turnover of a factor. If the value of a factor
-for each name changes randomly from week to week, we&#8217;d expect a weekly autocorrelation of 0.</p>
+<code class="descclassname">alphalens.performance.</code><code class="descname">factor_rank_autocorrelation</code><span class="sig-paren">(</span><em>factor_data</em>, <em>period=1</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.factor_rank_autocorrelation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes autocorrelation of mean factor ranks in specified time spans.
+We must compare period to period factor ranks rather than factor values
+to account for systematic shifts in the factor values of all names or names
+within a group. This metric is useful for measuring the turnover of a
+factor. If the value of a factor for each name changes randomly from period
+to period, we’d expect an autocorrelation of 0.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_data</strong> : pd.DataFrame - MultiIndex</p>
 <blockquote>
-<div><p>Series with date and asset index. Values are factor values.</p>
+<div><p>A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+containing the values for a single alpha factor, forward returns for each period,
+The factor quantile/bin that factor value belongs too, and (optionally) the group the
+asset belongs to.</p>
 </div></blockquote>
-<p><strong>time_rule</strong> : str, optional</p>
+<p><strong>period: int, optional</strong></p>
 <blockquote>
-<div><p>Time span to use in factor grouping mean reduction.
-See <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/timeseries.html">http://pandas.pydata.org/pandas-docs/stable/timeseries.html</a> for available options.</p>
-</div></blockquote>
-<p><strong>by_sector</strong> : bool</p>
-<blockquote>
-<div><p>If True, compute autocorrelation separately for each sector.</p>
+<div><p>Period over which to calculate the autocorrelation</p>
 </div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>autocorr</strong> : pd.Series</p>
 <blockquote class="last">
-<div><p>Rolling 1 period (defined by time_rule) autocorrelation of factor values.</p>
+<div><p>Rolling 1 period (defined by time_rule) autocorrelation of
+factor values.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -365,32 +648,36 @@ See <a class="reference external" href="http://pandas.pydata.org/pandas-docs/sta
 
 <dl class="function">
 <dt id="alphalens.performance.factor_returns">
-<code class="descclassname">alphalens.performance.</code><code class="descname">factor_returns</code><span class="sig-paren">(</span><em>factor</em>, <em>forward_returns</em>, <em>long_short=True</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.factor_returns" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes daily returns for portfolio weighted by factor
+<code class="descclassname">alphalens.performance.</code><code class="descname">factor_returns</code><span class="sig-paren">(</span><em>factor_data</em>, <em>long_short=True</em>, <em>group_neutral=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.factor_returns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes period wise returns for portfolio weighted by factor
 values. Weights are computed by demeaning factors and dividing
-by the sum of their absolute value (acheiving gross leverage of 1).</p>
+by the sum of their absolute value (achieving gross leverage of 1).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series - MultiIndex</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_data</strong> : pd.DataFrame - MultiIndex</p>
 <blockquote>
-<div><p>A list of equities and their factor values indexed by date.</p>
-</div></blockquote>
-<p><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
-<blockquote>
-<div><p>Daily forward returns in indexed by date and symbol.
-Separate column for each forward return window.</p>
+<div><p>A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+containing the values for a single alpha factor, forward returns for each period,
+The factor quantile/bin that factor value belongs too, and (optionally) the group the
+asset belongs to.</p>
 </div></blockquote>
 <p><strong>long_short</strong> : bool</p>
 <blockquote>
-<div><p>Should this computation happen on a long short portfolio?</p>
+<div><p>Should this computation happen on a long short portfolio? if so then factor returns
+will be demeaned across the factor universe</p>
+</div></blockquote>
+<p><strong>group_neutral</strong> : bool</p>
+<blockquote>
+<div><p>If True, compute group neutral returns: each group will weight
+the same and returns demeaning will occur on the group level.</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>factor_daily_returns</strong> : pd.DataFrame</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>returns</strong> : pd.DataFrame</p>
 <blockquote class="last">
-<div><p>Daily returns of dollar neutral portfolio weighted by factor value.</p>
+<div><p>Period wise returns of dollar neutral portfolio weighted by factor value.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -400,42 +687,34 @@ Separate column for each forward return window.</p>
 
 <dl class="function">
 <dt id="alphalens.performance.mean_information_coefficient">
-<code class="descclassname">alphalens.performance.</code><code class="descname">mean_information_coefficient</code><span class="sig-paren">(</span><em>factor</em>, <em>forward_returns</em>, <em>sector_adjust=False</em>, <em>by_time=None</em>, <em>by_sector=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.mean_information_coefficient" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">alphalens.performance.</code><code class="descname">mean_information_coefficient</code><span class="sig-paren">(</span><em>factor_data</em>, <em>group_adjust=False</em>, <em>by_group=False</em>, <em>by_time=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.mean_information_coefficient" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the mean information coefficient of specified groups.
 Answers questions like:
 What is the mean IC for each month?
-What is the mean IC for each sector for our whole timerange?
-What is the mean IC for for each sector, each week?</p>
+What is the mean IC for each group for our whole timerange?
+What is the mean IC for for each group, each week?</p>
+<p>Parameters
+factor_data : pd.DataFrame - MultiIndex</p>
+<blockquote>
+<div>A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+containing the values for a single alpha factor, forward returns for each period,
+The factor quantile/bin that factor value belongs too, and (optionally) the group the
+asset belongs to.</div></blockquote>
+<dl class="docutils">
+<dt>group_adjust <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>Demean forward returns by group before computing IC.</dd>
+<dt>by_group <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>If True, take the mean IC for each group.</dd>
+<dt>by_time <span class="classifier-delimiter">:</span> <span class="classifier">str (pd time_rule), optional</span></dt>
+<dd>Time window to use when taking mean IC.
+See <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/timeseries.html">http://pandas.pydata.org/pandas-docs/stable/timeseries.html</a>
+for available options.</dd>
+</dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series - MultiIndex</p>
-<blockquote>
-<div><p>Factor values indexed by date and symbol.</p>
-</div></blockquote>
-<p><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
-<blockquote>
-<div><p>Daily forward returns in indexed by date and symbol.
-Separate column for each forward return window.</p>
-</div></blockquote>
-<p><strong>sector_adjust</strong> : bool</p>
-<blockquote>
-<div><p>Demean forward returns by sector before computing IC.</p>
-</div></blockquote>
-<p><strong>by_time</strong> : str (pd time_rule), optional</p>
-<blockquote>
-<div><p>Time window to use when taking mean IC.
-See <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/timeseries.html">http://pandas.pydata.org/pandas-docs/stable/timeseries.html</a>
-for available options.</p>
-</div></blockquote>
-<p><strong>by_sector</strong> : bool</p>
-<blockquote>
-<div><p>If True, take the mean IC for each sector.</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ic</strong> : pd.DataFrame</p>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ic</strong> : pd.DataFrame</p>
 <blockquote class="last">
 <div><p>Mean Spearman Rank correlation between factor and provided
 forward price movement windows.</p>
@@ -448,44 +727,42 @@ forward price movement windows.</p>
 
 <dl class="function">
 <dt id="alphalens.performance.mean_return_by_quantile">
-<code class="descclassname">alphalens.performance.</code><code class="descname">mean_return_by_quantile</code><span class="sig-paren">(</span><em>quantized_factor</em>, <em>forward_returns</em>, <em>by_time=None</em>, <em>by_sector=False</em>, <em>std_err=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.mean_return_by_quantile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes mean demeaned returns for factor quantiles across
+<code class="descclassname">alphalens.performance.</code><code class="descname">mean_return_by_quantile</code><span class="sig-paren">(</span><em>factor_data</em>, <em>by_date=False</em>, <em>by_group=False</em>, <em>demeaned=True</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.mean_return_by_quantile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes mean returns for factor quantiles across
 provided forward returns columns.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quantized_factor</strong> : pd.Series - MultiIndex</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_data</strong> : pd.DataFrame - MultiIndex</p>
 <blockquote>
-<div><p>DataFrame with date, asset index and factor quantile as a column.
-See quantile_bucket_factor for more detail.</p>
+<div><p>A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+containing the values for a single alpha factor, forward returns for each period,
+The factor quantile/bin that factor value belongs too, and (optionally) the group the
+asset belongs to.</p>
 </div></blockquote>
-<p><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
+<p><strong>by_date</strong> : bool</p>
 <blockquote>
-<div><p>A list of equities and their N day forward returns where each column contains the N day forward returns.</p>
+<div><p>If True, compute quantile bucket returns separately for each date.</p>
 </div></blockquote>
-<p><strong>by_time</strong> : str</p>
+<p><strong>by_group</strong> : bool</p>
 <blockquote>
-<div><p>The pandas str code for time grouping.</p>
+<div><p>If True, compute quantile bucket returns separately for each group.
+Returns demeaning will occur on the group level.</p>
 </div></blockquote>
-<p><strong>by_sector</strong> : bool</p>
+<p><strong>demeaned</strong> : bool</p>
 <blockquote>
-<div><p>If True, compute quantile bucket returns separately for each sector.
-Returns demeaning will occur on the sector level.</p>
-</div></blockquote>
-<p><strong>std_err</strong> : bool</p>
-<blockquote>
-<div><p>If True, compute and return the standard error of the mean return.</p>
+<div><p>Compute demeaned mean returns (long short portfolio)</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>mean_returns_by_quantile</strong> : pd.DataFrame</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>mean_ret</strong> : pd.DataFrame</p>
 <blockquote>
-<div><p>Mean daily returns by specified factor quantile.</p>
+<div><p>Mean period wise returns by specified factor quantile.</p>
 </div></blockquote>
-<p><strong>std_ret</strong> : pd.DataFrame</p>
+<p><strong>std_error_ret</strong> : pd.DataFrame</p>
 <blockquote class="last">
-<div><p>Standard deviation of returns by specified quantile.</p>
+<div><p>Standard error of returns by specified quantile.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -495,7 +772,7 @@ Returns demeaning will occur on the sector level.</p>
 
 <dl class="function">
 <dt id="alphalens.performance.quantile_turnover">
-<code class="descclassname">alphalens.performance.</code><code class="descname">quantile_turnover</code><span class="sig-paren">(</span><em>quantile_factor</em>, <em>quantile</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.quantile_turnover" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">alphalens.performance.</code><code class="descname">quantile_turnover</code><span class="sig-paren">(</span><em>quantile_factor</em>, <em>quantile</em>, <em>period=1</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.quantile_turnover" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the proportion of names in a factor quantile that were
 not in that quantile in the previous period.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -510,43 +787,15 @@ not in that quantile in the previous period.</p>
 <blockquote>
 <div><p>Quantile on which to perform turnover analysis.</p>
 </div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>quant_turnover</strong> : pd.Series</p>
+<p><strong>period: int, optional</strong></p>
+<blockquote>
+<div><p>Period over which to calculate the turnover</p>
+</div></blockquote>
+<p><strong>Returns</strong></p>
+<p><strong>——-</strong></p>
+<p><strong>quant_turnover</strong> : pd.Series</p>
 <blockquote class="last">
 <div><p>Period by period turnover for that quantile.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="alphalens.performance.quantize_factor">
-<code class="descclassname">alphalens.performance.</code><code class="descname">quantize_factor</code><span class="sig-paren">(</span><em>factor</em>, <em>quantiles=5</em>, <em>by_sector=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.performance.quantize_factor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes daily factor quantiles.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series - MultiIndex</p>
-<blockquote>
-<div><p>A list of equities and their factor values indexed by date.</p>
-</div></blockquote>
-<p><strong>quantiles</strong> : int</p>
-<blockquote>
-<div><p>Number of quantiles buckets to use in factor bucketing.</p>
-</div></blockquote>
-<p><strong>by_sector</strong> : bool</p>
-<blockquote>
-<div><p>If True, compute quantile buckets separately for each sector.</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>factor_quantile</strong> : pd.Series</p>
-<blockquote class="last">
-<div><p>Factor quantiles indexed by date and symbol.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -558,33 +807,22 @@ not in that quantile in the previous period.</p>
 <div class="section" id="module-alphalens.plotting">
 <span id="plotting"></span><h2>Plotting<a class="headerlink" href="#module-alphalens.plotting" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="alphalens.plotting.context">
-<code class="descclassname">alphalens.plotting.</code><code class="descname">context</code><span class="sig-paren">(</span><em>context='notebook'</em>, <em>font_scale=1.5</em>, <em>rc=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.context" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create pyfolio default plotting style context.</p>
-<p>Under the hood, calls and returns seaborn.plotting_context() with
+<dt id="alphalens.plotting.axes_style">
+<code class="descclassname">alphalens.plotting.</code><code class="descname">axes_style</code><span class="sig-paren">(</span><em>style=’darkgrid’</em>, <em>rc=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.axes_style" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create alphalens default axes style context.</p>
+<p>Under the hood, calls and returns seaborn.axes_style() with
 some custom settings. Usually you would use in a with-context.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>context</strong> : str, optional</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>style</strong> : str, optional</p>
 <blockquote>
-<div><p>Name of seaborn context.</p>
-</div></blockquote>
-<p><strong>font_scale</strong> : float, optional</p>
-<blockquote>
-<div><p>Scale font by factor font_scale.</p>
+<div><p>Name of seaborn style.</p>
 </div></blockquote>
 <p><strong>rc</strong> : dict, optional</p>
 <blockquote>
-<div><p>Config flags.
-By default, {&#8216;lines.linewidth&#8217;: 1.5,</p>
-<blockquote>
-<div><p>&#8216;axes.facecolor&#8217;: &#8216;0.995&#8217;,
-&#8216;figure.facecolor&#8217;: &#8216;0.97&#8217;}</p>
-</div></blockquote>
-<p>is being used and will be added to any
-rc passed in, unless explicitly overriden.</p>
+<div><p>Config flags.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -600,8 +838,14 @@ rc passed in, unless explicitly overriden.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="alphalens.plotting.customize">
+<code class="descclassname">alphalens.plotting.</code><code class="descname">customize</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.customize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator to set plotting context and axes style during function call.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="alphalens.plotting.plot_cumulative_returns">
-<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_cumulative_returns</code><span class="sig-paren">(</span><em>factor_returns</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_cumulative_returns" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_cumulative_returns</code><span class="sig-paren">(</span><em>factor_returns</em>, <em>period=1</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_cumulative_returns" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the cumulative returns of the returns series passed in.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -609,7 +853,11 @@ rc passed in, unless explicitly overriden.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_returns</strong> : pd.Series</p>
 <blockquote>
-<div><p>Daily returns of dollar neutral portfolio weighted by factor value.</p>
+<div><p>Period wise returns of dollar neutral portfolio weighted by factor value.</p>
+</div></blockquote>
+<p><strong>period: int, optional</strong></p>
+<blockquote>
+<div><p>Period over which the daily returns are calculated</p>
 </div></blockquote>
 <p><strong>ax</strong> : matplotlib.Axes, optional</p>
 <blockquote>
@@ -629,17 +877,19 @@ rc passed in, unless explicitly overriden.</p>
 
 <dl class="function">
 <dt id="alphalens.plotting.plot_cumulative_returns_by_quantile">
-<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_cumulative_returns_by_quantile</code><span class="sig-paren">(</span><em>quantile_daily_returns</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_cumulative_returns_by_quantile" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_cumulative_returns_by_quantile</code><span class="sig-paren">(</span><em>quantile_returns</em>, <em>period=1</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_cumulative_returns_by_quantile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the cumulative returns of various factor quantiles.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mean_returns_by_quantile</strong> : pd.Series &#8211; MultiIndex</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quantile_returns</strong> : pd.DataFrame</p>
 <blockquote>
-<div><p>Mean daily returns by specified factor quantile.
-MultiIndex of date, quantile.
-See performance.mean_returns_by_quantile.</p>
+<div><p>Cumulative returns by factor quantile.</p>
+</div></blockquote>
+<p><strong>period: int, optional</strong></p>
+<blockquote>
+<div><p>Period over which the daily returns are calculated</p>
 </div></blockquote>
 <p><strong>ax</strong> : matplotlib.Axes, optional</p>
 <blockquote>
@@ -655,14 +905,78 @@ See performance.mean_returns_by_quantile.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="alphalens.plotting.plot_daily_ic_hist">
-<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_daily_ic_hist</code><span class="sig-paren">(</span><em>daily_ic</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_daily_ic_hist" title="Permalink to this definition">¶</a></dt>
+<dt id="alphalens.plotting.plot_factor_rank_auto_correlation">
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_factor_rank_auto_correlation</code><span class="sig-paren">(</span><em>factor_autocorrelation</em>, <em>period=1</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_factor_rank_auto_correlation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots factor rank autocorrelation over time.
+See factor_rank_autocorrelation for more details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_autocorrelation</strong> : pd.Series</p>
+<blockquote>
+<div><p>Rolling 1 period (defined by time_rule) autocorrelation
+of factor values.</p>
+</div></blockquote>
+<p><strong>period: int, optional</strong></p>
+<blockquote>
+<div><p>Period over which the autocorrelation is calculated</p>
+</div></blockquote>
+<p><strong>ax</strong> : matplotlib.Axes, optional</p>
+<blockquote>
+<div><p>Axes upon which to plot.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> : matplotlib.Axes</p>
+<blockquote class="last">
+<div><p>The axes that were plotted on.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alphalens.plotting.plot_ic_by_group">
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_ic_by_group</code><span class="sig-paren">(</span><em>ic_group</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_ic_by_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots Spearman Rank Information Coefficient for a given
+factor over provided forward returns.
+Separates by group.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ic_group</strong> : pd.DataFrame</p>
+<blockquote>
+<div><p>group-wise mean period wise returns.</p>
+</div></blockquote>
+<p><strong>ax</strong> : matplotlib.Axes, optional</p>
+<blockquote>
+<div><p>Axes upon which to plot.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> : matplotlib.Axes</p>
+<blockquote class="last">
+<div><p>The axes that were plotted on.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alphalens.plotting.plot_ic_hist">
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_ic_hist</code><span class="sig-paren">(</span><em>ic</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_ic_hist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots Spearman Rank Information Coefficient histogram for a given factor.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>daily_ic</strong> : pd.DataFrame</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ic</strong> : pd.DataFrame</p>
 <blockquote>
 <div><p>DataFrame indexed by date, with IC for each forward return.</p>
 </div></blockquote>
@@ -683,15 +997,15 @@ See performance.mean_returns_by_quantile.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="alphalens.plotting.plot_daily_ic_qq">
-<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_daily_ic_qq</code><span class="sig-paren">(</span><em>daily_ic</em>, <em>theoretical_dist=&lt;scipy.stats._continuous_distns.norm_gen object&gt;</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_daily_ic_qq" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots Spearman Rank Information Coefficient &#8220;Q-Q&#8221; plot relative to
+<dt id="alphalens.plotting.plot_ic_qq">
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_ic_qq</code><span class="sig-paren">(</span><em>ic</em>, <em>theoretical_dist=&lt;scipy.stats._continuous_distns.norm_gen object&gt;</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_ic_qq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots Spearman Rank Information Coefficient “Q-Q” plot relative to
 a theoretical distribution.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>daily_ic</strong> : pd.DataFrame</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ic</strong> : pd.DataFrame</p>
 <blockquote>
 <div><p>DataFrame indexed by date, with IC for each forward return.</p>
 </div></blockquote>
@@ -717,14 +1031,15 @@ scipy.stats.t are popular options.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="alphalens.plotting.plot_daily_ic_ts">
-<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_daily_ic_ts</code><span class="sig-paren">(</span><em>daily_ic</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_daily_ic_ts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots Spearman Rank Information Coefficient and IC moving average for a given factor.</p>
+<dt id="alphalens.plotting.plot_ic_ts">
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_ic_ts</code><span class="sig-paren">(</span><em>ic</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_ic_ts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots Spearman Rank Information Coefficient and IC moving
+average for a given factor.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>daily_ic</strong> : pd.DataFrame</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ic</strong> : pd.DataFrame</p>
 <blockquote>
 <div><p>DataFrame indexed by date, with IC for each forward return.</p>
 </div></blockquote>
@@ -745,87 +1060,30 @@ scipy.stats.t are popular options.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="alphalens.plotting.plot_factor_rank_auto_correlation">
-<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_factor_rank_auto_correlation</code><span class="sig-paren">(</span><em>factor_autocorrelation</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_factor_rank_auto_correlation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots factor rank autocorrelation over time. See factor_rank_autocorrelation for more details.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_autocorrelation</strong> : pd.Series</p>
-<blockquote>
-<div><p>Rolling 1 period (defined by time_rule) autocorrelation of factor values.</p>
-</div></blockquote>
-<p><strong>ax</strong> : matplotlib.Axes, optional</p>
-<blockquote>
-<div><p>Axes upon which to plot.</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> : matplotlib.Axes</p>
-<blockquote class="last">
-<div><p>The axes that were plotted on.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="alphalens.plotting.plot_ic_by_sector">
-<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_ic_by_sector</code><span class="sig-paren">(</span><em>ic_sector</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_ic_by_sector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots Spearman Rank Information Coefficient for a given
-factor over provided forward price movement windows.
-Separates by sector.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ic_sector</strong> : pd.DataFrame</p>
-<blockquote>
-<div><p>Sector-wise mean daily returns.</p>
-</div></blockquote>
-<p><strong>ax</strong> : matplotlib.Axes, optional</p>
-<blockquote>
-<div><p>Axes upon which to plot.</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> : matplotlib.Axes</p>
-<blockquote class="last">
-<div><p>The axes that were plotted on.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
+<dt id="alphalens.plotting.plot_information_table">
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_information_table</code><span class="sig-paren">(</span><em>ic_data</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_information_table" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="alphalens.plotting.plot_mean_quantile_returns_spread_time_series">
 <code class="descclassname">alphalens.plotting.</code><code class="descname">plot_mean_quantile_returns_spread_time_series</code><span class="sig-paren">(</span><em>mean_returns_spread</em>, <em>std_err=None</em>, <em>bandwidth=1</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_mean_quantile_returns_spread_time_series" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots mean daily returns for factor quantiles.</p>
+<dd><p>Plots mean period wise returns for factor quantiles.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mean_returns_spread</strong> : pd.Series</p>
 <blockquote>
-<div><p>Series with difference between quantile mean returns by day.</p>
+<div><p>Series with difference between quantile mean returns by period.</p>
 </div></blockquote>
-<p><strong>std</strong> : pd.Series</p>
+<p><strong>std_err</strong> : pd.Series</p>
 <blockquote>
-<div><p>Series with standard devation of difference between quantile
-mean returns each day.</p>
+<div><p>Series with standard error of difference between quantile
+mean returns each period.</p>
 </div></blockquote>
 <p><strong>bandwidth</strong> : float</p>
 <blockquote>
 <div><p>Width of displayed error bands in standard deviations.</p>
-</div></blockquote>
-<p><strong>title</strong> : str</p>
-<blockquote>
-<div><p>Plot title.</p>
 </div></blockquote>
 <p><strong>ax</strong> : matplotlib.Axes, optional</p>
 <blockquote>
@@ -853,7 +1111,7 @@ mean returns each day.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mean_monthly_ic</strong> : pd.DataFrame</p>
 <blockquote>
-<div><p>The mean monthly IC for N days forward.</p>
+<div><p>The mean monthly IC for N periods forward.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -868,20 +1126,59 @@ mean returns each day.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="alphalens.plotting.plot_quantile_average_cumulative_return">
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_quantile_average_cumulative_return</code><span class="sig-paren">(</span><em>avg_cumulative_returns</em>, <em>by_quantile=False</em>, <em>std_bar=False</em>, <em>title=None</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_quantile_average_cumulative_return" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots sector-wise mean daily returns for factor quantiles 
+across provided forward price movement columns.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>avg_cumulative_returns: pd.Dataframe</strong></p>
+<blockquote>
+<div><p>The format is the one returned by 
+performance.average_cumulative_return_by_quantile</p>
+</div></blockquote>
+<p><strong>by_quantile</strong> : boolean, optional</p>
+<blockquote>
+<div><p>Disaggregated figures by quantile (useful to clearly see std dev bars)</p>
+</div></blockquote>
+<p><strong>std_bar</strong> : boolean, optional</p>
+<blockquote>
+<div><p>Plot standard deviation plot</p>
+</div></blockquote>
+<p><strong>title: string, optional</strong></p>
+<blockquote>
+<div><p>Custom title</p>
+</div></blockquote>
+<p><strong>ax</strong> : matplotlib.Axes, optional</p>
+<blockquote>
+<div><p>Axes upon which to plot.</p>
+</div></blockquote>
+<p><strong>Returns</strong></p>
+<p><strong>——-</strong></p>
+<p class="last"><strong>ax</strong> : matplotlib.Axes</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="alphalens.plotting.plot_quantile_returns_bar">
-<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_quantile_returns_bar</code><span class="sig-paren">(</span><em>mean_ret_by_q</em>, <em>by_sector=False</em>, <em>ylim_percentiles=None</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_quantile_returns_bar" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots mean daily returns for factor quantiles.</p>
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_quantile_returns_bar</code><span class="sig-paren">(</span><em>mean_ret_by_q</em>, <em>by_group=False</em>, <em>ylim_percentiles=None</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_quantile_returns_bar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots mean period wise returns for factor quantiles.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mean_ret_by_q</strong> : pd.DataFrame</p>
 <blockquote>
-<div><p>DataFrame with quantile, (sector) and mean daily return values.</p>
+<div><p>DataFrame with quantile, (group) and mean period wise return values.</p>
 </div></blockquote>
-<p><strong>by_sector</strong> : bool</p>
+<p><strong>by_group</strong> : bool</p>
 <blockquote>
-<div><p>Disagregate figures by sector.</p>
+<div><p>Disaggregated figures by group.</p>
 </div></blockquote>
 <p><strong>ylim_percentiles</strong> : tuple of integers</p>
 <blockquote>
@@ -905,15 +1202,15 @@ mean returns each day.</p>
 
 <dl class="function">
 <dt id="alphalens.plotting.plot_quantile_returns_violin">
-<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_quantile_returns_violin</code><span class="sig-paren">(</span><em>daily_return_by_q</em>, <em>ylim_percentiles=None</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_quantile_returns_violin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots a violin box plot of daily returns for factor quantiles.</p>
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_quantile_returns_violin</code><span class="sig-paren">(</span><em>return_by_q</em>, <em>ylim_percentiles=None</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_quantile_returns_violin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots a violin box plot of period wise returns for factor quantiles.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>daily_return_by_q</strong> : pd.DataFrame - MultiIndex</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>return_by_q</strong> : pd.DataFrame - MultiIndex</p>
 <blockquote>
-<div><p>DataFrame with day and quantile as rows MultiIndex,
+<div><p>DataFrame with date and quantile as rows MultiIndex,
 forward return windows as columns, returns as values.</p>
 </div></blockquote>
 <p><strong>ylim_percentiles</strong> : tuple of integers</p>
@@ -937,16 +1234,30 @@ forward return windows as columns, returns as values.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="alphalens.plotting.plot_quantile_statistics_table">
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_quantile_statistics_table</code><span class="sig-paren">(</span><em>factor_data</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_quantile_statistics_table" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="alphalens.plotting.plot_returns_table">
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_returns_table</code><span class="sig-paren">(</span><em>alpha_beta</em>, <em>mean_ret_quantile</em>, <em>mean_ret_spread_quantile</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_returns_table" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="alphalens.plotting.plot_top_bottom_quantile_turnover">
-<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_top_bottom_quantile_turnover</code><span class="sig-paren">(</span><em>quantized_factor</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_top_bottom_quantile_turnover" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plots daily top and bottom quantile factor turnover.</p>
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_top_bottom_quantile_turnover</code><span class="sig-paren">(</span><em>quantile_turnover</em>, <em>period=1</em>, <em>ax=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_top_bottom_quantile_turnover" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots period wise top and bottom quantile factor turnover.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quantized_factor</strong> : pd.Series</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quantile_turnover: pd.Dataframe</strong></p>
 <blockquote>
-<div><p>Factor quantiles indexed by date and symbol.</p>
+<div><p>Quantile turnover (each DataFrame column a quantile).</p>
+</div></blockquote>
+<p><strong>period: int, optional</strong></p>
+<blockquote>
+<div><p>Period over which to calculate the turnover</p>
 </div></blockquote>
 <p><strong>ax</strong> : matplotlib.Axes, optional</p>
 <blockquote>
@@ -965,44 +1276,109 @@ forward return windows as columns, returns as values.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="alphalens.plotting.plotting_context">
-<code class="descclassname">alphalens.plotting.</code><code class="descname">plotting_context</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plotting_context" title="Permalink to this definition">¶</a></dt>
-<dd><p>Decorator to set plotting context during function call.</p>
-</dd></dl>
+<dt id="alphalens.plotting.plot_turnover_table">
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plot_turnover_table</code><span class="sig-paren">(</span><em>autocorrelation_data</em>, <em>quantile_turnover</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plot_turnover_table" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
-<dt id="alphalens.plotting.summary_stats">
-<code class="descclassname">alphalens.plotting.</code><code class="descname">summary_stats</code><span class="sig-paren">(</span><em>ic_data</em>, <em>alpha_beta</em>, <em>quantized_factor</em>, <em>mean_ret_quantile</em>, <em>autocorrelation_data</em>, <em>mean_ret_spread_quantile</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.summary_stats" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a pretty printed table of summary statistics for the alpha factor.</p>
+<dt id="alphalens.plotting.plotting_context">
+<code class="descclassname">alphalens.plotting.</code><code class="descname">plotting_context</code><span class="sig-paren">(</span><em>context=’notebook’</em>, <em>font_scale=1.5</em>, <em>rc=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.plotting.plotting_context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create alphalens default plotting style context.</p>
+<p>Under the hood, calls and returns seaborn.plotting_context() with
+some custom settings. Usually you would use in a with-context.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ic_data</strong> : pd.DataFrame</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>context</strong> : str, optional</p>
 <blockquote>
-<div><p>Spearman Rank correlation between factor and
-provided forward price movement windows.</p>
+<div><p>Name of seaborn context.</p>
 </div></blockquote>
-<p><strong>alpha_beta</strong> : pd.Series</p>
+<p><strong>font_scale</strong> : float, optional</p>
 <blockquote>
-<div><p>A list containing the alpha, beta, a t-stat(alpha) for the
-given factor and forward returns.</p>
+<div><p>Scale font by factor font_scale.</p>
 </div></blockquote>
-<p><strong>quantized_factor</strong> : pd.Series</p>
+<p><strong>rc</strong> : dict, optional</p>
 <blockquote>
-<div><p>Factor quantiles indexed by date and symbol.</p>
+<div><p>Config flags.
+By default, {‘lines.linewidth’: 1.5}
+is being used and will be added to any
+rc passed in, unless explicitly overriden.</p>
 </div></blockquote>
-<p><strong>mean_ret_quantile</strong> : pd.DataFrame</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">seaborn plotting context</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-obj docutils literal"><span class="pre">For</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">see</span></code></p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-alphalens.utils">
+<span id="utilities"></span><h2>Utilities<a class="headerlink" href="#module-alphalens.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="alphalens.utils.NonMatchingTimezoneError">
+<em class="property">exception </em><code class="descclassname">alphalens.utils.</code><code class="descname">NonMatchingTimezoneError</code><a class="headerlink" href="#alphalens.utils.NonMatchingTimezoneError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alphalens.utils.common_start_returns">
+<code class="descclassname">alphalens.utils.</code><code class="descname">common_start_returns</code><span class="sig-paren">(</span><em>factor</em>, <em>prices</em>, <em>before</em>, <em>after</em>, <em>cumulative=False</em>, <em>mean_by_date=False</em>, <em>demean=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.utils.common_start_returns" title="Permalink to this definition">¶</a></dt>
+<dd><p>A date and equity pair is extracted from each index row in the factor
+dataframe and for each of these pairs a return series is built starting
+from ‘before’ the date and ending ‘after’ the date specified in the pair.
+All those returns series are then aligned to a common index (-before to after)
+and returned as a single DataFrame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.DataFrame</p>
 <blockquote>
-<div><p>Mean daily returns by specified factor quantile.</p>
+<div><p>DataFrame with at least date and equity as index, the columns are irrelevant</p>
 </div></blockquote>
-<p><strong>autocorrelation_data</strong> : pd.Series</p>
+<p><strong>prices</strong> : pd.DataFrame</p>
 <blockquote>
-<div><p>Rolling 1 period (defined by time_rule) autocorrelation of factor values.</p>
+<div><p>A wide form Pandas DataFrame indexed by date with assets
+in the columns. Pricing data should span the factor
+analysis time period plus/minus an additional buffer window
+corresponding to after/before period parameters.</p>
 </div></blockquote>
-<p><strong>mean_ret_spread_quantile</strong> : pd.Series</p>
+<p><strong>before:</strong></p>
+<blockquote>
+<div><p>How many returns to load before factor date</p>
+</div></blockquote>
+<p><strong>after:</strong></p>
+<blockquote>
+<div><p>How many returns to load after factor date</p>
+</div></blockquote>
+<p><strong>cumulative: bool, optional</strong></p>
+<blockquote>
+<div><p>Return cumulative returns</p>
+</div></blockquote>
+<p><strong>mean_by_date: bool, optional</strong></p>
+<blockquote>
+<div><p>If True, compute mean returns for each date and return that
+instead of a return series for each asset</p>
+</div></blockquote>
+<p><strong>demean: pd.DataFrame, optional</strong></p>
+<blockquote>
+<div><p>DataFrame with at least date and equity as index, the columns are irrelevant
+For each date a list of equities is extracted from ‘demean’ index and used 
+as universe to compute demeaned mean returns (long short portfolio)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>aligned_returns</strong> : pd.DataFrame</p>
 <blockquote class="last">
-<div><p>Daily difference in quantile returns.</p>
+<div><p>Dataframe containing returns series for each factor aligned to the same index:
+-before to after</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1010,13 +1386,10 @@ given factor and forward returns.</p>
 </table>
 </dd></dl>
 
-</div>
-<div class="section" id="module-alphalens.utils">
-<span id="utilities"></span><h2>Utilities<a class="headerlink" href="#module-alphalens.utils" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="alphalens.utils.compute_forward_returns">
-<code class="descclassname">alphalens.utils.</code><code class="descname">compute_forward_returns</code><span class="sig-paren">(</span><em>prices</em>, <em>days=(1</em>, <em>5</em>, <em>10)</em>, <em>filter_zscore=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.utils.compute_forward_returns" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finds the N day forward returns (as percent change) for each asset provided.</p>
+<code class="descclassname">alphalens.utils.</code><code class="descname">compute_forward_returns</code><span class="sig-paren">(</span><em>prices</em>, <em>periods=(1</em>, <em>5</em>, <em>10)</em>, <em>filter_zscore=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.utils.compute_forward_returns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the N period forward returns (as percent change) for each asset provided.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1024,29 +1397,27 @@ given factor and forward returns.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>prices</strong> : pd.DataFrame</p>
 <blockquote>
 <div><p>Pricing data to use in forward price calculation.
-Equities as columns, dates as index.
-Pricing data must span the factor analysis time period
-plus an additional buffer window
-that is greater than the maximum number of expected days
+Assets as columns, dates as index. Pricing data must
+span the factor analysis time period plus an additional buffer window
+that is greater than the maximum number of expected periods
 in the forward returns calculations.</p>
 </div></blockquote>
-<p><strong>days</strong> : list</p>
+<p><strong>periods</strong> : sequence[int]</p>
 <blockquote>
-<div><p>Number of days forward to project returns.
-One column will be added for each value.</p>
+<div><p>periods to compute forward returns on.</p>
 </div></blockquote>
-<p><strong>filter_zscore</strong> : int</p>
+<p><strong>filter_zscore</strong> : int or float</p>
 <blockquote>
-<div><p>Sets forward returns greater than X standard
-deviations from the the mean to nan.
-Caution: this outlier filtering incorporates
-lookahead bias.</p>
+<div><p>Sets forward returns greater than X standard deviations
+from the the mean to nan.
+Caution: this outlier filtering incorporates lookahead bias.</p>
 </div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
 <blockquote class="last">
-<div><p>DataFrame containing the N day forward returns for a security.</p>
+<div><p>Forward returns in indexed by date and asset.
+Separate column for each forward return window.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1056,34 +1427,35 @@ lookahead bias.</p>
 
 <dl class="function">
 <dt id="alphalens.utils.demean_forward_returns">
-<code class="descclassname">alphalens.utils.</code><code class="descname">demean_forward_returns</code><span class="sig-paren">(</span><em>forward_returns</em>, <em>by_sector=False</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.utils.demean_forward_returns" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert forward price movements to price movements relative to mean
-daily all-universe or sector price movements.
-Sector-wise normalization incorporates the assumption of a
-sector neutral portfolio constraint and thus allows allows the
-factor to be evaluated across sectors.</p>
-<p>For example, if AAPL 5 day return is 0.1% and mean 5 day
+<code class="descclassname">alphalens.utils.</code><code class="descname">demean_forward_returns</code><span class="sig-paren">(</span><em>factor_data</em>, <em>grouper=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.utils.demean_forward_returns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert forward returns to returns relative to mean
+period wise all-universe or group returns.
+group-wise normalization incorporates the assumption of a
+group neutral portfolio constraint and thus allows allows the
+factor to be evaluated across groups.</p>
+<p>For example, if AAPL 5 period return is 0.1% and mean 5 period
 return for the Technology stocks in our universe was 0.5% in the
-same period, the sector adjusted 5 day return for AAPL in this period is -0.4%.</p>
+same period, the group adjusted 5 period return for AAPL in this
+period is -0.4%.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor_data</strong> : pd.DataFrame - MultiIndex</p>
 <blockquote>
-<div><p>DataFrame with date, asset, sector, and forward returns columns.
-See compute_forward_returns for more detail.</p>
+<div><p>Forward returns in indexed by date and asset.
+Separate column for each forward return window.</p>
 </div></blockquote>
-<p><strong>by_sector</strong> : bool</p>
+<p><strong>grouper</strong> : list</p>
 <blockquote>
-<div><p>If True, demean according to sector.</p>
+<div><p>If True, demean according to group.</p>
 </div></blockquote>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>adjusted_forward_returns</strong> : pd.DataFrame - MultiIndex</p>
 <blockquote class="last">
 <div><p>DataFrame of the same format as the input, but with each
-security&#8217;s returns normalized by sector.</p>
+security’s returns normalized by group.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1092,65 +1464,132 @@ security&#8217;s returns normalized by sector.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="alphalens.utils.format_input_data">
-<code class="descclassname">alphalens.utils.</code><code class="descname">format_input_data</code><span class="sig-paren">(</span><em>factor</em>, <em>prices</em>, <em>sectors=None</em>, <em>filter_zscore=20</em>, <em>days=(1</em>, <em>5</em>, <em>10)</em>, <em>sector_names=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.utils.format_input_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Formats the factor data, pricing data, and sector mappings
-into DataFrames and Series that contain aligned MultiIndex
-indices containing date, asset, and sector.</p>
+<dt id="alphalens.utils.deprecated">
+<code class="descclassname">alphalens.utils.</code><code class="descname">deprecated</code><span class="sig-paren">(</span><em>msg=None</em>, <em>stacklevel=2</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.utils.deprecated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to mark a function as deprecated.
+Parameters
+———-
+msg : str</p>
+<blockquote>
+<div>The message to display in the deprecation warning.</div></blockquote>
+<dl class="docutils">
+<dt>stacklevel <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>How far up the stack the warning needs to go, before
+showing the relevant calling lines.</dd>
+</dl>
+<p>&#64;deprecated(msg=’function_a is deprecated! Use function_b instead.’)
+def function_a(<a href="#id1"><span class="problematic" id="id2">*</span></a>args, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs):</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alphalens.utils.get_clean_factor_and_forward_returns">
+<code class="descclassname">alphalens.utils.</code><code class="descname">get_clean_factor_and_forward_returns</code><span class="sig-paren">(</span><em>factor</em>, <em>prices</em>, <em>groupby=None</em>, <em>by_group=False</em>, <em>quantiles=5</em>, <em>bins=None</em>, <em>periods=(1</em>, <em>5</em>, <em>10)</em>, <em>filter_zscore=20</em>, <em>groupby_labels=None</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.utils.get_clean_factor_and_forward_returns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formats the factor data, pricing data, and group mappings
+into a DataFrame that contains aligned MultiIndex
+indices of date and asset.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series - MultiIndex</p>
 <blockquote>
-<div><p>A list of equities and their factor values indexed by date.</p>
+<div><p>A MultiIndex Series indexed by date (level 0) and asset (level 1), containing
+the values for a single alpha factor.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">-----------------------------------</span>
+    <span class="n">date</span>    <span class="o">|</span>    <span class="n">asset</span>   <span class="o">|</span>
+<span class="o">-----------------------------------</span>
+            <span class="o">|</span>   <span class="n">AAPL</span>     <span class="o">|</span>   <span class="mf">0.5</span>
+            <span class="o">-----------------------</span>
+            <span class="o">|</span>   <span class="n">BA</span>       <span class="o">|</span>  <span class="o">-</span><span class="mf">1.1</span>
+            <span class="o">-----------------------</span>
+<span class="mi">2014</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span>  <span class="o">|</span>   <span class="n">CMG</span>      <span class="o">|</span>   <span class="mf">1.7</span>
+            <span class="o">-----------------------</span>
+            <span class="o">|</span>   <span class="n">DAL</span>      <span class="o">|</span>  <span class="o">-</span><span class="mf">0.1</span>
+            <span class="o">-----------------------</span>
+            <span class="o">|</span>   <span class="n">LULU</span>     <span class="o">|</span>   <span class="mf">2.7</span>
+            <span class="o">-----------------------</span>
+</pre></div>
+</div>
 </div></blockquote>
 <p><strong>prices</strong> : pd.DataFrame</p>
 <blockquote>
-<div><p>Pricing data to use in forward price calculation.
-Equities as columns, dates as index.
-Pricing data must span the factor analysis time period
-plus an additional buffer window that is greater than the
-maximum number of expected days in the forward returns
-calculations.</p>
+<div><p>A wide form Pandas DataFrame indexed by date with assets
+in the columns. It is important to pass the
+correct pricing data in depending on what time of period your
+signal was generated so to avoid lookahead bias, or
+delayed calculations. Pricing data must span the factor
+analysis time period plus an additional buffer window
+that is greater than the maximum number of expected periods
+in the forward returns calculations.</p>
 </div></blockquote>
-<p><strong>sectors</strong> : pd.Series - MultiIndex</p>
+<p><strong>groupby</strong> : pd.Series - MultiIndex or dict</p>
 <blockquote>
-<div><p>A list of equities and their sectors.</p>
+<div><p>Either A MultiIndex Series indexed by date and asset,
+containing the period wise group codes for each asset, or
+a dict of asset to group mappings. If a dict is passed,
+it is assumed that group mappings are unchanged for the
+entire time period of the passed factor data.</p>
 </div></blockquote>
-<p><strong>filter_zscore</strong> : int</p>
+<p><strong>by_group</strong> : bool</p>
+<blockquote>
+<div><p>If True, compute statistics separately for each group.</p>
+</div></blockquote>
+<p><strong>quantiles</strong> : int or sequence[float]</p>
+<blockquote>
+<div><p>Number of equal-sized quantile buckets to use in factor bucketing.
+Alternately sequence of quantiles, allowing non-equal-sized buckets
+e.g. [0, .10, .5, .90, 1.] or [.05, .5, .95]
+Only one of ‘quantiles’ or ‘bins’ can be not-None</p>
+</div></blockquote>
+<p><strong>bins</strong> : int or sequence[float]</p>
+<blockquote>
+<div><p>Number of equal-width (valuewise) bins to use in factor bucketing.
+Alternately sequence of bin edges allowing for non-uniform bin width
+e.g. [-4, -2, -0.5, 0, 10]
+Chooses the buckets to be evenly spaced according to the values themselves.
+Useful when the factor contains discrete values.
+Only one of ‘quantiles’ or ‘bins’ can be not-None</p>
+</div></blockquote>
+<p><strong>periods</strong> : sequence[int]</p>
+<blockquote>
+<div><p>periods to compute forward returns on.</p>
+</div></blockquote>
+<p><strong>filter_zscore</strong> : int or float</p>
 <blockquote>
 <div><p>Sets forward returns greater than X standard deviations
 from the the mean to nan.
-Caution: this outlier filtering incorperates lookahead bias.</p>
+Caution: this outlier filtering incorporates lookahead bias.</p>
 </div></blockquote>
-<p><strong>days</strong> : list</p>
+<p><strong>groupby_labels</strong> : dict</p>
 <blockquote>
-<div><p>Number of days forward to project returns. One column
-will be added for each value.</p>
-</div></blockquote>
-<p><strong>sector_names</strong> : dict</p>
-<blockquote>
-<div><p>A dictionary keyed by sector code with values corresponding
-to the display name for each sector.</p>
+<div><p>A dictionary keyed by group code with values corresponding
+to the display name for each group.</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>factor</strong> : pd.Series</p>
-<blockquote>
-<div><p>A list of equities and their factor values indexed by date,
-asset, and optionally sector.</p>
-</div></blockquote>
-<p><strong>forward_returns</strong> : pd.DataFrame - MultiIndex</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>merged_data</strong> : pd.DataFrame - MultiIndex</p>
 <blockquote class="last">
-<div><p>A DataFrame of equities and their forward returns
-indexed by date, asset, and optionally sector.
-Note: this is the same index as the factor index.</p>
+<div><p>A MultiIndex Series indexed by date (level 0) and asset (level 1),
+containing the values for a single alpha factor, forward returns for each period,
+The factor quantile/bin that factor value belongs too, and (optionally) the group the
+asset belongs to.</p>
 </div></blockquote>
 </td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alphalens.utils.get_forward_returns_columns">
+<code class="descclassname">alphalens.utils.</code><code class="descname">get_forward_returns_columns</code><span class="sig-paren">(</span><em>columns</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.utils.get_forward_returns_columns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="alphalens.utils.non_unique_bin_edges_error">
+<code class="descclassname">alphalens.utils.</code><code class="descname">non_unique_bin_edges_error</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.utils.non_unique_bin_edges_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Give user a more informative error in case it is not possible
+to properly calculate quantiles on the input dataframe (factor)</p>
 </dd></dl>
 
 <dl class="function">
@@ -1174,8 +1613,45 @@ formatted text output.</p>
 <p><strong>fmt</strong> : str, optional</p>
 <blockquote class="last">
 <div><p>Formatter to use for displaying table elements.
-E.g. &#8216;{0:.2f}%&#8217; for displaying 100 as &#8216;100.00%&#8217;.
+E.g. ‘{0:.2f}%’ for displaying 100 as ‘100.00%’.
 Restores original setting after displaying.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="alphalens.utils.quantize_factor">
+<code class="descclassname">alphalens.utils.</code><code class="descname">quantize_factor</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.utils.quantize_factor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="alphalens.utils.rate_of_return">
+<code class="descclassname">alphalens.utils.</code><code class="descname">rate_of_return</code><span class="sig-paren">(</span><em>period_ret</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.utils.rate_of_return" title="Permalink to this definition">¶</a></dt>
+<dd><p>1-period Growth Rate: the average rate of 1-period returns</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="alphalens.utils.std_conversion">
+<code class="descclassname">alphalens.utils.</code><code class="descname">std_conversion</code><span class="sig-paren">(</span><em>period_std</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.utils.std_conversion" title="Permalink to this definition">¶</a></dt>
+<dd><p>1-period standard deviation (or standard error) approximation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>period_std: pd.DataFrame</strong></p>
+<blockquote>
+<div><p>DataFrame containing standard deviation or standard error values
+with column headings representing the return period.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">pd.DataFrame</p>
+<blockquote class="last">
+<div><p>DataFrame in same format as input but with one-period
+standard deviation/error values.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1187,6 +1663,9 @@ Restores original setting after displaying.</p>
 </div>
 
 
+           </div>
+           <div class="articleComments">
+            
            </div>
           </div>
           <footer>
@@ -1218,10 +1697,11 @@ Restores original setting after displaying.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1',
+            VERSION:'0.1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

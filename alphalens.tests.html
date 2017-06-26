@@ -8,9 +8,11 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>alphalens.tests package &mdash; Alphalens 0.1 documentation</title>
+  <title>alphalens.tests package &mdash; Alphalens 0.1.1 documentation</title>
   
 
+  
+  
   
   
 
@@ -30,7 +32,10 @@
   
 
   
-    <link rel="top" title="Alphalens 0.1 documentation" href="index.html"/> 
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Alphalens 0.1.1 documentation" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -39,6 +44,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -58,7 +64,7 @@
             
             
               <div class="version">
-                0.1
+                0.1.1
               </div>
             
           
@@ -79,8 +85,11 @@
           
             
             
-                <!-- Local TOC -->
-                <div class="local-toc"><ul>
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
 <li><a class="reference internal" href="#">alphalens.tests package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#alphalens-tests-test-performance-module">alphalens.tests.test_performance module</a></li>
@@ -100,8 +109,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Alphalens</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Alphalens</a>
+        
       </nav>
 
 
@@ -110,23 +121,40 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>alphalens.tests package</li>
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>alphalens.tests package</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/alphalens.tests.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/alphalens.tests.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -141,47 +169,122 @@
 <h2>alphalens.tests.test_performance module<a class="headerlink" href="#alphalens-tests-test-performance-module" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-alphalens.tests.test_performance"></span><dl class="class">
 <dt id="alphalens.tests.test_performance.PerformanceTestCase">
-<em class="property">class </em><code class="descclassname">alphalens.tests.test_performance.</code><code class="descname">PerformanceTestCase</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">alphalens.tests.test_performance.</code><code class="descname">PerformanceTestCase</code><span class="sig-paren">(</span><em>methodName=’runTest’</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
 <p class="rubric">Attributes</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="77%" />
-<col width="23%" />
+<col width="81%" />
+<col width="19%" />
 </colgroup>
 <tbody valign="top">
+<tr class="row-odd"><td>test_average_cumulative_return_by_quantile</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>test_average_cumulative_return_by_quantile_2</td>
+<td>&#160;</td>
+</tr>
 <tr class="row-odd"><td>test_factor_alpha_beta</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 </tr>
 <tr class="row-even"><td>test_factor_rank_autocorrelation</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 </tr>
 <tr class="row-odd"><td>test_factor_returns</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 </tr>
 <tr class="row-even"><td>test_information_coefficient</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 </tr>
 <tr class="row-odd"><td>test_mean_information_coefficient</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 </tr>
 <tr class="row-even"><td>test_quantile_turnover</td>
-<td>&nbsp;</td>
-</tr>
-<tr class="row-odd"><td>test_quantize_factor</td>
-<td>&nbsp;</td>
+<td>&#160;</td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Methods</p>
 <dl class="attribute">
 <dt id="alphalens.tests.test_performance.PerformanceTestCase.dr">
-<code class="descname">dr</code><em class="property"> = DatetimeIndex(['2015-01-01', '2015-01-02'], dtype='datetime64[ns]', name='date', freq='D')</em><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.dr" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dr</code><em class="property"> = DatetimeIndex([‘2015-01-01’, ‘2015-01-02’], dtype=’datetime64[ns]’, name=’date’, freq=’D’)</em><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.dr" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="alphalens.tests.test_performance.PerformanceTestCase.factor">
-<code class="descname">factor</code><em class="property"> = date        asset  sector 2015-01-01  A      1         1             B      1         2             C      2         3             D      2         4 2015-01-02  A      1         4             B      1         3             C      2         2             D      2         1 Name: factor, dtype: int64</em><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.factor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">factor</code><em class="property"> = date        asset 2015-01-01  A        1             B        2             C        3             D        4 2015-01-02  A        4             B        3             C        2             D        1 Name: factor, dtype: int64</em><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.factor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.factor_data">
+<code class="descname">factor_data</code><em class="property"> =                   factor group date       asset               2015-01-01 A           1     1            B           2     1            C           3     2            D           4     2 2015-01-02 A           4     1            B           3     1            C           2     2            D           1     2</em><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.factor_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile">
+<code class="descname">test_average_cumulative_return_by_quantile</code><em class="property"> = None</em><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_0">
+<code class="descname">test_average_cumulative_return_by_quantile_0</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_1">
+<code class="descname">test_average_cumulative_return_by_quantile_1</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_2">
+<code class="descname">test_average_cumulative_return_by_quantile_2</code><em class="property"> = None</em><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_2_0">
+<code class="descname">test_average_cumulative_return_by_quantile_2_0</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_2_0" title="Permalink to this definition">¶</a></dt>
+<dd><p>[with before=0, after=2, demeaned=False, quantiles=4, expected_vals=[[0.0, -0.5, -0.75], [0.0, 0.0, ….0, 0.5, 1.25], [0.0, 0.0, 0.0]]]
+Test varying factor asset universe: at different dates there might be
+different assets</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_2_1">
+<code class="descname">test_average_cumulative_return_by_quantile_2_1</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_2_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>[with before=0, after=3, demeaned=True, quantiles=4, expected_vals=[[0.0, -0.5625, -1.015625, -1.48…1.761719], [0.0, 0.0, 0.0, 0.0]]]
+Test varying factor asset universe: at different dates there might be
+different assets</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_2_2">
+<code class="descname">test_average_cumulative_return_by_quantile_2_2</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_2_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>[with before=0, after=3, demeaned=False, quantiles=2, expected_vals=[[0.0, -0.25, -0.375, -0.4375], …1.664062], [0.0, 0.0, 0.0, 0.0]]]
+Test varying factor asset universe: at different dates there might be
+different assets</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_2_3">
+<code class="descname">test_average_cumulative_return_by_quantile_2_3</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_2_3" title="Permalink to this definition">¶</a></dt>
+<dd><p>[with before=0, after=3, demeaned=True, quantiles=2, expected_vals=[[0.0, -0.3125, -0.640625, -1.05…1.050781], [0.0, 0.0, 0.0, 0.0]]]
+Test varying factor asset universe: at different dates there might be
+different assets</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_3">
+<code class="descname">test_average_cumulative_return_by_quantile_3</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_4">
+<code class="descname">test_average_cumulative_return_by_quantile_4</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_5">
+<code class="descname">test_average_cumulative_return_by_quantile_5</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_average_cumulative_return_by_quantile_5" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -214,11 +317,6 @@
 <code class="descname">test_factor_rank_autocorrelation_2</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_factor_rank_autocorrelation_2" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_factor_rank_autocorrelation_3">
-<code class="descname">test_factor_rank_autocorrelation_3</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_factor_rank_autocorrelation_3" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="attribute">
 <dt id="alphalens.tests.test_performance.PerformanceTestCase.test_factor_returns">
 <code class="descname">test_factor_returns</code><em class="property"> = None</em><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_factor_returns" title="Permalink to this definition">¶</a></dt>
@@ -232,6 +330,21 @@
 <dl class="method">
 <dt id="alphalens.tests.test_performance.PerformanceTestCase.test_factor_returns_1">
 <code class="descname">test_factor_returns_1</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_factor_returns_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_factor_returns_2">
+<code class="descname">test_factor_returns_2</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_factor_returns_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_factor_returns_3">
+<code class="descname">test_factor_returns_3</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_factor_returns_3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_factor_returns_4">
+<code class="descname">test_factor_returns_4</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_factor_returns_4" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -305,28 +418,8 @@
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_quantize_factor">
-<code class="descname">test_quantize_factor</code><em class="property"> = None</em><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_quantize_factor" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_quantize_factor_0">
-<code class="descname">test_quantize_factor_0</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_quantize_factor_0" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_quantize_factor_1">
-<code class="descname">test_quantize_factor_1</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_quantize_factor_1" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="alphalens.tests.test_performance.PerformanceTestCase.test_quantize_factor_2">
-<code class="descname">test_quantize_factor_2</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.test_quantize_factor_2" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
 <dt id="alphalens.tests.test_performance.PerformanceTestCase.tickers">
-<code class="descname">tickers</code><em class="property"> = ['A', 'B', 'C', 'D']</em><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.tickers" title="Permalink to this definition">¶</a></dt>
+<code class="descname">tickers</code><em class="property"> = [‘A’, ‘B’, ‘C’, ‘D’]</em><a class="headerlink" href="#alphalens.tests.test_performance.PerformanceTestCase.tickers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -336,12 +429,202 @@
 <h2>alphalens.tests.test_utils module<a class="headerlink" href="#alphalens-tests-test-utils-module" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-alphalens.tests.test_utils"></span><dl class="class">
 <dt id="alphalens.tests.test_utils.UtilsTestCase">
-<em class="property">class </em><code class="descclassname">alphalens.tests.test_utils.</code><code class="descname">UtilsTestCase</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">alphalens.tests.test_utils.</code><code class="descname">UtilsTestCase</code><span class="sig-paren">(</span><em>methodName=’runTest’</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<p class="rubric">Attributes</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="71%" />
+<col width="29%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>test_common_start_returns</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>test_quantize_factor</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Methods</p>
+<dl class="attribute">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.dr">
+<code class="descname">dr</code><em class="property"> = DatetimeIndex([‘2015-01-01’, ‘2015-01-02’], dtype=’datetime64[ns]’, name=’date’, freq=’D’)</em><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.dr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.factor">
+<code class="descname">factor</code><em class="property"> = date        asset 2015-01-01  A        1             B        2             C        3             D        4 2015-01-02  A        4             B        3             C        2             D        1 Name: factor, dtype: int64</em><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.factor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.factor_data">
+<code class="descname">factor_data</code><em class="property"> =                   factor group date       asset               2015-01-01 A           1     1            B           2     1            C           3     2            D           4     2 2015-01-02 A           4     1            B           3     1            C           2     2            D           1     2</em><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.factor_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns">
+<code class="descname">test_common_start_returns</code><em class="property"> = None</em><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_0">
+<code class="descname">test_common_start_returns_0</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_1">
+<code class="descname">test_common_start_returns_1</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_2">
+<code class="descname">test_common_start_returns_2</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_3">
+<code class="descname">test_common_start_returns_3</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_4">
+<code class="descname">test_common_start_returns_4</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_5">
+<code class="descname">test_common_start_returns_5</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_6">
+<code class="descname">test_common_start_returns_6</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_6" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_7">
+<code class="descname">test_common_start_returns_7</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_common_start_returns_7" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="alphalens.tests.test_utils.UtilsTestCase.test_compute_forward_returns">
 <code class="descname">test_compute_forward_returns</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_compute_forward_returns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor">
+<code class="descname">test_quantize_factor</code><em class="property"> = None</em><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_0">
+<code class="descname">test_quantize_factor_0</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_1">
+<code class="descname">test_quantize_factor_1</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_10">
+<code class="descname">test_quantize_factor_10</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_10" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_11">
+<code class="descname">test_quantize_factor_11</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_11" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_12">
+<code class="descname">test_quantize_factor_12</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_12" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_13">
+<code class="descname">test_quantize_factor_13</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_13" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_14">
+<code class="descname">test_quantize_factor_14</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_14" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_15">
+<code class="descname">test_quantize_factor_15</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_15" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_16">
+<code class="descname">test_quantize_factor_16</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_16" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_17">
+<code class="descname">test_quantize_factor_17</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_17" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_18">
+<code class="descname">test_quantize_factor_18</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_18" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_19">
+<code class="descname">test_quantize_factor_19</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_19" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_2">
+<code class="descname">test_quantize_factor_2</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_20">
+<code class="descname">test_quantize_factor_20</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_20" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_3">
+<code class="descname">test_quantize_factor_3</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_4">
+<code class="descname">test_quantize_factor_4</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_5">
+<code class="descname">test_quantize_factor_5</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_6">
+<code class="descname">test_quantize_factor_6</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_6" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_7">
+<code class="descname">test_quantize_factor_7</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_7" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_8">
+<code class="descname">test_quantize_factor_8</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_8" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_9">
+<code class="descname">test_quantize_factor_9</code><span class="sig-paren">(</span><em>*a</em><span class="sig-paren">)</span><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.test_quantize_factor_9" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="alphalens.tests.test_utils.UtilsTestCase.tickers">
+<code class="descname">tickers</code><em class="property"> = [‘A’, ‘B’, ‘C’, ‘D’]</em><a class="headerlink" href="#alphalens.tests.test_utils.UtilsTestCase.tickers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -353,6 +636,9 @@
 </div>
 
 
+           </div>
+           <div class="articleComments">
+            
            </div>
           </div>
           <footer>
@@ -384,10 +670,11 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1',
+            VERSION:'0.1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>
