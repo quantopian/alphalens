@@ -423,6 +423,89 @@ def create_event_returns_tear_sheet(factor_data,
                                                                  std_bar=False, title=group, ax=gf.next_cell())
 
 
+@plotting.customize
+def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
+    """
+    Creates a tear sheet for returns analysis of a factor.
+
+    Parameters
+    ----------
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for each period,
+        The factor quantile/bin that factor value belongs too, and (optionally) the group the
+        asset belongs to.
+    """
+
+    long_short = False
+
+    plotting.plot_quantile_statistics_table(factor_data)
+
+    before, after = avgretplot
+    after = max(after, max(utils.get_forward_returns_columns(factor_data.columns)) + 1)
+
+    avg_cumulative_returns = perf.average_cumulative_return_by_quantile(factor_data['factor_quantile'],
+                                                                        prices,
+                                                                        periods_before=before,
+                                                                        periods_after=after,
+                                                                        demeaned=long_short)
+
+    gf = GridFigure(rows=2, cols=1)
+    plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=False,
+                                                     std_bar=False, ax=gf.next_row())
+
+    plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns, by_quantile=False,
+                                                     std_bar=True, ax=gf.next_row())
+
+    factor_returns = perf.factor_returns(factor_data, long_short)
+
+    mean_ret_quantile, std_quantile = perf.mean_return_by_quantile(factor_data,
+                                                                   by_group=False,
+                                                                   demeaned=long_short)
+
+    mean_compret_quantile = mean_ret_quantile.apply(utils.rate_of_return, axis=0)
+
+    mean_ret_quant_daily, std_quant_daily = perf.mean_return_by_quantile(factor_data,
+                                                                         by_date=True,
+                                                                         by_group=False,
+                                                                         demeaned=long_short)
+
+    mean_compret_quant_daily = mean_ret_quant_daily.apply(utils.rate_of_return, axis=0)
+    compstd_quant_daily = std_quant_daily.apply(utils.std_conversion, axis=0)
+
+    fr_cols = len(factor_returns.columns)
+    vertical_sections = 2 + fr_cols * 3
+    gf = GridFigure(rows=vertical_sections, cols=1)
+
+    plotting.plot_quantile_returns_bar(mean_compret_quantile,
+                                       by_group=False,
+                                       ylim_percentiles=None,
+                                       ax=gf.next_row())
+
+    plotting.plot_quantile_returns_violin(mean_compret_quant_daily,
+                                          ylim_percentiles=(1, 99),
+                                          ax=gf.next_row())
+
+    for p in factor_returns:
+
+        plotting.plot_cumulative_returns(factor_returns[p],
+                                         period=p,
+                                         ax=gf.next_row())
+
+        plotting.plot_cumulative_returns_by_quantile(mean_ret_quant_daily[p],
+                                                     period=p,
+                                                     ax=gf.next_row())
+
+    gf = GridFigure(rows=1, cols=1)
+    events = factor_data['factor']
+    grouper = [events.index.get_level_values('date').year, events.index.get_level_values('date').month]
+    events.groupby(grouper).count().plot(kind="bar", grid=False, ax=gf.next_row())
+    plt.title("Distribution of events in time")
+    plt.ylabel("Number of event")
+    plt.xlabel("Date")
+    plt.show()
+
+
 
 @utils.deprecated('This function is deprecated and will be removed in the'
                   ' future. Please use the new API instead.')
