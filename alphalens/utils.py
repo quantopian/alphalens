@@ -256,6 +256,15 @@ def get_clean_factor_and_forward_returns(factor,
         analysis time period plus an additional buffer window
         that is greater than the maximum number of expected periods
         in the forward returns calculations.
+        'Prices' must contain at least an entry for each date/asset
+        combination in 'factor'. This entry must be the asset price
+        at the time the asset factor value is computed and it will be
+        considered the buy price for that asset at that date.
+        'Prices' must also contain entries for dates following each
+        date/asset combination in 'factor', as many more dates as the
+        maximum value in 'periods'. The asset price after 'period'
+        dates will be considered the sell price for that asset when
+        computing 'period' forward returns.
     groupby : pd.Series - MultiIndex or dict
         Either A MultiIndex Series indexed by date and asset,
         containing the period wise group codes for each asset, or
