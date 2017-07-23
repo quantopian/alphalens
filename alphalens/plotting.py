@@ -865,3 +865,33 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
                xlabel='Periods')
 
     return ax
+
+
+def plot_events_distribution(events, ax=None):
+    """
+    Plots the distribution of events in time.
+
+    Parameters
+    ----------
+    events : pd.Series
+        A pd.Series whose index contains at least 'date' level.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+    """
+
+    if ax is None:
+        f, ax = plt.subplots(1, 1, figsize=(18, 6))
+
+    grouper = [events.index.get_level_values('date').year, events.index.get_level_values('date').month]
+    events.groupby(grouper).count().plot(kind="bar", grid=False, ax=ax)
+    ax.set(ylabel='Number of events',
+           title='Distribution of events in time',
+           xlabel='Date')
+
+    return ax
+
+

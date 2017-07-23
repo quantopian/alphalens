@@ -24,34 +24,32 @@ class NonMatchingTimezoneError(Exception):
     pass
 
 
-def deprecated(msg=None, stacklevel=2):
+def non_unique_bin_edges_error(func):
     """
-    Used to mark a function as deprecated.
-    Parameters
-    ----------
-    msg : str
-        The message to display in the deprecation warning.
-    stacklevel : int
-        How far up the stack the warning needs to go, before
-        showing the relevant calling lines.
-    Usage
-    -----
-    @deprecated(msg='function_a is deprecated! Use function_b instead.')
-    def function_a(*args, **kwargs):
+    Give user a more informative error in case it is not possible
+    to properly calculate quantiles on the input dataframe (factor)
     """
-    def deprecated_dec(fn):
-        @wraps(fn)
-        def wrapper(*args, **kwargs):
-            warnings.warn(
-                msg or "Function %s is deprecated." % fn.__name__,
-                category=DeprecationWarning,
-                stacklevel=stacklevel
-            )
-            return fn(*args, **kwargs)
-        return wrapper
-    return deprecated_dec
+    def dec(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except ValueError as e:
+            if 'Bin edges must be unique' in str(e):
+                print("""
+It's not possible to compute quantiles for the input provided.
+This usually happens when the input contains too many identical
+values so that they span more than one quantile. A typical example
+is a factor with discrete values.
+A workaround is to use 'bins' option instead of 'quantiles', or
+to provide custom ranges to 'quantiles' option. 'bins' chooses the
+buckets to be evenly spaced according to the values themselves, while
+'quantiles' forces the buckets to have the same number of records.
+Please see utils.get_clean_factor_and_forward_returns documentation.
+                      """)
+            raise
+    return dec
 
 
+@non_unique_bin_edges_error
 def quantize_factor(factor_data, quantiles=5, bins=None, by_group=False):
     """
     Computes period wise factor quantiles.
@@ -83,11 +81,11 @@ def quantize_factor(factor_data, quantiles=5, bins=None, by_group=False):
     """
 
     def quantile_calc(x, _quantiles, _bins):
-        if _quantiles is not None:
+        if _quantiles is not None and _bins is None:
             return pd.qcut(x, _quantiles, labels=False) + 1
-        elif _bins is not None:
+        elif _bins is not None and _quantiles is None:
             return pd.cut(x, _bins, labels=False) + 1
-        raise ValueError('quantiles or bins should be provided')
+        raise ValueError('Either quantiles or bins should be provided')
 
     grouper = [factor_data.index.get_level_values('date')]
     if by_group:
@@ -258,6 +256,15 @@ def get_clean_factor_and_forward_returns(factor,
         analysis time period plus an additional buffer window
         that is greater than the maximum number of expected periods
         in the forward returns calculations.
+        'Prices' must contain at least an entry for each date/asset
+        combination in 'factor'. This entry must be the asset price
+        at the time the asset factor value is computed and it will be
+        considered the buy price for that asset at that date.
+        'Prices' must also contain entries for dates following each
+        date/asset combination in 'factor', as many more dates as the
+        maximum value in 'periods'. The asset price after 'period'
+        dates will be considered the sell price for that asset when
+        computing 'period' forward returns.
     groupby : pd.Series - MultiIndex or dict
         Either A MultiIndex Series indexed by date and asset,
         containing the period wise group codes for each asset, or
@@ -275,6 +282,8 @@ def get_clean_factor_and_forward_returns(factor,
         Number of equal-width (valuewise) bins to use in factor bucketing.
         Alternately sequence of bin edges allowing for non-uniform bin width
         e.g. [-4, -2, -0.5, 0, 10]
+        Chooses the buckets to be evenly spaced according to the values themselves.
+        Useful when the factor contains discrete values.
         Only one of 'quantiles' or 'bins' can be not-None
     periods : sequence[int]
         periods to compute forward returns on.
@@ -381,7 +390,7 @@ def common_start_returns(factor,
         DataFrame with at least date and equity as index, the columns are irrelevant
         For each date a list of equities is extracted from 'demean' index and used 
         as universe to compute demeaned mean returns (long short portfolio)
-    
+
     Returns
     -------
     aligned_returns : pd.DataFrame
@@ -445,7 +454,7 @@ def rate_of_return(period_ret):
 def std_conversion(period_std):
     """
     1-period standard deviation (or standard error) approximation
-    
+
     Parameters
     ----------
     period_std: pd.DataFrame

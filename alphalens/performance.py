@@ -136,7 +136,8 @@ def factor_returns(factor_data, long_short=True, group_neutral=False):
         The factor quantile/bin that factor value belongs too, and (optionally) the group the
         asset belongs to.
     long_short : bool
-        Should this computation happen on a long short portfolio?
+        Should this computation happen on a long short portfolio? if so then factor returns
+        will be demeaned across the factor universe
     group_neutral : bool
         If True, compute group neutral returns: each group will weight
         the same and returns demeaning will occur on the group level.
