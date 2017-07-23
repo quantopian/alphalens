@@ -171,7 +171,7 @@ def factor_returns(factor_data, long_short=True, group_neutral=False):
     return returns
 
 
-def factor_alpha_beta(factor_data):
+def factor_alpha_beta(factor_data, long_short=True):
     """
     Computes the alpha (excess returns), alpha t-stat (alpha significance),
     and beta (market exposure) of a factor. A regression is run with
@@ -186,7 +186,9 @@ def factor_alpha_beta(factor_data):
         containing the values for a single alpha factor, forward returns for each period,
         The factor quantile/bin that factor value belongs too, and (optionally) the group the
         asset belongs to.
-
+    long_short : bool
+        Should this computation happen on a long short portfolio? if so then factor returns
+        will be demeaned across the factor universe
     Returns
     -------
     alpha_beta : pd.Series
@@ -194,7 +196,7 @@ def factor_alpha_beta(factor_data):
         for the given factor and forward returns.
     """
 
-    returns = factor_returns(factor_data, long_short=True)
+    returns = factor_returns(factor_data, long_short=long_short)
 
     universe_ret = factor_data.groupby(level='date')[utils.get_forward_returns_columns(factor_data.columns)].mean().loc[returns.index]
 
