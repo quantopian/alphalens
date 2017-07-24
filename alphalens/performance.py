@@ -173,11 +173,11 @@ def factor_returns(factor_data, long_short=True, group_neutral=False):
 
 def factor_alpha_beta(factor_data, long_short=True):
     """
-    Computes the alpha (excess returns), alpha t-stat (alpha significance),
+    Compute the alpha (excess returns), alpha t-stat (alpha significance),
     and beta (market exposure) of a factor. A regression is run with
     the period wise factor universe mean return as the independent variable
-    and mean period wise return from a dollar-neutral portfolio weighted
-    by factor values as the dependent variable.
+    and mean period wise return from a portfolio weighted by factor values
+    as the dependent variable.
 
     Parameters
     ----------
