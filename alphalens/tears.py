@@ -87,7 +87,7 @@ def create_summary_tear_sheet(factor_data, long_short=True):
                                                           axis=0)
     compstd_quant_daily = std_quant_daily.apply(utils.std_conversion, axis=0)
 
-    alpha_beta = perf.factor_alpha_beta(factor_data)
+    alpha_beta = perf.factor_alpha_beta(factor_data, long_short)
 
     mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(
         mean_compret_quant_daily,
@@ -165,7 +165,7 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
     mean_compret_quant_daily = mean_ret_quant_daily.apply(utils.rate_of_return, axis=0)
     compstd_quant_daily = std_quant_daily.apply(utils.std_conversion, axis=0)
 
-    alpha_beta = perf.factor_alpha_beta(factor_data)
+    alpha_beta = perf.factor_alpha_beta(factor_data, long_short)
 
     mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(
         mean_compret_quant_daily,
