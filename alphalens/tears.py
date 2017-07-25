@@ -64,8 +64,9 @@ def create_summary_tear_sheet(factor_data, long_short=True):
         The factor quantile/bin that factor value belongs too, and (optionally) the group the
         asset belongs to.
     long_short : bool
-        Should this computation happen on a long short portfolio? if so then factor returns
-        will be demeaned across the factor universe
+        Should this computation happen on a long short portfolio? if so, then factor values
+        will be demeaned across the factor universe when factor weighting the portfolio. 
+        Additionally, mean quantile returns will be demeaned across the factor universe.
     """
 
 
@@ -142,8 +143,9 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
         The factor quantile/bin that factor value belongs too, and (optionally) the group the
         asset belongs to.
     long_short : bool
-        Should this computation happen on a long short portfolio? if so then factor returns
-        will be demeaned across the factor universe
+        Should this computation happen on a long short portfolio? if so, then factor values
+        will be demeaned across the factor universe when factor weighting the portfolio. 
+        Additionally, mean quantile returns will be demeaned across the factor universe.
     by_group : bool
         If True, perform calcuations, and display graphs separately for
         each group.
@@ -345,8 +347,9 @@ def create_full_tear_sheet(factor_data,
         If True, perform calcuations, and display graphs separately for
         each group.
     long_short : bool
-        Should this computation happen on a long short portfolio? if so then factor returns
-        will be demeaned across the factor universe
+        Should this computation happen on a long short portfolio? if so, then factor values
+        will be demeaned across the factor universe when factor weighting the portfolio. 
+        Additionally, mean quantile returns will be demeaned across the factor universe.
     """
 
     plotting.plot_quantile_statistics_table(factor_data)
