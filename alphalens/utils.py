@@ -15,8 +15,6 @@
 
 import pandas as pd
 import numpy as np
-import warnings
-from functools import wraps
 from IPython.display import display
 
 
@@ -58,9 +56,9 @@ def quantize_factor(factor_data, quantiles=5, bins=None, by_group=False):
     ----------
     factor_data : pd.DataFrame - MultiIndex
         A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
-        containing the values for a single alpha factor, forward returns for each period,
-        The factor quantile/bin that factor value belongs too, and (optionally) the group the
-        asset belongs to.
+        containing the values for a single alpha factor, forward returns for
+        each period, the factor quantile/bin that factor value belongs too, and
+        (optionally) the group the asset belongs to.
     quantiles : int or sequence[float]
         Number of equal-sized quantile buckets to use in factor bucketing.
         Alternately sequence of quantiles, allowing non-equal-sized buckets
@@ -91,7 +89,8 @@ def quantize_factor(factor_data, quantiles=5, bins=None, by_group=False):
     if by_group:
         grouper.append('group')
 
-    factor_quantile = factor_data.groupby(grouper)['factor'].apply(quantile_calc, quantiles, bins)
+    factor_quantile = factor_data.groupby(grouper)['factor'] \
+        .apply(quantile_calc, quantiles, bins)
     factor_quantile.name = 'factor_quantile'
 
     return factor_quantile.dropna()
@@ -99,7 +98,8 @@ def quantize_factor(factor_data, quantiles=5, bins=None, by_group=False):
 
 def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
     """
-    Finds the N period forward returns (as percent change) for each asset provided.
+    Finds the N period forward returns (as percent change) for each asset
+    provided.
 
     Parameters
     ----------
@@ -174,7 +174,8 @@ def demean_forward_returns(factor_data, grouper=None):
         grouper = factor_data.index.get_level_values('date')
 
     cols = get_forward_returns_columns(factor_data.columns)
-    factor_data[cols] = factor_data.groupby(grouper)[cols].transform(lambda x: x - x.mean())
+    factor_data[cols] = factor_data.groupby(grouper)[cols] \
+        .transform(lambda x: x - x.mean())
 
     return factor_data
 
@@ -230,8 +231,8 @@ def get_clean_factor_and_forward_returns(factor,
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        A MultiIndex Series indexed by date (level 0) and asset (level 1), containing
-        the values for a single alpha factor.
+        A MultiIndex Series indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor.
         ::
             -----------------------------------
                 date    |    asset   |
@@ -282,8 +283,8 @@ def get_clean_factor_and_forward_returns(factor,
         Number of equal-width (valuewise) bins to use in factor bucketing.
         Alternately sequence of bin edges allowing for non-uniform bin width
         e.g. [-4, -2, -0.5, 0, 10]
-        Chooses the buckets to be evenly spaced according to the values themselves.
-        Useful when the factor contains discrete values.
+        Chooses the buckets to be evenly spaced according to the values
+        themselves. Useful when the factor contains discrete values.
         Only one of 'quantiles' or 'bins' can be not-None
     periods : sequence[int]
         periods to compute forward returns on.
@@ -299,15 +300,16 @@ def get_clean_factor_and_forward_returns(factor,
     -------
     merged_data : pd.DataFrame - MultiIndex
         A MultiIndex Series indexed by date (level 0) and asset (level 1),
-        containing the values for a single alpha factor, forward returns for each period,
-        The factor quantile/bin that factor value belongs too, and (optionally) the group the
-        asset belongs to.
+        containing the values for a single alpha factor, forward returns for
+        each period, the factor quantile/bin that factor value belongs to, and
+        (optionally) the group the asset belongs to.
     """
 
     if factor.index.levels[0].tz != prices.index.tz:
         raise NonMatchingTimezoneError("The timezone of 'factor' is not the "
                                        "same as the timezone of 'prices'. See "
-                                       "the pandas methods tz_localize and tz_convert.")
+                                       "the pandas methods tz_localize and "
+                                       "tz_convert.")
 
     merged_data = compute_forward_returns(prices, periods, filter_zscore)
 
@@ -365,13 +367,14 @@ def common_start_returns(factor,
     A date and equity pair is extracted from each index row in the factor
     dataframe and for each of these pairs a return series is built starting
     from 'before' the date and ending 'after' the date specified in the pair.
-    All those returns series are then aligned to a common index (-before to after)
-    and returned as a single DataFrame
+    All those returns series are then aligned to a common index (-before to
+    after) and returned as a single DataFrame
 
     Parameters
     ----------
     factor : pd.DataFrame
-        DataFrame with at least date and equity as index, the columns are irrelevant
+        DataFrame with at least date and equity as index, the columns are
+        irrelevant
     prices : pd.DataFrame
         A wide form Pandas DataFrame indexed by date with assets
         in the columns. Pricing data should span the factor
@@ -387,15 +390,16 @@ def common_start_returns(factor,
         If True, compute mean returns for each date and return that
         instead of a return series for each asset
     demean: pd.DataFrame, optional
-        DataFrame with at least date and equity as index, the columns are irrelevant
-        For each date a list of equities is extracted from 'demean' index and used 
-        as universe to compute demeaned mean returns (long short portfolio)
+        DataFrame with at least date and equity as index, the columns are
+        irrelevant. For each date a list of equities is extracted from 'demean'
+        index and used as universe to compute demeaned mean returns (long short
+        portfolio)
 
     Returns
     -------
     aligned_returns : pd.DataFrame
-        Dataframe containing returns series for each factor aligned to the same index:
-        -before to after
+        Dataframe containing returns series for each factor aligned to the same
+        index: -before to after
     """
 
     if cumulative:
@@ -415,12 +419,13 @@ def common_start_returns(factor,
             continue
 
         starting_index = max(day_zero_index - before, 0)
-        ending_index = min(day_zero_index + after + 1, 
+        ending_index = min(day_zero_index + after + 1,
                            len(returns.index))
 
         equities_slice = set(equities)
         if demean is not None:
-            demean_equities = demean.loc[timestamp].index.get_level_values('asset')
+            demean_equities = demean.loc[timestamp] \
+                .index.get_level_values('asset')
             equities_slice |= set(demean_equities)
 
         series = returns.loc[returns.index[starting_index:ending_index],
@@ -432,7 +437,7 @@ def common_start_returns(factor,
             series = (series / series.loc[0, :]) - 1
 
         if demean is not None:
-            mean   = series.loc[:, demean_equities].mean(axis=1)
+            mean = series.loc[:, demean_equities].mean(axis=1)
             series = series.loc[:, equities]
             series = series.sub(mean, axis=0)
 
