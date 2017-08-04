@@ -84,6 +84,7 @@ def mean_information_coefficient(factor_data,
     What is the mean IC for for each group, each week?
 
     Parameters
+    ----------
     factor_data : pd.DataFrame - MultiIndex
         A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
         containing the values for a single alpha factor, forward returns for
