@@ -61,7 +61,7 @@ def create_summary_tear_sheet(factor_data, long_short=True):
     factor_data : pd.DataFrame - MultiIndex
         A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
         containing the values for a single alpha factor, forward returns for
-        each period, the factor quantile/bin that factor value belongs too, and
+        each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
     long_short : bool
         Should this computation happen on a long short portfolio? if so, then

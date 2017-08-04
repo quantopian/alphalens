@@ -546,9 +546,8 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
 
 def plot_ic_by_group(ic_group, ax=None):
     """
-    Plots Spearman Rank Information Coefficient for a given
-    factor over provided forward returns.
-    Separates by group.
+    Plots Spearman Rank Information Coefficient for a given factor over
+    provided forward returns. Separates by group.
 
     Parameters
     ----------
@@ -820,6 +819,7 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
         Custom title
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
+
     Returns
     -------
     ax : matplotlib.Axes

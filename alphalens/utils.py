@@ -33,15 +33,15 @@ def non_unique_bin_edges_error(func):
         except ValueError as e:
             if 'Bin edges must be unique' in str(e):
                 print("""
-It's not possible to compute quantiles for the input provided.
-This usually happens when the input contains too many identical
-values so that they span more than one quantile. A typical example
-is a factor with discrete values.
-A workaround is to use 'bins' option instead of 'quantiles', or
-to provide custom ranges to 'quantiles' option. 'bins' chooses the
-buckets to be evenly spaced according to the values themselves, while
-'quantiles' forces the buckets to have the same number of records.
-Please see utils.get_clean_factor_and_forward_returns documentation.
+    It's not possible to compute quantiles for the input provided.
+    This usually happens when the input contains too many identical
+    values so that they span more than one quantile. A typical example
+    is a factor with discrete values.
+    A workaround is to use 'bins' option instead of 'quantiles', or
+    to provide custom ranges to 'quantiles' option. 'bins' chooses the
+    buckets to be evenly spaced according to the values themselves, while
+    'quantiles' forces the buckets to have the same number of records.
+    Please see utils.get_clean_factor_and_forward_returns documentation.
                       """)
             raise
     return dec
