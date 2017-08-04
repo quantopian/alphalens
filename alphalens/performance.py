@@ -35,9 +35,9 @@ def factor_information_coefficient(factor_data,
     ----------
     factor_data : pd.DataFrame - MultiIndex
         A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
-        containing the values for a single alpha factor, forward returns for each period,
-        The factor quantile/bin that factor value belongs too, and (optionally) the group the
-        asset belongs to.
+        containing the values for a single alpha factor, forward returns for
+        each period, the factor quantile/bin that factor value belongs to, and
+        (optionally) the group the asset belongs to.
     group_adjust : bool
         Demean forward returns by group before computing IC.
     by_group : bool
@@ -52,7 +52,8 @@ def factor_information_coefficient(factor_data,
 
     def src_ic(group):
         f = group['factor']
-        _ic = group[utils.get_forward_returns_columns(factor_data.columns)].apply(lambda x: stats.spearmanr(x, f)[0])
+        _ic = group[utils.get_forward_returns_columns(factor_data.columns)] \
+            .apply(lambda x: stats.spearmanr(x, f)[0])
         return _ic
 
     factor_data = factor_data.copy()
@@ -62,7 +63,8 @@ def factor_information_coefficient(factor_data,
         grouper.append('group')
 
     if group_adjust:
-        factor_data = utils.demean_forward_returns(factor_data, grouper + ['group'])
+        factor_data = utils.demean_forward_returns(factor_data,
+                                                   grouper + ['group'])
 
     ic = factor_data.groupby(grouper).apply(src_ic)
     ic.columns = pd.Int64Index(ic.columns)
@@ -84,9 +86,9 @@ def mean_information_coefficient(factor_data,
     Parameters
     factor_data : pd.DataFrame - MultiIndex
         A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
-        containing the values for a single alpha factor, forward returns for each period,
-        The factor quantile/bin that factor value belongs too, and (optionally) the group the
-        asset belongs to.
+        containing the values for a single alpha factor, forward returns for
+        each period, the factor quantile/bin that factor value belongs to, and
+        (optionally) the group the asset belongs to.
     group_adjust : bool
         Demean forward returns by group before computing IC.
     by_group : bool
@@ -132,12 +134,13 @@ def factor_returns(factor_data, long_short=True, group_neutral=False):
     ----------
     factor_data : pd.DataFrame - MultiIndex
         A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
-        containing the values for a single alpha factor, forward returns for each period,
-        The factor quantile/bin that factor value belongs too, and (optionally) the group the
-        asset belongs to.
+        containing the values for a single alpha factor, forward returns for
+        each period, the factor quantile/bin that factor value belongs to, and
+        (optionally) the group the asset belongs to.
     long_short : bool
-        Should this computation happen on a long short portfolio? if so, then factor values
-        will be demeaned across factor universe when factor weighting the portfolio. 
+        Should this computation happen on a long short portfolio? if so, then
+        factor values will be demeaned across factor universe when factor
+        weighting the portfolio.
     group_neutral : bool
         If True, compute group neutral returns: each group will weight
         the same and returns demeaning will occur on the group level.
@@ -145,7 +148,8 @@ def factor_returns(factor_data, long_short=True, group_neutral=False):
     Returns
     -------
     returns : pd.DataFrame
-        Period wise returns of dollar neutral portfolio weighted by factor value.
+        Period wise returns of dollar neutral portfolio weighted by factor
+        value.
     """
 
     def to_weights(group, is_long_short):
@@ -159,12 +163,15 @@ def factor_returns(factor_data, long_short=True, group_neutral=False):
     if group_neutral:
         grouper.append('group')
 
-    weights = factor_data.groupby(grouper)['factor'].apply(to_weights, long_short)
+    weights = factor_data.groupby(grouper)['factor'] \
+        .apply(to_weights, long_short)
 
     if group_neutral:
         weights = weights.groupby(level='date').apply(to_weights, False)
 
-    weighted_returns = factor_data[utils.get_forward_returns_columns(factor_data.columns)].multiply(weights, axis=0)
+    weighted_returns = \
+        factor_data[utils.get_forward_returns_columns(factor_data.columns)] \
+        .multiply(weights, axis=0)
 
     returns = weighted_returns.groupby(level='date').sum()
 
@@ -183,12 +190,14 @@ def factor_alpha_beta(factor_data, long_short=True):
     ----------
     factor_data : pd.DataFrame - MultiIndex
         A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
-        containing the values for a single alpha factor, forward returns for each period,
-        The factor quantile/bin that factor value belongs too, and (optionally) the group the
-        asset belongs to.
+        containing the values for a single alpha factor, forward returns for
+        each period, the factor quantile/bin that factor value belongs too, and
+        (optionally) the group the asset belongs to.
     long_short : bool
-        Should this computation happen on a long short portfolio? if so, then factor values
-        will be demeaned across factor universe when factor weighting the portfolio. 
+        Should this computation happen on a long short portfolio? if so, then
+        factor values will be demeaned across factor universe when factor
+        weighting the portfolio.
+
     Returns
     -------
     alpha_beta : pd.Series
@@ -198,7 +207,9 @@ def factor_alpha_beta(factor_data, long_short=True):
 
     returns = factor_returns(factor_data, long_short=long_short)
 
-    universe_ret = factor_data.groupby(level='date')[utils.get_forward_returns_columns(factor_data.columns)].mean().loc[returns.index]
+    universe_ret = factor_data.groupby(level='date')[
+        utils.get_forward_returns_columns(factor_data.columns)] \
+        .mean().loc[returns.index]
 
     if isinstance(returns, pd.Series):
         returns.name = universe_ret.columns.values[0]
@@ -213,7 +224,8 @@ def factor_alpha_beta(factor_data, long_short=True):
         reg_fit = OLS(y, x).fit()
         alpha, beta = reg_fit.params
 
-        alpha_beta.loc['Ann. alpha', period] = (1 + alpha) ** (252.0/period) - 1
+        alpha_beta.loc['Ann. alpha', period] = \
+            (1 + alpha) ** (252.0/period) - 1
         alpha_beta.loc['beta', period] = beta
 
     return alpha_beta
@@ -231,9 +243,9 @@ def mean_return_by_quantile(factor_data,
     ----------
     factor_data : pd.DataFrame - MultiIndex
         A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
-        containing the values for a single alpha factor, forward returns for each period,
-        The factor quantile/bin that factor value belongs too, and (optionally) the group the
-        asset belongs to.
+        containing the values for a single alpha factor, forward returns for
+        each period, the factor quantile/bin that factor value belongs to, and
+        (optionally) the group the asset belongs to.
     by_date : bool
         If True, compute quantile bucket returns separately for each date.
     by_group : bool
@@ -262,13 +274,14 @@ def mean_return_by_quantile(factor_data,
     if by_group:
         grouper.append('group')
 
-
-    group_stats = factor_data.groupby(grouper)[utils.get_forward_returns_columns(factor_data.columns)].agg(['mean', 'std', 'count'])
+    group_stats = factor_data.groupby(grouper)[
+        utils.get_forward_returns_columns(factor_data.columns)] \
+        .agg(['mean', 'std', 'count'])
 
     mean_ret = group_stats.T.xs('mean', level=1).T
 
-    std_error_ret = group_stats.T.xs('std', level=1).T /\
-                    np.sqrt(group_stats.T.xs('count', level=1).T)
+    std_error_ret = group_stats.T.xs('std', level=1).T \
+        / np.sqrt(group_stats.T.xs('count', level=1).T)
 
     return mean_ret, std_error_ret
 
@@ -306,8 +319,9 @@ def compute_mean_returns_spread(mean_returns,
         Period wise standard error of the difference in quantile returns.
     """
 
-    mean_return_difference = mean_returns.xs(upper_quant, level='factor_quantile') - \
-        mean_returns.xs(lower_quant, level='factor_quantile')
+    mean_return_difference = mean_returns.xs(upper_quant,
+                                             level='factor_quantile') \
+        - mean_returns.xs(lower_quant, level='factor_quantile')
 
     std1 = std_err.xs(upper_quant, level='factor_quantile')
     std2 = std_err.xs(lower_quant, level='factor_quantile')
@@ -328,7 +342,7 @@ def quantile_turnover(quantile_factor, quantile, period=1):
     quantile : int
         Quantile on which to perform turnover analysis.
     period: int, optional
-        Period over which to calculate the turnover     
+        Period over which to calculate the turnover
     Returns
     -------
     quant_turnover : pd.Series
@@ -358,9 +372,9 @@ def factor_rank_autocorrelation(factor_data, period=1):
     ----------
     factor_data : pd.DataFrame - MultiIndex
         A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
-        containing the values for a single alpha factor, forward returns for each period,
-        The factor quantile/bin that factor value belongs too, and (optionally) the group the
-        asset belongs to.
+        containing the values for a single alpha factor, forward returns for
+        each period, the factor quantile/bin that factor value belongs to, and
+        (optionally) the group the asset belongs to.
     period: int, optional
         Period over which to calculate the autocorrelation
 
@@ -380,7 +394,8 @@ def factor_rank_autocorrelation(factor_data, period=1):
                                                   columns='asset',
                                                   values='factor')
 
-    autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(period), axis=1)
+    autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(period),
+                                          axis=1)
     autocorr.name = period
     return autocorr
 
@@ -391,9 +406,9 @@ def average_cumulative_return_by_quantile(quantized_factor,
                                           periods_after=15,
                                           demeaned=True):
     """
-    Plots sector-wise mean daily returns for factor quantiles 
+    Plots sector-wise mean daily returns for factor quantiles
     across provided forward price movement columns.
-    
+
     Parameters
     ----------
     quantized_factor : pd.Series
@@ -409,7 +424,7 @@ def average_cumulative_return_by_quantile(quantized_factor,
     periods_after  : int, optional
         How many periods after factor to plot
     demeaned : bool, optional
-        Compute demeaned mean returns (long short portfolio)        
+        Compute demeaned mean returns (long short portfolio)
     Returns
     -------
     pd.DataFrame indexed by quantile (level 0) and mean/std
@@ -422,6 +437,8 @@ def average_cumulative_return_by_quantile(quantized_factor,
         q_returns = utils.common_start_returns(q_fact, prices,
                                                periods_before, periods_after,
                                                True, True, demean)
-        return pd.DataFrame( {'mean': q_returns.mean(axis=1), 'std': q_returns.std(axis=1)} ).T
+        return pd.DataFrame({'mean': q_returns.mean(axis=1),
+                             'std': q_returns.std(axis=1)}).T
 
-    return quantized_factor.groupby(quantized_factor).apply(average_cumulative_return)
+    return quantized_factor.groupby(quantized_factor) \
+        .apply(average_cumulative_return)
