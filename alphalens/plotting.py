@@ -31,7 +31,9 @@ DECIMAL_TO_BPS = 10000
 
 
 def customize(func):
-    """Decorator to set plotting context and axes style during function call."""
+    """
+    Decorator to set plotting context and axes style during function call.
+    """
     @wraps(func)
     def call_w_context(*args, **kwargs):
         set_context = kwargs.pop('set_context', True)
@@ -45,7 +47,8 @@ def customize(func):
 
 
 def plotting_context(context='notebook', font_scale=1.5, rc=None):
-    """Create alphalens default plotting style context.
+    """
+    Create alphalens default plotting style context.
 
     Under the hood, calls and returns seaborn.plotting_context() with
     some custom settings. Usually you would use in a with-context.
@@ -74,7 +77,6 @@ def plotting_context(context='notebook', font_scale=1.5, rc=None):
     See also
     --------
     For more information, see seaborn.plotting_context().
-
     """
     if rc is None:
         rc = {}
@@ -87,7 +89,7 @@ def plotting_context(context='notebook', font_scale=1.5, rc=None):
 
     return sns.plotting_context(context=context, font_scale=font_scale, rc=rc)
 
-  
+
 def axes_style(style='darkgrid', rc=None):
     """Create alphalens default axes style context.
 
@@ -118,31 +120,30 @@ def axes_style(style='darkgrid', rc=None):
     if rc is None:
         rc = {}
 
-    rc_default = { }
+    rc_default = {}
 
     # Add defaults if they do not exist
     for name, val in rc_default.items():
         rc.setdefault(name, val)
 
     return sns.axes_style(style=style, rc=rc)
-  
-  
-def plot_returns_table(alpha_beta, mean_ret_quantile, mean_ret_spread_quantile):
+
+
+def plot_returns_table(alpha_beta,
+                       mean_ret_quantile,
+                       mean_ret_spread_quantile):
     returns_table = pd.DataFrame()
     returns_table = returns_table.append(alpha_beta)
-    returns_table.loc[
-        "Mean Period Wise Return Top Quantile (bps)"] = \
+    returns_table.loc["Mean Period Wise Return Top Quantile (bps)"] = \
         mean_ret_quantile.iloc[-1] * DECIMAL_TO_BPS
-    returns_table.loc[
-        "Mean Period Wise Return Bottom Quantile (bps)"] = \
-    mean_ret_quantile.iloc[0] * DECIMAL_TO_BPS
-    returns_table.loc[
-        "Mean Period Wise Spread (bps)"] = mean_ret_spread_quantile.mean() \
-                                           * DECIMAL_TO_BPS
+    returns_table.loc["Mean Period Wise Return Bottom Quantile (bps)"] = \
+        mean_ret_quantile.iloc[0] * DECIMAL_TO_BPS
+    returns_table.loc["Mean Period Wise Spread (bps)"] = \
+        mean_ret_spread_quantile.mean() * DECIMAL_TO_BPS
 
     print("Returns Analysis")
     utils.print_table(returns_table.apply(lambda x: x.round(3)))
-    
+
 
 def plot_turnover_table(autocorrelation_data, quantile_turnover):
     turnover_table = pd.DataFrame()
@@ -169,16 +170,18 @@ def plot_information_table(ic_data):
     ic_summary_table["p-value(IC)"] = p_value
     ic_summary_table["IC Skew"] = stats.skew(ic_data)
     ic_summary_table["IC Kurtosis"] = stats.kurtosis(ic_data)
-    ic_summary_table["Ann. IR"] = (ic_data.mean() / ic_data.std()) * np.sqrt(252)
+    ic_summary_table["Ann. IR"] = \
+        (ic_data.mean() / ic_data.std()) * np.sqrt(252)
 
     print("Information Analysis")
     utils.print_table(ic_summary_table.apply(lambda x: x.round(3)).T)
 
 
 def plot_quantile_statistics_table(factor_data):
-
-    quantile_stats = factor_data.groupby('factor_quantile').agg(['min', 'max', 'mean', 'std', 'count'])['factor']
-    quantile_stats['count %'] = quantile_stats['count'] / quantile_stats['count'].sum() * 100.
+    quantile_stats = factor_data.groupby('factor_quantile') \
+        .agg(['min', 'max', 'mean', 'std', 'count'])['factor']
+    quantile_stats['count %'] = quantile_stats['count'] \
+        / quantile_stats['count'].sum() * 100.
 
     print("Quantiles Statistics")
     utils.print_table(quantile_stats)
@@ -201,7 +204,6 @@ def plot_ic_ts(ic, ax=None):
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
-
     ic = ic.copy()
 
     num_plots = len(ic.columns)
@@ -229,7 +231,7 @@ def plot_ic_ts(ic, ax=None):
 
         curr_ymin, curr_ymax = a.get_ylim()
         ymin = curr_ymin if ymin is None else min(ymin, curr_ymin)
-        ymax = curr_ymax if ymax is None else max(ymax, curr_ymax)                                                          
+        ymax = curr_ymax if ymax is None else max(ymax, curr_ymax)
 
     for a in ax:
         a.set_ylim([ymin, ymax])
@@ -358,9 +360,9 @@ def plot_quantile_returns_bar(mean_ret_by_q,
 
     if ylim_percentiles is not None:
         ymin = (np.nanpercentile(mean_ret_by_q.values,
-                              ylim_percentiles[0]) * DECIMAL_TO_BPS)
+                                 ylim_percentiles[0]) * DECIMAL_TO_BPS)
         ymax = (np.nanpercentile(mean_ret_by_q.values,
-                              ylim_percentiles[1]) * DECIMAL_TO_BPS)
+                                 ylim_percentiles[1]) * DECIMAL_TO_BPS)
     else:
         ymin = None
         ymax = None
@@ -424,12 +426,12 @@ def plot_quantile_returns_violin(return_by_q,
     """
 
     return_by_q = return_by_q.copy()
-        
+
     if ylim_percentiles is not None:
         ymin = (np.nanpercentile(return_by_q.values,
-                              ylim_percentiles[0]) * DECIMAL_TO_BPS)
+                                 ylim_percentiles[0]) * DECIMAL_TO_BPS)
         ymax = (np.nanpercentile(return_by_q.values,
-                              ylim_percentiles[1]) * DECIMAL_TO_BPS)
+                                 ylim_percentiles[1]) * DECIMAL_TO_BPS)
     else:
         ymin = None
         ymax = None
@@ -491,7 +493,8 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
             ax = [None for a in mean_returns_spread.columns]
 
         ymin, ymax = (None, None)
-        for (i, a), (name, fr_column) in zip(enumerate(ax), mean_returns_spread.iteritems()):
+        for (i, a), (name, fr_column) in zip(enumerate(ax),
+                                             mean_returns_spread.iteritems()):
             stdn = None if std_err is None else std_err[name]
             a = plot_mean_quantile_returns_spread_time_series(fr_column,
                                                               std_err=stdn,
@@ -499,7 +502,7 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
             ax[i] = a
             curr_ymin, curr_ymax = a.get_ylim()
             ymin = curr_ymin if ymin is None else min(ymin, curr_ymin)
-            ymax = curr_ymax if ymax is None else max(ymax, curr_ymax)                                                          
+            ymax = curr_ymax if ymax is None else max(ymax, curr_ymax)
 
         for a in ax:
             a.set_ylim([ymin, ymax])
@@ -594,8 +597,8 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation,
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    factor_autocorrelation.plot(title='{} Period Factor Rank Autocorrelation'.format(
-                                period), ax=ax)
+    factor_autocorrelation.plot(title='{} Period Factor Rank Autocorrelation'
+                                .format(period), ax=ax)
     ax.set(ylabel='Autocorrelation Coefficient', xlabel='')
     ax.axhline(0.0, linestyle='-', color='black', lw=1)
     ax.text(.05, .95, "Mean %.3f" % factor_autocorrelation.mean(),
@@ -616,7 +619,7 @@ def plot_top_bottom_quantile_turnover(quantile_turnover, period=1, ax=None):
     quantile_turnover: pd.Dataframe
         Quantile turnover (each DataFrame column a quantile).
     period: int, optional
-        Period over which to calculate the turnover        
+        Period over which to calculate the turnover
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -633,8 +636,8 @@ def plot_top_bottom_quantile_turnover(quantile_turnover, period=1, ax=None):
     turnover = pd.DataFrame()
     turnover['top quantile turnover'] = quantile_turnover[max_quantile]
     turnover['bottom quantile turnover'] = quantile_turnover[min_quantile]
-    turnover.plot(title='{} Period Top and Bottom Quantile Turnover'.format(period),
-                  ax=ax, alpha=0.6, lw=0.8)
+    turnover.plot(title='{} Period Top and Bottom Quantile Turnover'
+                  .format(period), ax=ax, alpha=0.6, lw=0.8)
     ax.set(ylabel='Proportion Of Names New To Quantile', xlabel="")
 
     return ax
@@ -705,9 +708,10 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
     Parameters
     ----------
     factor_returns : pd.Series
-        Period wise returns of dollar neutral portfolio weighted by factor value.
+        Period wise returns of dollar neutral portfolio weighted by factor
+        value.
     period: int, optional
-        Period over which the daily returns are calculated        
+        Period over which the daily returns are calculated
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -722,15 +726,19 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
     factor_returns = factor_returns.copy()
 
     if period > 1:
-        compound_returns = lambda ret, period: ( (np.nanmean(ret) + 1)**(1./period) ) - 1
-        factor_returns = pd.rolling_apply(factor_returns, period, compound_returns,
-                                          min_periods=1, args=(period,))
-                                    
+        factor_returns = pd.rolling_apply(
+            factor_returns,
+            period,
+            # compound returns
+            lambda ret, period: ((np.nanmean(ret) + 1)**(1./period)) - 1,
+            min_periods=1,
+            args=(period,))
+
     factor_returns.add(1).cumprod().plot(
         ax=ax, lw=3, color='forestgreen', alpha=0.6)
     ax.set(ylabel='Cumulative Returns',
-           title='Factor Weighted Long/Short Portfolio Cumulative Return ({} Fwd Period)'.format(
-               period),
+           title='''Factor Weighted Long/Short Portfolio Cumulative Return
+                    ({} Fwd Period)'''.format(period),
            xlabel='')
     ax.axhline(1.0, linestyle='-', color='black', lw=1)
 
@@ -746,7 +754,7 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
     quantile_returns : pd.DataFrame
         Cumulative returns by factor quantile.
     period: int, optional
-        Period over which the daily returns are calculated 
+        Period over which the daily returns are calculated
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -762,9 +770,13 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
         .pivot(index='date', columns='factor_quantile', values=period)
 
     if period > 1:
-        compound_returns = lambda ret, period: ( (np.nanmean(ret) + 1)**(1./period) ) - 1
-        ret_wide = pd.rolling_apply(ret_wide, period, compound_returns,
-                                    min_periods=1, args=(period,))
+        ret_wide = pd.rolling_apply(
+            ret_wide,
+            period,
+            # compound returns
+            lambda ret, period: ((np.nanmean(ret) + 1)**(1./period)) - 1,
+            min_periods=1,
+            args=(period,))
 
     cum_ret = ret_wide.add(1).cumprod()
     cum_ret = cum_ret.loc[:, ::-1]
@@ -773,8 +785,8 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
     ax.legend()
     ymin, ymax = cum_ret.min().min(), cum_ret.max().max()
     ax.set(ylabel='Log Cumulative Returns',
-           title='Cumulative Return by Quantile ({} Period Forward Return)'.format(
-               period),
+           title='''Cumulative Return by Quantile
+                    ({} Period Forward Return)'''.format(period),
            xlabel='',
            yscale='symlog',
            yticks=np.linspace(ymin, ymax, 5),
@@ -788,24 +800,24 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
 
 def plot_quantile_average_cumulative_return(avg_cumulative_returns,
                                             by_quantile=False,
-                                            std_bar=False, 
+                                            std_bar=False,
                                             title=None,
                                             ax=None):
     """
-    Plots sector-wise mean daily returns for factor quantiles 
+    Plots sector-wise mean daily returns for factor quantiles
     across provided forward price movement columns.
 
     Parameters
     ----------
     avg_cumulative_returns: pd.Dataframe
-        The format is the one returned by 
+        The format is the one returned by
         performance.average_cumulative_return_by_quantile
     by_quantile : boolean, optional
         Disaggregated figures by quantile (useful to clearly see std dev bars)
     std_bar : boolean, optional
         Plot standard deviation plot
     title: string, optional
-        Custom title        
+        Custom title
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     Returns
@@ -825,7 +837,9 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
                                  sharey=False, figsize=(18, 6 * v_spaces))
             ax = ax.flatten()
 
-        for i, (quantile, q_ret) in enumerate(avg_cumulative_returns.groupby(level='factor_quantile')):
+        for i, (quantile, q_ret) in enumerate(avg_cumulative_returns
+                                              .groupby(level='factor_quantile')
+                                              ):
 
             mean = q_ret.loc[(quantile, 'mean')]
             mean.name = 'Quantile ' + str(quantile)
@@ -846,7 +860,9 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
         if ax is None:
             f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-        for i, (quantile, q_ret) in enumerate(avg_cumulative_returns.groupby(level='factor_quantile')):
+        for i, (quantile, q_ret) in enumerate(avg_cumulative_returns
+                                              .groupby(level='factor_quantile')
+                                              ):
 
             mean = q_ret.loc[(quantile, 'mean')]
             mean.name = 'Quantile ' + str(quantile)
@@ -861,7 +877,8 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
         ax.axvline(x=0, color='k', linestyle='--')
         ax.legend()
         ax.set(ylabel='Mean Return (bps)',
-               title=("Average Cumulative Returns by Quantile" if title is None else title),
+               title=("Average Cumulative Returns by Quantile"
+                      if title is None else title),
                xlabel='Periods')
 
     return ax
@@ -886,12 +903,11 @@ def plot_events_distribution(events, ax=None):
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    grouper = [events.index.get_level_values('date').year, events.index.get_level_values('date').month]
+    grouper = [events.index.get_level_values('date').year,
+               events.index.get_level_values('date').month]
     events.groupby(grouper).count().plot(kind="bar", grid=False, ax=ax)
     ax.set(ylabel='Number of events',
            title='Distribution of events in time',
            xlabel='Date')
 
     return ax
-
-
