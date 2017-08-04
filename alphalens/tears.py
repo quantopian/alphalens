@@ -218,7 +218,7 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
         std_err=std_spread_quant,
         bandwidth=0.5,
         ax=ax_mean_quantile_returns_spread_ts
-        )
+    )
 
     if by_group:
         mean_return_quantile_group, mean_return_quantile_group_std_err = \
@@ -417,8 +417,10 @@ def create_event_returns_tear_sheet(factor_data,
     """
 
     before, after = avgretplot
-    after = max(after,
-                max(utils.get_forward_returns_columns(factor_data.columns))+1)
+    after = max(
+        after, max(
+            utils.get_forward_returns_columns(
+                factor_data.columns)) + 1)
 
     avg_cumulative_returns = \
         perf.average_cumulative_return_by_quantile(

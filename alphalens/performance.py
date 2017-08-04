@@ -226,7 +226,7 @@ def factor_alpha_beta(factor_data, long_short=True):
         alpha, beta = reg_fit.params
 
         alpha_beta.loc['Ann. alpha', period] = \
-            (1 + alpha) ** (252.0/period) - 1
+            (1 + alpha) ** (252.0 / period) - 1
         alpha_beta.loc['beta', period] = beta
 
     return alpha_beta
