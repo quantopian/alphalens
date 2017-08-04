@@ -453,7 +453,7 @@ def rate_of_return(period_ret):
     """
     1-period Growth Rate: the average rate of 1-period returns
     """
-    return period_ret.add(1).pow(1./period_ret.name).sub(1)
+    return period_ret.add(1).pow(1. / period_ret.name).sub(1)
 
 
 def std_conversion(period_std):

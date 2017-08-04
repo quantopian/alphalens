@@ -729,7 +729,7 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
             factor_returns,
             period,
             # compound returns
-            lambda ret, period: ((np.nanmean(ret) + 1)**(1./period)) - 1,
+            lambda ret, period: ((np.nanmean(ret) + 1)**(1. / period)) - 1,
             min_periods=1,
             args=(period,))
 
@@ -773,7 +773,7 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
             ret_wide,
             period,
             # compound returns
-            lambda ret, period: ((np.nanmean(ret) + 1)**(1./period)) - 1,
+            lambda ret, period: ((np.nanmean(ret) + 1)**(1. / period)) - 1,
             min_periods=1,
             args=(period,))
 
