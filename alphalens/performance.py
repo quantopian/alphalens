@@ -428,7 +428,7 @@ def average_cumulative_return_by_quantile(quantized_factor,
     return quantized_factor.groupby(quantized_factor).apply(average_cumulative_return)
 
 
-def get_vifs(data):
+def calc_vifs(data):
     '''
     Computes variance inflation factors (VIFs) for a set of random variables.
     For more information, see
@@ -443,9 +443,10 @@ def get_vifs(data):
     '''
     vifs = np.zeros(len(data.columns))
     for i in range(len(data.columns)):
-        r2 = OLS(data.iloc[:, i],
-                 add_constant(data.drop(data.columns[i], axis='columns'))) \
-            .fit().rsquared
+        r2 = (OLS(data.iloc[:, i],
+                  add_constant(data.drop(data.columns[i], axis='columns')))
+              .fit()
+              .rsquared)
         vifs[i] = 1/(1-r2)
     return pd.Series(index=data.columns, data=vifs)
 
@@ -537,7 +538,7 @@ def decompose_returns(algo_returns, risk_factors, hierarchy=None,
         returns_decomposition.loc['Alpha', tier] = betas.loc['Alpha', tier]
 
     if compute_t_stats and compute_vifs:
-        vifs = get_vifs(risk_factors)
+        vifs = calc_vifs(risk_factors)
         return returns_decomposition, betas, t_stats, vifs
     elif compute_vifs:
         vifs = vifs(risk_factors)
