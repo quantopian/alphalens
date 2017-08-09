@@ -34,3 +34,7 @@ script: nosetests
 
 notifications:
   email: false
+
+branches:
+  only:
+    - master
