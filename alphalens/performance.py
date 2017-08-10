@@ -17,6 +17,7 @@ import pandas as pd
 import numpy as np
 from scipy import stats
 from collections import OrderedDict
+import warnings
 
 from statsmodels.regression.linear_model import OLS
 from statsmodels.tools.tools import add_constant
@@ -451,8 +452,7 @@ def calc_vifs(data):
     return pd.Series(index=data.columns, data=vifs)
 
 
-def decompose_returns(algo_returns, risk_factors, hierarchy=None,
-                      compute_t_stats=False, compute_vifs=False):
+def decompose_returns(algo_returns, risk_factors, hierarchy=None):
     '''
     Decomposes returns into returns attributable to common risk factors.
 
@@ -479,20 +479,16 @@ def decompose_returns(algo_returns, risk_factors, hierarchy=None,
         - Example:
         OrderedDict([('Market', ['Mkt']),
                      ('Style', ['SMB', 'HML', 'UMD'])])
-    compute_t_stats : bool
-        If True, returns t-statistics for the betas. Defaults to False
-    compute_vifs : bool
-        If True, computes and returns variance inflation factors for the
-        common factors. Defaults to False
 
     Returns
     -------
     returns_decomposition : pd.DataFrame
         Decomposed returns
-
     betas : pd.DataFrame
         Betas to the common factors
-
+    t_stats : pd.DataFrame
+        t-statistics for the betas to the common factors. Computed by dividing
+        betas by White's (1980) heteroskedasticity standard errors.
     vifs : pd.Series
         Variance inflation factors for the common factors
         - For more information, see
@@ -518,9 +514,7 @@ def decompose_returns(algo_returns, risk_factors, hierarchy=None,
     idx = np.append(['Alpha'], risk_factors.columns.values)
     betas = pd.DataFrame(index=idx, columns=hierarchy.keys())
     returns_decomposition = pd.DataFrame(index=idx, columns=hierarchy.keys())
-
-    if compute_t_stats:
-        t_stats = pd.DataFrame(index=idx, columns=hierarchy.keys())
+    t_stats = pd.DataFrame(index=idx, columns=hierarchy.keys())
 
     for tier, factors in cum_hierarchy.iteritems():
         model_factors = add_constant(risk_factors.loc[:, factors]) \
@@ -529,21 +523,16 @@ def decompose_returns(algo_returns, risk_factors, hierarchy=None,
 
         betas.loc[:, tier] = model.params
         betas.loc['Alpha', tier] *= 252
-
-        if compute_t_stats:
-            t_stats.loc[:, tier] = model.params / model.HC0_se
+        t_stats.loc[:, tier] = model.params / model.HC0_se
 
         returns_decomposition.loc[:, tier] = model.params.drop('Alpha') \
             * risk_factors.mean() * 252
         returns_decomposition.loc['Alpha', tier] = betas.loc['Alpha', tier]
 
-    if compute_t_stats and compute_vifs:
-        vifs = calc_vifs(risk_factors)
-        return returns_decomposition, betas, t_stats, vifs
-    elif compute_vifs:
-        vifs = vifs(risk_factors)
-        return returns_decomposition, betas, vifs
-    elif compute_t_stats:
-        return returns_decomposition, betas, t_stats
-    else:
-        return returns_decomposition, betas
+    vifs = calc_vifs(risk_factors)
+    if any(vifs > 5):
+        warnings.warn('Factors with VIFs over 5: {}'
+                      .format(', '.join(vifs[vifs > 5].index.values)),
+                      Warning)
+
+    return returns_decomposition, betas, t_stats, vifs
