@@ -235,7 +235,7 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
     ])
 
     factor_returns.index = factor_returns.index.tz_localize('UTC')
-    for i, period in enumerate([1, 5, 10]):
+    for i, period in enumerate(factor_returns.columns.values):
         returns_decomposition = \
             perf.decompose_returns(factor_returns.iloc[:, i],
                                    risk_factors=ff_factors,

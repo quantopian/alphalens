@@ -902,7 +902,7 @@ def plot_returns_decomposition(returns_decomposition,
         period = 1
 
     if ax is None:
-        _, ax = plt.subplots(figsize=[14, 8])
+        _, ax = plt.subplots(figsize=[18, 6])
 
     returns_decomposition.T.plot(kind='bar', stacked=True, ax=ax, rot=0,
                                  colormap=plt.cm.Set3)
