@@ -898,6 +898,24 @@ def plot_events_distribution(events, ax=None):
 def plot_returns_decomposition(returns_decomposition,
                                period=None,
                                ax=None):
+    """
+    Plots the returns decomposition of the alpha factor's returns.
+
+    Parameters
+    ----------
+    returns_decomposition : pd.DataFrame
+        DataFrame with returns decomposition of alpha factor's returns
+        - Exact output of performance.returns_decomposition
+    period : int, optional
+        Number of periods of forward returns. Defaults to 1 (i.e., plots
+        decomposition of one-period forward returns)
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+    """
     if period is None:
         period = 1
 
