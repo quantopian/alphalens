@@ -17,6 +17,8 @@
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import pandas as pd
+from collections import OrderedDict
+import pyfolio as pf
 
 from . import plotting
 from . import performance as perf
@@ -65,7 +67,7 @@ def create_summary_tear_sheet(factor_data, long_short=True):
         asset belongs to.
     long_short : bool
         Should this computation happen on a long short portfolio? if so, then factor values
-        will be demeaned across the factor universe when factor weighting the portfolio. 
+        will be demeaned across the factor universe when factor weighting the portfolio.
         Additionally, mean quantile returns will be demeaned across the factor universe.
     """
 
@@ -144,7 +146,7 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
         asset belongs to.
     long_short : bool
         Should this computation happen on a long short portfolio? if so, then factor values
-        will be demeaned across the factor universe when factor weighting the portfolio. 
+        will be demeaned across the factor universe when factor weighting the portfolio.
         Additionally, mean quantile returns will be demeaned across the factor universe.
     by_group : bool
         If True, perform calcuations, and display graphs separately for
@@ -223,6 +225,19 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
                                            by_group=True,
                                            ylim_percentiles=(5, 95),
                                            ax=ax_quantile_returns_bar_by_group)
+
+    ff_factors = pf.utils.load_portfolio_risk_factors() \
+        .drop(['RF'], axis='columns')
+    hierarchy = OrderedDict([
+        ('Market', ['Mkt-RF']),
+        ('Style', ['SMB', 'HML', 'Mom   '])
+    ])
+
+    returns_decomposition = perf.decompose_returns(factor_returns,
+                                                   risk_factors=ff_factors,
+                                                   hierarchy=hierarchy)
+
+    plotting.plot_returns_decomposition(returns_decomposition)
 
 
 @plotting.customize
@@ -348,7 +363,7 @@ def create_full_tear_sheet(factor_data,
         each group.
     long_short : bool
         Should this computation happen on a long short portfolio? if so, then factor values
-        will be demeaned across the factor universe when factor weighting the portfolio. 
+        will be demeaned across the factor universe when factor weighting the portfolio.
         Additionally, mean quantile returns will be demeaned across the factor universe.
     """
 
