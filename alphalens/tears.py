@@ -229,16 +229,18 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
     ff_factors = pf.utils.load_portfolio_risk_factors() \
         .drop(['RF'], axis='columns')
     hierarchy = OrderedDict([
+        # not typos! These are the Fama-French factors names from Dartmouth
         ('Market', ['Mkt-RF']),
         ('Style', ['SMB', 'HML', 'Mom   '])
     ])
 
     factor_returns.index = factor_returns.index.tz_localize('UTC')
-    returns_decomposition = perf.decompose_returns(factor_returns.iloc[:, 0],
-                                                   risk_factors=ff_factors,
-                                                   hierarchy=hierarchy)
-
-    plotting.plot_returns_decomposition(returns_decomposition[0])
+    for i, period in enumerate([1, 5, 10]):
+        returns_decomposition = \
+            perf.decompose_returns(factor_returns.iloc[:, i],
+                                   risk_factors=ff_factors,
+                                   hierarchy=hierarchy)
+        plotting.plot_returns_decomposition(returns_decomposition[0], period)
 
 
 @plotting.customize

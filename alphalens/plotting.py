@@ -895,7 +895,12 @@ def plot_events_distribution(events, ax=None):
     return ax
 
 
-def plot_returns_decomposition(returns_decomposition, ax=None):
+def plot_returns_decomposition(returns_decomposition,
+                               period=None,
+                               ax=None):
+    if period is None:
+        period = 1
+
     if ax is None:
         _, ax = plt.subplots(figsize=[14, 8])
 
@@ -912,6 +917,6 @@ def plot_returns_decomposition(returns_decomposition, ax=None):
     ax.set_yticklabels(['{: 0.0f}%'.format(100*y) for y in ax.get_yticks()])
     ax.legend(bbox_to_anchor=(1.0, 0.5))
     ax.set_ylabel('Returns')
-    ax.set_title('Returns Decomposition')
+    ax.set_title('Returns Decomposition: {} Forward Period Returns'.format(period))
 
     return ax
