@@ -15,6 +15,8 @@ install_reqs = [
     'scipy>=0.14.0',
     'seaborn>=0.6.0',
     'statsmodels>=0.6.1',
+    'pyfolio>=0.7.0',
+    'collections>=2.7'
     'IPython>=3.2.3',
 ]
 

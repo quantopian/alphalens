@@ -5,7 +5,7 @@ python:
   - "2.7"
   - "3.4"
   - "3.5"
-  
+
 before_install:
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
@@ -22,9 +22,9 @@ before_install:
   # Useful for debugging any issues with conda
   - conda info -a
   - cp alphalens/tests/matplotlibrc .
-  
+
 install:
-  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython numpy scipy nose matplotlib pandas statsmodels seaborn
+  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython numpy scipy nose matplotlib pandas statsmodels seaborn pyfolio collections
   - source activate testenv
   - pip install nose_parameterized
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes mock; fi
