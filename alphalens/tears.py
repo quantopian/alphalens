@@ -233,11 +233,12 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
         ('Style', ['SMB', 'HML', 'Mom   '])
     ])
 
-    returns_decomposition = perf.decompose_returns(factor_returns,
+    factor_returns.index = factor_returns.index.tz_localize('UTC')
+    returns_decomposition = perf.decompose_returns(factor_returns.iloc[:, 0],
                                                    risk_factors=ff_factors,
                                                    hierarchy=hierarchy)
 
-    plotting.plot_returns_decomposition(returns_decomposition)
+    plotting.plot_returns_decomposition(returns_decomposition[0])
 
 
 @plotting.customize
