@@ -16,8 +16,7 @@ install_reqs = [
     'seaborn>=0.6.0',
     'statsmodels>=0.6.1',
     'empyrical>=0.3.2',
-    'collections>=2.7',
-    'IPython>=3.2.3',
+    'IPython>=3.2.3'
 ]
 
 extra_reqs = {
