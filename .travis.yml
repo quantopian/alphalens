@@ -24,7 +24,7 @@ before_install:
   - cp alphalens/tests/matplotlibrc .
 
 install:
-  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython flake8 numpy scipy nose matplotlib pandas statsmodels seaborn collections
+  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython flake8 numpy scipy nose matplotlib pandas statsmodels seaborn 
   - source activate testenv
   - pip install nose_parameterized
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes mock; fi
