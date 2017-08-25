@@ -17,6 +17,8 @@
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import pandas as pd
+from collections import OrderedDict
+import empyrical as ep
 
 from . import plotting
 from . import performance as perf
@@ -242,6 +244,22 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
                                            by_group=True,
                                            ylim_percentiles=(5, 95),
                                            ax=ax_quantile_returns_bar_by_group)
+
+    ff_factors = ep.utils.load_portfolio_risk_factors() \
+        .drop(['RF'], axis='columns')
+    hierarchy = OrderedDict([
+        # not typos! These are the Fama-French factors names from Dartmouth
+        ('Market', ['Mkt-RF']),
+        ('Style', ['SMB', 'HML', 'Mom   '])
+    ])
+
+    factor_returns.index = factor_returns.index.tz_localize('UTC')
+    for i, period in enumerate(factor_returns.columns.values):
+        returns_decomposition = \
+            perf.decompose_returns(factor_returns.iloc[:, i],
+                                   risk_factors=ff_factors,
+                                   hierarchy=hierarchy)
+        plotting.plot_returns_decomposition(returns_decomposition[0], period)
 
 
 @plotting.customize
