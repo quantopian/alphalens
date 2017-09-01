@@ -827,7 +827,7 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
 
     avg_cumulative_returns = avg_cumulative_returns.multiply(DECIMAL_TO_BPS)
     quantiles = len(avg_cumulative_returns.index.levels[0].unique())
-    palette = cm.RdYlGn_r(np.linspace(0, 1, quantiles))
+    palette = [cm.RdYlGn_r(i) for i in np.linspace(0, 1, quantiles)]
 
     if by_quantile:
 
