@@ -704,6 +704,12 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
     """
     Plots the cumulative returns of the returns series passed in.
 
+    When 'period' N is greater than 1 the cumulative returns plot is computed
+    building and averaging the returns of N portfolios started at subsequnet
+    periods (1,2,3,...,N) and where each portfolio is then rebalance every N
+    periods. This results in trading the factor at every period and the results
+    don't dependent on a spacific starting date.
+
     Parameters
     ----------
     factor_returns : pd.Series
@@ -725,10 +731,11 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
     factor_returns = factor_returns.copy()
 
     if period > 1:
+        # build N portfolios each rebalancing every N periods and average them
         factor_returns = pd.rolling_apply(
             factor_returns,
             period,
-            # compound returns
+            # rate of 1 period returns
             lambda ret, period: ((np.nanmean(ret) + 1)**(1. / period)) - 1,
             min_periods=1,
             args=(period,))
@@ -747,6 +754,12 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
 def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
     """
     Plots the cumulative returns of various factor quantiles.
+
+    When 'period' N is greater than 1 the cumulative returns plot is computed
+    building and averaging the returns of N portfolios started at subsequnet
+    periods (1,2,3,...,N) and where each portfolio is then rebalance every N
+    periods. This results in trading the factor quantile at every period and
+    the results don't dependent on a spacific starting date.
 
     Parameters
     ----------
@@ -769,10 +782,11 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
         .pivot(index='date', columns='factor_quantile', values=period)
 
     if period > 1:
+        # build N portfolios each rebalancing every N periods and average them
         ret_wide = pd.rolling_apply(
             ret_wide,
             period,
-            # compound returns
+            # rate of 1 period returns
             lambda ret, period: ((np.nanmean(ret) + 1)**(1. / period)) - 1,
             min_periods=1,
             args=(period,))
