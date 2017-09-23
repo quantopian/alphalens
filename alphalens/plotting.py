@@ -708,7 +708,7 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
     building and averaging the  cumulative returns of N interleaved portfolios
     (started at subsequent periods 1,2,3,...,N) each one rebalancing every N
     periods. This results in trading the factor at every value/signal computed
-    by the factor and also the cumulative returns don't dependent on a spacific
+    by the factor and also the cumulative returns don't dependent on a specific
     starting date.
 
     Parameters
@@ -760,7 +760,7 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
     building and averaging the  cumulative returns of N interleaved portfolios
     (started at subsequent periods 1,2,3,...,N) each one rebalancing every N
     periods. This results in trading the factor at every value/signal computed
-    by the factor and also the cumulative returns don't dependent on a spacific
+    by the factor and also the cumulative returns don't dependent on a specific
     starting date.
 
     Parameters
