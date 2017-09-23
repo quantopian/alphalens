@@ -266,6 +266,19 @@ def get_clean_factor_and_forward_returns(factor,
         maximum value in 'periods'. The asset price after 'period'
         dates will be considered the sell price for that asset when
         computing 'period' forward returns.
+        ::
+            ----------------------------------------------------
+                        | AAPL |  BA  |  CMG  |  DAL  |  LULU  |
+            ----------------------------------------------------
+               Date     |      |      |       |       |        |
+            ----------------------------------------------------
+            2014-01-01  |605.12| 24.58|  11.72| 54.43 |  37.14 |
+            ----------------------------------------------------
+            2014-01-02  |604.35| 22.23|  12.21| 52.78 |  33.63 |
+            ----------------------------------------------------
+            2014-01-03  |607.94| 21.68|  14.36| 53.94 |  29.37 |
+            ----------------------------------------------------
+
     groupby : pd.Series - MultiIndex or dict
         Either A MultiIndex Series indexed by date and asset,
         containing the period wise group codes for each asset, or
