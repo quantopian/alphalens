@@ -63,6 +63,7 @@ def create_summary_tear_sheet(factor_data, long_short=True):
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     long_short : bool
         Should this computation happen on a long short portfolio? if so, then
         factor values will be demeaned across the factor universe when factor
@@ -147,6 +148,7 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to,
         and (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     long_short : bool
         Should this computation happen on a long short portfolio? if so, then
         factor values will be demeaned across the factor universe when factor
@@ -258,6 +260,7 @@ def create_information_tear_sheet(factor_data,
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     group_adjust : bool
         Demean forward returns by group before computing IC.
     by_group : bool
@@ -311,6 +314,7 @@ def create_turnover_tear_sheet(factor_data):
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     """
 
     turnover_periods = utils.get_forward_returns_columns(factor_data.columns)
@@ -361,6 +365,7 @@ def create_full_tear_sheet(factor_data,
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     group_adjust : bool
         Demean forward returns by group before computing IC.
     by_group : bool
@@ -402,11 +407,11 @@ def create_event_returns_tear_sheet(factor_data,
         containing the values for a single alpha factor, forward returns
         for each period, the factor quantile/bin that factor value belongs to,
         and (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     prices : pd.DataFrame
-        A wide form Pandas DataFrame indexed by date with assets
-        in the columns. Pricing data should span the factor
-        analysis time period plus/minus an additional buffer window
-        corresponding to periods_after/periods_before parameters.
+        A DataFrame indexed by date with assets in the columns containing the
+        pricing data.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     avgretplot: tuple (int, int) - (before, after)
         If not None, plot quantile average cumulative returns
     long_short : bool
@@ -483,11 +488,9 @@ def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
         period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
     prices : pd.DataFrame
-        A wide form Pandas DataFrame indexed by date with assets
-        in the columns. Pricing data should span the factor
-        analysis time period plus/minus an additional buffer window
-        corresponding to periods_after/periods_before parameters.
-        if 'avgretplot' is None this can be None too
+        A DataFrame indexed by date with assets in the columns containing the
+        pricing data.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     avgretplot: tuple (int, int) - (before, after)
         If not None, plot quantile average cumulative returns
     """
