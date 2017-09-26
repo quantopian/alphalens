@@ -922,7 +922,7 @@ def plot_events_distribution(events, num_bars=50, ax=None):
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
     start = events.index.get_level_values('date').min()
-    end   = events.index.get_level_values('date').max()
+    end = events.index.get_level_values('date').max()
     group_interval = (end - start) / num_bars
     grouper = pd.Grouper(level='date', freq=group_interval)
     events.groupby(grouper).count().plot(kind="bar", grid=False, ax=ax)
