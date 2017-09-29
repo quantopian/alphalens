@@ -700,16 +700,9 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     return ax
 
 
-def plot_cumulative_returns(factor_returns, period=1, ax=None):
+def plot_cumulative_returns(factor_returns, period=1, overlap=True, ax=None):
     """
     Plots the cumulative returns of the returns series passed in.
-
-    When 'period' N is greater than 1 the cumulative returns plot is computed
-    building and averaging the  cumulative returns of N interleaved portfolios
-    (started at subsequent periods 1,2,3,...,N) each one rebalancing every N
-    periods. This results in trading the factor at every value/signal computed
-    by the factor and also the cumulative returns don't dependent on a specific
-    starting date.
 
     Parameters
     ----------
@@ -718,6 +711,14 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
         value.
     period: int, optional
         Period over which the daily returns are calculated
+    overlap: boolean, optional
+        Specify if subsequent returns overlaps.
+        If 'overlap' is True and 'period' N is greater than 1, the cumulative
+        returns plot is computed building and averaging the  cumulative returns
+        of N interleaved portfolios (started at subsequent periods 1,2,3,...,N)
+        each one rebalancing every N periods. This results in trading the factor
+        at every value/signal computed by the factor and also the cumulative
+        returns don't dependent on a specific starting date.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -729,20 +730,11 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    factor_returns = factor_returns.copy()
+    overlapping_period = period if overlap else 1
+    factor_returns = utils.cumulative_returns(factor_returns,
+                                              overlapping_period)
 
-    if period > 1:
-        # build N portfolios each rebalancing every N periods and average them
-        factor_returns = pd.rolling_apply(
-            factor_returns,
-            period,
-            # rate of 1 period returns
-            lambda ret, period: ((np.nanmean(ret) + 1)**(1. / period)) - 1,
-            min_periods=1,
-            args=(period,))
-
-    factor_returns.add(1).cumprod().plot(
-        ax=ax, lw=3, color='forestgreen', alpha=0.6)
+    factor_returns.plot(ax=ax, lw=3, color='forestgreen', alpha=0.6)
     ax.set(ylabel='Cumulative Returns',
            title='''Factor Weighted Long/Short Portfolio Cumulative Return
                     ({} Fwd Period)'''.format(period),
@@ -752,16 +744,12 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
     return ax
 
 
-def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
+def plot_cumulative_returns_by_quantile(quantile_returns,
+                                        period=1,
+                                        overlap=True,
+                                        ax=None):
     """
     Plots the cumulative returns of various factor quantiles.
-
-    When 'period' N is greater than 1 the cumulative returns plot is computed
-    building and averaging the  cumulative returns of N interleaved portfolios
-    (started at subsequent periods 1,2,3,...,N) each one rebalancing every N
-    periods. This results in trading the factor at every value/signal computed
-    by the factor and also the cumulative returns don't dependent on a specific
-    starting date.
 
     Parameters
     ----------
@@ -769,6 +757,14 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
         Cumulative returns by factor quantile.
     period: int, optional
         Period over which the daily returns are calculated
+    overlap: boolean, optional
+        Specify if subsequent returns overlaps.
+        If 'overlap' is True and 'period' N is greater than 1, the cumulative
+        returns plot is computed building and averaging the  cumulative returns
+        of N interleaved portfolios (started at subsequent periods 1,2,3,...,N)
+        each one rebalancing every N periods. This results in trading the factor
+        at every value/signal computed by the factor and also the cumulative
+        returns don't dependent on a specific starting date.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -783,17 +779,9 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
     ret_wide = quantile_returns.reset_index()\
         .pivot(index='date', columns='factor_quantile', values=period)
 
-    if period > 1:
-        # build N portfolios each rebalancing every N periods and average them
-        ret_wide = pd.rolling_apply(
-            ret_wide,
-            period,
-            # rate of 1 period returns
-            lambda ret, period: ((np.nanmean(ret) + 1)**(1. / period)) - 1,
-            min_periods=1,
-            args=(period,))
-
-    cum_ret = ret_wide.add(1).cumprod()
+    overlapping_period = period if overlap else 1
+    cum_ret = ret_wide.apply(utils.cumulative_returns,
+                             args=(overlapping_period,))
     cum_ret = cum_ret.loc[:, ::-1]
 
     cum_ret.plot(lw=2, ax=ax, cmap=cm.RdYlGn_r)
