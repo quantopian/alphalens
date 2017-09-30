@@ -404,9 +404,9 @@ def create_event_returns_tear_sheet(factor_data,
     ----------
     factor_data : pd.DataFrame - MultiIndex
         A MultiIndex Series indexed by date (level 0) and asset (level 1),
-        containing the values for a single alpha factor, forward returns
-        for each period, the factor quantile/bin that factor value belongs to,
-        and (optionally) the group the asset belongs to.
+        containing the values for a single alpha factor, the factor
+        quantile/bin that factor value belongs to and (optionally) the group
+        the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
     prices : pd.DataFrame
         A DataFrame indexed by date with assets in the columns containing the
@@ -422,10 +422,6 @@ def create_event_returns_tear_sheet(factor_data,
     """
 
     before, after = avgretplot
-    after = max(
-        after, max(
-            utils.get_forward_returns_columns(
-                factor_data.columns)) + 1)
 
     avg_cumulative_returns = \
         perf.average_cumulative_return_by_quantile(
@@ -487,12 +483,13 @@ def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
         containing the values for a single event, forward returns for each
         period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
-    prices : pd.DataFrame
+    prices : pd.DataFrame, required only if 'avgretplot' is provided
         A DataFrame indexed by date with assets in the columns containing the
         pricing data.
         - See full explanation in utils.get_clean_factor_and_forward_returns
-    avgretplot: tuple (int, int) - (before, after)
-        If not None, plot quantile average cumulative returns
+    avgretplot: tuple (int, int) - (before, after), optional
+        If not None, plot event style average cumulative returns within a
+        window (pre and post event).
     """
 
     long_short = False  # no return demeaning
@@ -503,11 +500,13 @@ def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
     plotting.plot_events_distribution(events=factor_data['factor'],
                                       ax=gf.next_row())
 
-    create_event_returns_tear_sheet(factor_data=factor_data,
-                                    prices=prices,
-                                    avgretplot=avgretplot,
-                                    long_short=long_short,
-                                    by_group=False)
+    if prices is not None and avgretplot is not None:
+
+        create_event_returns_tear_sheet(factor_data=factor_data,
+                                        prices=prices,
+                                        avgretplot=avgretplot,
+                                        long_short=long_short,
+                                        by_group=False)
 
     mean_ret_quantile, std_quantile = \
         perf.mean_return_by_quantile(factor_data,
