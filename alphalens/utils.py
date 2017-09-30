@@ -504,15 +504,15 @@ def cumulative_returns(returns, period):
     if period == 1:
         return returns.add(1).cumprod()
 
-    # build N interleaved portfolios from the single returns Series
+    # build N portfolios from the single returns Series
 
     def split_portfolio(ret, period): return pd.DataFrame(np.diag(ret))
 
-    sub_portfolios = returns.groupby(by=np.arange(len(returns.index)) // period,
+    sub_portfolios = returns.groupby(np.arange(len(returns.index)) // period,
                                      axis=0).apply(split_portfolio, period)
     sub_portfolios.index = returns.index
 
-    # compute rate of 1 period returns so that we can average the N portfolios
+    # compute 1 period returns so that we can average the N portfolios
 
     def rate_of_returns(ret, period): return (
         (np.nansum(ret) + 1)**(1. / period)) - 1
