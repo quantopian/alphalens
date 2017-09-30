@@ -33,15 +33,21 @@ def non_unique_bin_edges_error(func):
         except ValueError as e:
             if 'Bin edges must be unique' in str(e):
                 print("""
-    It's not possible to compute quantiles for the input provided.
+    It's NOT possible to compute the selected quantiles for the input provided.
     This usually happens when the input contains too many identical
-    values so that they span more than one quantile. A typical example
-    is a factor with discrete values.
-    A workaround is to use 'bins' option instead of 'quantiles', or
-    to provide custom ranges to 'quantiles' option. 'bins' chooses the
-    buckets to be evenly spaced according to the values themselves, while
-    'quantiles' forces the buckets to have the same number of records.
-    Please see utils.get_clean_factor_and_forward_returns documentation.
+    values and they span more than one quantile. The quantiles are choosen
+    to have the same number of records each, but the same value cannot span
+    multiple quantiles. Possible workarounds are:
+    1 - Decrease the number of quantiles
+    2 - Specify a custom quantiles range, e.g. [0, .50, .75, 1.] to get unequal
+        number of records per quantile
+    3 - Use 'bins' option instead of 'quantiles', 'bins' chooses the
+        buckets to be evenly spaced according to the values themselves, while
+        'quantiles' forces the buckets to have the same number of records.
+    4 - for factors with discrete values use the 'bins' option with custom
+        ranges and create a range for each discrete value
+    Please see utils.get_clean_factor_and_forward_returns documentation for
+    full documentation of 'bins' and 'quantiles' options.
                       """)
             raise
     return dec
