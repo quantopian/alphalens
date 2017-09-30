@@ -716,9 +716,9 @@ def plot_cumulative_returns(factor_returns, period=1, overlap=True, ax=None):
         If 'overlap' is True and 'period' N is greater than 1, the cumulative
         returns plot is computed building and averaging the  cumulative returns
         of N interleaved portfolios (started at subsequent periods 1,2,3,...,N)
-        each one rebalancing every N periods. This results in trading the factor
-        at every value/signal computed by the factor and also the cumulative
-        returns don't dependent on a specific starting date.
+        each one rebalancing every N periods. This results in trading the
+        factor at every value/signal computed by the factor and also the
+        cumulative returns don't dependent on a specific starting date.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -762,9 +762,9 @@ def plot_cumulative_returns_by_quantile(quantile_returns,
         If 'overlap' is True and 'period' N is greater than 1, the cumulative
         returns plot is computed building and averaging the  cumulative returns
         of N interleaved portfolios (started at subsequent periods 1,2,3,...,N)
-        each one rebalancing every N periods. This results in trading the factor
-        at every value/signal computed by the factor and also the cumulative
-        returns don't dependent on a specific starting date.
+        each one rebalancing every N periods. This results in trading the
+        factor at every value/signal computed by the factor and also the
+        cumulative returns don't dependent on a specific starting date.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
