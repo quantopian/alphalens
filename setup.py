@@ -29,7 +29,7 @@ extra_reqs = {
 if __name__ == "__main__":
     setup(
         name='alphalens',
-        version='0.1.1',
+        version='0.1.2',
         description='Performance analysis of predictive (alpha) stock factors',
         author='Quantopian Inc.',
         author_email='opensource@quantopian.com',
