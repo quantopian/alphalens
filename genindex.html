@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; Alphalens 0.1.1 documentation</title>
+  <title>Index &mdash; Alphalens 0.1.2 documentation</title>
   
 
   
@@ -36,7 +36,7 @@
         <link rel="index" title="Index"
               href="#"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Alphalens 0.1.1 documentation" href="index.html"/> 
+    <link rel="top" title="Alphalens 0.1.2 documentation" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.1.1
+                0.1.2
               </div>
             
           
@@ -206,12 +206,12 @@
 </li>
       <li><a href="alphalens.html#alphalens.tears.create_event_returns_tear_sheet">create_event_returns_tear_sheet() (in module alphalens.tears)</a>
 </li>
-      <li><a href="alphalens.html#alphalens.tears.create_factor_tear_sheet">create_factor_tear_sheet() (in module alphalens.tears)</a>
+      <li><a href="alphalens.html#alphalens.tears.create_event_study_tear_sheet">create_event_study_tear_sheet() (in module alphalens.tears)</a>
+</li>
+      <li><a href="alphalens.html#alphalens.tears.create_full_tear_sheet">create_full_tear_sheet() (in module alphalens.tears)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="alphalens.html#alphalens.tears.create_full_tear_sheet">create_full_tear_sheet() (in module alphalens.tears)</a>
-</li>
       <li><a href="alphalens.html#alphalens.tears.create_information_tear_sheet">create_information_tear_sheet() (in module alphalens.tears)</a>
 </li>
       <li><a href="alphalens.html#alphalens.tears.create_returns_tear_sheet">create_returns_tear_sheet() (in module alphalens.tears)</a>
@@ -219,6 +219,8 @@
       <li><a href="alphalens.html#alphalens.tears.create_summary_tear_sheet">create_summary_tear_sheet() (in module alphalens.tears)</a>
 </li>
       <li><a href="alphalens.html#alphalens.tears.create_turnover_tear_sheet">create_turnover_tear_sheet() (in module alphalens.tears)</a>
+</li>
+      <li><a href="alphalens.html#alphalens.utils.cumulative_returns">cumulative_returns() (in module alphalens.utils)</a>
 </li>
       <li><a href="alphalens.html#alphalens.plotting.customize">customize() (in module alphalens.plotting)</a>
 </li>
@@ -229,8 +231,6 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="alphalens.html#alphalens.utils.demean_forward_returns">demean_forward_returns() (in module alphalens.utils)</a>
-</li>
-      <li><a href="alphalens.html#alphalens.utils.deprecated">deprecated() (in module alphalens.utils)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -322,6 +322,8 @@
 </li>
       <li><a href="alphalens.html#alphalens.plotting.plot_cumulative_returns_by_quantile">plot_cumulative_returns_by_quantile() (in module alphalens.plotting)</a>
 </li>
+      <li><a href="alphalens.html#alphalens.plotting.plot_events_distribution">plot_events_distribution() (in module alphalens.plotting)</a>
+</li>
       <li><a href="alphalens.html#alphalens.plotting.plot_factor_rank_auto_correlation">plot_factor_rank_auto_correlation() (in module alphalens.plotting)</a>
 </li>
       <li><a href="alphalens.html#alphalens.plotting.plot_ic_by_group">plot_ic_by_group() (in module alphalens.plotting)</a>
@@ -334,10 +336,10 @@
 </li>
       <li><a href="alphalens.html#alphalens.plotting.plot_information_table">plot_information_table() (in module alphalens.plotting)</a>
 </li>
-      <li><a href="alphalens.html#alphalens.plotting.plot_mean_quantile_returns_spread_time_series">plot_mean_quantile_returns_spread_time_series() (in module alphalens.plotting)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="alphalens.html#alphalens.plotting.plot_mean_quantile_returns_spread_time_series">plot_mean_quantile_returns_spread_time_series() (in module alphalens.plotting)</a>
+</li>
       <li><a href="alphalens.html#alphalens.plotting.plot_monthly_ic_heatmap">plot_monthly_ic_heatmap() (in module alphalens.plotting)</a>
 </li>
       <li><a href="alphalens.html#alphalens.plotting.plot_quantile_average_cumulative_return">plot_quantile_average_cumulative_return() (in module alphalens.plotting)</a>
@@ -585,7 +587,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1.1',
+            VERSION:'0.1.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
