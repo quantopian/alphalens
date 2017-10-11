@@ -9,6 +9,7 @@ if 'upload' in sys.argv:
         long_description = f.read()
 
 install_reqs = [
+    'ipython>=3.2.3'
     'matplotlib>=1.4.0',
     'numpy>=1.9.1',
     'pandas>=0.16.1',
@@ -16,7 +17,6 @@ install_reqs = [
     'seaborn>=0.6.0',
     'statsmodels>=0.6.1',
     'empyrical>=0.3.2',
-    'IPython>=3.2.3'
 ]
 
 extra_reqs = {
