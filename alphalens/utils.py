@@ -261,7 +261,7 @@ def print_table(table, name=None, fmt=None):
 def get_clean_factor_and_forward_returns(factor,
                                          prices,
                                          groupby=None,
-                                         by_group=False,
+                                         binning_by_group=False,
                                          quantiles=5,
                                          bins=None,
                                          periods=(1, 5, 10),
@@ -330,8 +330,10 @@ def get_clean_factor_and_forward_returns(factor,
         a dict of asset to group mappings. If a dict is passed,
         it is assumed that group mappings are unchanged for the
         entire time period of the passed factor data.
-    by_group : bool
-        If True, compute statistics separately for each group.
+    binning_by_group : bool
+        If True, compute bin or quantile buckets separately for each group.
+        This is useful when the factor values range vary considerably
+        across gorups so that it is wise to make the binning group relative.
     quantiles : int or sequence[float]
         Number of equal-sized quantile buckets to use in factor bucketing.
         Alternately sequence of quantiles, allowing non-equal-sized buckets
@@ -435,7 +437,7 @@ def get_clean_factor_and_forward_returns(factor,
 
     no_raise = False if max_loss == 0 else True
     merged_data['factor_quantile'] = \
-        quantize_factor(merged_data, quantiles, bins, by_group, no_raise)
+        quantize_factor(merged_data, quantiles, bins, binning_by_group, no_raise)
 
     merged_data = merged_data.dropna()
 
