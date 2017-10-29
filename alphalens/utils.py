@@ -294,7 +294,7 @@ def get_clean_factor_and_forward_returns(factor,
         entire time period of the passed factor data.
     binning_by_group : bool
         If True, compute bin or quantile buckets separately for each group.
-        This is useful when the factor values range vary considerably 
+        This is useful when the factor values range vary considerably
         across gorups so that it is wise to make the binning group relative.
     quantiles : int or sequence[float]
         Number of equal-sized quantile buckets to use in factor bucketing.
