@@ -63,8 +63,9 @@ def quantize_factor(factor_data, quantiles=5, bins=None, by_group=False):
     factor_data : pd.DataFrame - MultiIndex
         A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
         containing the values for a single alpha factor, forward returns for
-        each period, the factor quantile/bin that factor value belongs too, and
+        each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     quantiles : int or sequence[float]
         Number of equal-sized quantile buckets to use in factor bucketing.
         Alternately sequence of quantiles, allowing non-equal-sized buckets
