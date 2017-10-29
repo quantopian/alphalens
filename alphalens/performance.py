@@ -38,6 +38,7 @@ def factor_information_coefficient(factor_data,
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     group_adjust : bool
         Demean forward returns by group before computing IC.
     by_group : bool
@@ -90,6 +91,7 @@ def mean_information_coefficient(factor_data,
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     group_adjust : bool
         Demean forward returns by group before computing IC.
     by_group : bool
@@ -138,6 +140,7 @@ def factor_returns(factor_data, long_short=True, group_neutral=False):
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     long_short : bool
         Should this computation happen on a long short portfolio? if so, then
         factor values will be demeaned across factor universe when factor
@@ -192,8 +195,9 @@ def factor_alpha_beta(factor_data, long_short=True):
     factor_data : pd.DataFrame - MultiIndex
         A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
         containing the values for a single alpha factor, forward returns for
-        each period, the factor quantile/bin that factor value belongs too, and
+        each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     long_short : bool
         Should this computation happen on a long short portfolio? if so, then
         factor values will be demeaned across factor universe when factor
@@ -247,6 +251,7 @@ def mean_return_by_quantile(factor_data,
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     by_date : bool
         If True, compute quantile bucket returns separately for each date.
     by_group : bool
@@ -376,6 +381,7 @@ def factor_rank_autocorrelation(factor_data, period=1):
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     period: int, optional
         Period over which to calculate the autocorrelation
 
