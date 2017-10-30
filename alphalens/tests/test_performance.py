@@ -220,7 +220,7 @@ class PerformanceTestCase(TestCase):
     def test_factor_returns(self,
                             factor_vals,
                             fwd_return_vals,
-                            group_neutral,
+                            group_adjust,
                             expected_vals):
 
         factor_data = self.factor_data.copy()
@@ -228,8 +228,8 @@ class PerformanceTestCase(TestCase):
         factor_data['factor'] = factor_vals
 
         factor_returns_s = factor_returns(factor_data=factor_data,
-                                          long_short=True,
-                                          group_neutral=group_neutral)
+                                          demeaned=True,
+                                          group_adjust=group_adjust)
 
         expected = DataFrame(
             index=self.dr,
@@ -372,20 +372,19 @@ class PerformanceTestCase(TestCase):
         dr2.name = 'date'
         factor = DataFrame(
             index=dr2, columns=tickers, data=[
-                [
-                    3, 4, 2, 1], [
-                    3, 4, 2, 1], [
-                    3, 4, 2, 1], [
-                        3, 4, 2, 1], [
-                            3, 4, 2, 1], [
-                                3, 4, 2, 1]]).stack()
+                [3, 4, 2, 1],
+                [3, 4, 2, 1],
+                [3, 4, 2, 1],
+                [3, 4, 2, 1],
+                [3, 4, 2, 1],
+                [3, 4, 2, 1]]).stack()
 
         factor_data = get_clean_factor_and_forward_returns(
             factor, prices, quantiles=quantiles, periods=range(
                 0, after + 1), filter_zscore=False)
 
         avgrt = average_cumulative_return_by_quantile(
-            factor_data['factor_quantile'], prices, before, after, demeaned)
+            factor_data, prices, before, after, demeaned)
         arrays = []
         for q in range(1, quantiles + 1):
             arrays.append((q, 'mean'))
@@ -451,7 +450,7 @@ class PerformanceTestCase(TestCase):
                 0, after + 1), filter_zscore=False)
 
         avgrt = average_cumulative_return_by_quantile(
-            factor_data['factor_quantile'], prices, before, after, demeaned)
+            factor_data, prices, before, after, demeaned)
         arrays = []
         for q in range(1, quantiles + 1):
             arrays.append((q, 'mean'))
