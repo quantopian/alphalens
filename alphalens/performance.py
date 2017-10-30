@@ -60,12 +60,12 @@ def factor_information_coefficient(factor_data,
     factor_data = factor_data.copy()
 
     grouper = [factor_data.index.get_level_values('date')]
-    if by_group:
-        grouper.append('group')
 
     if group_adjust:
         factor_data = utils.demean_forward_returns(factor_data,
                                                    grouper + ['group'])
+    if by_group:
+        grouper.append('group')
 
     ic = factor_data.groupby(grouper).apply(src_ic)
     ic.columns = pd.Int64Index(ic.columns)
@@ -127,7 +127,7 @@ def mean_information_coefficient(factor_data,
     return ic
 
 
-def factor_returns(factor_data, long_short=True, group_neutral=False):
+def factor_returns(factor_data, demeaned=True, group_adjust=False):
     """
     Computes period wise returns for portfolio weighted by factor
     values. Weights are computed by demeaning factors and dividing
@@ -141,13 +141,14 @@ def factor_returns(factor_data, long_short=True, group_neutral=False):
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
-    long_short : bool
-        Should this computation happen on a long short portfolio? if so, then
-        factor values will be demeaned across factor universe when factor
-        weighting the portfolio.
-    group_neutral : bool
-        If True, compute group neutral returns: each group will weight
-        the same and returns demeaning will occur on the group level.
+    demeaned : bool
+        Should this computation happen on a long short portfolio? if True,
+        then factor values will be demeaned across factor universe when
+        factor weighting the portfolio.
+    group_adjust : bool
+        Should this computation happen on a group neutral portfolio? If True,
+        compute group neutral returns: each group will weight the same and
+        returns demeaning will occur on the group level.
 
     Returns
     -------
@@ -164,13 +165,13 @@ def factor_returns(factor_data, long_short=True, group_neutral=False):
             return group / group.abs().sum()
 
     grouper = [factor_data.index.get_level_values('date')]
-    if group_neutral:
+    if group_adjust:
         grouper.append('group')
 
     weights = factor_data.groupby(grouper)['factor'] \
-        .apply(to_weights, long_short)
+        .apply(to_weights, demeaned)
 
-    if group_neutral:
+    if group_adjust:
         weights = weights.groupby(level='date').apply(to_weights, False)
 
     weighted_returns = \
@@ -182,7 +183,7 @@ def factor_returns(factor_data, long_short=True, group_neutral=False):
     return returns
 
 
-def factor_alpha_beta(factor_data, long_short=True):
+def factor_alpha_beta(factor_data, demeaned=True, group_adjust=False):
     """
     Compute the alpha (excess returns), alpha t-stat (alpha significance),
     and beta (market exposure) of a factor. A regression is run with
@@ -198,10 +199,12 @@ def factor_alpha_beta(factor_data, long_short=True):
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
-    long_short : bool
-        Should this computation happen on a long short portfolio? if so, then
-        factor values will be demeaned across factor universe when factor
-        weighting the portfolio.
+    demeaned : bool
+        Control how to build factor returns used for alpha/beta computation
+        -- see performance.factor_return for a full explanation
+    group_adjust : bool
+        Control how to build factor returns used for alpha/beta computation
+        -- see performance.factor_return for a full explanation
 
     Returns
     -------
@@ -210,7 +213,7 @@ def factor_alpha_beta(factor_data, long_short=True):
         for the given factor and forward returns.
     """
 
-    returns = factor_returns(factor_data, long_short=long_short)
+    returns = factor_returns(factor_data, demeaned, group_adjust)
 
     universe_ret = factor_data.groupby(level='date')[
         utils.get_forward_returns_columns(factor_data.columns)] \
@@ -239,7 +242,8 @@ def factor_alpha_beta(factor_data, long_short=True):
 def mean_return_by_quantile(factor_data,
                             by_date=False,
                             by_group=False,
-                            demeaned=True):
+                            demeaned=True,
+                            group_adjust=False):
     """
     Computes mean returns for factor quantiles across
     provided forward returns columns.
@@ -256,9 +260,10 @@ def mean_return_by_quantile(factor_data,
         If True, compute quantile bucket returns separately for each date.
     by_group : bool
         If True, compute quantile bucket returns separately for each group.
-        Returns demeaning will occur on the group level.
     demeaned : bool
         Compute demeaned mean returns (long short portfolio)
+    group_adjust : bool
+        Returns demeaning will occur on the group level.
 
     Returns
     -------
@@ -268,7 +273,10 @@ def mean_return_by_quantile(factor_data,
         Standard error of returns by specified quantile.
     """
 
-    if demeaned:
+    if group_adjust:
+        grouper = [factor_data.index.get_level_values('date')] + ['group']
+        factor_data = utils.demean_forward_returns(factor_data, grouper)
+    elif demeaned:
         factor_data = utils.demean_forward_returns(factor_data)
     else:
         factor_data = factor_data.copy()
@@ -407,20 +415,25 @@ def factor_rank_autocorrelation(factor_data, period=1):
     return autocorr
 
 
-def average_cumulative_return_by_quantile(quantized_factor,
+def average_cumulative_return_by_quantile(factor_data,
                                           prices,
                                           periods_before=10,
                                           periods_after=15,
-                                          demeaned=True):
+                                          demeaned=True,
+                                          group_adjust=False,
+                                          by_group=False):
     """
-    Plots sector-wise mean daily returns for factor quantiles
-    across provided forward price movement columns.
+    Plots average cumulative returns by factor quantiles in the period range
+    defined by -periods_before to periods_after
 
     Parameters
     ----------
-    quantized_factor : pd.Series
-        Factor quantiles indexed by date and asset and
-        optional a custom group.
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for
+        each period, the factor quantile/bin that factor value belongs to, and
+        (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     prices : pd.DataFrame
         A wide form Pandas DataFrame indexed by date with assets
         in the columns. Pricing data should span the factor
@@ -432,20 +445,94 @@ def average_cumulative_return_by_quantile(quantized_factor,
         How many periods after factor to plot
     demeaned : bool, optional
         Compute demeaned mean returns (long short portfolio)
+    group_adjust : bool
+        Returns demeaning will occur on the group level (group
+        neutral portfolio)
+    by_group : bool
+        If True, compute cumulative returns separately for each group
     Returns
     -------
-    pd.DataFrame indexed by quantile (level 0) and mean/std
-    (level 1) and the values on the columns in range from
-    -periods_before to periods_after
+    cumulative returns and std deviation : pd.DataFrame
+        A MultiIndex DataFrame indexed by quantile (level 0) and mean/std
+        (level 1) and the values on the columns in range from
+        -periods_before to periods_after
+        If by_group=True the index will have an additional 'group' level
+        ::
+            ---------------------------------------------------
+                        |       | -2  | -1  |  0  |  1  | ...
+            ---------------------------------------------------
+              quantile  |       |     |     |     |     |
+            ---------------------------------------------------
+                        | mean  |  x  |  x  |  x  |  x  |
+                 1      ---------------------------------------
+                        | std   |  x  |  x  |  x  |  x  |
+            ---------------------------------------------------
+                        | mean  |  x  |  x  |  x  |  x  |
+                 2      ---------------------------------------
+                        | std   |  x  |  x  |  x  |  x  |
+            ---------------------------------------------------
+                ...     |                 ...
+            ---------------------------------------------------
     """
 
-    def average_cumulative_return(q_fact):
-        demean = quantized_factor if demeaned else None
-        q_returns = utils.common_start_returns(q_fact, prices,
-                                               periods_before, periods_after,
-                                               True, True, demean)
+    def cumulative_return(q_fact, demean_by):
+        return utils.common_start_returns(q_fact, prices,
+                                          periods_before,
+                                          periods_after,
+                                          True, True, demean_by)
+
+    def average_cumulative_return(q_fact, demean_by):
+        q_returns = cumulative_return(q_fact, demean_by)
         return pd.DataFrame({'mean': q_returns.mean(axis=1),
                              'std': q_returns.std(axis=1)}).T
 
-    return quantized_factor.groupby(quantized_factor) \
-        .apply(average_cumulative_return)
+    if by_group:
+        #
+        # Compute quantile cumulative returns separately for each group
+        # Deman those returns accordingly to 'group_adjust' and 'demeaned'
+        #
+        returns_bygroup = []
+
+        for group, g_data in factor_data.groupby('group'):
+            g_fq = g_data['factor_quantile']
+            if group_adjust:
+                demean_by = g_fq  # demeans at group level
+            elif demeaned:
+                demean_by = factor_data['factor_quantile']  # demean by all
+            else:
+                demean_by = None
+            #
+            # Align cumulative return from different dates to the same index
+            # then compute mean and std
+            #
+            avgcumret = g_fq.groupby(g_fq).apply(average_cumulative_return,
+                                                 demean_by)
+            avgcumret['group'] = group
+            avgcumret.set_index('group', append=True, inplace=True)
+            returns_bygroup.append(avgcumret)
+
+        return pd.concat(returns_bygroup, axis=0)
+
+    else:
+        #
+        # Compute quantile cumulative returns for the full factor_data
+        # Align cumulative return from different dates to the same index
+        # then compute mean and std
+        # Deman those returns accordingly to 'group_adjust' and 'demeaned'
+        #
+        if group_adjust:
+            all_returns = []
+            for group, g_data in factor_data.groupby('group'):
+                g_fq = g_data['factor_quantile']
+                avgcumret = g_fq.groupby(g_fq).apply(cumulative_return, g_fq)
+                all_returns.append(avgcumret)
+            q_returns = pd.concat(all_returns, axis=1)
+            q_returns = pd.DataFrame({'mean': q_returns.mean(axis=1),
+                                      'std': q_returns.std(axis=1)})
+            return q_returns.unstack(level=1).stack(level=0)
+        elif demeaned:
+            fq = factor_data['factor_quantile']
+            return fq.groupby(fq).apply(average_cumulative_return, fq)
+        else:
+            fq = factor_data['factor_quantile']
+            return fq.groupby(fq).apply(average_cumulative_return, None)

@@ -331,9 +331,11 @@ def get_clean_factor_and_forward_returns(factor,
         it is assumed that group mappings are unchanged for the
         entire time period of the passed factor data.
     binning_by_group : bool
-        If True, compute bin or quantile buckets separately for each group.
+        If True, compute quantile buckets separately for each group.
         This is useful when the factor values range vary considerably
         across gorups so that it is wise to make the binning group relative.
+        You should probably enable this if the factor is intended
+        to be analyzed for a group neutral portfolio
     quantiles : int or sequence[float]
         Number of equal-sized quantile buckets to use in factor bucketing.
         Alternately sequence of quantiles, allowing non-equal-sized buckets
@@ -466,7 +468,7 @@ def common_start_returns(factor,
                          after,
                          cumulative=False,
                          mean_by_date=False,
-                         demean=None):
+                         demean_by=None):
     """
     A date and equity pair is extracted from each index row in the factor
     dataframe and for each of these pairs a return series is built starting
@@ -493,11 +495,11 @@ def common_start_returns(factor,
     mean_by_date: bool, optional
         If True, compute mean returns for each date and return that
         instead of a return series for each asset
-    demean: pd.DataFrame, optional
+    demean_by: pd.DataFrame, optional
         DataFrame with at least date and equity as index, the columns are
-        irrelevant. For each date a list of equities is extracted from 'demean'
-        index and used as universe to compute demeaned mean returns (long short
-        portfolio)
+        irrelevant. For each date a list of equities is extracted from
+        'demean_by' index and used as universe to compute demeaned mean
+        returns (long short portfolio)
 
     Returns
     -------
@@ -527,8 +529,8 @@ def common_start_returns(factor,
                            len(returns.index))
 
         equities_slice = set(equities)
-        if demean is not None:
-            demean_equities = demean.loc[timestamp] \
+        if demean_by is not None:
+            demean_equities = demean_by.loc[timestamp] \
                 .index.get_level_values('asset')
             equities_slice |= set(demean_equities)
 
@@ -540,7 +542,7 @@ def common_start_returns(factor,
         if cumulative:
             series = (series / series.loc[0, :]) - 1
 
-        if demean is not None:
+        if demean_by is not None:
             mean = series.loc[:, demean_equities].mean(axis=1)
             series = series.loc[:, equities]
             series = series.sub(mean, axis=0)
