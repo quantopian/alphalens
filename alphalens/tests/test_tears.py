@@ -75,7 +75,8 @@ class PerformanceTestCase(TestCase):
             self.prices,
             quantiles=quantiles,
             periods=periods,
-            filter_zscore=filter_zscore)
+            filter_zscore=filter_zscore,
+            max_loss=0.15)
         create_returns_tear_sheet(
             factor_data, long_short=long_short, by_group=False)
 
@@ -93,7 +94,8 @@ class PerformanceTestCase(TestCase):
             self.prices,
             quantiles=quantiles,
             periods=periods,
-            filter_zscore=filter_zscore)
+            filter_zscore=filter_zscore,
+            max_loss=0.15)
         create_information_tear_sheet(
             factor_data, group_adjust=False, by_group=False)
 
@@ -115,7 +117,8 @@ class PerformanceTestCase(TestCase):
             self.prices,
             quantiles=quantiles,
             periods=periods,
-            filter_zscore=filter_zscore)
+            filter_zscore=filter_zscore,
+            max_loss=0.15)
         create_turnover_tear_sheet(factor_data)
 
     @parameterized.expand([(2, (1, 5, 10), False, False),
@@ -136,7 +139,8 @@ class PerformanceTestCase(TestCase):
             self.prices,
             quantiles=quantiles,
             periods=periods,
-            filter_zscore=filter_zscore)
+            filter_zscore=filter_zscore,
+            max_loss=0.15)
         create_summary_tear_sheet(factor_data, long_short=long_short)
 
     @parameterized.expand([(2, (1, 5, 10), False, False),
@@ -157,7 +161,8 @@ class PerformanceTestCase(TestCase):
             self.prices,
             quantiles=quantiles,
             periods=periods,
-            filter_zscore=filter_zscore)
+            filter_zscore=filter_zscore,
+            max_loss=0.15)
 
         create_full_tear_sheet(
             factor_data,
@@ -179,7 +184,8 @@ class PerformanceTestCase(TestCase):
             self.prices,
             quantiles=quantiles,
             periods=periods,
-            filter_zscore=filter_zscore)
+            filter_zscore=filter_zscore,
+            max_loss=0.20)
 
         create_event_returns_tear_sheet(factor_data, self.prices, avgretplot=(
             5, 11), long_short=long_short, by_group=False)
@@ -229,7 +235,7 @@ class PerformanceTestCase(TestCase):
 
         factor_data = get_clean_factor_and_forward_returns(
             factor, self.prices, bins=1, quantiles=None, periods=(
-                1, 2), filter_zscore=filter_zscore)
+                1, 2), filter_zscore=filter_zscore, max_loss=0.10)
 
         create_event_study_tear_sheet(
             factor_data, self.prices, avgretplot=avgretplot)
