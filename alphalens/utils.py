@@ -22,6 +22,25 @@ class NonMatchingTimezoneError(Exception):
     pass
 
 
+class MaxLossExceededError(Exception):
+    pass
+
+
+def rethrow(exception, additional_message):
+    """
+    Re-raise the last exception that was active in the current scope
+    without losing the stacktrace but adding an additional message.
+    This is hacky because it has to be compatible with both python 2/3
+    """
+    e = exception
+    m = additional_message
+    if not e.args:
+        e.args = (m,)
+    else:
+        e.args = (e.args[0] + m,) + e.args[1:]
+    raise e
+
+
 def non_unique_bin_edges_error(func):
     """
     Give user a more informative error in case it is not possible
@@ -32,8 +51,9 @@ def non_unique_bin_edges_error(func):
             return func(*args, **kwargs)
         except ValueError as e:
             if 'Bin edges must be unique' in str(e):
-                print("""
-    It's NOT possible to compute the selected quantiles for the input provided.
+                message = """
+
+    An error occurred while computing bins/quantiles on the input provided.
     This usually happens when the input contains too many identical
     values and they span more than one quantile. The quantiles are choosen
     to have the same number of records each, but the same value cannot span
@@ -48,13 +68,19 @@ def non_unique_bin_edges_error(func):
         ranges and create a range for each discrete value
     Please see utils.get_clean_factor_and_forward_returns documentation for
     full documentation of 'bins' and 'quantiles' options.
-                      """)
+
+"""
+                rethrow(e, message)
             raise
     return dec
 
 
 @non_unique_bin_edges_error
-def quantize_factor(factor_data, quantiles=5, bins=None, by_group=False):
+def quantize_factor(factor_data,
+                    quantiles=5,
+                    bins=None,
+                    by_group=False,
+                    no_raise=False):
     """
     Computes period wise factor quantiles.
 
@@ -78,26 +104,36 @@ def quantize_factor(factor_data, quantiles=5, bins=None, by_group=False):
         Only one of 'quantiles' or 'bins' can be not-None
     by_group : bool
         If True, compute quantile buckets separately for each group.
+    no_raise: bool, optional
+        If True, no exceptions are thrown and the values for which the
+        exception would have been thrown are set to np.NaN
 
     Returns
     -------
     factor_quantile : pd.Series
         Factor quantiles indexed by date and asset.
     """
-
-    def quantile_calc(x, _quantiles, _bins):
-        if _quantiles is not None and _bins is None:
-            return pd.qcut(x, _quantiles, labels=False) + 1
-        elif _bins is not None and _quantiles is None:
-            return pd.cut(x, _bins, labels=False) + 1
+    if not ((quantiles is not None and bins is None) or
+            (quantiles is None and bins is not None)):
         raise ValueError('Either quantiles or bins should be provided')
+
+    def quantile_calc(x, _quantiles, _bins, _no_raise):
+        try:
+            if _quantiles is not None and _bins is None:
+                return pd.qcut(x, _quantiles, labels=False) + 1
+            elif _bins is not None and _quantiles is None:
+                return pd.cut(x, _bins, labels=False) + 1
+        except Exception as e:
+            if _no_raise:
+                return pd.Series(index=x.index)
+            raise e
 
     grouper = [factor_data.index.get_level_values('date')]
     if by_group:
         grouper.append('group')
 
     factor_quantile = factor_data.groupby(grouper)['factor'] \
-        .apply(quantile_calc, quantiles, bins)
+        .apply(quantile_calc, quantiles, bins, no_raise)
     factor_quantile.name = 'factor_quantile'
 
     return factor_quantile.dropna()
@@ -229,7 +265,8 @@ def get_clean_factor_and_forward_returns(factor,
                                          bins=None,
                                          periods=(1, 5, 10),
                                          filter_zscore=20,
-                                         groupby_labels=None):
+                                         groupby_labels=None,
+                                         max_loss=0.05):
     """
     Formats the factor data, pricing data, and group mappings
     into a DataFrame that contains aligned MultiIndex
@@ -315,6 +352,14 @@ def get_clean_factor_and_forward_returns(factor,
     groupby_labels : dict
         A dictionary keyed by group code with values corresponding
         to the display name for each group.
+    max_loss : float, optional
+        Maximum percentage of factor data dropping allowed, computed comparing
+        the number of items in the input factor index and the number of items
+        in the output DataFrame index.
+        Factor data can be partially dropped due to being flawed itself
+        (e.g. NaNs), not having provided enough price data to compute
+        forward returns for all factor values, or because it is not possible
+        perform binning (the error details are reported in this case)
 
     Returns
     -------
@@ -346,6 +391,8 @@ def get_clean_factor_and_forward_returns(factor,
                                        "same as the timezone of 'prices'. See "
                                        "the pandas methods tz_localize and "
                                        "tz_convert.")
+
+    initial_amount = float(len(factor.index))
 
     merged_data = compute_forward_returns(prices, periods, filter_zscore)
 
@@ -382,12 +429,36 @@ def get_clean_factor_and_forward_returns(factor,
 
     merged_data = merged_data.dropna()
 
-    merged_data['factor_quantile'] = quantize_factor(merged_data,
-                                                     quantiles,
-                                                     bins,
-                                                     by_group)
+    fwdret_amount = float(len(merged_data.index))
+
+    binning_exc = None
+    try:
+        merged_data['factor_quantile'] = quantize_factor(
+            merged_data, quantiles, bins, by_group)
+    except Exception as e:
+        binning_exc = e
+        merged_data['factor_quantile'] = quantize_factor(
+            merged_data, quantiles, bins, by_group, no_raise=True)
 
     merged_data = merged_data.dropna()
+
+    binning_amount = float(len(merged_data.index))
+
+    tot_loss = (initial_amount - binning_amount) / initial_amount
+    if tot_loss > max_loss:
+        fwdret_loss = (initial_amount - fwdret_amount) / initial_amount
+        bin_loss = tot_loss - fwdret_loss
+        message = ("max_loss exceeded (%.1f%%): dropped %.1f%% entries from "
+                   "factor data (%.1f%% due to forward returns computation, "
+                   "%.1f%% due to binning), consider increasing max_loss" %
+                   (max_loss * 100, tot_loss * 100, fwdret_loss * 100,
+                    bin_loss * 100))
+
+        if binning_exc is not None and bin_loss > max_loss:
+            # don't hide the reason of binning exception
+            rethrow(binning_exc, message)
+
+        raise MaxLossExceededError(message)
 
     return merged_data
 
