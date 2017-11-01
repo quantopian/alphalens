@@ -269,7 +269,6 @@ def create_returns_tear_sheet(factor_data,
 
 @plotting.customize
 def create_information_tear_sheet(factor_data,
-                                  group_neutral=False,
                                   by_group=False):
     """
     Creates a tear sheet for information analysis of a factor.
@@ -282,13 +281,11 @@ def create_information_tear_sheet(factor_data,
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
-    group_neutral : bool
-        Demean forward returns by group before computing IC.
     by_group : bool
         If True, display graphs separately for each group.
     """
 
-    ic = perf.factor_information_coefficient(factor_data, group_neutral)
+    ic = perf.factor_information_coefficient(factor_data)
 
     plotting.plot_information_table(ic)
 
@@ -309,7 +306,6 @@ def create_information_tear_sheet(factor_data,
 
         mean_monthly_ic = \
             perf.mean_information_coefficient(factor_data,
-                                              group_adjust=group_neutral,
                                               by_group=False,
                                               by_time="M")
         ax_monthly_ic_heatmap = [gf.next_cell() for x in range(fr_cols)]
@@ -319,7 +315,6 @@ def create_information_tear_sheet(factor_data,
     if by_group:
         mean_group_ic = \
             perf.mean_information_coefficient(factor_data,
-                                              group_adjust=group_neutral,
                                               by_group=True)
 
         plotting.plot_ic_by_group(mean_group_ic, ax=gf.next_row())
@@ -397,8 +392,6 @@ def create_full_tear_sheet(factor_data,
         Should this computation happen on a group neutral portfolio?
         - See tears.create_returns_tear_sheet for details on how this flag
         affects returns analysis
-        - See tears.create_information_tear_sheet for details on how this
-        flag affects information analysis
     by_group : bool
         If True, display graphs separately for each group.
     """
@@ -410,7 +403,6 @@ def create_full_tear_sheet(factor_data,
                               by_group,
                               set_context=False)
     create_information_tear_sheet(factor_data,
-                                  group_neutral,
                                   by_group,
                                   set_context=False)
     create_turnover_tear_sheet(factor_data, set_context=False)
