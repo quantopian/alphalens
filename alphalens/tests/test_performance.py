@@ -57,23 +57,17 @@ class PerformanceTestCase(TestCase):
                                   dtype="category")
 
     @parameterized.expand([(factor_data, [4, 3, 2, 1, 1, 2, 3, 4],
-                            False, False,
+                            False,
                             dr,
                             [-1., -1.],
                             ),
                            (factor_data, [1, 2, 3, 4, 4, 3, 2, 1],
-                            False, False,
+                            False,
                             dr,
                             [1., 1.],
                             ),
                            (factor_data, [1, 2, 3, 4, 4, 3, 2, 1],
-                            False, True,
-                            MultiIndex.from_product(
-                                [dr, [1, 2]], names=['date', 'group']),
-                            [1., 1., 1., 1.],
-                            ),
-                           (factor_data, [1, 2, 3, 4, 4, 3, 2, 1],
-                            True, True,
+                            True,
                             MultiIndex.from_product(
                                 [dr, [1, 2]], names=['date', 'group']),
                             [1., 1., 1., 1.],
@@ -81,7 +75,6 @@ class PerformanceTestCase(TestCase):
     def test_information_coefficient(self,
                                      factor_data,
                                      forward_returns,
-                                     group_adjust,
                                      by_group,
                                      expected_ix,
                                      expected_ic_val):
@@ -90,7 +83,6 @@ class PerformanceTestCase(TestCase):
                                 data=forward_returns)
 
         ic = factor_information_coefficient(factor_data=factor_data,
-                                            group_adjust=group_adjust,
                                             by_group=by_group)
 
         expected_ic_df = DataFrame(index=expected_ix,
@@ -102,13 +94,11 @@ class PerformanceTestCase(TestCase):
     @parameterized.expand([(factor_data,
                             [4, 3, 2, 1, 1, 2, 3, 4],
                             False,
-                            False,
                             'D',
                             dr,
                             [-1., -1.]),
                            (factor_data,
                             [1, 2, 3, 4, 4, 3, 2, 1],
-                            False,
                             False,
                             'W',
                             DatetimeIndex(['2015-01-04'],
@@ -117,14 +107,12 @@ class PerformanceTestCase(TestCase):
                             [1.]),
                            (factor_data,
                             [1, 2, 3, 4, 4, 3, 2, 1],
-                            False,
                             True,
                             None,
                             Int64Index([1, 2], name='group'),
                             [1., 1.]),
                            (factor_data,
                             [1, 2, 3, 4, 4, 3, 2, 1],
-                            False,
                             True,
                             'W',
                             MultiIndex.from_product(
@@ -136,7 +124,6 @@ class PerformanceTestCase(TestCase):
     def test_mean_information_coefficient(self,
                                           factor_data,
                                           forward_returns,
-                                          group_adjust,
                                           by_group,
                                           by_time,
                                           expected_ix,
@@ -146,7 +133,6 @@ class PerformanceTestCase(TestCase):
                                 data=forward_returns)
 
         ic = mean_information_coefficient(factor_data,
-                                          group_adjust=group_adjust,
                                           by_group=by_group,
                                           by_time=by_time)
 

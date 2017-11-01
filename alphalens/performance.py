@@ -24,7 +24,6 @@ from . import utils
 
 
 def factor_information_coefficient(factor_data,
-                                   group_adjust=False,
                                    by_group=False):
     """
     Computes the Spearman Rank Correlation based Information Coefficient (IC)
@@ -39,8 +38,6 @@ def factor_information_coefficient(factor_data,
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
-    group_adjust : bool
-        Demean forward returns by group before computing IC.
     by_group : bool
         If True, compute period wise IC separately for each group.
 
@@ -61,9 +58,6 @@ def factor_information_coefficient(factor_data,
 
     grouper = [factor_data.index.get_level_values('date')]
 
-    if group_adjust:
-        factor_data = utils.demean_forward_returns(factor_data,
-                                                   grouper + ['group'])
     if by_group:
         grouper.append('group')
 
@@ -74,7 +68,6 @@ def factor_information_coefficient(factor_data,
 
 
 def mean_information_coefficient(factor_data,
-                                 group_adjust=False,
                                  by_group=False,
                                  by_time=None):
     """
@@ -92,8 +85,6 @@ def mean_information_coefficient(factor_data,
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
-    group_adjust : bool
-        Demean forward returns by group before computing IC.
     by_group : bool
         If True, take the mean IC for each group.
     by_time : str (pd time_rule), optional
@@ -108,7 +99,7 @@ def mean_information_coefficient(factor_data,
         forward price movement windows.
     """
 
-    ic = factor_information_coefficient(factor_data, group_adjust, by_group)
+    ic = factor_information_coefficient(factor_data, by_group)
 
     grouper = []
     if by_time is not None:

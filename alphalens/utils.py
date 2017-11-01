@@ -438,8 +438,11 @@ def get_clean_factor_and_forward_returns(factor,
     fwdret_amount = float(len(merged_data.index))
 
     no_raise = False if max_loss == 0 else True
-    merged_data['factor_quantile'] = \
-        quantize_factor(merged_data, quantiles, bins, binning_by_group, no_raise)
+    merged_data['factor_quantile'] = quantize_factor(merged_data,
+                                                     quantiles,
+                                                     bins,
+                                                     binning_by_group,
+                                                     no_raise)
 
     merged_data = merged_data.dropna()
 

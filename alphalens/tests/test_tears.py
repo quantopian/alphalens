@@ -92,8 +92,7 @@ class PerformanceTestCase(TestCase):
             periods=periods,
             filter_zscore=filter_zscore)
 
-        create_information_tear_sheet(
-            factor_data, group_neutral=False, by_group=False)
+        create_information_tear_sheet(factor_data, by_group=False)
 
     @parameterized.expand([(2, (2, 3, 6), True),
                            (4, (1, 2, 3, 7), False)])
