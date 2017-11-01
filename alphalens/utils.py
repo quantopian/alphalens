@@ -46,12 +46,7 @@ def non_unique_bin_edges_error(func):
     Give user a more informative error in case it is not possible
     to properly calculate quantiles on the input dataframe (factor)
     """
-    def dec(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except ValueError as e:
-            if 'Bin edges must be unique' in str(e):
-                message = """
+    message = """
 
     An error occurred while computing bins/quantiles on the input provided.
     This usually happens when the input contains too many identical
@@ -70,6 +65,12 @@ def non_unique_bin_edges_error(func):
     full documentation of 'bins' and 'quantiles' options.
 
 """
+
+    def dec(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except ValueError as e:
+            if 'Bin edges must be unique' in str(e):
                 rethrow(e, message)
             raise
     return dec
@@ -266,7 +267,7 @@ def get_clean_factor_and_forward_returns(factor,
                                          periods=(1, 5, 10),
                                          filter_zscore=20,
                                          groupby_labels=None,
-                                         max_loss=0.05):
+                                         max_loss=0.25):
     """
     Formats the factor data, pricing data, and group mappings
     into a DataFrame that contains aligned MultiIndex
@@ -353,13 +354,14 @@ def get_clean_factor_and_forward_returns(factor,
         A dictionary keyed by group code with values corresponding
         to the display name for each group.
     max_loss : float, optional
-        Maximum percentage of factor data dropping allowed, computed comparing
-        the number of items in the input factor index and the number of items
-        in the output DataFrame index.
+        Maximum percentage (0.00 to 1.00) of factor data dropping allowed,
+        computed comparing the number of items in the input factor index and
+        the number of items in the output DataFrame index.
         Factor data can be partially dropped due to being flawed itself
         (e.g. NaNs), not having provided enough price data to compute
         forward returns for all factor values, or because it is not possible
-        perform binning (the error details are reported in this case)
+        to perform binning.
+        Set max_loss=0 to avoid Exceptions suppression.
 
     Returns
     -------
@@ -431,33 +433,26 @@ def get_clean_factor_and_forward_returns(factor,
 
     fwdret_amount = float(len(merged_data.index))
 
-    binning_exc = None
-    try:
-        merged_data['factor_quantile'] = quantize_factor(
-            merged_data, quantiles, bins, by_group)
-    except Exception as e:
-        binning_exc = e
-        merged_data['factor_quantile'] = quantize_factor(
-            merged_data, quantiles, bins, by_group, no_raise=True)
+    no_raise = False if max_loss == 0 else True
+    merged_data['factor_quantile'] = \
+        quantize_factor(merged_data, quantiles, bins, by_group, no_raise)
 
     merged_data = merged_data.dropna()
 
     binning_amount = float(len(merged_data.index))
 
     tot_loss = (initial_amount - binning_amount) / initial_amount
+    fwdret_loss = (initial_amount - fwdret_amount) / initial_amount
+    bin_loss = tot_loss - fwdret_loss
+
+    print("Dropped %.1f%% entries from factor data (%.1f%% after "
+          "in forward returns computation and %.1f%% in binning phase). "
+          "Set max_loss=0 to see potentially suppressed Exceptions." %
+          (tot_loss * 100, fwdret_loss * 100,  bin_loss * 100))
+
     if tot_loss > max_loss:
-        fwdret_loss = (initial_amount - fwdret_amount) / initial_amount
-        bin_loss = tot_loss - fwdret_loss
-        message = ("max_loss exceeded (%.1f%%): dropped %.1f%% entries from "
-                   "factor data (%.1f%% due to forward returns computation, "
-                   "%.1f%% due to binning), consider increasing max_loss" %
-                   (max_loss * 100, tot_loss * 100, fwdret_loss * 100,
-                    bin_loss * 100))
-
-        if binning_exc is not None and bin_loss > max_loss:
-            # don't hide the reason of binning exception
-            rethrow(binning_exc, message)
-
+        message = ("max_loss (%.1f%%) exceeded %.1f%%, consider increasing it."
+                   % (max_loss * 100, tot_loss * 100))
         raise MaxLossExceededError(message)
 
     return merged_data
