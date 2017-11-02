@@ -214,8 +214,12 @@ def plot_ic_ts(ic, ax=None):
     ymin, ymax = (None, None)
     for a, (period_num, ic) in zip(ax, ic.iteritems()):
         ic.plot(alpha=0.7, ax=a, lw=0.7, color='steelblue')
-        pd.rolling_mean(ic, 22).plot(ax=a,
-                                     color='forestgreen', lw=2, alpha=0.8)
+        ic.rolling(window=22).mean().plot(
+            ax=a,
+            color='forestgreen',
+            lw=2,
+            alpha=0.8
+        )
 
         a.set(ylabel='IC', xlabel="")
         a.set_title(
@@ -519,9 +523,11 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     mean_returns_spread_bps = mean_returns_spread * DECIMAL_TO_BPS
 
     mean_returns_spread_bps.plot(alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
-    pd.rolling_mean(mean_returns_spread_bps, 22).plot(color='orangered',
-                                                      alpha=0.7,
-                                                      ax=ax)
+    mean_returns_spread_bps.rolling(window=22).plot(
+        color='orangered',
+        alpha=0.7,
+        ax=ax
+    )
     ax.legend(['mean returns spread', '1 month moving avg'], loc='upper right')
 
     if std_err is not None:
