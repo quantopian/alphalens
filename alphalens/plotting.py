@@ -523,7 +523,7 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     mean_returns_spread_bps = mean_returns_spread * DECIMAL_TO_BPS
 
     mean_returns_spread_bps.plot(alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
-    mean_returns_spread_bps.rolling(window=22).plot(
+    mean_returns_spread_bps.rolling(window=22).mean().plot(
         color='orangered',
         alpha=0.7,
         ax=ax
