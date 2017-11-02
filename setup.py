@@ -12,7 +12,7 @@ if 'upload' in sys.argv:
 install_reqs = [
     'matplotlib>=1.4.0',
     'numpy>=1.9.1',
-    'pandas>=0.16.1',
+    'pandas>=0.18.0',
     'scipy>=0.14.0',
     'seaborn>=0.6.0',
     'statsmodels>=0.6.1',
