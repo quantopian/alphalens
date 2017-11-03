@@ -170,8 +170,8 @@ def plot_information_table(ic_data):
     ic_summary_table["p-value(IC)"] = p_value
     ic_summary_table["IC Skew"] = stats.skew(ic_data)
     ic_summary_table["IC Kurtosis"] = stats.kurtosis(ic_data)
-    ic_summary_table["Ann. IR"] = \
-        (ic_data.mean() / ic_data.std()) * np.sqrt(252)
+    ic_summary_table["Risk-Adjusted IC"] = \
+        ic_data.mean() / ic_data.std()
 
     print("Information Analysis")
     utils.print_table(ic_summary_table.apply(lambda x: x.round(3)).T)
