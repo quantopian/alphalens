@@ -17,14 +17,19 @@
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import pandas as pd
+import warnings
+
+from functools import wraps
 
 from . import plotting
 from . import performance as perf
 from . import utils
 
 
-# it makes life easier with grid plots
 class GridFigure(object):
+    """
+    It makes life easier with grid plots
+    """
 
     def __init__(self, rows, cols):
         self.rows = rows
@@ -49,6 +54,127 @@ class GridFigure(object):
         subplt = plt.subplot(self.gs[self.curr_row, self.curr_col])
         self.curr_col += 1
         return subplt
+
+
+def create_full_tear_sheet_api_change_warning(func):
+    """
+    Decorator used to help API transition: maintain the function backward
+    compatible and warn the user about the API change.
+    Old API:
+        create_full_tear_sheet(factor_data,
+                               long_short=True,
+                               group_adjust=False,
+                               by_group=False)
+    New API:
+        create_full_tear_sheet(factor_data,
+                               long_short=True,
+                               group_neutral=False,
+                               by_group=False)
+
+    Eventually this function can be deleted
+    """
+    @wraps(func)
+    def call_w_context(*args, **kwargs):
+        group_adjust = kwargs.pop('group_adjust', None)
+        if group_adjust is not None:
+            kwargs['group_neutral'] = group_adjust
+            warnings.warn("create_full_tear_sheet: 'group_adjust' argument "
+                          "is now deprecated and replaced by 'group_neutral'",
+                          category=DeprecationWarning, stacklevel=3)
+        return func(*args, **kwargs)
+    return call_w_context
+
+
+def create_information_tear_sheet_api_change_warning(func):
+    """
+    Decorator used to help API transition: maintain the function backward
+    compatible and warn the user about the API change.
+    Old API:
+        create_information_tear_sheet(factor_data,
+                                      group_adjust=False,
+                                      by_group=False)
+    New API:
+        create_information_tear_sheet(factor_data,
+                                      by_group=False)
+
+    Eventually this function can be deleted
+    """
+    @wraps(func)
+    def call_w_context(*args, **kwargs):
+        group_adjust = kwargs.pop('group_adjust', None)
+        if group_adjust is not None:
+            warnings.warn("create_information_tear_sheet: 'group_adjust' "
+                          "argument is now deprecated.",
+                          category=DeprecationWarning, stacklevel=2)
+        elif len(args) == 3 or (len(args) == 2 and args[1] is True):
+            warnings.warn("create_information_tear_sheet: 'group_adjust' "
+                          "argument has been removed. Please consider using "
+                          "keyword arguments instead of positional ones to "
+                          "avoid unexpected behaviour.",
+                          category=DeprecationWarning, stacklevel=2)
+
+        return func(*args, **kwargs)
+    return call_w_context
+
+
+def create_returns_tear_sheet_api_change_warning(func):
+    """
+    Decorator used to help API transition: maintain the function backward
+    compatible and warn the user about the API change.
+    Old API:
+        create_returns_tear_sheet(factor_data,
+                                  long_short=True,
+                                  by_group=False)
+    New API:
+        create_returns_tear_sheet(factor_data,
+                                  long_short=True,
+                                  group_neutral=False,
+                                  by_group=False)
+
+    Eventually this function can be deleted
+    """
+    @wraps(func)
+    def call_w_context(*args, **kwargs):
+        if len(args) == 3 and args[2] is True:
+            warnings.warn("create_returns_tear_sheet: a new argument "
+                          "'group_neutral' has been added. Please consider "
+                          "using keyword arguments instead of positional ones "
+                          " to avoid unexpected behaviour.",
+                          category=DeprecationWarning, stacklevel=2)
+        return func(*args, **kwargs)
+    return call_w_context
+
+
+def create_event_returns_tear_sheet_api_change_warning(func):
+    """
+    Decorator used to help API transition: maintain the function backward
+    compatible and warn the user about the API change.
+    Old API:
+        create_event_returns_tear_sheet(factor_data,
+                                        prices,
+                                        avgretplot=(5, 15),
+                                        long_short=True,
+                                        by_group=False)
+    New API:
+        create_event_returns_tear_sheet(factor_data,
+                                        prices,
+                                        avgretplot=(5, 15),
+                                        long_short=True,
+                                        group_neutral=False,
+                                        by_group=False)
+
+    Eventually this function can be deleted
+    """
+    @wraps(func)
+    def call_w_context(*args, **kwargs):
+        if len(args) == 5 and args[4] is True:
+            warnings.warn("create_event_returns_tear_sheet: a new argument "
+                          "'group_neutral' has been added. Please consider "
+                          "using keyword arguments instead of positional ones "
+                          " to avoid unexpected behaviour.",
+                          category=DeprecationWarning, stacklevel=2)
+        return func(*args, **kwargs)
+    return call_w_context
 
 
 @plotting.customize
@@ -143,6 +269,7 @@ def create_summary_tear_sheet(factor_data,
     plotting.plot_turnover_table(autocorrelation, quantile_turnover)
 
 
+@create_returns_tear_sheet_api_change_warning
 @plotting.customize
 def create_returns_tear_sheet(factor_data,
                               long_short=True,
@@ -267,6 +394,7 @@ def create_returns_tear_sheet(factor_data,
                                            ax=ax_quantile_returns_bar_by_group)
 
 
+@create_information_tear_sheet_api_change_warning
 @plotting.customize
 def create_information_tear_sheet(factor_data,
                                   by_group=False):
@@ -367,6 +495,7 @@ def create_turnover_tear_sheet(factor_data):
                                                    ax=gf.next_row())
 
 
+@create_full_tear_sheet_api_change_warning
 @plotting.customize
 def create_full_tear_sheet(factor_data,
                            long_short=True,
@@ -408,6 +537,7 @@ def create_full_tear_sheet(factor_data,
     create_turnover_tear_sheet(factor_data, set_context=False)
 
 
+@create_event_returns_tear_sheet_api_change_warning
 @plotting.customize
 def create_event_returns_tear_sheet(factor_data,
                                     prices,
