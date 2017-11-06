@@ -16,6 +16,9 @@
 import pandas as pd
 import numpy as np
 from IPython.display import display
+import warnings
+
+from functools import wraps
 
 
 class NonMatchingTimezoneError(Exception):
@@ -258,6 +261,49 @@ def print_table(table, name=None, fmt=None):
         pd.set_option('display.float_format', prev_option)
 
 
+def get_clean_factor_and_forward_returns_api_change_warning(func):
+    """
+    Decorator used to help API transition: maintain the function backward
+    compatible and warn the user about the API change.
+    Old API:
+        get_clean_factor_and_forward_returns(factor,
+                                             prices,
+                                             groupby=None,
+                                             by_group=False,
+                                             quantiles=5,
+                                             bins=None,
+                                             periods=(1, 5, 10),
+                                             filter_zscore=20,
+                                             groupby_labels=None,
+                                             max_loss=0.25)
+    New API:
+        get_clean_factor_and_forward_returns(factor,
+                                             prices,
+                                             groupby=None,
+                                             binning_by_group=False,
+                                             quantiles=5,
+                                             bins=None,
+                                             periods=(1, 5, 10),
+                                             filter_zscore=20,
+                                             groupby_labels=None,
+                                             max_loss=0.25)
+
+    Eventually this function can be deleted
+    """
+    @wraps(func)
+    def call_w_context(*args, **kwargs):
+        by_group = kwargs.pop('by_group', None)
+        if by_group is not None:
+            kwargs['binning_by_group'] = by_group
+            warnings.warn("get_clean_factor_and_forward_returns: "
+                          "'by_group' argument is now deprecated and "
+                          "replaced by 'binning_by_group'",
+                          category=DeprecationWarning, stacklevel=3)
+        return func(*args, **kwargs)
+    return call_w_context
+
+
+@get_clean_factor_and_forward_returns_api_change_warning
 def get_clean_factor_and_forward_returns(factor,
                                          prices,
                                          groupby=None,
