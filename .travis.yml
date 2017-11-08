@@ -28,7 +28,7 @@ install:
   - source activate testenv
   - pip install nose_parameterized
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes mock; fi
-  - python setup.py install
+  - pip install -e .
 
 before_script:
   - "flake8 alphalens"
