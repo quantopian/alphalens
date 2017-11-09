@@ -165,13 +165,13 @@ def plot_information_table(ic_data):
     ic_summary_table = pd.DataFrame()
     ic_summary_table["IC Mean"] = ic_data.mean()
     ic_summary_table["IC Std."] = ic_data.std()
+    ic_summary_table["Risk-Adjusted IC"] = \
+        ic_data.mean() / ic_data.std()
     t_stat, p_value = stats.ttest_1samp(ic_data, 0)
     ic_summary_table["t-stat(IC)"] = t_stat
     ic_summary_table["p-value(IC)"] = p_value
     ic_summary_table["IC Skew"] = stats.skew(ic_data)
     ic_summary_table["IC Kurtosis"] = stats.kurtosis(ic_data)
-    ic_summary_table["Ann. IR"] = \
-        (ic_data.mean() / ic_data.std()) * np.sqrt(252)
 
     print("Information Analysis")
     utils.print_table(ic_summary_table.apply(lambda x: x.round(3)).T)
@@ -214,8 +214,12 @@ def plot_ic_ts(ic, ax=None):
     ymin, ymax = (None, None)
     for a, (period_num, ic) in zip(ax, ic.iteritems()):
         ic.plot(alpha=0.7, ax=a, lw=0.7, color='steelblue')
-        pd.rolling_mean(ic, 22).plot(ax=a,
-                                     color='forestgreen', lw=2, alpha=0.8)
+        ic.rolling(window=22).mean().plot(
+            ax=a,
+            color='forestgreen',
+            lw=2,
+            alpha=0.8
+        )
 
         a.set(ylabel='IC', xlabel="")
         a.set_title(
@@ -519,9 +523,11 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     mean_returns_spread_bps = mean_returns_spread * DECIMAL_TO_BPS
 
     mean_returns_spread_bps.plot(alpha=0.4, ax=ax, lw=0.7, color='forestgreen')
-    pd.rolling_mean(mean_returns_spread_bps, 22).plot(color='orangered',
-                                                      alpha=0.7,
-                                                      ax=ax)
+    mean_returns_spread_bps.rolling(window=22).mean().plot(
+        color='orangered',
+        alpha=0.7,
+        ax=ax
+    )
     ax.legend(['mean returns spread', '1 month moving avg'], loc='upper right')
 
     if std_err is not None:
@@ -700,7 +706,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     return ax
 
 
-def plot_cumulative_returns(factor_returns, period=1, ax=None):
+def plot_cumulative_returns(factor_returns, period=1, overlap=True, ax=None):
     """
     Plots the cumulative returns of the returns series passed in.
 
@@ -711,6 +717,14 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
         value.
     period: int, optional
         Period over which the daily returns are calculated
+    overlap: boolean, optional
+        Specify if subsequent returns overlaps.
+        If 'overlap' is True and 'period' N is greater than 1, the cumulative
+        returns plot is computed building and averaging the  cumulative returns
+        of N interleaved portfolios (started at subsequent periods 1,2,3,...,N)
+        each one rebalancing every N periods. This results in trading the
+        factor at every value/signal computed by the factor and also the
+        cumulative returns don't dependent on a specific starting date.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -722,19 +736,11 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    factor_returns = factor_returns.copy()
+    overlapping_period = period if overlap else 1
+    factor_returns = utils.cumulative_returns(factor_returns,
+                                              overlapping_period)
 
-    if period > 1:
-        factor_returns = pd.rolling_apply(
-            factor_returns,
-            period,
-            # compound returns
-            lambda ret, period: ((np.nanmean(ret) + 1)**(1. / period)) - 1,
-            min_periods=1,
-            args=(period,))
-
-    factor_returns.add(1).cumprod().plot(
-        ax=ax, lw=3, color='forestgreen', alpha=0.6)
+    factor_returns.plot(ax=ax, lw=3, color='forestgreen', alpha=0.6)
     ax.set(ylabel='Cumulative Returns',
            title='''Factor Weighted Long/Short Portfolio Cumulative Return
                     ({} Fwd Period)'''.format(period),
@@ -744,7 +750,10 @@ def plot_cumulative_returns(factor_returns, period=1, ax=None):
     return ax
 
 
-def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
+def plot_cumulative_returns_by_quantile(quantile_returns,
+                                        period=1,
+                                        overlap=True,
+                                        ax=None):
     """
     Plots the cumulative returns of various factor quantiles.
 
@@ -754,6 +763,14 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
         Cumulative returns by factor quantile.
     period: int, optional
         Period over which the daily returns are calculated
+    overlap: boolean, optional
+        Specify if subsequent returns overlaps.
+        If 'overlap' is True and 'period' N is greater than 1, the cumulative
+        returns plot is computed building and averaging the  cumulative returns
+        of N interleaved portfolios (started at subsequent periods 1,2,3,...,N)
+        each one rebalancing every N periods. This results in trading the
+        factor at every value/signal computed by the factor and also the
+        cumulative returns don't dependent on a specific starting date.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -768,16 +785,9 @@ def plot_cumulative_returns_by_quantile(quantile_returns, period=1, ax=None):
     ret_wide = quantile_returns.reset_index()\
         .pivot(index='date', columns='factor_quantile', values=period)
 
-    if period > 1:
-        ret_wide = pd.rolling_apply(
-            ret_wide,
-            period,
-            # compound returns
-            lambda ret, period: ((np.nanmean(ret) + 1)**(1. / period)) - 1,
-            min_periods=1,
-            args=(period,))
-
-    cum_ret = ret_wide.add(1).cumprod()
+    overlapping_period = period if overlap else 1
+    cum_ret = ret_wide.apply(utils.cumulative_returns,
+                             args=(overlapping_period,))
     cum_ret = cum_ret.loc[:, ::-1]
 
     cum_ret.plot(lw=2, ax=ax, cmap=cm.RdYlGn_r)
@@ -827,7 +837,7 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
 
     avg_cumulative_returns = avg_cumulative_returns.multiply(DECIMAL_TO_BPS)
     quantiles = len(avg_cumulative_returns.index.levels[0].unique())
-    palette = cm.RdYlGn_r(np.linspace(0, 1, quantiles))
+    palette = [cm.RdYlGn_r(i) for i in np.linspace(0, 1, quantiles)]
 
     if by_quantile:
 
@@ -884,7 +894,7 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
     return ax
 
 
-def plot_events_distribution(events, ax=None):
+def plot_events_distribution(events, num_bars=50, ax=None):
     """
     Plots the distribution of events in time.
 
@@ -892,6 +902,8 @@ def plot_events_distribution(events, ax=None):
     ----------
     events : pd.Series
         A pd.Series whose index contains at least 'date' level.
+    num_bars : integer, optional
+        Number of bars to plot
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -903,8 +915,10 @@ def plot_events_distribution(events, ax=None):
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    grouper = [events.index.get_level_values('date').year,
-               events.index.get_level_values('date').month]
+    start = events.index.get_level_values('date').min()
+    end = events.index.get_level_values('date').max()
+    group_interval = (end - start) / num_bars
+    grouper = pd.Grouper(level='date', freq=group_interval)
     events.groupby(grouper).count().plot(kind="bar", grid=False, ax=ax)
     ax.set(ylabel='Number of events',
            title='Distribution of events in time',

@@ -19,14 +19,20 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from collections import OrderedDict
 import empyrical as ep
+import warnings
+
+from functools import wraps
 
 from . import plotting
 from . import performance as perf
 from . import utils
 
 
-# it makes life easier with grid plots
 class GridFigure(object):
+    """
+    It makes life easier with grid plots
+    """
+
     def __init__(self, rows, cols):
         self.rows = rows
         self.cols = cols
@@ -52,8 +58,131 @@ class GridFigure(object):
         return subplt
 
 
+def create_full_tear_sheet_api_change_warning(func):
+    """
+    Decorator used to help API transition: maintain the function backward
+    compatible and warn the user about the API change.
+    Old API:
+        create_full_tear_sheet(factor_data,
+                               long_short=True,
+                               group_adjust=False,
+                               by_group=False)
+    New API:
+        create_full_tear_sheet(factor_data,
+                               long_short=True,
+                               group_neutral=False,
+                               by_group=False)
+
+    Eventually this function can be deleted
+    """
+    @wraps(func)
+    def call_w_context(*args, **kwargs):
+        group_adjust = kwargs.pop('group_adjust', None)
+        if group_adjust is not None:
+            kwargs['group_neutral'] = group_adjust
+            warnings.warn("create_full_tear_sheet: 'group_adjust' argument "
+                          "is now deprecated and replaced by 'group_neutral'",
+                          category=DeprecationWarning, stacklevel=3)
+        return func(*args, **kwargs)
+    return call_w_context
+
+
+def create_information_tear_sheet_api_change_warning(func):
+    """
+    Decorator used to help API transition: maintain the function backward
+    compatible and warn the user about the API change.
+    Old API:
+        create_information_tear_sheet(factor_data,
+                                      group_adjust=False,
+                                      by_group=False)
+    New API:
+        create_information_tear_sheet(factor_data,
+                                      by_group=False)
+
+    Eventually this function can be deleted
+    """
+    @wraps(func)
+    def call_w_context(*args, **kwargs):
+        group_adjust = kwargs.pop('group_adjust', None)
+        if group_adjust is not None:
+            warnings.warn("create_information_tear_sheet: 'group_adjust' "
+                          "argument is now deprecated.",
+                          category=DeprecationWarning, stacklevel=2)
+        elif len(args) == 3 or (len(args) == 2 and args[1] is True):
+            warnings.warn("create_information_tear_sheet: 'group_adjust' "
+                          "argument has been removed. Please consider using "
+                          "keyword arguments instead of positional ones to "
+                          "avoid unexpected behaviour.",
+                          category=DeprecationWarning, stacklevel=2)
+
+        return func(*args, **kwargs)
+    return call_w_context
+
+
+def create_returns_tear_sheet_api_change_warning(func):
+    """
+    Decorator used to help API transition: maintain the function backward
+    compatible and warn the user about the API change.
+    Old API:
+        create_returns_tear_sheet(factor_data,
+                                  long_short=True,
+                                  by_group=False)
+    New API:
+        create_returns_tear_sheet(factor_data,
+                                  long_short=True,
+                                  group_neutral=False,
+                                  by_group=False)
+
+    Eventually this function can be deleted
+    """
+    @wraps(func)
+    def call_w_context(*args, **kwargs):
+        if len(args) == 3 and args[2] is True:
+            warnings.warn("create_returns_tear_sheet: a new argument "
+                          "'group_neutral' has been added. Please consider "
+                          "using keyword arguments instead of positional ones "
+                          " to avoid unexpected behaviour.",
+                          category=DeprecationWarning, stacklevel=2)
+        return func(*args, **kwargs)
+    return call_w_context
+
+
+def create_event_returns_tear_sheet_api_change_warning(func):
+    """
+    Decorator used to help API transition: maintain the function backward
+    compatible and warn the user about the API change.
+    Old API:
+        create_event_returns_tear_sheet(factor_data,
+                                        prices,
+                                        avgretplot=(5, 15),
+                                        long_short=True,
+                                        by_group=False)
+    New API:
+        create_event_returns_tear_sheet(factor_data,
+                                        prices,
+                                        avgretplot=(5, 15),
+                                        long_short=True,
+                                        group_neutral=False,
+                                        by_group=False)
+
+    Eventually this function can be deleted
+    """
+    @wraps(func)
+    def call_w_context(*args, **kwargs):
+        if len(args) == 5 and args[4] is True:
+            warnings.warn("create_event_returns_tear_sheet: a new argument "
+                          "'group_neutral' has been added. Please consider "
+                          "using keyword arguments instead of positional ones "
+                          " to avoid unexpected behaviour.",
+                          category=DeprecationWarning, stacklevel=2)
+        return func(*args, **kwargs)
+    return call_w_context
+
+
 @plotting.customize
-def create_summary_tear_sheet(factor_data, long_short=True):
+def create_summary_tear_sheet(factor_data,
+                              long_short=True,
+                              group_neutral=False):
     """
     Creates a small summary tear sheet with returns, information, and turnover
     analysis.
@@ -65,20 +194,21 @@ def create_summary_tear_sheet(factor_data, long_short=True):
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     long_short : bool
         Should this computation happen on a long short portfolio? if so, then
-        factor values will be demeaned across the factor universe when factor
-        weighting the portfolio. Additionally, mean quantile returns will be
-        demeaned across the factor universe.
+        mean quantile returns will be demeaned across the factor universe.
+    group_neutral : bool
+        Should this computation happen on a group neutral portfolio? if so,
+        returns demeaning will occur on the group level.
     """
 
     # Returns Analysis
-    factor_returns = perf.factor_returns(factor_data, long_short)
-
     mean_ret_quantile, std_quantile = \
         perf.mean_return_by_quantile(factor_data,
                                      by_group=False,
-                                     demeaned=long_short)
+                                     demeaned=long_short,
+                                     group_adjust=group_neutral)
 
     mean_compret_quantile = mean_ret_quantile.apply(utils.rate_of_return,
                                                     axis=0)
@@ -87,13 +217,16 @@ def create_summary_tear_sheet(factor_data, long_short=True):
         perf.mean_return_by_quantile(factor_data,
                                      by_date=True,
                                      by_group=False,
-                                     demeaned=long_short)
+                                     demeaned=long_short,
+                                     group_adjust=group_neutral)
 
     mean_compret_quant_daily = mean_ret_quant_daily.apply(utils.rate_of_return,
                                                           axis=0)
     compstd_quant_daily = std_quant_daily.apply(utils.std_conversion, axis=0)
 
-    alpha_beta = perf.factor_alpha_beta(factor_data, long_short)
+    alpha_beta = perf.factor_alpha_beta(factor_data,
+                                        long_short,
+                                        group_neutral)
 
     mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(
         mean_compret_quant_daily,
@@ -101,7 +234,9 @@ def create_summary_tear_sheet(factor_data, long_short=True):
         factor_data['factor_quantile'].min(),
         std_err=compstd_quant_daily)
 
-    fr_cols = len(factor_returns.columns)
+    periods = utils.get_forward_returns_columns(factor_data.columns)
+
+    fr_cols = len(periods)
     vertical_sections = 2 + fr_cols * 3
     gf = GridFigure(rows=vertical_sections, cols=1)
 
@@ -121,24 +256,27 @@ def create_summary_tear_sheet(factor_data, long_short=True):
     plotting.plot_information_table(ic)
 
     # Turnover Analysis
-    turnover_periods = utils.get_forward_returns_columns(factor_data.columns)
     quantile_factor = factor_data['factor_quantile']
 
     quantile_turnover = \
         {p: pd.concat([perf.quantile_turnover(quantile_factor, q, p)
                        for q in range(1, int(quantile_factor.max()) + 1)],
                       axis=1)
-            for p in turnover_periods}
+            for p in periods}
 
     autocorrelation = pd.concat(
         [perf.factor_rank_autocorrelation(factor_data, period) for period in
-         turnover_periods], axis=1)
+         periods], axis=1)
 
     plotting.plot_turnover_table(autocorrelation, quantile_turnover)
 
 
+@create_returns_tear_sheet_api_change_warning
 @plotting.customize
-def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
+def create_returns_tear_sheet(factor_data,
+                              long_short=True,
+                              group_neutral=False,
+                              by_group=False):
     """
     Creates a tear sheet for returns analysis of a factor.
 
@@ -149,22 +287,30 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to,
         and (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     long_short : bool
         Should this computation happen on a long short portfolio? if so, then
-        factor values will be demeaned across the factor universe when factor
-        weighting the portfolio. Additionally, mean quantile returns will be
-        demeaned across the factor universe.
+        mean quantile returns will be demeaned across the factor universe.
+        Additionally factor values will be demeaned across the factor universe
+        when factor weighting the portfolio for cumulative returns plots
+    group_neutral : bool
+        Should this computation happen on a group neutral portfolio? if so,
+        returns demeaning will occur on the group level.
+        Additionally each group will weight the same in cumulative returns
+        plots
     by_group : bool
-        If True, perform calcuations, and display graphs separately for
-        each group.
+        If True, display graphs separately for each group.
     """
 
-    factor_returns = perf.factor_returns(factor_data, long_short)
+    factor_returns = perf.factor_returns(factor_data,
+                                         long_short,
+                                         group_neutral)
 
     mean_ret_quantile, std_quantile = \
         perf.mean_return_by_quantile(factor_data,
                                      by_group=False,
-                                     demeaned=long_short)
+                                     demeaned=long_short,
+                                     group_adjust=group_neutral)
 
     mean_compret_quantile = mean_ret_quantile.apply(utils.rate_of_return,
                                                     axis=0)
@@ -173,13 +319,16 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
         perf.mean_return_by_quantile(factor_data,
                                      by_date=True,
                                      by_group=False,
-                                     demeaned=long_short)
+                                     demeaned=long_short,
+                                     group_adjust=group_neutral)
 
     mean_compret_quant_daily = mean_ret_quant_daily.apply(utils.rate_of_return,
                                                           axis=0)
     compstd_quant_daily = std_quant_daily.apply(utils.std_conversion, axis=0)
 
-    alpha_beta = perf.factor_alpha_beta(factor_data, long_short)
+    alpha_beta = perf.factor_alpha_beta(factor_data,
+                                        long_short,
+                                        group_neutral)
 
     mean_ret_spread_quant, std_spread_quant = \
         perf.compute_mean_returns_spread(mean_compret_quant_daily,
@@ -226,8 +375,9 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
         mean_return_quantile_group, mean_return_quantile_group_std_err = \
             perf.mean_return_by_quantile(factor_data,
                                          by_date=False,
-                                         by_group=by_group,
-                                         demeaned=True)
+                                         by_group=True,
+                                         demeaned=long_short,
+                                         group_adjust=group_neutral)
 
         mean_compret_quantile_group = \
             mean_return_quantile_group.apply(utils.rate_of_return, axis=0)
@@ -262,9 +412,9 @@ def create_returns_tear_sheet(factor_data, long_short=True, by_group=False):
         plotting.plot_returns_decomposition(returns_decomposition[0], period)
 
 
+@create_information_tear_sheet_api_change_warning
 @plotting.customize
 def create_information_tear_sheet(factor_data,
-                                  group_adjust=False,
                                   by_group=False):
     """
     Creates a tear sheet for information analysis of a factor.
@@ -276,14 +426,12 @@ def create_information_tear_sheet(factor_data,
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
-    group_adjust : bool
-        Demean forward returns by group before computing IC.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     by_group : bool
-        If True, perform calcuations, and display graphs separately for
-        each group.
+        If True, display graphs separately for each group.
     """
 
-    ic = perf.factor_information_coefficient(factor_data, group_adjust)
+    ic = perf.factor_information_coefficient(factor_data)
 
     plotting.plot_information_table(ic)
 
@@ -302,17 +450,18 @@ def create_information_tear_sheet(factor_data,
 
     if not by_group:
 
-        mean_monthly_ic = perf.mean_information_coefficient(factor_data,
-                                                            group_adjust,
-                                                            by_group,
-                                                            "M")
+        mean_monthly_ic = \
+            perf.mean_information_coefficient(factor_data,
+                                              by_group=False,
+                                              by_time="M")
         ax_monthly_ic_heatmap = [gf.next_cell() for x in range(fr_cols)]
         plotting.plot_monthly_ic_heatmap(mean_monthly_ic,
                                          ax=ax_monthly_ic_heatmap)
 
     if by_group:
-        mean_group_ic = perf.mean_information_coefficient(factor_data,
-                                                          by_group=True)
+        mean_group_ic = \
+            perf.mean_information_coefficient(factor_data,
+                                              by_group=True)
 
         plotting.plot_ic_by_group(mean_group_ic, ax=gf.next_row())
 
@@ -329,6 +478,7 @@ def create_turnover_tear_sheet(factor_data):
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     """
 
     turnover_periods = utils.get_forward_returns_columns(factor_data.columns)
@@ -363,10 +513,11 @@ def create_turnover_tear_sheet(factor_data):
                                                    ax=gf.next_row())
 
 
+@create_full_tear_sheet_api_change_warning
 @plotting.customize
 def create_full_tear_sheet(factor_data,
                            long_short=True,
-                           group_adjust=False,
+                           group_neutral=False,
                            by_group=False):
     """
     Creates a full tear sheet for analysis and evaluating single
@@ -379,35 +530,38 @@ def create_full_tear_sheet(factor_data,
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
-    group_adjust : bool
-        Demean forward returns by group before computing IC.
-    by_group : bool
-        If True, perform calcuations, and display graphs separately for
-        each group.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     long_short : bool
-        Should this computation happen on a long short portfolio? if so, then
-        factor values will be demeaned across the factor universe when factor
-        weighting the portfolio. Additionally, mean quantile returns will be
-        demeaned across the factor universe.
+        Should this computation happen on a long short portfolio?
+        - See tears.create_returns_tear_sheet for details on how this flag
+        affects returns analysis
+    group_neutral : bool
+        Should this computation happen on a group neutral portfolio?
+        - See tears.create_returns_tear_sheet for details on how this flag
+        affects returns analysis
+    by_group : bool
+        If True, display graphs separately for each group.
     """
 
     plotting.plot_quantile_statistics_table(factor_data)
     create_returns_tear_sheet(factor_data,
                               long_short,
+                              group_neutral,
                               by_group,
                               set_context=False)
     create_information_tear_sheet(factor_data,
-                                  group_adjust,
                                   by_group,
                                   set_context=False)
     create_turnover_tear_sheet(factor_data, set_context=False)
 
 
+@create_event_returns_tear_sheet_api_change_warning
 @plotting.customize
 def create_event_returns_tear_sheet(factor_data,
                                     prices,
                                     avgretplot=(5, 15),
                                     long_short=True,
+                                    group_neutral=False,
                                     by_group=False):
     """
     Creates a tear sheet to view the average cumulative returns for a
@@ -417,36 +571,36 @@ def create_event_returns_tear_sheet(factor_data,
     ----------
     factor_data : pd.DataFrame - MultiIndex
         A MultiIndex Series indexed by date (level 0) and asset (level 1),
-        containing the values for a single alpha factor, forward returns
-        for each period, the factor quantile/bin that factor value belongs to,
-        and (optionally) the group the asset belongs to.
+        containing the values for a single alpha factor, the factor
+        quantile/bin that factor value belongs to and (optionally) the group
+        the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     prices : pd.DataFrame
-        A wide form Pandas DataFrame indexed by date with assets
-        in the columns. Pricing data should span the factor
-        analysis time period plus/minus an additional buffer window
-        corresponding to periods_after/periods_before parameters.
+        A DataFrame indexed by date with assets in the columns containing the
+        pricing data.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
     avgretplot: tuple (int, int) - (before, after)
         If not None, plot quantile average cumulative returns
     long_short : bool
         Should this computation happen on a long short portfolio? if so then
         factor returns will be demeaned across the factor universe
+    group_neutral : bool
+        Should this computation happen on a group neutral portfolio? if so,
+        returns demeaning will occur on the group level.
     by_group : bool
-        If True, view the average cumulative returns for each group.
+        If True, display graphs separately for each group.
     """
 
     before, after = avgretplot
-    after = max(
-        after, max(
-            utils.get_forward_returns_columns(
-                factor_data.columns)) + 1)
 
     avg_cumulative_returns = \
         perf.average_cumulative_return_by_quantile(
-            factor_data['factor_quantile'],
+            factor_data,
             prices,
             periods_before=before,
             periods_after=after,
-            demeaned=long_short)
+            demeaned=long_short,
+            group_adjust=group_neutral)
 
     num_quantiles = int(factor_data['factor_quantile'].max())
 
@@ -467,21 +621,25 @@ def create_event_returns_tear_sheet(factor_data,
         ax=ax_avg_cumulative_returns_by_q)
 
     if by_group:
-        num_groups = len(factor_data['group'].unique())
+        groups = factor_data['group'].unique()
+        num_groups = len(groups)
         vertical_sections = ((num_groups - 1) // 2) + 1
         gf = GridFigure(rows=vertical_sections, cols=2)
 
-        for group, g_factor in factor_data.groupby('group'):
-            avg_cumulative_returns = \
-                perf.average_cumulative_return_by_quantile(
-                    g_factor['factor_quantile'],
-                    prices,
-                    periods_before=before,
-                    periods_after=after,
-                    demeaned=long_short)
+        avg_cumret_by_group = \
+            perf.average_cumulative_return_by_quantile(
+                factor_data,
+                prices,
+                periods_before=before,
+                periods_after=after,
+                demeaned=long_short,
+                group_adjust=group_neutral,
+                by_group=True)
 
+        for group, avg_cumret in avg_cumret_by_group.groupby(level='group'):
+            avg_cumret.index = avg_cumret.index.droplevel('group')
             plotting.plot_quantile_average_cumulative_return(
-                avg_cumulative_returns,
+                avg_cumret,
                 by_quantile=False,
                 std_bar=False,
                 title=group,
@@ -500,17 +658,16 @@ def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
         containing the values for a single event, forward returns for each
         period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
-    prices : pd.DataFrame
-        A wide form Pandas DataFrame indexed by date with assets
-        in the columns. Pricing data should span the factor
-        analysis time period plus/minus an additional buffer window
-        corresponding to periods_after/periods_before parameters.
-        if 'avgretplot' is None this can be None too
-    avgretplot: tuple (int, int) - (before, after)
-        If not None, plot quantile average cumulative returns
+    prices : pd.DataFrame, required only if 'avgretplot' is provided
+        A DataFrame indexed by date with assets in the columns containing the
+        pricing data.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
+    avgretplot: tuple (int, int) - (before, after), optional
+        If not None, plot event style average cumulative returns within a
+        window (pre and post event).
     """
 
-    long_short = False  # no return demeaning
+    long_short = False
 
     plotting.plot_quantile_statistics_table(factor_data)
 
@@ -518,11 +675,13 @@ def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
     plotting.plot_events_distribution(events=factor_data['factor'],
                                       ax=gf.next_row())
 
-    create_event_returns_tear_sheet(factor_data=factor_data,
-                                    prices=prices,
-                                    avgretplot=avgretplot,
-                                    long_short=long_short,
-                                    by_group=False)
+    if prices is not None and avgretplot is not None:
+
+        create_event_returns_tear_sheet(factor_data=factor_data,
+                                        prices=prices,
+                                        avgretplot=avgretplot,
+                                        long_short=long_short,
+                                        by_group=False)
 
     mean_ret_quantile, std_quantile = \
         perf.mean_return_by_quantile(factor_data,

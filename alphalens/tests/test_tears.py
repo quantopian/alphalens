@@ -56,17 +56,15 @@ class PerformanceTestCase(TestCase):
                              [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
                              [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2]]) \
         .stack()
+    factor_groups = {'A': 1, 'B': 2, 'C': 1, 'D': 2, 'E': 1, 'F': 2}
 
-    @parameterized.expand([(2, (1, 5, 10), False, False),
-                           (3, (2, 4, 6), True, False),
-                           (4, (1, 8), False, True),
-                           (4, (1, 2, 3, 7), True, True)])
+    @parameterized.expand([(2, (1, 5, 10), False),
+                           (3, (2, 4, 6), True)])
     def test_create_returns_tear_sheet(
             self,
             quantiles,
             periods,
-            filter_zscore,
-            long_short):
+            filter_zscore):
         """
         Test no exceptions are thrown
         """
@@ -76,15 +74,14 @@ class PerformanceTestCase(TestCase):
             quantiles=quantiles,
             periods=periods,
             filter_zscore=filter_zscore)
+
         create_returns_tear_sheet(
-            factor_data, long_short=long_short, by_group=False)
+            factor_data, long_short=False, group_neutral=False, by_group=False)
 
-    @parameterized.expand([(1, (1, 5, 10), False, False),
-                           (3, (2, 4, 6), False, True),
-                           (2, (1, 8), True, False),
-                           (4, (1, 2, 3, 7), True, True)])
+    @parameterized.expand([(1, (1, 5, 10), False),
+                           (4, (1, 2, 3, 7), True)])
     def test_create_information_tear_sheet(
-            self, quantiles, periods, filter_zscore, long_short):
+            self, quantiles, periods, filter_zscore):
         """
         Test no exceptions are thrown
         """
@@ -94,19 +91,16 @@ class PerformanceTestCase(TestCase):
             quantiles=quantiles,
             periods=periods,
             filter_zscore=filter_zscore)
-        create_information_tear_sheet(
-            factor_data, group_adjust=False, by_group=False)
 
-    @parameterized.expand([(2, (2, 3, 6), True, True),
-                           (3, (1, 2, 3), True, False),
-                           (4, (3, 7), False, True),
-                           (4, (1, 2, 3, 7), False, False)])
+        create_information_tear_sheet(factor_data, by_group=False)
+
+    @parameterized.expand([(2, (2, 3, 6), True),
+                           (4, (1, 2, 3, 7), False)])
     def test_create_turnover_tear_sheet(
             self,
             quantiles,
             periods,
-            filter_zscore,
-            long_short):
+            filter_zscore):
         """
         Test no exceptions are thrown
         """
@@ -116,18 +110,16 @@ class PerformanceTestCase(TestCase):
             quantiles=quantiles,
             periods=periods,
             filter_zscore=filter_zscore)
+
         create_turnover_tear_sheet(factor_data)
 
-    @parameterized.expand([(2, (1, 5, 10), False, False),
-                           (1, (2, 4, 6), True, True),
-                           (4, (1, 8), False, True),
-                           (3, (1, 2, 3, 7), True, False)])
+    @parameterized.expand([(2, (1, 5, 10), False),
+                           (3, (1, 2, 3, 7), True)])
     def test_create_summary_tear_sheet(
             self,
             quantiles,
             periods,
-            filter_zscore,
-            long_short):
+            filter_zscore):
         """
         Test no exceptions are thrown
         """
@@ -137,61 +129,77 @@ class PerformanceTestCase(TestCase):
             quantiles=quantiles,
             periods=periods,
             filter_zscore=filter_zscore)
-        create_summary_tear_sheet(factor_data, long_short=long_short)
 
-    @parameterized.expand([(2, (1, 5, 10), False, False),
-                           (3, (2, 4, 6), True, False),
-                           (4, (1, 8), False, True),
-                           (4, (1, 2, 3, 7), True, True)])
+        create_summary_tear_sheet(
+            factor_data, long_short=True, group_neutral=False)
+        create_summary_tear_sheet(
+            factor_data, long_short=False, group_neutral=False)
+
+    @parameterized.expand([(2, (1, 5, 10), False),
+                           (3, (2, 4, 6), True),
+                           (4, (1, 8), False),
+                           (4, (1, 2, 3, 7), True)])
     def test_create_full_tear_sheet(
             self,
             quantiles,
             periods,
-            filter_zscore,
-            long_short):
+            filter_zscore):
         """
         Test no exceptions are thrown
         """
         factor_data = get_clean_factor_and_forward_returns(
             self.factor,
             self.prices,
+            groupby=self.factor_groups,
             quantiles=quantiles,
             periods=periods,
             filter_zscore=filter_zscore)
 
-        create_full_tear_sheet(
-            factor_data,
-            long_short=long_short,
-            group_adjust=False,
-            by_group=False)
+        create_full_tear_sheet(factor_data, long_short=False,
+                               group_neutral=False, by_group=False)
+        create_full_tear_sheet(factor_data, long_short=True,
+                               group_neutral=False, by_group=True)
+        create_full_tear_sheet(factor_data, long_short=True,
+                               group_neutral=True, by_group=True)
 
-    @parameterized.expand([(2, (1, 5, 10), False, False),
-                           (3, (2, 4, 6), True, False),
-                           (4, (3, 4), False, True),
-                           (1, (2, 3, 6, 9), True, True)])
+    @parameterized.expand([(2, (1, 5, 10), False),
+                           (3, (2, 4, 6), True),
+                           (4, (3, 4), False),
+                           (1, (2, 3, 6, 9), True)])
     def test_create_event_returns_tear_sheet(
-            self, quantiles, periods, filter_zscore, long_short):
+            self, quantiles, periods, filter_zscore):
         """
         Test no exceptions are thrown
         """
         factor_data = get_clean_factor_and_forward_returns(
             self.factor,
             self.prices,
+            groupby=self.factor_groups,
             quantiles=quantiles,
             periods=periods,
             filter_zscore=filter_zscore)
 
         create_event_returns_tear_sheet(factor_data, self.prices, avgretplot=(
-            5, 11), long_short=long_short, by_group=False)
+            5, 11), long_short=False, group_neutral=False, by_group=False)
+        create_event_returns_tear_sheet(factor_data, self.prices, avgretplot=(
+            5, 11), long_short=True, group_neutral=False, by_group=False)
+        create_event_returns_tear_sheet(factor_data, self.prices, avgretplot=(
+            5, 11), long_short=False, group_neutral=True, by_group=False)
+        create_event_returns_tear_sheet(factor_data, self.prices, avgretplot=(
+            5, 11), long_short=False, group_neutral=False, by_group=True)
+        create_event_returns_tear_sheet(factor_data, self.prices, avgretplot=(
+            5, 11), long_short=True, group_neutral=False, by_group=True)
+        create_event_returns_tear_sheet(factor_data, self.prices, avgretplot=(
+            5, 11), long_short=False, group_neutral=True, by_group=True)
 
-    @parameterized.expand([((6, 8), False, False),
-                           ((6, 8), False, True),
-                           ((6, 3), True, False),
-                           ((6, 3), True, True),
-                           ((0, 3), False, True),
-                           ((3, 0), True, True)])
+    @parameterized.expand([((6, 8), False),
+                           ((6, 8), False),
+                           ((6, 3), True),
+                           ((6, 3), True),
+                           ((0, 3), False),
+                           ((3, 0), True)])
     def test_create_event_study_tear_sheet(
-            self, avgretplot, filter_zscore, long_short):
+            self, avgretplot, filter_zscore):
         """
         Test no exceptions are thrown
         """

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
+import versioneer
 import sys
 
 long_description = ''
@@ -11,7 +12,7 @@ if 'upload' in sys.argv:
 install_reqs = [
     'matplotlib>=1.4.0',
     'numpy>=1.9.1',
-    'pandas>=0.16.1',
+    'pandas>=0.18.0',
     'scipy>=0.14.0',
     'seaborn>=0.6.0',
     'statsmodels>=0.6.1',
@@ -30,7 +31,8 @@ extra_reqs = {
 if __name__ == "__main__":
     setup(
         name='alphalens',
-        version='0.1.1',
+        version=versioneer.get_version(),
+        cmdclass=versioneer.get_cmdclass(),
         description='Performance analysis of predictive (alpha) stock factors',
         author='Quantopian Inc.',
         author_email='opensource@quantopian.com',

@@ -50,6 +50,14 @@ the factor tear sheet.
 Installation
 ------------
 
+Stable release
+
+::
+
+    pip install alphalens
+
+Development code
+
 ::
 
     pip install git+https://github.com/quantopian/alphalens

@@ -57,23 +57,17 @@ class PerformanceTestCase(TestCase):
                                   dtype="category")
 
     @parameterized.expand([(factor_data, [4, 3, 2, 1, 1, 2, 3, 4],
-                            False, False,
+                            False,
                             dr,
                             [-1., -1.],
                             ),
                            (factor_data, [1, 2, 3, 4, 4, 3, 2, 1],
-                            False, False,
+                            False,
                             dr,
                             [1., 1.],
                             ),
                            (factor_data, [1, 2, 3, 4, 4, 3, 2, 1],
-                            False, True,
-                            MultiIndex.from_product(
-                                [dr, [1, 2]], names=['date', 'group']),
-                            [1., 1., 1., 1.],
-                            ),
-                           (factor_data, [1, 2, 3, 4, 4, 3, 2, 1],
-                            True, True,
+                            True,
                             MultiIndex.from_product(
                                 [dr, [1, 2]], names=['date', 'group']),
                             [1., 1., 1., 1.],
@@ -81,7 +75,6 @@ class PerformanceTestCase(TestCase):
     def test_information_coefficient(self,
                                      factor_data,
                                      forward_returns,
-                                     group_adjust,
                                      by_group,
                                      expected_ix,
                                      expected_ic_val):
@@ -90,7 +83,6 @@ class PerformanceTestCase(TestCase):
                                 data=forward_returns)
 
         ic = factor_information_coefficient(factor_data=factor_data,
-                                            group_adjust=group_adjust,
                                             by_group=by_group)
 
         expected_ic_df = DataFrame(index=expected_ix,
@@ -102,13 +94,11 @@ class PerformanceTestCase(TestCase):
     @parameterized.expand([(factor_data,
                             [4, 3, 2, 1, 1, 2, 3, 4],
                             False,
-                            False,
                             'D',
                             dr,
                             [-1., -1.]),
                            (factor_data,
                             [1, 2, 3, 4, 4, 3, 2, 1],
-                            False,
                             False,
                             'W',
                             DatetimeIndex(['2015-01-04'],
@@ -117,14 +107,12 @@ class PerformanceTestCase(TestCase):
                             [1.]),
                            (factor_data,
                             [1, 2, 3, 4, 4, 3, 2, 1],
-                            False,
                             True,
                             None,
                             Int64Index([1, 2], name='group'),
                             [1., 1.]),
                            (factor_data,
                             [1, 2, 3, 4, 4, 3, 2, 1],
-                            False,
                             True,
                             'W',
                             MultiIndex.from_product(
@@ -136,7 +124,6 @@ class PerformanceTestCase(TestCase):
     def test_mean_information_coefficient(self,
                                           factor_data,
                                           forward_returns,
-                                          group_adjust,
                                           by_group,
                                           by_time,
                                           expected_ix,
@@ -146,7 +133,6 @@ class PerformanceTestCase(TestCase):
                                 data=forward_returns)
 
         ic = mean_information_coefficient(factor_data,
-                                          group_adjust=group_adjust,
                                           by_group=by_group,
                                           by_time=by_time)
 
@@ -220,7 +206,7 @@ class PerformanceTestCase(TestCase):
     def test_factor_returns(self,
                             factor_vals,
                             fwd_return_vals,
-                            group_neutral,
+                            group_adjust,
                             expected_vals):
 
         factor_data = self.factor_data.copy()
@@ -228,8 +214,8 @@ class PerformanceTestCase(TestCase):
         factor_data['factor'] = factor_vals
 
         factor_returns_s = factor_returns(factor_data=factor_data,
-                                          long_short=True,
-                                          group_neutral=group_neutral)
+                                          demeaned=True,
+                                          group_adjust=group_adjust)
 
         expected = DataFrame(
             index=self.dr,
@@ -372,20 +358,19 @@ class PerformanceTestCase(TestCase):
         dr2.name = 'date'
         factor = DataFrame(
             index=dr2, columns=tickers, data=[
-                [
-                    3, 4, 2, 1], [
-                    3, 4, 2, 1], [
-                    3, 4, 2, 1], [
-                        3, 4, 2, 1], [
-                            3, 4, 2, 1], [
-                                3, 4, 2, 1]]).stack()
+                [3, 4, 2, 1],
+                [3, 4, 2, 1],
+                [3, 4, 2, 1],
+                [3, 4, 2, 1],
+                [3, 4, 2, 1],
+                [3, 4, 2, 1]]).stack()
 
         factor_data = get_clean_factor_and_forward_returns(
             factor, prices, quantiles=quantiles, periods=range(
                 0, after + 1), filter_zscore=False)
 
         avgrt = average_cumulative_return_by_quantile(
-            factor_data['factor_quantile'], prices, before, after, demeaned)
+            factor_data, prices, before, after, demeaned)
         arrays = []
         for q in range(1, quantiles + 1):
             arrays.append((q, 'mean'))
@@ -451,7 +436,7 @@ class PerformanceTestCase(TestCase):
                 0, after + 1), filter_zscore=False)
 
         avgrt = average_cumulative_return_by_quantile(
-            factor_data['factor_quantile'], prices, before, after, demeaned)
+            factor_data, prices, before, after, demeaned)
         arrays = []
         for q in range(1, quantiles + 1):
             arrays.append((q, 'mean'))
