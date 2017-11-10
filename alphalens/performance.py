@@ -600,7 +600,7 @@ def decompose_returns(algo_returns, risk_factors, hierarchy=None):
     cum_tiers = []
     for i in range(len(hierarchy.values())):
         cum_tiers.append([item for a in range(0, i+1)
-                          for item in hierarchy.values()[a]])
+                          for item in list(hierarchy.values())[a]])
     cum_hierarchy = OrderedDict()
     cum_hierarchy.update((hierarchy.keys()[i], cum_tiers[i])
                          for i in range(len(hierarchy)))
