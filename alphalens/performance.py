@@ -478,7 +478,7 @@ def average_cumulative_return_by_quantile(factor_data,
         q_returns = cumulative_return(q_fact, demean_by)
         return pd.DataFrame({'mean': q_returns.mean(axis=1),
                              'std': q_returns.std(axis=1)}).T
-      
+
     if by_group:
         #
         # Compute quantile cumulative returns separately for each group
@@ -635,4 +635,3 @@ def decompose_returns(algo_returns, risk_factors, hierarchy=None):
                       Warning)
 
     return returns_decomposition, betas, t_stats, vifs
-
