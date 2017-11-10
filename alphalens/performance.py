@@ -602,7 +602,7 @@ def decompose_returns(algo_returns, risk_factors, hierarchy=None):
         cum_tiers.append([item for a in range(0, i+1)
                           for item in list(hierarchy.values())[a]])
     cum_hierarchy = OrderedDict()
-    cum_hierarchy.update((hierarchy.keys()[i], cum_tiers[i])
+    cum_hierarchy.update((list(hierarchy.keys())[i], cum_tiers[i])
                          for i in range(len(hierarchy)))
 
     # ensure that risk_factors and algo_rets_over_rf have the same index
