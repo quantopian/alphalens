@@ -615,7 +615,7 @@ def decompose_returns(algo_returns, risk_factors, hierarchy=None):
     returns_decomposition = pd.DataFrame(index=idx, columns=hierarchy.keys())
     t_stats = pd.DataFrame(index=idx, columns=hierarchy.keys())
 
-    for tier, factors in cum_hierarchy.iteritems():
+    for tier, factors in cum_hierarchy.items():
         model_factors = add_constant(risk_factors.loc[:, factors]) \
             .rename(columns={'const': 'Alpha'})
         model = OLS(algo_returns, model_factors).fit()
