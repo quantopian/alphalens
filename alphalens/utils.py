@@ -317,13 +317,13 @@ def get_clean_factor_and_forward_returns(factor,
     """
     Formats the factor data, pricing data, and group mappings
     into a DataFrame that contains aligned MultiIndex
-    indices of date and asset.
+    indices of timestamp and asset.
 
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        A MultiIndex Series indexed by date (level 0) and asset (level 1),
-        containing the values for a single alpha factor.
+        A MultiIndex Series indexed by timestamp (level 0) and asset
+        (level 1), containing the values for a single alpha factor.
         ::
             -----------------------------------
                 date    |    asset   |
@@ -340,7 +340,7 @@ def get_clean_factor_and_forward_returns(factor,
                         -----------------------
 
     prices : pd.DataFrame
-        A wide form Pandas DataFrame indexed by date with assets
+        A wide form Pandas DataFrame indexed by timestamp with assets
         in the columns. It is important to pass the
         correct pricing data in depending on what time of period your
         signal was generated so to avoid lookahead bias, or
@@ -348,14 +348,14 @@ def get_clean_factor_and_forward_returns(factor,
         analysis time period plus an additional buffer window
         that is greater than the maximum number of expected periods
         in the forward returns calculations.
-        'Prices' must contain at least an entry for each date/asset
+        'Prices' must contain at least an entry for each timestamp/asset
         combination in 'factor'. This entry must be the asset price
         at the time the asset factor value is computed and it will be
-        considered the buy price for that asset at that date.
-        'Prices' must also contain entries for dates following each
-        date/asset combination in 'factor', as many more dates as the
-        maximum value in 'periods'. The asset price after 'period'
-        dates will be considered the sell price for that asset when
+        considered the buy price for that asset at that timestamp.
+        'Prices' must also contain entries for timestamps following each
+        timestamp/asset combination in 'factor', as many more timestamps
+        as the maximum value in 'periods'. The asset price after 'period'
+        timestamps will be considered the sell price for that asset when
         computing 'period' forward returns.
         ::
             ----------------------------------------------------
