@@ -383,8 +383,8 @@ def create_returns_tear_sheet(factor_data,
             mean_return_quantile_group.apply(utils.rate_of_return, axis=0)
 
         num_groups = len(mean_quant_rateret_group.index
-                                                    .get_level_values('group')
-                                                    .unique())
+                         .get_level_values('group').unique())
+
         vertical_sections = 1 + (((num_groups - 1) // 2) + 1)
         gf = GridFigure(rows=vertical_sections, cols=2)
 
