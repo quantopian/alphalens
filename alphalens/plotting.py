@@ -400,7 +400,7 @@ def plot_quantile_returns_bar(mean_ret_by_q,
 
         (mean_ret_by_q.multiply(DECIMAL_TO_BPS)
             .plot(kind='bar',
-                  title="Mean Return By Factor Quantile", ax=ax))
+                  title="Mean Period Wise Return By Factor Quantile", ax=ax))
         ax.set(xlabel='', ylabel='Mean Return (bps)',
                ylim=(ymin, ymax))
 
