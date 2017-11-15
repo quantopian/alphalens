@@ -202,24 +202,25 @@ def create_summary_tear_sheet(factor_data,
     """
 
     # Returns Analysis
-    mean_ret_quantile, std_quantile = \
+    mean_quant_ret, std_quantile = \
         perf.mean_return_by_quantile(factor_data,
                                      by_group=False,
                                      demeaned=long_short,
                                      group_adjust=group_neutral)
 
-    mean_compret_quantile = mean_ret_quantile.apply(utils.rate_of_return,
-                                                    axis=0)
+    mean_quant_rateret = \
+        mean_quant_ret.apply(utils.rate_of_return, axis=0)
 
-    mean_ret_quant_daily, std_quant_daily = \
+    mean_quant_ret_bydate, std_quant_daily = \
         perf.mean_return_by_quantile(factor_data,
                                      by_date=True,
                                      by_group=False,
                                      demeaned=long_short,
                                      group_adjust=group_neutral)
 
-    mean_compret_quant_daily = mean_ret_quant_daily.apply(utils.rate_of_return,
-                                                          axis=0)
+    mean_quant_rateret_bydate = \
+        mean_quant_ret_bydate.apply(utils.rate_of_return, axis=0)
+
     compstd_quant_daily = std_quant_daily.apply(utils.std_conversion, axis=0)
 
     alpha_beta = perf.factor_alpha_beta(factor_data,
@@ -227,7 +228,7 @@ def create_summary_tear_sheet(factor_data,
                                         group_neutral)
 
     mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(
-        mean_compret_quant_daily,
+        mean_quant_rateret_bydate,
         factor_data['factor_quantile'].max(),
         factor_data['factor_quantile'].min(),
         std_err=compstd_quant_daily)
@@ -241,10 +242,10 @@ def create_summary_tear_sheet(factor_data,
     plotting.plot_quantile_statistics_table(factor_data)
 
     plotting.plot_returns_table(alpha_beta,
-                                mean_compret_quantile,
+                                mean_quant_rateret,
                                 mean_ret_spread_quant)
 
-    plotting.plot_quantile_returns_bar(mean_compret_quantile,
+    plotting.plot_quantile_returns_bar(mean_quant_rateret,
                                        by_group=False,
                                        ylim_percentiles=None,
                                        ax=gf.next_row())
@@ -304,24 +305,25 @@ def create_returns_tear_sheet(factor_data,
                                          long_short,
                                          group_neutral)
 
-    mean_ret_quantile, std_quantile = \
+    mean_quant_ret, std_quantile = \
         perf.mean_return_by_quantile(factor_data,
                                      by_group=False,
                                      demeaned=long_short,
                                      group_adjust=group_neutral)
 
-    mean_compret_quantile = mean_ret_quantile.apply(utils.rate_of_return,
-                                                    axis=0)
+    mean_quant_rateret = \
+        mean_quant_ret.apply(utils.rate_of_return, axis=0)
 
-    mean_ret_quant_daily, std_quant_daily = \
+    mean_quant_ret_bydate, std_quant_daily = \
         perf.mean_return_by_quantile(factor_data,
                                      by_date=True,
                                      by_group=False,
                                      demeaned=long_short,
                                      group_adjust=group_neutral)
 
-    mean_compret_quant_daily = mean_ret_quant_daily.apply(utils.rate_of_return,
-                                                          axis=0)
+    mean_quant_rateret_bydate = \
+        mean_quant_ret_bydate.apply(utils.rate_of_return, axis=0)
+
     compstd_quant_daily = std_quant_daily.apply(utils.std_conversion, axis=0)
 
     alpha_beta = perf.factor_alpha_beta(factor_data,
@@ -329,7 +331,7 @@ def create_returns_tear_sheet(factor_data,
                                         group_neutral)
 
     mean_ret_spread_quant, std_spread_quant = \
-        perf.compute_mean_returns_spread(mean_compret_quant_daily,
+        perf.compute_mean_returns_spread(mean_quant_rateret_bydate,
                                          factor_data['factor_quantile'].max(),
                                          factor_data['factor_quantile'].min(),
                                          std_err=compstd_quant_daily)
@@ -339,15 +341,15 @@ def create_returns_tear_sheet(factor_data,
     gf = GridFigure(rows=vertical_sections, cols=1)
 
     plotting.plot_returns_table(alpha_beta,
-                                mean_compret_quantile,
+                                mean_quant_rateret,
                                 mean_ret_spread_quant)
 
-    plotting.plot_quantile_returns_bar(mean_compret_quantile,
+    plotting.plot_quantile_returns_bar(mean_quant_rateret,
                                        by_group=False,
                                        ylim_percentiles=None,
                                        ax=gf.next_row())
 
-    plotting.plot_quantile_returns_violin(mean_compret_quant_daily,
+    plotting.plot_quantile_returns_violin(mean_quant_rateret_bydate,
                                           ylim_percentiles=(1, 99),
                                           ax=gf.next_row())
 
@@ -356,7 +358,7 @@ def create_returns_tear_sheet(factor_data,
                                          period=p,
                                          ax=gf.next_row())
 
-        plotting.plot_cumulative_returns_by_quantile(mean_ret_quant_daily[p],
+        plotting.plot_cumulative_returns_by_quantile(mean_quant_ret_bydate[p],
                                                      period=p,
                                                      ax=gf.next_row())
 
@@ -377,10 +379,10 @@ def create_returns_tear_sheet(factor_data,
                                          demeaned=long_short,
                                          group_adjust=group_neutral)
 
-        mean_compret_quantile_group = \
+        mean_quant_rateret_group = \
             mean_return_quantile_group.apply(utils.rate_of_return, axis=0)
 
-        num_groups = len(mean_compret_quantile_group.index
+        num_groups = len(mean_quant_rateret_group.index
                                                     .get_level_values('group')
                                                     .unique())
         vertical_sections = 1 + (((num_groups - 1) // 2) + 1)
@@ -388,7 +390,7 @@ def create_returns_tear_sheet(factor_data,
 
         ax_quantile_returns_bar_by_group = [gf.next_cell()
                                             for _ in range(num_groups)]
-        plotting.plot_quantile_returns_bar(mean_compret_quantile_group,
+        plotting.plot_quantile_returns_bar(mean_quant_rateret_group,
                                            by_group=True,
                                            ylim_percentiles=(5, 95),
                                            ax=ax_quantile_returns_bar_by_group)
@@ -665,32 +667,36 @@ def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
                                         long_short=long_short,
                                         by_group=False)
 
-    mean_ret_quantile, std_quantile = \
+    mean_quant_ret, std_quantile = \
         perf.mean_return_by_quantile(factor_data,
                                      by_group=False,
                                      demeaned=long_short)
+    mean_quant_ret = \
+        mean_quant_ret.apply(utils.rate_of_return, axis=0)
 
-    mean_ret_quant_daily, std_quant_daily = \
+    mean_quant_ret_bydate, std_quant_daily = \
         perf.mean_return_by_quantile(factor_data,
                                      by_date=True,
                                      by_group=False,
                                      demeaned=long_short)
+    mean_quant_rateret_bydate = \
+        mean_quant_ret_bydate.apply(utils.rate_of_return, axis=0)
 
-    fr_cols = len(mean_ret_quantile.columns)
+    fr_cols = len(mean_quant_ret.columns)
     vertical_sections = 2 + fr_cols * 3
     gf = GridFigure(rows=vertical_sections, cols=1)
 
-    plotting.plot_quantile_returns_bar(mean_ret_quantile,
+    plotting.plot_quantile_returns_bar(mean_quant_ret,
                                        by_group=False,
                                        ylim_percentiles=None,
                                        ax=gf.next_row())
 
-    plotting.plot_quantile_returns_violin(mean_ret_quant_daily,
+    plotting.plot_quantile_returns_violin(mean_quant_rateret_bydate,
                                           ylim_percentiles=(1, 99),
                                           ax=gf.next_row())
 
-    for c in mean_ret_quant_daily:
+    for c in mean_quant_ret_bydate:
 
-        plotting.plot_cumulative_returns_by_quantile(mean_ret_quant_daily[c],
+        plotting.plot_cumulative_returns_by_quantile(mean_quant_ret_bydate[c],
                                                      period=c,
                                                      ax=gf.next_row())
