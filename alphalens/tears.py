@@ -80,7 +80,7 @@ def create_full_tear_sheet_api_change_warning(func):
             kwargs['group_neutral'] = group_adjust
             warnings.warn("create_full_tear_sheet: 'group_adjust' argument "
                           "is now deprecated and replaced by 'group_neutral'",
-                          category=DeprecationWarning, stacklevel=3)
+                          category=DeprecationWarning, stacklevel=2)
         return func(*args, **kwargs)
     return call_w_context
 
@@ -95,6 +95,7 @@ def create_information_tear_sheet_api_change_warning(func):
                                       by_group=False)
     New API:
         create_information_tear_sheet(factor_data,
+                                      group_neutral=False,
                                       by_group=False)
 
     Eventually this function can be deleted
@@ -103,16 +104,11 @@ def create_information_tear_sheet_api_change_warning(func):
     def call_w_context(*args, **kwargs):
         group_adjust = kwargs.pop('group_adjust', None)
         if group_adjust is not None:
+            kwargs['group_neutral'] = group_adjust
             warnings.warn("create_information_tear_sheet: 'group_adjust' "
-                          "argument is now deprecated.",
+                          "argument is now deprecated and replaced by "
+                          "'group_neutral'",
                           category=DeprecationWarning, stacklevel=2)
-        elif len(args) == 3 or (len(args) == 2 and args[1] is True):
-            warnings.warn("create_information_tear_sheet: 'group_adjust' "
-                          "argument has been removed. Please consider using "
-                          "keyword arguments instead of positional ones to "
-                          "avoid unexpected behaviour.",
-                          category=DeprecationWarning, stacklevel=2)
-
         return func(*args, **kwargs)
     return call_w_context
 
@@ -399,6 +395,7 @@ def create_returns_tear_sheet(factor_data,
 @create_information_tear_sheet_api_change_warning
 @plotting.customize
 def create_information_tear_sheet(factor_data,
+                                  group_neutral=False,
                                   by_group=False):
     """
     Creates a tear sheet for information analysis of a factor.
@@ -411,11 +408,13 @@ def create_information_tear_sheet(factor_data,
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
+    group_neutral : bool
+        Demean forward returns by group before computing IC.
     by_group : bool
         If True, display graphs separately for each group.
     """
 
-    ic = perf.factor_information_coefficient(factor_data)
+    ic = perf.factor_information_coefficient(factor_data, group_neutral)
 
     plotting.plot_information_table(ic)
 
@@ -436,6 +435,7 @@ def create_information_tear_sheet(factor_data,
 
         mean_monthly_ic = \
             perf.mean_information_coefficient(factor_data,
+                                              group_adjust=group_neutral,
                                               by_group=False,
                                               by_time="M")
         ax_monthly_ic_heatmap = [gf.next_cell() for x in range(fr_cols)]
@@ -445,6 +445,7 @@ def create_information_tear_sheet(factor_data,
     if by_group:
         mean_group_ic = \
             perf.mean_information_coefficient(factor_data,
+                                              group_adjust=group_neutral,
                                               by_group=True)
 
         plotting.plot_ic_by_group(mean_group_ic, ax=gf.next_row())
@@ -523,6 +524,8 @@ def create_full_tear_sheet(factor_data,
         Should this computation happen on a group neutral portfolio?
         - See tears.create_returns_tear_sheet for details on how this flag
         affects returns analysis
+        - See tears.create_information_tear_sheet for details on how this
+        flag affects information analysis
     by_group : bool
         If True, display graphs separately for each group.
     """
@@ -534,6 +537,7 @@ def create_full_tear_sheet(factor_data,
                               by_group,
                               set_context=False)
     create_information_tear_sheet(factor_data,
+                                  group_neutral,
                                   by_group,
                                   set_context=False)
     create_turnover_tear_sheet(factor_data, set_context=False)
