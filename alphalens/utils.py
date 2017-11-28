@@ -606,58 +606,6 @@ def common_start_returns(factor,
     return pd.concat(all_returns, axis=1)
 
 
-def cumulative_returns(returns, period):
-    """
-    Builds cumulative returns from N-periods returns.
-
-    When 'period' N is greater than 1 the cumulative returns plot is computed
-    building and averaging the cumulative returns of N interleaved portfolios
-    (started at subsequent periods 1,2,3,...,N) each one rebalancing every N
-    periods.
-
-    Parameters
-    ----------
-    returns: pd.Series
-        pd.Series containing N-periods returns
-    period: integer
-        Period for which the returns are computed
-    Returns
-    -------
-    pd.Series
-        Cumulative returns series
-    """
-
-    returns = returns.fillna(0)
-
-    if period == 1:
-        return returns.add(1).cumprod()
-    #
-    # build N portfolios from the single returns Series
-    #
-
-    def split_portfolio(ret, period): return pd.DataFrame(np.diag(ret))
-
-    sub_portfolios = returns.groupby(np.arange(len(returns.index)) // period,
-                                     axis=0).apply(split_portfolio, period)
-    sub_portfolios.index = returns.index
-
-    #
-    # compute 1 period returns so that we can average the N portfolios
-    #
-
-    def rate_of_returns(ret, period): return (
-        (np.nansum(ret) + 1)**(1. / period)) - 1
-
-    sub_portfolios = sub_portfolios.rolling(window=period, min_periods=1) \
-                                   .apply(rate_of_returns, args=(period,))
-    sub_portfolios = sub_portfolios.add(1).cumprod()
-
-    #
-    # average the N portfolios
-    #
-    return sub_portfolios.mean(axis=1)
-
-
 def rate_of_return(period_ret):
     """
     1-period Growth Rate: the average rate of 1-period returns

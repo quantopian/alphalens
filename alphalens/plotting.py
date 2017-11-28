@@ -26,6 +26,7 @@ from matplotlib.ticker import ScalarFormatter
 from functools import wraps
 
 from . import utils
+from . import performance as perf
 
 DECIMAL_TO_BPS = 10000
 
@@ -737,8 +738,8 @@ def plot_cumulative_returns(factor_returns, period=1, overlap=True, ax=None):
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
     overlapping_period = period if overlap else 1
-    factor_returns = utils.cumulative_returns(factor_returns,
-                                              overlapping_period)
+    factor_returns = perf.cumulative_returns(factor_returns,
+                                             overlapping_period)
 
     factor_returns.plot(ax=ax, lw=3, color='forestgreen', alpha=0.6)
     ax.set(ylabel='Cumulative Returns',
@@ -786,7 +787,7 @@ def plot_cumulative_returns_by_quantile(quantile_returns,
         .pivot(index='date', columns='factor_quantile', values=period)
 
     overlapping_period = period if overlap else 1
-    cum_ret = ret_wide.apply(utils.cumulative_returns,
+    cum_ret = ret_wide.apply(perf.cumulative_returns,
                              args=(overlapping_period,))
     cum_ret = cum_ret.loc[:, ::-1]
 
