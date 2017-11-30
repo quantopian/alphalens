@@ -31,13 +31,13 @@ from .. utils import get_clean_factor_and_forward_returns
 
 
 class TearsTestCase(TestCase):
-    price_index = date_range(start='2015-1-10', end='2015-2-28')
+    price_index = date_range(start='2015-1-10', end='2015-3-22', freq='B')
     price_index.name = 'date'
     tickers = ['A', 'B', 'C', 'D', 'E', 'F']
     data = [[1.25**i, 1.50**i, 1.00**i, 0.50**i, 1.50**i, 1.00**i]
             for i in range(1, 51)]
     prices = DataFrame(index=price_index, columns=tickers, data=data)
-    factor_index = date_range(start='2015-1-15', end='2015-2-13')
+    factor_index = date_range(start='2015-1-15', end='2015-2-25', freq='B')
     factor_index.name = 'date'
     factor = DataFrame(index=factor_index, columns=tickers,
                        data=[[3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
@@ -104,12 +104,15 @@ class TearsTestCase(TestCase):
         create_information_tear_sheet(
             factor_data, group_neutral=False, by_group=False)
 
-    @parameterized.expand([(2, (2, 3, 6), True),
-                           (4, (1, 2, 3, 7), False)])
+    @parameterized.expand([(2, (2, 3, 6),    None, True),
+                           (4, (1, 2, 3, 7), None, False),
+                           (2, (2, 3, 6),    ['1D', '2D'], True),
+                           (4, (1, 2, 3, 7), ['1D'], False)])
     def test_create_turnover_tear_sheet(
             self,
             quantiles,
             periods,
+            turnover_periods,
             filter_zscore):
         """
         Test no exceptions are thrown
@@ -121,7 +124,7 @@ class TearsTestCase(TestCase):
             periods=periods,
             filter_zscore=filter_zscore)
 
-        create_turnover_tear_sheet(factor_data)
+        create_turnover_tear_sheet(factor_data, turnover_periods)
 
     @parameterized.expand([(2, (1, 5, 10), False),
                            (3, (1, 2, 3, 7), True)])

@@ -707,7 +707,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     return ax
 
 
-def plot_cumulative_returns(factor_returns, period=1, overlap=True, ax=None):
+def plot_cumulative_returns(factor_returns, period, ax=None):
     """
     Plots the cumulative returns of the returns series passed in.
 
@@ -716,16 +716,10 @@ def plot_cumulative_returns(factor_returns, period=1, overlap=True, ax=None):
     factor_returns : pd.Series
         Period wise returns of dollar neutral portfolio weighted by factor
         value.
-    period: int, optional
-        Period over which the daily returns are calculated
-    overlap: boolean, optional
-        Specify if subsequent returns overlaps.
-        If 'overlap' is True and 'period' N is greater than 1, the cumulative
-        returns plot is computed building and averaging the  cumulative returns
-        of N interleaved portfolios (started at subsequent periods 1,2,3,...,N)
-        each one rebalancing every N periods. This results in trading the
-        factor at every value/signal computed by the factor and also the
-        cumulative returns don't dependent on a specific starting date.
+    period: pandas.Timedelta or string
+        Length of period for which the returns are computed (e.g. 1 day)
+        if 'period' is a string it must follow pandas.Timedelta constructor
+        format (e.g. '1 days', '1D', '30m', '3h', '1D1h', etc)
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -737,9 +731,7 @@ def plot_cumulative_returns(factor_returns, period=1, overlap=True, ax=None):
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    overlapping_period = period if overlap else 1
-    factor_returns = perf.cumulative_returns(factor_returns,
-                                             overlapping_period)
+    factor_returns = perf.cumulative_returns(factor_returns, period)
 
     factor_returns.plot(ax=ax, lw=3, color='forestgreen', alpha=0.6)
     ax.set(ylabel='Cumulative Returns',
@@ -752,8 +744,7 @@ def plot_cumulative_returns(factor_returns, period=1, overlap=True, ax=None):
 
 
 def plot_cumulative_returns_by_quantile(quantile_returns,
-                                        period=1,
-                                        overlap=True,
+                                        period,
                                         ax=None):
     """
     Plots the cumulative returns of various factor quantiles.
@@ -761,17 +752,11 @@ def plot_cumulative_returns_by_quantile(quantile_returns,
     Parameters
     ----------
     quantile_returns : pd.DataFrame
-        Cumulative returns by factor quantile.
-    period: int, optional
-        Period over which the daily returns are calculated
-    overlap: boolean, optional
-        Specify if subsequent returns overlaps.
-        If 'overlap' is True and 'period' N is greater than 1, the cumulative
-        returns plot is computed building and averaging the  cumulative returns
-        of N interleaved portfolios (started at subsequent periods 1,2,3,...,N)
-        each one rebalancing every N periods. This results in trading the
-        factor at every value/signal computed by the factor and also the
-        cumulative returns don't dependent on a specific starting date.
+        Returns by factor quantile
+    period: pandas.Timedelta or string
+        Length of period for which the returns are computed (e.g. 1 day)
+        if 'period' is a string it must follow pandas.Timedelta constructor
+        format (e.g. '1 days', '1D', '30m', '3h', '1D1h', etc)
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -786,9 +771,7 @@ def plot_cumulative_returns_by_quantile(quantile_returns,
     ret_wide = quantile_returns.reset_index()\
         .pivot(index='date', columns='factor_quantile', values=period)
 
-    overlapping_period = period if overlap else 1
-    cum_ret = ret_wide.apply(perf.cumulative_returns,
-                             args=(overlapping_period,))
+    cum_ret = ret_wide.apply(perf.cumulative_returns, period=period)
     cum_ret = cum_ret.loc[:, ::-1]
 
     cum_ret.plot(lw=2, ax=ax, cmap=cm.RdYlGn_r)

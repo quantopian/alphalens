@@ -15,9 +15,10 @@
 
 import pandas as pd
 import numpy as np
-from IPython.display import display
 import warnings
+import re
 
+from IPython.display import display
 from functools import wraps
 
 
@@ -158,9 +159,9 @@ def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
         in the forward returns calculations.
     periods : sequence[int]
         periods to compute forward returns on.
-    filter_zscore : int or float
+    filter_zscore : int or float, optional
         Sets forward returns greater than X standard deviations
-        from the the mean to nan.
+        from the the mean to nan. Set it to 'None' to avoid filtering.
         Caution: this outlier filtering incorporates lookahead bias.
 
     Returns
@@ -173,6 +174,11 @@ def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
         [prices.index, prices.columns], names=['date', 'asset']))
 
+    # if the period length is not consistent across the factor index then
+    # it must be a trading day calendar
+    time_diffs = prices.index.to_series().diff()
+    trading_calendar = time_diffs.min() != time_diffs.max()
+
     for period in periods:
         delta = prices.pct_change(period).shift(-period)
 
@@ -180,7 +186,22 @@ def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
             mask = abs(delta - delta.mean()) > (filter_zscore * delta.std())
             delta[mask] = np.nan
 
-        forward_returns[period] = delta.stack()
+        # find the period length and consider there might be weekends
+        # or public holidays
+        entries_to_test = min(10, len(prices.index)-period)
+        period_len = min([prices.index[period+i] - prices.index[i]
+                          for i in range(entries_to_test)])
+
+        # we use business days as an approximation to trading calendar
+        if trading_calendar and period_len.components.days > 0:
+            days_diffs = \
+              [len(pd.bdate_range(prices.index[i], prices.index[period+i])) - 1
+               for i in range(entries_to_test)]
+            delta_days = period_len.components.days - min(days_diffs)
+            period_len -= pd.Timedelta(days=delta_days)
+
+        column_name = timedelta_to_string(period_len)
+        forward_returns[column_name] = delta.stack()
 
     forward_returns.index = forward_returns.index.rename(['date', 'asset'])
 
@@ -396,9 +417,9 @@ def get_clean_factor_and_forward_returns(factor,
         Only one of 'quantiles' or 'bins' can be not-None
     periods : sequence[int]
         periods to compute forward returns on.
-    filter_zscore : int or float
+    filter_zscore : int or float, optional
         Sets forward returns greater than X standard deviations
-        from the the mean to nan.
+        from the the mean to nan. Set it to 'None' to avoid filtering.
         Caution: this outlier filtering incorporates lookahead bias.
     groupby_labels : dict
         A dictionary keyed by group code with values corresponding
@@ -422,7 +443,7 @@ def get_clean_factor_and_forward_returns(factor,
         (optionally) the group the asset belongs to.
         ::
            -------------------------------------------------------------------
-                      |       |  1  |  5  |  10  |factor|group|factor_quantile
+                      |       | 1D  | 5D  | 10D  |factor|group|factor_quantile
            -------------------------------------------------------------------
                date   | asset |     |     |      |      |     |
            -------------------------------------------------------------------
@@ -443,6 +464,8 @@ def get_clean_factor_and_forward_returns(factor,
                                        "same as the timezone of 'prices'. See "
                                        "the pandas methods tz_localize and "
                                        "tz_convert.")
+
+    periods = sorted(periods)
 
     initial_amount = float(len(factor.index))
 
@@ -606,22 +629,47 @@ def common_start_returns(factor,
     return pd.concat(all_returns, axis=1)
 
 
-def rate_of_return(period_ret):
+def rate_of_return(period_ret, base_period):
     """
-    1-period Growth Rate: the average rate of 1-period returns
+    Convert returns to 'one_period_len' rate of returns: that is the value the
+    returns would have every 'one_period_len' if they had grown at a steady
+    rate
+
+    Parameters
+    ----------
+    period_ret: pd.DataFrame
+        DataFrame containing returns values with column headings representing
+        the return period.
+    base_period: string
+        The base period length used in the conversion
+        It must follow pandas.Timedelta constructor format (e.g. '1 days',
+        '1D', '30m', '3h', '1D1h', etc)
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame in same format as input but with 'one_period_len' rate of
+        returns values.
     """
-    return period_ret.add(1).pow(1. / period_ret.name).sub(1)
+    period_len = period_ret.name
+    conversion_factor = (pd.Timedelta(base_period) /
+                         pd.Timedelta(period_len))
+    return period_ret.add(1).pow(conversion_factor).sub(1)
 
 
-def std_conversion(period_std):
+def std_conversion(period_std, base_period):
     """
-    1-period standard deviation (or standard error) approximation
+    one_period_len standard deviation (or standard error) approximation
 
     Parameters
     ----------
     period_std: pd.DataFrame
         DataFrame containing standard deviation or standard error values
         with column headings representing the return period.
+    base_period: string
+        The base period length used in the conversion
+        It must follow pandas.Timedelta constructor format (e.g. '1 days',
+        '1D', '30m', '3h', '1D1h', etc)
 
     Returns
     -------
@@ -630,8 +678,36 @@ def std_conversion(period_std):
         standard deviation/error values.
     """
     period_len = period_std.name
-    return period_std / np.sqrt(period_len)
+    conversion_factor = (pd.Timedelta(period_len) /
+                         pd.Timedelta(base_period))
+    return period_std / np.sqrt(conversion_factor)
 
 
 def get_forward_returns_columns(columns):
-    return columns[columns.astype('str').str.isdigit()]
+    pattern = re.compile(r"^(\d+([Dhms]|ms|us|ns))+$", re.IGNORECASE)
+    valid_columns = [(pattern.match(col) is not None) for col in columns]
+    return columns[valid_columns]
+
+
+def timedelta_to_string(timedelta):
+    """
+    Utility that converts a pandas.Timedelta to a string representation
+    compatible with pandas.Timedelta constructor format
+    """
+    c = timedelta.components
+    format = ''
+    if c.days != 0:
+        format += '%dD' % c.days
+    if c.hours > 0:
+        format += '%dh' % c.hours
+    if c.minutes > 0:
+        format += '%dm' % c.minutes
+    if c.seconds > 0:
+        format += '%ds' % c.seconds
+    if c.milliseconds > 0:
+        format += '%dms' % c.milliseconds
+    if c.microseconds > 0:
+        format += '%dus' % c.microseconds
+    if c.nanoseconds > 0:
+        format += '%dns' % c.nanoseconds
+    return format
