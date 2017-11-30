@@ -205,7 +205,8 @@ def create_summary_tear_sheet(factor_data,
                                      group_adjust=group_neutral)
 
     mean_quant_rateret = \
-        mean_quant_ret.apply(utils.rate_of_return, axis=0)
+        mean_quant_ret.apply(utils.rate_of_return, axis=0,
+                             base_period=mean_quant_ret.columns[0])
 
     mean_quant_ret_bydate, std_quant_daily = \
         perf.mean_return_by_quantile(factor_data,
@@ -214,10 +215,16 @@ def create_summary_tear_sheet(factor_data,
                                      demeaned=long_short,
                                      group_adjust=group_neutral)
 
-    mean_quant_rateret_bydate = \
-        mean_quant_ret_bydate.apply(utils.rate_of_return, axis=0)
+    mean_quant_rateret_bydate = mean_quant_ret_bydate.apply(
+        utils.rate_of_return,
+        axis=0,
+        base_period=mean_quant_ret_bydate.columns[0]
+    )
 
-    compstd_quant_daily = std_quant_daily.apply(utils.std_conversion, axis=0)
+    compstd_quant_daily = std_quant_daily.apply(
+        utils.std_conversion, axis=0,
+        base_period=std_quant_daily.columns[0]
+    )
 
     alpha_beta = perf.factor_alpha_beta(factor_data,
                                         long_short,
@@ -308,7 +315,8 @@ def create_returns_tear_sheet(factor_data,
                                      group_adjust=group_neutral)
 
     mean_quant_rateret = \
-        mean_quant_ret.apply(utils.rate_of_return, axis=0)
+        mean_quant_ret.apply(utils.rate_of_return, axis=0,
+                             base_period=mean_quant_ret.columns[0])
 
     mean_quant_ret_bydate, std_quant_daily = \
         perf.mean_return_by_quantile(factor_data,
@@ -317,10 +325,14 @@ def create_returns_tear_sheet(factor_data,
                                      demeaned=long_short,
                                      group_adjust=group_neutral)
 
-    mean_quant_rateret_bydate = \
-        mean_quant_ret_bydate.apply(utils.rate_of_return, axis=0)
+    mean_quant_rateret_bydate = mean_quant_ret_bydate.apply(
+        utils.rate_of_return, axis=0,
+        base_period=mean_quant_ret_bydate.columns[0]
+    )
 
-    compstd_quant_daily = std_quant_daily.apply(utils.std_conversion, axis=0)
+    compstd_quant_daily = \
+        std_quant_daily.apply(utils.std_conversion, axis=0,
+                              base_period=std_quant_daily.columns[0])
 
     alpha_beta = perf.factor_alpha_beta(factor_data,
                                         long_short,
@@ -375,8 +387,10 @@ def create_returns_tear_sheet(factor_data,
                                          demeaned=long_short,
                                          group_adjust=group_neutral)
 
-        mean_quant_rateret_group = \
-            mean_return_quantile_group.apply(utils.rate_of_return, axis=0)
+        mean_quant_rateret_group = mean_return_quantile_group.apply(
+            utils.rate_of_return, axis=0,
+            base_period=mean_return_quantile_group.columns[0]
+        )
 
         num_groups = len(mean_quant_rateret_group.index
                          .get_level_values('group').unique())
@@ -452,7 +466,7 @@ def create_information_tear_sheet(factor_data,
 
 
 @plotting.customize
-def create_turnover_tear_sheet(factor_data):
+def create_turnover_tear_sheet(factor_data, turnover_periods=None):
     """
     Creates a tear sheet for analyzing the turnover properties of a factor.
 
@@ -464,9 +478,19 @@ def create_turnover_tear_sheet(factor_data):
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
+    turnover_periods : sequence[string], optional
+        Periods to compute turnover analysis on. By default periods in
+        'factor_data' are used but custom periods can provided instead. This
+        can be useful when periods in 'factor_data' are not multiples of the
+        frequency at which factor values are computed i.e. the periods
+        are 2h and 4h and the factor is computed daily and so values like
+        ['1D', '2D'] could be used instead
     """
 
-    turnover_periods = utils.get_forward_returns_columns(factor_data.columns)
+    if turnover_periods is None:
+        turnover_periods = utils.get_forward_returns_columns(
+            factor_data.columns)
+
     quantile_factor = factor_data['factor_quantile']
 
     quantile_turnover = \
@@ -487,7 +511,7 @@ def create_turnover_tear_sheet(factor_data):
     vertical_sections = fr_cols + 3 * rows_when_wide + 2 * fr_cols
     gf = GridFigure(rows=vertical_sections, cols=columns_wide)
 
-    for period in sorted(quantile_turnover.keys()):
+    for period in turnover_periods:
         plotting.plot_top_bottom_quantile_turnover(quantile_turnover[period],
                                                    period=period,
                                                    ax=gf.next_row())
@@ -676,15 +700,19 @@ def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
                                      by_group=False,
                                      demeaned=long_short)
     mean_quant_ret = \
-        mean_quant_ret.apply(utils.rate_of_return, axis=0)
+        mean_quant_ret.apply(utils.rate_of_return, axis=0,
+                             base_period=mean_quant_ret.columns[0])
 
     mean_quant_ret_bydate, std_quant_daily = \
         perf.mean_return_by_quantile(factor_data,
                                      by_date=True,
                                      by_group=False,
                                      demeaned=long_short)
-    mean_quant_rateret_bydate = \
-        mean_quant_ret_bydate.apply(utils.rate_of_return, axis=0)
+
+    mean_quant_rateret_bydate = mean_quant_ret_bydate.apply(
+        utils.rate_of_return, axis=0,
+        base_period=mean_quant_ret_bydate.columns[0]
+    )
 
     fr_cols = len(mean_quant_ret.columns)
     vertical_sections = 2 + fr_cols * 3

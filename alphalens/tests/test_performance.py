@@ -23,7 +23,9 @@ from pandas import (
     date_range,
     MultiIndex,
     Int64Index,
-    DatetimeIndex
+    Index,
+    DatetimeIndex,
+    Timedelta
 )
 
 from pandas.util.testing import (assert_frame_equal,
@@ -34,6 +36,7 @@ from .. performance import (factor_information_coefficient,
                             quantile_turnover,
                             factor_rank_autocorrelation,
                             factor_returns, factor_alpha_beta,
+                            cumulative_returns,
                             average_cumulative_return_by_quantile)
 
 from .. utils import (get_forward_returns_columns,
@@ -86,15 +89,15 @@ class PerformanceTestCase(TestCase):
                                      expected_ix,
                                      expected_ic_val):
 
-        factor_data[1] = Series(index=factor_data.index,
-                                data=forward_returns)
+        factor_data['1D'] = Series(index=factor_data.index,
+                                   data=forward_returns)
 
         ic = factor_information_coefficient(factor_data=factor_data,
                                             group_adjust=group_adjust,
                                             by_group=by_group)
 
         expected_ic_df = DataFrame(index=expected_ix,
-                                   columns=Int64Index([1], dtype='object'),
+                                   columns=Index(['1D'], dtype='object'),
                                    data=expected_ic_val)
 
         assert_frame_equal(ic, expected_ic_df)
@@ -142,8 +145,8 @@ class PerformanceTestCase(TestCase):
                                           expected_ix,
                                           expected_ic_val):
 
-        factor_data[1] = Series(index=factor_data.index,
-                                data=forward_returns)
+        factor_data['1D'] = Series(index=factor_data.index,
+                                   data=forward_returns)
 
         ic = mean_information_coefficient(factor_data,
                                           group_adjust=group_adjust,
@@ -151,7 +154,7 @@ class PerformanceTestCase(TestCase):
                                           by_time=by_time)
 
         expected_ic_df = DataFrame(index=expected_ix,
-                                   columns=Int64Index([1], dtype='object'),
+                                   columns=Index(['1D'], dtype='object'),
                                    data=expected_ic_val)
 
         assert_frame_equal(ic, expected_ic_df)
@@ -160,24 +163,174 @@ class PerformanceTestCase(TestCase):
                              [4.0, 3.0, 2.0, 1.0],
                              [1.0, 2.0, 3.0, 4.0],
                              [1.0, 2.0, 3.0, 4.0]],
-                            4.0,
+                            '1B', 4.0, '1D',
                             [nan, 1.0, 1.0, 0.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [4.0, 3.0, 2.0, 1.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1D', 4.0, '1D',
+                            [nan, 1.0, 1.0, 0.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [4.0, 3.0, 2.0, 1.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '10T', 4.0, '10min',
+                            [nan, 1.0, 1.0, 0.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [4.0, 3.0, 2.0, 1.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1B', 4.0, '2D',
+                            [nan, nan, 0.0, 1.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [4.0, 3.0, 2.0, 1.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1D', 4.0, '2D',
+                            [nan, nan, 0.0, 1.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [4.0, 3.0, 2.0, 1.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1H', 4.0, '2H',
+                            [nan, nan, 0.0, 1.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [4.0, 3.0, 2.0, 1.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1B', 4.0, '3D',
+                            [nan, nan, nan, 0.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [4.0, 3.0, 2.0, 1.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1D', 4.0, '3D',
+                            [nan, nan, nan, 0.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [4.0, 3.0, 2.0, 1.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1H', 4.0, '3H',
+                            [nan, nan, nan, 0.0]),
                            ([[1.0, 2.0, 3.0, 4.0],
                              [1.0, 2.0, 3.0, 4.0],
                              [1.0, 2.0, 3.0, 4.0],
                              [1.0, 2.0, 3.0, 4.0]],
-                            3.0,
+                            '1B', 3.0, '1D',
                             [nan, 0.0, 0.0, 0.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1D', 3.0, '1D',
+                            [nan, 0.0, 0.0, 0.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1B', 3.0, '2D',
+                            [nan, nan, 0.0, 0.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1D', 3.0, '2D',
+                            [nan, nan, 0.0, 0.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1B', 3.0, '3D',
+                            [nan, nan, nan, 0.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1D', 3.0, '3D',
+                            [nan, nan, nan, 0.0]),
                            ([[1.0, 2.0, 3.0, 4.0],
                              [4.0, 3.0, 2.0, 1.0],
                              [1.0, 2.0, 3.0, 4.0],
                              [4.0, 3.0, 2.0, 1.0]],
-                            2.0,
-                            [nan, 1.0, 1.0, 1.0])])
-    def test_quantile_turnover(self, quantile_values, test_quantile,
-                               expected_vals):
+                            '1B', 2.0, '1D',
+                            [nan, 1.0, 1.0, 1.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [4.0, 3.0, 2.0, 1.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [4.0, 3.0, 2.0, 1.0]],
+                            '1D', 2.0, '1D',
+                            [nan, 1.0, 1.0, 1.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0]],
+                            '1B', 3.0, '4D',
+                            [nan, nan, nan, nan,
+                             0., 0., 0., 0.,
+                             0., 0., 0., 0.]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0]],
+                            '1D', 3.0, '4D',
+                            [nan, nan, nan, nan,
+                             0., 0., 0., 0.,
+                             0., 0., 0., 0.]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1B', 3.0, '10D',
+                            [nan, nan, nan, nan, nan,
+                             nan, nan, nan, nan, nan,
+                             0., 1.]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 3.0, 2.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1D', 3.0, '10D',
+                            [nan, nan, nan, nan, nan,
+                             nan, nan, nan, nan, nan,
+                             0., 1.])
+                           ])
+    def test_quantile_turnover(self, quantile_values, freq, test_quantile,
+                               period, expected_vals):
 
-        dr = date_range(start='2015-1-1', end='2015-1-4')
+        dr = date_range(start='2015-1-1', periods=len(quantile_values),
+                        freq=freq)
         dr.name = 'date'
         tickers = ['A', 'B', 'C', 'D']
 
@@ -188,7 +341,7 @@ class PerformanceTestCase(TestCase):
         quantized_test_factor.index = quantized_test_factor.index.set_names(
             ['date', 'asset'])
 
-        to = quantile_turnover(quantized_test_factor, test_quantile)
+        to = quantile_turnover(quantized_test_factor, test_quantile, period)
 
         expected = Series(
             index=quantized_test_factor.index.levels[0], data=expected_vals)
@@ -224,7 +377,7 @@ class PerformanceTestCase(TestCase):
                             expected_vals):
 
         factor_data = self.factor_data.copy()
-        factor_data[1] = fwd_return_vals
+        factor_data['1D'] = fwd_return_vals
         factor_data['factor'] = factor_vals
 
         factor_returns_s = factor_returns(factor_data=factor_data,
@@ -245,29 +398,119 @@ class PerformanceTestCase(TestCase):
     def test_factor_alpha_beta(self, fwd_return_vals, alpha, beta):
 
         factor_data = self.factor_data.copy()
-        factor_data[1] = fwd_return_vals
+        factor_data['1D'] = fwd_return_vals
 
         ab = factor_alpha_beta(factor_data=factor_data)
 
-        expected = DataFrame(columns=[1],
+        expected = DataFrame(columns=['1D'],
                              index=['Ann. alpha', 'beta'],
                              data=[alpha, beta])
 
         assert_frame_equal(ab, expected)
 
+    @parameterized.expand([([1.0, 0.5, 1.0, 0.5, 0.5],
+                            '1D', '1D',
+                            [1.0, 2.0, 3.0, 6.0, 9.0, 13.50]),
+                           ([1.0, 0.5, 1.0, 0.5, 0.5],
+                            '1D', '45m',
+                            [1., 2., 2., 3., 3.0, 6.0, 6.0, 9.0, 9.0, 13.50]),
+                           ([0.1, 0.1, 0.1, 0.1, 0.1],
+                            '1D', '1D',
+                            [1.0, 1.1, 1.21, 1.331, 1.4641, 1.61051]),
+                           ([-0.1, -0.1, -0.1, -0.1, -0.1],
+                            '1D', '1D',
+                            [1.0, 0.9, 0.81, 0.729, 0.6561, 0.59049]),
+                           ([1.0, nan, 0.5, nan, 1.0, nan, 0.5, nan, 0.5],
+                            '20s', '20s',
+                            [1.0, 2., 2., 3., 3.0, 6.0, 6.0, 9.0, 9.0, 13.50]),
+                           ([0.1, 0, 0.1, 0, 0.1, 0, 0.1, 0, 0.1],
+                            '10m', '10m',
+                            [1.0, 1.1, 1.1, 1.21, 1.21, 1.331, 1.331, 1.4641,
+                             1.4641, 1.61051]),
+                           ([3.0, 0.0, 0.0],
+                            '1h', '2h',
+                            [1.0, 2.0, 3.0, 3.0, 3.0]),
+                           ([1.0, 1.0, 1.0, 1.0, 1.0],
+                            '1h', '2h',
+                            [1.0, 1.4142, 2.0, 2.8284, 4.0, 5.6568, 8.0]),
+                           ([0.1, 0.1, 0.1, 0.1, 0.1],
+                            '1h', '2h',
+                            [1.0, 1.0488, 1.1, 1.15368, 1.21, 1.26905, 1.331]),
+                           ([-0.1, -0.1, -0.1, -0.1, -0.1],
+                            '1m', '2m',
+                            [1.0, 0.94868, 0.9, 0.8538, 0.81, 0.76843, 0.729]),
+                           ([-0.75, -0.75, -0.75, -0.75, -0.75],
+                            '1D', '2D',
+                            [1., 0.5, 0.25, 0.125, 0.0625, 0.03125, 0.015625]),
+                           ([3.0, 3.0, 3.0, 3.0, 3.0],
+                            '1D', '2D',
+                            [1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0]),
+                           ([3.0, -0.75, 3.0, -0.75, 3.0],
+                            '1h', '2h',
+                            [1.0, 2.0, 2.5, 3.125, 3.90625, 4.88281, 9.76562]),
+                           ([3.0, -0.75],
+                            '1D', '2D',
+                            [1.0, 2.0, 2.5, 1.25]),
+                           ([7.0, -0.875, 7.0, -0.875, 7.0],
+                            '1D', '3D',
+                            [1.0, 2.0, 2.5, 3.75, 3.75, 5.625, 7.03125,
+                             14.0625]),
+                           ([7.0, -0.875, nan, 7.0, -0.875],
+                            '1D', '3D',
+                            [1.0, 2.0, 2.5, 3.125, 3.90625, 4.88281, 6.10351,
+                             3.05175]),
+                           ([7.0, nan, nan, -0.875, 7.0, nan, nan, nan, 7.0,
+                             nan, -0.875],
+                            '1h', '3h',
+                            [1.0, 2.0, 4.0, 8.0, 4.0, 5.0, 6.25, 12.5, 12.5,
+                             25., 50., 62.5, 31.25, 15.625]),
+                           ([15., nan, nan, -0.9375, 15., nan, nan, nan, 15.],
+                            '1D', '4D',
+                            [1.0, 2.0, 4.0, 8.0, 10.0, 12.5, 15.625, 19.53125,
+                             39.0625, 78.125, 156.25, 312.5, 625.0]),
+                           ([15.0, -0.9375, 15.0, -0.9375],
+                            '1D', '4D',
+                            [1.0, 2.0, 2.5, 3.75, 4.6875, 4.6875, 5.85937,
+                             2.92968]),
+                           ])
+    def test_cumulative_returns(self, returns, ret_freq, period_len,
+                                expected_vals):
+
+        period_len = Timedelta(period_len)
+        ret_freq = Timedelta(ret_freq)
+        index = date_range('1/1/1999', periods=len(returns), freq=ret_freq)
+        returns = Series(returns, index=index)
+
+        cum_ret = cumulative_returns(returns, period_len)
+
+        exp_index = returns.index.union(returns.index + period_len)
+        expected = Series(expected_vals, index=exp_index)
+
+        assert_series_equal(cum_ret, expected, check_less_precise=True)
+
     @parameterized.expand([([[1.0, 2.0, 3.0, 4.0],
                              [1.0, 2.0, 3.0, 4.0],
                              [1.0, 2.0, 3.0, 4.0],
                              [1.0, 2.0, 3.0, 4.0]],
-                            '2015-1-4',
-                            1,
+                            '1B', '1D',
+                            [nan, 1.0, 1.0, 1.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1D', '1D',
                             [nan, 1.0, 1.0, 1.0]),
                            ([[4.0, 3.0, 2.0, 1.0],
                              [1.0, 2.0, 3.0, 4.0],
                              [4.0, 3.0, 2.0, 1.0],
                              [1.0, 2.0, 3.0, 4.0]],
-                            '2015-1-4',
-                            1,
+                            '1B', '1D',
+                            [nan, -1.0, -1.0, -1.0]),
+                           ([[4.0, 3.0, 2.0, 1.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [4.0, 3.0, 2.0, 1.0],
+                             [1.0, 2.0, 3.0, 4.0]],
+                            '1D', '1D',
                             [nan, -1.0, -1.0, -1.0]),
                            ([[1.0, 2.0, 3.0, 4.0],
                              [2.0, 1.0, 4.0, 3.0],
@@ -281,18 +524,35 @@ class PerformanceTestCase(TestCase):
                              [2.0, 1.0, 4.0, 3.0],
                              [2.0, 1.0, 4.0, 3.0],
                              [4.0, 3.0, 2.0, 1.0]],
-                            '2015-1-12',
-                            3,
+                            '1B', '3D',
+                            [nan, nan, nan, 1.0, 1.0,
+                             1.0, 0.6, -0.6, -1.0, 1.0,
+                             -0.6, -1.0]),
+                           ([[1.0, 2.0, 3.0, 4.0],
+                             [2.0, 1.0, 4.0, 3.0],
+                             [4.0, 3.0, 2.0, 1.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [2.0, 1.0, 4.0, 3.0],
+                             [4.0, 3.0, 2.0, 1.0],
+                             [2.0, 1.0, 4.0, 3.0],
+                             [4.0, 3.0, 2.0, 1.0],
+                             [1.0, 2.0, 3.0, 4.0],
+                             [2.0, 1.0, 4.0, 3.0],
+                             [2.0, 1.0, 4.0, 3.0],
+                             [4.0, 3.0, 2.0, 1.0]],
+                            '1D', '3D',
                             [nan, nan, nan, 1.0, 1.0,
                              1.0, 0.6, -0.6, -1.0, 1.0,
                              -0.6, -1.0])
                            ])
     def test_factor_rank_autocorrelation(self,
                                          factor_values,
-                                         end_date,
+                                         freq,
                                          period,
                                          expected_vals):
-        dr = date_range(start='2015-1-1', end=end_date)
+
+        dr = date_range(start='2015-1-1', periods=len(factor_values),
+                        freq=freq)
         dr.name = 'date'
         tickers = ['A', 'B', 'C', 'D']
         factor = DataFrame(index=dr,

@@ -57,9 +57,9 @@ class UtilsTestCase(TestCase):
 
         ix = MultiIndex.from_product([dr, ['A', 'B']],
                                      names=['date', 'asset'])
-        expected = DataFrame(index=ix, columns=[1, 2])
-        expected[1] = [0., 1., 1., -0.5, nan, nan]
-        expected[2] = [1., 0., nan, nan, nan, nan]
+        expected = DataFrame(index=ix, columns=['1D', '2D'])
+        expected['1D'] = [0., 1., 1., -0.5, nan, nan]
+        expected['2D'] = [1., 0., nan, nan, nan, nan]
 
         assert_frame_equal(fp, expected)
 
