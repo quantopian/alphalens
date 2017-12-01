@@ -400,7 +400,7 @@ def create_returns_tear_sheet(factor_data,
     hierarchy = OrderedDict([
         # not typos! These are the Fama-French factors names from Dartmouth
         ('Market', ['Mkt-RF']),
-        ('Style', ['SMB', 'HML', 'Mom   '])
+        ('Style', ['SMB', 'HML', 'Mom'])
     ])
 
     factor_returns.index = factor_returns.index.tz_localize('UTC')
