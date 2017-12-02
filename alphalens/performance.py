@@ -111,7 +111,7 @@ def mean_information_coefficient(factor_data,
 
     grouper = []
     if by_time is not None:
-        grouper.append(pd.TimeGrouper(by_time))
+        grouper.append(pd.Grouper(freq=by_time))
     if by_group:
         grouper.append('group')
 
