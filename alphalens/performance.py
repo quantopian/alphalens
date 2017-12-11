@@ -738,3 +738,97 @@ def average_cumulative_return_by_quantile(factor_data,
         else:
             fq = factor_data['factor_quantile']
             return fq.groupby(fq).apply(average_cumulative_return, None)
+
+
+def create_pyfolio_input(factor_data,
+                         period,
+                         long_short=True,
+                         group_neutral=False,
+                         quantiles=None,
+                         groups=None):
+    """
+
+    WARNING: this API is still in experimental phase and input/output
+             paramenters might change in the future
+
+    Simulate a portfolio using the factor in input and returns a DataFrames
+    containing the portfolio returns formatted for pyfolio.
+
+    For more details on how this portfolio is built see:
+    - performance.factor_returns (how assets weights are computed)
+    - performance.cumulative_returns (how the portfolio returns are computed)
+
+    Parameters
+    ----------
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for
+        each period, the factor quantile/bin that factor value belongs to,
+        and (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
+    period : string
+        'factor_data' column name corresponding to the 'period' returns to be
+        used in the computation of porfolio returns
+    long_short : bool, optional
+        Should this computation happen on a long short portfolio? if so, then
+        factor values will be demeaned across the factor universe when factor
+        weighting the portfolio for cumulative returns plots
+    group_neutral : bool, optional
+        Should this computation happen on a group neutral portfolio? if so,
+        factor values demeaning will occur on the group level.
+        Additionally each group will weight the same in cumulative returns
+        plots
+    quantiles: sequence[int], optional
+        Use only specific quantiles in the computation. By default all
+        quantiles are used
+    groups: sequence[string], optional
+        Use only specific groups in the computation. By default all groups
+        are used
+
+
+    Returns
+    -------
+     returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+
+     benchmark : pd.Series
+        Benchmark returns computed as the factor universe mean daily returns.
+        If '1D' period column is not present in the factor_data the beanchmark
+        returns is not computed and returned as 'None'
+    """
+
+    portfolio_data = factor_data
+
+    if quantiles is not None:
+        portfolio_data = portfolio_data[portfolio_data['factor_quantile'].isin(
+            quantiles)]
+
+    if groups is not None:
+        portfolio_data = portfolio_data[portfolio_data['group'].isin(groups)]
+
+    #
+    # Build returns:
+    # we don't know the frequency at which the factor returns are computed but
+    # pyfolio wants daily returns. So we compute the cumulative returns of the
+    # factor, then resample it at 1 day frequency and finally compute daily
+    # returns
+    #
+    returns = factor_returns(portfolio_data, long_short, group_neutral)
+    returns = cumulative_returns(returns[period], period)
+    returns = returns.resample('1D').last()
+    returns = returns.pct_change().fillna(0)
+
+    #
+    #
+    #
+    # Build benchmark returns as the factor universe mean daily return
+    #
+    if '1D' in utils.get_forward_returns_columns(factor_data.columns):
+        benchmark_rets = factor_data.groupby(level='date')['1D'] \
+                                    .mean().loc[returns.index]
+    else:
+        benchmark_rets = None
+        print("Cannot computed benchmark daily returns: '1D' not present"
+              " in 'factor_data' periods column")
+
+    return returns, benchmark_rets
