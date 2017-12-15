@@ -313,7 +313,7 @@ def get_clean_factor_and_forward_returns(factor,
                                          periods=(1, 5, 10),
                                          filter_zscore=20,
                                          groupby_labels=None,
-                                         max_loss=0.25):
+                                         max_loss=0.35):
     """
     Formats the factor data, pricing data, and group mappings
     into a DataFrame that contains aligned MultiIndex
@@ -498,15 +498,17 @@ def get_clean_factor_and_forward_returns(factor,
     fwdret_loss = (initial_amount - fwdret_amount) / initial_amount
     bin_loss = tot_loss - fwdret_loss
 
-    print("Dropped %.1f%% entries from factor data (%.1f%% after "
-          "in forward returns computation and %.1f%% in binning phase). "
-          "Set max_loss=0 to see potentially suppressed Exceptions." %
+    print("Dropped %.1f%% entries from factor data: %.1f%% in forward "
+          "returns computation and %.1f%% in binning phase "
+          "(set max_loss=0 to see potentially suppressed Exceptions)." %
           (tot_loss * 100, fwdret_loss * 100,  bin_loss * 100))
 
     if tot_loss > max_loss:
         message = ("max_loss (%.1f%%) exceeded %.1f%%, consider increasing it."
                    % (max_loss * 100, tot_loss * 100))
         raise MaxLossExceededError(message)
+    else:
+        print("max_loss is %.1f%% -> not exceeded: OK!" % (max_loss * 100))
 
     return merged_data
 
