@@ -402,7 +402,6 @@ def create_returns_tear_sheet(factor_data,
         ('Market', ['Mkt-RF']),
         ('Style', ['SMB', 'HML', 'Mom'])
     ])
-    
     if factor_returns.index.tzinfo is None:
         factor_returns.index = factor_returns.index.tz_localize('UTC')
     else:
