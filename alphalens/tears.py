@@ -402,8 +402,11 @@ def create_returns_tear_sheet(factor_data,
         ('Market', ['Mkt-RF']),
         ('Style', ['SMB', 'HML', 'Mom'])
     ])
-
-    factor_returns.index = factor_returns.index.tz_localize('UTC')
+    
+    if factor_returns.index.tzinfo is None:
+        factor_returns.index = factor_returns.index.tz_localize('UTC')
+    else:
+        factor_returns.tz_convert('UTC')
     for i, period in enumerate(factor_returns.columns.values):
         returns_decomposition = \
             perf.decompose_returns(factor_returns.iloc[:, i],
