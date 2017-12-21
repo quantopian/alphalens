@@ -420,24 +420,36 @@ class PerformanceTestCase(TestCase):
                            ([-0.1, -0.1, -0.1, -0.1, -0.1],
                             '1D', '1D',
                             [1.0, 0.9, 0.81, 0.729, 0.6561, 0.59049]),
+                           ([1.0, 0.5, 1.0, 0.5, 0.5],
+                            '1B', '1D',
+                            [1.0, 2.0, 3.0, 6.0, 9.0, 13.50]),
+                           ([1.0, 0.5, 1.0, 0.5, 0.5],
+                            '1B', '45m',
+                            [1., 2., 2., 3., 3.0, 6.0, 6.0, 9.0, 9.0, 13.50]),
+                           ([0.1, 0.1, 0.1, 0.1, 0.1],
+                            '1B', '1D',
+                            [1.0, 1.1, 1.21, 1.331, 1.4641, 1.61051]),
+                           ([-0.1, -0.1, -0.1, -0.1, -0.1],
+                            '1B', '1D',
+                            [1.0, 0.9, 0.81, 0.729, 0.6561, 0.59049]),
                            ([1.0, nan, 0.5, nan, 1.0, nan, 0.5, nan, 0.5],
-                            '20s', '20s',
+                            '20S', '20s',
                             [1.0, 2., 2., 3., 3.0, 6.0, 6.0, 9.0, 9.0, 13.50]),
                            ([0.1, 0, 0.1, 0, 0.1, 0, 0.1, 0, 0.1],
-                            '10m', '10m',
+                            '10T', '10m',
                             [1.0, 1.1, 1.1, 1.21, 1.21, 1.331, 1.331, 1.4641,
                              1.4641, 1.61051]),
                            ([3.0, 0.0, 0.0],
-                            '1h', '2h',
+                            '1H', '2h',
                             [1.0, 2.0, 3.0, 3.0, 3.0]),
                            ([1.0, 1.0, 1.0, 1.0, 1.0],
-                            '1h', '2h',
+                            '1H', '2h',
                             [1.0, 1.4142, 2.0, 2.8284, 4.0, 5.6568, 8.0]),
                            ([0.1, 0.1, 0.1, 0.1, 0.1],
-                            '1h', '2h',
+                            '1H', '2h',
                             [1.0, 1.0488, 1.1, 1.15368, 1.21, 1.26905, 1.331]),
                            ([-0.1, -0.1, -0.1, -0.1, -0.1],
-                            '1m', '2m',
+                            '1T', '2m',
                             [1.0, 0.94868, 0.9, 0.8538, 0.81, 0.76843, 0.729]),
                            ([-0.75, -0.75, -0.75, -0.75, -0.75],
                             '1D', '2D',
@@ -477,14 +489,12 @@ class PerformanceTestCase(TestCase):
                                 expected_vals):
 
         period_len = Timedelta(period_len)
-        ret_freq = Timedelta(ret_freq)
         index = date_range('1/1/1999', periods=len(returns), freq=ret_freq)
         returns = Series(returns, index=index)
 
         cum_ret = cumulative_returns(returns, period_len)
 
-        exp_index = returns.index.union(returns.index + period_len)
-        expected = Series(expected_vals, index=exp_index)
+        expected = Series(expected_vals, index=cum_ret.index)
 
         assert_series_equal(cum_ret, expected, check_less_precise=True)
 
