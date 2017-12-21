@@ -699,3 +699,26 @@ def add_custom_calendar_timedelta(input, timedelta, freq):
     days = timedelta.components.days
     offset = timedelta - pd.Timedelta(days=days)
     return input + freq * days + offset
+
+
+def diff_custom_calendar_timedeltas(start, end, freq):
+    """
+    Compute the difference between two pd.Timedelta taking into consideration
+    custom frequency, which is used to deal with custom calendars, such as a
+    trading calendar
+
+    Parameters
+    ----------
+    start : pd.Timestamp
+    end : pd.Timestamp
+    freq : DateOffset, optional
+
+    Returns
+    -------
+    pd.Timedelta
+        end - start
+    """
+    actual_days = pd.date_range(start, end, freq=freq).shape[0] - 1
+    timediff = end - start
+    delta_days = timediff.components.days - actual_days
+    return timediff - pd.Timedelta(days=delta_days)

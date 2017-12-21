@@ -444,8 +444,9 @@ def cumulative_returns(returns, period, freq=None):
             # moves the final 'period' returns value from trading timestamp to
             # trading timestamp + 'period'
             for slice_idx in slice:
-                sub_period = (pret_end_idx - pret_idx) / (slice_idx - pret_idx)
-                subret[slice_idx] = rate_of_returns(pret, sub_period)
+                sub_period = utils.diff_custom_calendar_timedeltas(
+                    pret_idx, slice_idx, freq)
+                subret[slice_idx] = rate_of_returns(pret, period / sub_period)
 
             subret[pret_idx] = np.nan
 
