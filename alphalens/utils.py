@@ -230,7 +230,11 @@ def compute_forward_returns(factor_idx,
 
     forward_returns.index = forward_returns.index.rename(['date', 'asset'])
 
-    # use business days as an approximation to trading calendar
+    # use business days as an approximation to trading calendar, if this will
+    # be proven to be a poor approximation then we could build a pandas
+    # AbstractHolidayCalendar inferring non-trading days from price DataFrame
+    # and use it to build a CustomBusinessDay DateOffset that we can finally
+    # set it as index 'freq'
     freq = BDay() if custom_calendar else Day()
     forward_returns.index.levels[0].freq = freq
 
