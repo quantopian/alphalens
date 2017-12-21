@@ -15,11 +15,10 @@
 
 import pandas as pd
 import numpy as np
-from scipy import stats
 
+from scipy import stats
 from statsmodels.regression.linear_model import OLS
 from statsmodels.tools.tools import add_constant
-
 from . import utils
 
 
@@ -282,7 +281,7 @@ def factor_alpha_beta(factor_data, demeaned=True, group_adjust=False):
     return alpha_beta
 
 
-def cumulative_returns(returns, period):
+def cumulative_returns(returns, period, freq=None):
     """
     Builds cumulative returns from 'period' returns. This function simulate the
     cumulative effect that a series of gains or losses (the 'retuns') have on
@@ -320,6 +319,9 @@ def cumulative_returns(returns, period):
         Length of period for which the returns are computed (1 day, 2 mins,
         3 hours etc). It can be a Timedelta or a string in the format accepted
         by Timedelta constructor ('1 days', '1D', '30m', '3h', '1D1h', etc)
+    freq : pandas DateOffset, optional
+        Used to specify a particular trading calendar. If not present
+        returns.index.freq will be used
 
     Returns
     -------
@@ -330,15 +332,18 @@ def cumulative_returns(returns, period):
     if not isinstance(period, pd.Timedelta):
         period = pd.Timedelta(period)
 
+    if freq is None:
+        freq = returns.index.freq
+
     #
     # index contains factor computation timestamps, then add returns timestamps
-    # too (factor timestamps + period) and save them to 'full_ts'
-    # Cumulative returns will use 'full_ts' index, because we want a cumulative
-    # returns value for each entry in 'full_ts'
+    # too (factor timestamps + period) and save them to 'full_idx'
+    # Cumulative returns will use 'full_idx' index,because we want a cumulative
+    # returns value for each entry in 'full_idx'
     #
-    trading_ts = returns.index.copy()
-    returns_ts = trading_ts + period
-    full_ts = trading_ts.union(returns_ts)
+    trades_idx = returns.index.copy()
+    returns_idx = utils.add_custom_calendar_timedelta(trades_idx, period, freq)
+    full_idx = trades_idx.union(returns_idx)
 
     #
     # Build N sub_returns from the single returns Series. Each sub_retuns
@@ -347,19 +352,28 @@ def cumulative_returns(returns, period):
     # returns happening on those overlapping returns streams
     #
     sub_returns = []
-    while len(trading_ts) > 0:
+    while len(trades_idx) > 0:
 
+        #
         # select non-overlapping returns starting with first timestamp in index
-        sub_index = pd.date_range(start=trading_ts.min(), end=trading_ts.max(),
-                                  freq=period)
-        if full_ts.tz is not None:
-            sub_index = sub_index.tz_convert(full_ts.tz)
+        #
+        sub_index = []
+        next = trades_idx.min()
+        while next <= trades_idx.max():
+            sub_index.append(next)
+            next = utils.add_custom_calendar_timedelta(next, period, freq)
+            # make sure to fetch the next available entry after 'period'
+            try:
+                i = trades_idx.get_loc(next, method='bfill')
+                next = trades_idx[i]
+            except KeyError:
+                break
 
-        sub_index = sub_index.intersection(returns.index)
+        sub_index = pd.DatetimeIndex(sub_index, tz=full_idx.tz)
         subret = returns[sub_index]
 
-        # make the index to have all entries in 'full_ts'
-        subret = subret.reindex(full_ts)
+        # make the index to have all entries in 'full_idx'
+        subret = subret.reindex(full_idx)
 
         #
         # compute intermediate returns values for each index in subret that are
@@ -370,9 +384,11 @@ def cumulative_returns(returns, period):
 
             pret = subret[pret_idx]
 
-            # get all timestamps between factor computation and retuns
+            # get all timestamps between factor computation and period returns
+            pret_end_idx = \
+                utils.add_custom_calendar_timedelta(pret_idx, period, freq)
             slice = subret[(subret.index > pret_idx) & (
-                subret.index <= pret_idx + period)].index
+                subret.index <= pret_end_idx)].index
 
             if pd.isnull(pret):
                 continue
@@ -384,7 +400,7 @@ def cumulative_returns(returns, period):
             # moves the final 'period' returns value from trading timestamp to
             # trading timestamp + 'period'
             for slice_idx in slice:
-                sub_period = period / (slice_idx - pret_idx)
+                sub_period = (pret_end_idx - pret_idx) / (slice_idx - pret_idx)
                 subret[slice_idx] = rate_of_returns(pret, sub_period)
 
             subret[pret_idx] = np.nan
@@ -393,7 +409,7 @@ def cumulative_returns(returns, period):
             subret[slice[1:]] = (subret[slice] + 1).pct_change()[slice[1:]]
 
         sub_returns.append(subret)
-        trading_ts = trading_ts.difference(sub_index)
+        trades_idx = trades_idx.difference(sub_index)
 
     #
     # Compute portfolio cumulative returns averaging the returns happening on
@@ -526,7 +542,7 @@ def compute_mean_returns_spread(mean_returns,
     return mean_return_difference, joint_std_err
 
 
-def quantile_turnover(quantile_factor, quantile, period=None):
+def quantile_turnover(quantile_factor, quantile, period=1):
     """
     Computes the proportion of names in a factor quantile that were
     not in that quantile in the previous period.
@@ -537,10 +553,10 @@ def quantile_turnover(quantile_factor, quantile, period=None):
         DataFrame with date, asset and factor quantile.
     quantile : int
         Quantile on which to perform turnover analysis.
-    period: string, optional
-        Period over which to calculate the turnover. It must follow
-        pandas.Timedelta constructor format (e.g. '1 days', '1D', '30m', '3h',
-        '1D1h', etc). If no value is provided subsequent names are compared.
+    period: string or int, optional
+        Period over which to calculate the turnover. If it is a string it must
+        follow pandas.Timedelta constructor format (e.g. '1 days', '1D', '30m',
+        '3h', '1D1h', etc).
     Returns
     -------
     quant_turnover : pd.Series
@@ -551,13 +567,13 @@ def quantile_turnover(quantile_factor, quantile, period=None):
     quant_name_sets = quant_names.groupby(level=['date']).apply(
         lambda x: set(x.index.get_level_values('asset')))
 
-    # find the frequency at which the factor is computed
-    if period is not None:
+    if isinstance(period, int):
+        shift = period
+    else:
+        # find the frequency at which the factor is computed
         idx = quant_name_sets.index
         freq = min([idx[i] - idx[i-1] for i in range(1, min(10, len(idx)))])
         shift = int(pd.Timedelta(period) / freq)
-    else:
-        shift = 1
 
     new_names = (quant_name_sets - quant_name_sets.shift(shift)).dropna()
     quant_turnover = new_names.apply(
@@ -566,7 +582,7 @@ def quantile_turnover(quantile_factor, quantile, period=None):
     return quant_turnover
 
 
-def factor_rank_autocorrelation(factor_data, period=None):
+def factor_rank_autocorrelation(factor_data, period=1):
     """
     Computes autocorrelation of mean factor ranks in specified time spans.
     We must compare period to period factor ranks rather than factor values
@@ -583,10 +599,10 @@ def factor_rank_autocorrelation(factor_data, period=None):
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
-    period: string
-        Period over which to calculate the autocorrelation. It must follow
-        pandas.Timedelta constructor format (e.g. '1 days', '1D', '30m', '3h',
-        '1D1h', etc). If no value is provided subsequent values are compared.
+    period: string or int, optional
+        Period over which to calculate the turnover. If it is a string it must
+        follow pandas.Timedelta constructor format (e.g. '1 days', '1D', '30m',
+        '3h', '1D1h', etc).
     Returns
     -------
     autocorr : pd.Series
@@ -603,13 +619,13 @@ def factor_rank_autocorrelation(factor_data, period=None):
                                                   columns='asset',
                                                   values='factor')
 
-    # find the frequency at which the factor is computed
-    if period is not None:
+    if isinstance(period, int):
+        shift = period
+    else:
+        # find the frequency at which the factor is computed
         idx = asset_factor_rank.index
         freq = min([idx[i] - idx[i-1] for i in range(1, min(10, len(idx)))])
         shift = int(pd.Timedelta(period) / freq)
-    else:
-        shift = 1
 
     autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(shift),
                                           axis=1)

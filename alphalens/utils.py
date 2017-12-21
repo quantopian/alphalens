@@ -20,6 +20,8 @@ import re
 
 from IPython.display import display
 from functools import wraps
+from pandas.tseries.offsets import BDay, Day
+from scipy.stats import mode
 
 
 class NonMatchingTimezoneError(Exception):
@@ -144,13 +146,18 @@ def quantize_factor(factor_data,
     return factor_quantile.dropna()
 
 
-def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
+def compute_forward_returns(factor_idx,
+                            prices,
+                            periods=(1, 5, 10),
+                            filter_zscore=None):
     """
     Finds the N period forward returns (as percent change) for each asset
     provided.
 
     Parameters
     ----------
+    factor_idx : pd.DatetimeIndex
+        The factor datetimes for which we are computing the forward returns
     prices : pd.DataFrame
         Pricing data to use in forward price calculation.
         Assets as columns, dates as index. Pricing data must
@@ -171,39 +178,56 @@ def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
         Separate column for each forward return window.
     """
 
-    forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
-        [prices.index, prices.columns], names=['date', 'asset']))
+    factor_idx = factor_idx.intersection(prices.index)
 
-    # if the period length is not consistent across the factor index then
-    # it must be a trading day calendar
-    time_diffs = prices.index.to_series().diff()
-    trading_calendar = time_diffs.min() != time_diffs.max()
+    forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
+        [factor_idx, prices.columns], names=['date', 'asset']))
+
+    custom_calendar = False
 
     for period in periods:
-        delta = prices.pct_change(period).shift(-period)
+
+        #
+        # build forward returns
+        #
+        delta = prices.pct_change(period).shift(-period).loc[factor_idx]
 
         if filter_zscore is not None:
             mask = abs(delta - delta.mean()) > (filter_zscore * delta.std())
             delta[mask] = np.nan
 
-        # find the period length and consider there might be weekends
-        # or public holidays
-        entries_to_test = min(10, len(prices.index)-period)
-        period_len = min([prices.index[period+i] - prices.index[i]
-                          for i in range(entries_to_test)])
+        #
+        # if the period length is not consistent across the factor index then
+        # it must be a trading/business day calendar
+        #
+        time_diffs = delta.index.to_series().diff(period)
+        if time_diffs.min() != time_diffs.max():
+            custom_calendar = True
 
-        # we use business days as an approximation to trading calendar
-        if trading_calendar and period_len.components.days > 0:
+        #
+        # find the period length that will be the column name
+        #
+        period_len = delta.index[period] - delta.index[0]
+
+        #
+        # use business days as an approximation to trading calendar
+        #
+        if custom_calendar and period_len.components.days > 0:
+            entries_to_test = min(10, len(delta.index)-period)
             days_diffs = \
-              [len(pd.bdate_range(prices.index[i], prices.index[period+i])) - 1
-               for i in range(entries_to_test)]
-            delta_days = period_len.components.days - min(days_diffs)
+                [len(pd.bdate_range(delta.index[i], delta.index[period+i])) - 1
+                 for i in range(entries_to_test)]
+            delta_days = period_len.components.days - mode(days_diffs).mode[0]
             period_len -= pd.Timedelta(days=delta_days)
 
         column_name = timedelta_to_string(period_len)
         forward_returns[column_name] = delta.stack()
 
     forward_returns.index = forward_returns.index.rename(['date', 'asset'])
+
+    # use business days as an approximation to trading calendar
+    freq = BDay() if custom_calendar else Day()
+    forward_returns.index.levels[0].freq = freq
 
     return forward_returns
 
@@ -469,10 +493,12 @@ def get_clean_factor_and_forward_returns(factor,
 
     initial_amount = float(len(factor.index))
 
-    merged_data = compute_forward_returns(prices, periods, filter_zscore)
-
     factor = factor.copy()
     factor.index = factor.index.rename(['date', 'asset'])
+    factor_dateindex = factor.index.get_level_values('date').unique()
+
+    merged_data = compute_forward_returns(factor_dateindex, prices, periods,
+                                          filter_zscore)
     merged_data['factor'] = factor
 
     if groupby is not None:
@@ -684,6 +710,9 @@ def std_conversion(period_std, base_period):
 
 
 def get_forward_returns_columns(columns):
+    """
+    Utility that detects and returns the columns that are forward returns
+    """
     pattern = re.compile(r"^(\d+([Dhms]|ms|us|ns))+$", re.IGNORECASE)
     valid_columns = [(pattern.match(col) is not None) for col in columns]
     return columns[valid_columns]
@@ -693,6 +722,15 @@ def timedelta_to_string(timedelta):
     """
     Utility that converts a pandas.Timedelta to a string representation
     compatible with pandas.Timedelta constructor format
+
+    Parameters
+    ----------
+    timedelta: pd.Timedelta
+
+    Returns
+    -------
+    string
+        string representation of 'timedelta'
     """
     c = timedelta.components
     format = ''
@@ -711,3 +749,24 @@ def timedelta_to_string(timedelta):
     if c.nanoseconds > 0:
         format += '%dns' % c.nanoseconds
     return format
+
+
+def add_custom_calendar_timedelta(input, timedelta, freq):
+    """
+    Add timedelta to 'input' taking into consideration custom frequency, which
+    is used to deal with custom calendars, such as a trading calendar
+
+    Parameters
+    ----------
+    input : pd.DatetimeIndex or pd.Timestamp
+    timedelta : pd.Timedelta
+    freq : DateOffset, optional
+
+    Returns
+    -------
+    pd.DatetimeIndex or pd.Timestamp
+        input + timedelta
+    """
+    days = timedelta.components.days
+    offset = timedelta - pd.Timedelta(days=days)
+    return input + freq * days + offset

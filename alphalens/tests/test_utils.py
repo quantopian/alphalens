@@ -53,7 +53,7 @@ class UtilsTestCase(TestCase):
         prices = DataFrame(index=dr, columns=['A', 'B'],
                            data=[[1, 1], [1, 2], [2, 1]])
 
-        fp = compute_forward_returns(prices, periods=[1, 2])
+        fp = compute_forward_returns(prices.index, prices, periods=[1, 2])
 
         ix = MultiIndex.from_product([dr, ['A', 'B']],
                                      names=['date', 'asset'])

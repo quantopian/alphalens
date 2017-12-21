@@ -768,8 +768,7 @@ def plot_cumulative_returns_by_quantile(quantile_returns,
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    ret_wide = quantile_returns.reset_index()\
-        .pivot(index='date', columns='factor_quantile', values=period)
+    ret_wide = quantile_returns.unstack('factor_quantile')
 
     cum_ret = ret_wide.apply(perf.cumulative_returns, period=period)
     cum_ret = cum_ret.loc[:, ::-1]
