@@ -190,7 +190,7 @@ def compute_forward_returns(factor_idx,
         #
         # build forward returns
         #
-        delta = prices.pct_change(period).shift(-period).loc[factor_idx]
+        delta = prices.pct_change(period).shift(-period).reindex(factor_idx)
 
         if filter_zscore is not None:
             mask = abs(delta - delta.mean()) > (filter_zscore * delta.std())
@@ -207,16 +207,21 @@ def compute_forward_returns(factor_idx,
         #
         # find the period length that will be the column name
         #
-        period_len = delta.index[period] - delta.index[0]
+        p_idx = prices.index.get_loc(delta.index[0])
+        period_len = prices.index[p_idx+period] - prices.index[p_idx]
 
         #
         # use business days as an approximation to trading calendar
         #
         if custom_calendar and period_len.components.days > 0:
-            entries_to_test = min(10, len(delta.index)-period)
-            days_diffs = \
-                [len(pd.bdate_range(delta.index[i], delta.index[period+i])) - 1
-                 for i in range(entries_to_test)]
+            entries_to_test = min(50, len(delta.index)-period)
+            days_diffs = []
+            for i in range(entries_to_test):
+                p_idx = prices.index.get_loc(delta.index[i])
+                days = len(pd.bdate_range(prices.index[p_idx],
+                                          prices.index[p_idx+period])) - 1
+                days_diffs.append(days)
+
             delta_days = period_len.components.days - mode(days_diffs).mode[0]
             period_len -= pd.Timedelta(days=delta_days)
 
