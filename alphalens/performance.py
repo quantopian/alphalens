@@ -171,6 +171,7 @@ def factor_weights(factor_data,
     if group_adjust:
         weights = weights.groupby(level='date').apply(to_weights, False)
 
+    weights.index.levels[0].freq = factor_data.index.levels[0].freq
     return weights
 
 
@@ -220,6 +221,7 @@ def factor_returns(factor_data,
     else:
         returns = weighted_returns.groupby(level='date').sum()
 
+    returns.index.freq = factor_data.index.levels[0].freq
     return returns
 
 
