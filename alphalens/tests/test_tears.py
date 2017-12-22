@@ -18,6 +18,7 @@ from unittest import TestCase
 from nose_parameterized import parameterized
 from numpy import nan
 from pandas import (DataFrame, date_range, Timedelta, concat)
+import matplotlib.pyplot as plt
 
 from .. tears import (create_returns_tear_sheet,
                       create_information_tear_sheet,
@@ -122,7 +123,7 @@ class TearsTestCase(TestCase):
                               columns=tickers, data=price_data)
     today_open_3h -= today_open_3h*0.002
     intraday_prices = concat([today_open, today_open_1h, today_open_3h]) \
-                             .sort_index()
+        .sort_index()
 
     intraday_factor = DataFrame(index=factor_index+Timedelta('9h30m'),
                                 columns=tickers, data=factor_data).stack()
@@ -258,10 +259,13 @@ class TearsTestCase(TestCase):
 
             create_full_tear_sheet(factor_data, long_short=False,
                                    group_neutral=False, by_group=False)
+            plt.close('all')
             create_full_tear_sheet(factor_data, long_short=True,
                                    group_neutral=False, by_group=True)
+            plt.close('all')
             create_full_tear_sheet(factor_data, long_short=True,
                                    group_neutral=True, by_group=True)
+            plt.close('all')
 
     @parameterized.expand([(2, (1, 5, 10), None, None),
                            (3, (2, 4, 6), 20, None),
@@ -297,6 +301,7 @@ class TearsTestCase(TestCase):
                 5, 11), long_short=True, group_neutral=False, by_group=True)
             create_event_returns_tear_sheet(factor_data, prices, avgretplot=(
                 5, 11), long_short=False, group_neutral=True, by_group=True)
+            plt.close('all')
 
     @parameterized.expand([((6, 8), None, None),
                            ((6, 8), None, None),
@@ -320,3 +325,4 @@ class TearsTestCase(TestCase):
 
             create_event_study_tear_sheet(
                 factor_data, prices, avgretplot=avgretplot)
+            plt.close('all')
