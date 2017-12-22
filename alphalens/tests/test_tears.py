@@ -31,32 +31,88 @@ from .. utils import get_clean_factor_and_forward_returns
 
 
 class TearsTestCase(TestCase):
-    price_index = date_range(start='2015-1-10', end='2015-3-22', freq='B')
-    price_index.name = 'date'
+
     tickers = ['A', 'B', 'C', 'D', 'E', 'F']
-    data = [[1.25**i, 1.50**i, 1.00**i, 0.50**i, 1.50**i, 1.00**i]
-            for i in range(1, 51)]
-    prices = DataFrame(index=price_index, columns=tickers, data=data)
-    factor_index = date_range(start='2015-1-15', end='2015-2-25', freq='B')
+
+    factor_groups = {'A': 1, 'B': 2, 'C': 1, 'D': 2, 'E': 1, 'F': 2}
+
+    price_data = [[1.25**i, 1.50**i, 1.00**i, 0.50**i, 1.50**i, 1.00**i]
+                  for i in range(1, 51)]
+
+    factor_data = [[3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
+                   [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
+                   [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
+                   [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2],
+                   [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
+                   [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2],
+                   [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2],
+                   [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2],
+                   [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2],
+                   [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2],
+                   [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
+                   [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
+                   [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
+                   [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
+                   [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2]]
+
+    event_data = [[1, nan, nan, nan, nan, nan],
+                  [4, nan, nan, 7, nan, nan],
+                  [nan, nan, nan, nan, nan, nan],
+                  [nan, 3, nan, 2, nan, nan],
+                  [1, nan, nan, nan, nan, nan],
+                  [nan, nan, 2, nan, nan, nan],
+                  [nan, nan, nan, 2, nan, nan],
+                  [nan, nan, nan, 1, nan, nan],
+                  [2, nan, nan, nan, nan, nan],
+                  [nan, nan, nan, nan, 5, nan],
+                  [nan, nan, nan, 2, nan, nan],
+                  [nan, nan, nan, nan, nan, nan],
+                  [2, nan, nan, nan, nan, nan],
+                  [nan, nan, nan, nan, nan, 5],
+                  [nan, nan, nan, 1, nan, nan],
+                  [nan, nan, nan, nan, 4, nan],
+                  [5, nan, nan, 4, nan, nan],
+                  [nan, nan, nan, 3, nan, nan],
+                  [nan, nan, nan, 4, nan, nan],
+                  [nan, nan, 2, nan, nan, nan],
+                  [5, nan, nan, nan, nan, nan],
+                  [nan, 1, nan, nan, nan, nan],
+                  [nan, nan, nan, nan, 4, nan],
+                  [0, nan, nan, nan, nan, nan],
+                  [nan, 5, nan, nan, nan, 4],
+                  [nan, nan, nan, nan, nan, nan],
+                  [nan, nan, 5, nan, nan, 3],
+                  [nan, nan, 1, 2, 3, nan],
+                  [nan, nan, nan, 5, nan, nan],
+                  [nan, nan, 1, nan, 3, nan]]
+
+    bprice_index = date_range(start='2015-1-10', end='2015-3-22', freq='B')
+    bprice_index.name = 'date'
+    bprices = DataFrame(index=bprice_index, columns=tickers, data=price_data)
+
+    bfactor_index = date_range(start='2015-1-15', end='2015-2-25', freq='B')
+    bfactor_index.name = 'date'
+    bfactor = DataFrame(index=bfactor_index, columns=tickers,
+                        data=factor_data).stack()
+
+    price_index = date_range(start='2015-1-10', end='2015-2-28')
+    price_index.name = 'date'
+    prices = DataFrame(index=price_index, columns=tickers, data=price_data)
+
+    factor_index = date_range(start='2015-1-15', end='2015-2-13')
     factor_index.name = 'date'
     factor = DataFrame(index=factor_index, columns=tickers,
-                       data=[[3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
-                             [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
-                             [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
-                             [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2],
-                             [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
-                             [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2],
-                             [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2],
-                             [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2],
-                             [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2],
-                             [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2],
-                             [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
-                             [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
-                             [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
-                             [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
-                             [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2]]) \
-        .stack()
-    factor_groups = {'A': 1, 'B': 2, 'C': 1, 'D': 2, 'E': 1, 'F': 2}
+                       data=factor_data).stack()
+
+    bevent_factor = DataFrame(index=bfactor_index, columns=tickers,
+                              data=event_data).stack()
+
+    event_factor = DataFrame(index=factor_index, columns=tickers,
+                             data=event_data).stack()
+
+    all_events = [event_factor, bevent_factor]
+    all_factors = [factor, bfactor]
+    all_prices = [prices, bprices]
 
     def __localize_prices_and_factor(self, prices, factor, tz):
         if tz is not None:
@@ -161,23 +217,25 @@ class TearsTestCase(TestCase):
         """
         Test no exceptions are thrown
         """
-        prices, factor = self.__localize_prices_and_factor(self.prices,
-                                                           self.factor, tz)
+        for factor, prices in zip(self.all_factors, self.all_prices):
 
-        factor_data = get_clean_factor_and_forward_returns(
-            factor,
-            prices,
-            groupby=self.factor_groups,
-            quantiles=quantiles,
-            periods=periods,
-            filter_zscore=filter_zscore)
+            prices, factor = self.__localize_prices_and_factor(prices,
+                                                               factor,
+                                                               tz)
+            factor_data = get_clean_factor_and_forward_returns(
+                factor,
+                prices,
+                groupby=self.factor_groups,
+                quantiles=quantiles,
+                periods=periods,
+                filter_zscore=filter_zscore)
 
-        create_full_tear_sheet(factor_data, long_short=False,
-                               group_neutral=False, by_group=False)
-        create_full_tear_sheet(factor_data, long_short=True,
-                               group_neutral=False, by_group=True)
-        create_full_tear_sheet(factor_data, long_short=True,
-                               group_neutral=True, by_group=True)
+            create_full_tear_sheet(factor_data, long_short=False,
+                                   group_neutral=False, by_group=False)
+            create_full_tear_sheet(factor_data, long_short=True,
+                                   group_neutral=False, by_group=True)
+            create_full_tear_sheet(factor_data, long_short=True,
+                                   group_neutral=True, by_group=True)
 
     @parameterized.expand([(2, (1, 5, 10), False, None),
                            (3, (2, 4, 6), True, None),
@@ -188,29 +246,31 @@ class TearsTestCase(TestCase):
         """
         Test no exceptions are thrown
         """
-        prices, factor = self.__localize_prices_and_factor(self.prices,
-                                                           self.factor, tz)
+        for factor, prices in zip(self.all_factors, self.all_prices):
 
-        factor_data = get_clean_factor_and_forward_returns(
-            factor,
-            prices,
-            groupby=self.factor_groups,
-            quantiles=quantiles,
-            periods=periods,
-            filter_zscore=filter_zscore)
+            prices, factor = self.__localize_prices_and_factor(prices,
+                                                               factor,
+                                                               tz)
+            factor_data = get_clean_factor_and_forward_returns(
+                factor,
+                prices,
+                groupby=self.factor_groups,
+                quantiles=quantiles,
+                periods=periods,
+                filter_zscore=filter_zscore)
 
-        create_event_returns_tear_sheet(factor_data, prices, avgretplot=(
-            5, 11), long_short=False, group_neutral=False, by_group=False)
-        create_event_returns_tear_sheet(factor_data, prices, avgretplot=(
-            5, 11), long_short=True, group_neutral=False, by_group=False)
-        create_event_returns_tear_sheet(factor_data, prices, avgretplot=(
-            5, 11), long_short=False, group_neutral=True, by_group=False)
-        create_event_returns_tear_sheet(factor_data, prices, avgretplot=(
-            5, 11), long_short=False, group_neutral=False, by_group=True)
-        create_event_returns_tear_sheet(factor_data, prices, avgretplot=(
-            5, 11), long_short=True, group_neutral=False, by_group=True)
-        create_event_returns_tear_sheet(factor_data, prices, avgretplot=(
-            5, 11), long_short=False, group_neutral=True, by_group=True)
+            create_event_returns_tear_sheet(factor_data, prices, avgretplot=(
+                5, 11), long_short=False, group_neutral=False, by_group=False)
+            create_event_returns_tear_sheet(factor_data, prices, avgretplot=(
+                5, 11), long_short=True, group_neutral=False, by_group=False)
+            create_event_returns_tear_sheet(factor_data, prices, avgretplot=(
+                5, 11), long_short=False, group_neutral=True, by_group=False)
+            create_event_returns_tear_sheet(factor_data, prices, avgretplot=(
+                5, 11), long_short=False, group_neutral=False, by_group=True)
+            create_event_returns_tear_sheet(factor_data, prices, avgretplot=(
+                5, 11), long_short=True, group_neutral=False, by_group=True)
+            create_event_returns_tear_sheet(factor_data, prices, avgretplot=(
+                5, 11), long_short=False, group_neutral=True, by_group=True)
 
     @parameterized.expand([((6, 8), False, None),
                            ((6, 8), False, None),
@@ -223,44 +283,14 @@ class TearsTestCase(TestCase):
         """
         Test no exceptions are thrown
         """
-        factor = DataFrame(index=self.factor_index, columns=self.tickers,
-                           data=[[1, nan, nan, nan, nan, nan],
-                                 [4, nan, nan, 7, nan, nan],
-                                 [nan, nan, nan, nan, nan, nan],
-                                 [nan, 3, nan, 2, nan, nan],
-                                 [1, nan, nan, nan, nan, nan],
-                                 [nan, nan, 2, nan, nan, nan],
-                                 [nan, nan, nan, 2, nan, nan],
-                                 [nan, nan, nan, 1, nan, nan],
-                                 [2, nan, nan, nan, nan, nan],
-                                 [nan, nan, nan, nan, 5, nan],
-                                 [nan, nan, nan, 2, nan, nan],
-                                 [nan, nan, nan, nan, nan, nan],
-                                 [2, nan, nan, nan, nan, nan],
-                                 [nan, nan, nan, nan, nan, 5],
-                                 [nan, nan, nan, 1, nan, nan],
-                                 [nan, nan, nan, nan, 4, nan],
-                                 [5, nan, nan, 4, nan, nan],
-                                 [nan, nan, nan, 3, nan, nan],
-                                 [nan, nan, nan, 4, nan, nan],
-                                 [nan, nan, 2, nan, nan, nan],
-                                 [5, nan, nan, nan, nan, nan],
-                                 [nan, 1, nan, nan, nan, nan],
-                                 [nan, nan, nan, nan, 4, nan],
-                                 [0, nan, nan, nan, nan, nan],
-                                 [nan, 5, nan, nan, nan, 4],
-                                 [nan, nan, nan, nan, nan, nan],
-                                 [nan, nan, 5, nan, nan, 3],
-                                 [nan, nan, 1, 2, 3, nan],
-                                 [nan, nan, nan, 5, nan, nan],
-                                 [nan, nan, 1, nan, 3, nan]]).stack()
+        for factor, prices in zip(self.all_events, self.all_prices):
 
-        prices, factor = self.__localize_prices_and_factor(self.prices, factor,
-                                                           tz)
+            prices, factor = self.__localize_prices_and_factor(prices,
+                                                               factor,
+                                                               tz)
+            factor_data = get_clean_factor_and_forward_returns(
+                factor, prices, bins=1, quantiles=None, periods=(
+                    1, 2), filter_zscore=filter_zscore)
 
-        factor_data = get_clean_factor_and_forward_returns(
-            factor, prices, bins=1, quantiles=None, periods=(
-                1, 2), filter_zscore=filter_zscore)
-
-        create_event_study_tear_sheet(
-            factor_data, prices, avgretplot=avgretplot)
+            create_event_study_tear_sheet(
+                factor_data, prices, avgretplot=avgretplot)
