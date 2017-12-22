@@ -274,13 +274,17 @@ def factor_alpha_beta(factor_data, demeaned=True, group_adjust=False):
         x = add_constant(x)
 
         reg_fit = OLS(y, x).fit()
-        alpha, beta = reg_fit.params
+        try:
+            alpha, beta = reg_fit.params
+        except ValueError:
+            alpha_beta.loc['Ann. alpha', period] = np.nan
+            alpha_beta.loc['beta', period] = np.nan
+        else:
+            freq_adjust = pd.Timedelta('252Days') / pd.Timedelta(period)
 
-        freq_adjust = pd.Timedelta('252Days') / pd.Timedelta(period)
-
-        alpha_beta.loc['Ann. alpha', period] = \
-            (1 + alpha) ** freq_adjust - 1
-        alpha_beta.loc['beta', period] = beta
+            alpha_beta.loc['Ann. alpha', period] = \
+                (1 + alpha) ** freq_adjust - 1
+            alpha_beta.loc['beta', period] = beta
 
     return alpha_beta
 
