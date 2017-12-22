@@ -492,7 +492,7 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
-
+    
     if isinstance(mean_returns_spread, pd.DataFrame):
         if ax is None:
             ax = [None for a in mean_returns_spread.columns]
@@ -512,6 +512,9 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
         for a in ax:
             a.set_ylim([ymin, ymax])
 
+        return ax
+
+    if mean_returns_spread.isnull().all():
         return ax
 
     periods = mean_returns_spread.name
