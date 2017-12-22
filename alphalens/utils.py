@@ -200,7 +200,8 @@ def compute_forward_returns(factor_idx,
         # if the period length is not consistent across the factor index then
         # it must be a trading/business day calendar
         #
-        time_diffs = delta.index.to_series().diff(period)
+        time_diffs = prices.index.to_series().diff(period)
+        time_diffs = time_diffs.reindex(factor_idx)
         if time_diffs.min() != time_diffs.max():
             custom_calendar = True
 
