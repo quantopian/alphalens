@@ -18,7 +18,6 @@ from unittest import TestCase
 from nose_parameterized import parameterized
 from numpy import nan
 from pandas import (DataFrame, date_range, Timedelta, concat)
-import matplotlib.pyplot as plt
 
 from .. tears import (create_returns_tear_sheet,
                       create_information_tear_sheet,
@@ -259,13 +258,10 @@ class TearsTestCase(TestCase):
 
             create_full_tear_sheet(factor_data, long_short=False,
                                    group_neutral=False, by_group=False)
-            plt.close('all')
             create_full_tear_sheet(factor_data, long_short=True,
                                    group_neutral=False, by_group=True)
-            plt.close('all')
             create_full_tear_sheet(factor_data, long_short=True,
                                    group_neutral=True, by_group=True)
-            plt.close('all')
 
     @parameterized.expand([(2, (1, 5, 10), None, None),
                            (3, (2, 4, 6), 20, None),
@@ -301,7 +297,6 @@ class TearsTestCase(TestCase):
                 5, 11), long_short=True, group_neutral=False, by_group=True)
             create_event_returns_tear_sheet(factor_data, prices, avgretplot=(
                 5, 11), long_short=False, group_neutral=True, by_group=True)
-            plt.close('all')
 
     @parameterized.expand([((6, 8), None, None),
                            ((6, 8), None, None),
@@ -325,4 +320,3 @@ class TearsTestCase(TestCase):
 
             create_event_study_tear_sheet(
                 factor_data, prices, avgretplot=avgretplot)
-            plt.close('all')
