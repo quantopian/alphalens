@@ -55,6 +55,11 @@ class GridFigure(object):
         self.curr_col += 1
         return subplt
 
+    def close(self):
+        plt.close(self.fig)
+        self.fig = None
+        self.gs = None
+
 
 def create_full_tear_sheet_api_change_warning(func):
     """
@@ -252,6 +257,7 @@ def create_summary_tear_sheet(factor_data,
                                        by_group=False,
                                        ylim_percentiles=None,
                                        ax=gf.next_row())
+    gf.close()
 
     # Information Analysis
     ic = perf.factor_information_coefficient(factor_data)
@@ -379,6 +385,8 @@ def create_returns_tear_sheet(factor_data,
         ax=ax_mean_quantile_returns_spread_ts
     )
 
+    gf.close()
+
     if by_group:
         mean_return_quantile_group, mean_return_quantile_group_std_err = \
             perf.mean_return_by_quantile(factor_data,
@@ -404,6 +412,7 @@ def create_returns_tear_sheet(factor_data,
                                            by_group=True,
                                            ylim_percentiles=(5, 95),
                                            ax=ax_quantile_returns_bar_by_group)
+        gf.close()
 
 
 @create_information_tear_sheet_api_change_warning
@@ -464,6 +473,8 @@ def create_information_tear_sheet(factor_data,
 
         plotting.plot_ic_by_group(mean_group_ic, ax=gf.next_row())
 
+    gf.close()
+
 
 @plotting.customize
 def create_turnover_tear_sheet(factor_data, turnover_periods=None):
@@ -520,6 +531,8 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None):
         plotting.plot_factor_rank_auto_correlation(autocorrelation[period],
                                                    period=period,
                                                    ax=gf.next_row())
+
+    gf.close()
 
 
 @create_full_tear_sheet_api_change_warning
@@ -632,6 +645,8 @@ def create_event_returns_tear_sheet(factor_data,
         std_bar=True,
         ax=ax_avg_cumulative_returns_by_q)
 
+    gf.close()
+
     if by_group:
         groups = factor_data['group'].unique()
         num_groups = len(groups)
@@ -656,6 +671,8 @@ def create_event_returns_tear_sheet(factor_data,
                 std_bar=False,
                 title=group,
                 ax=gf.next_cell())
+
+        gf.close()
 
 
 @plotting.customize
@@ -686,6 +703,7 @@ def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
     gf = GridFigure(rows=1, cols=1)
     plotting.plot_events_distribution(events=factor_data['factor'],
                                       ax=gf.next_row())
+    gf.close()
 
     if prices is not None and avgretplot is not None:
 
@@ -732,3 +750,5 @@ def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
         plotting.plot_cumulative_returns_by_quantile(mean_quant_ret_bydate[c],
                                                      period=c,
                                                      ax=gf.next_row())
+
+    gf.close()
