@@ -257,6 +257,7 @@ def create_summary_tear_sheet(factor_data,
                                        by_group=False,
                                        ylim_percentiles=None,
                                        ax=gf.next_row())
+    plt.show()
     gf.close()
 
     # Information Analysis
@@ -385,6 +386,7 @@ def create_returns_tear_sheet(factor_data,
         ax=ax_mean_quantile_returns_spread_ts
     )
 
+    plt.show()
     gf.close()
 
     if by_group:
@@ -412,6 +414,7 @@ def create_returns_tear_sheet(factor_data,
                                            by_group=True,
                                            ylim_percentiles=(5, 95),
                                            ax=ax_quantile_returns_bar_by_group)
+        plt.show()
         gf.close()
 
 
@@ -473,6 +476,7 @@ def create_information_tear_sheet(factor_data,
 
         plotting.plot_ic_by_group(mean_group_ic, ax=gf.next_row())
 
+    plt.show()
     gf.close()
 
 
@@ -532,6 +536,7 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None):
                                                    period=period,
                                                    ax=gf.next_row())
 
+    plt.show()
     gf.close()
 
 
@@ -645,6 +650,7 @@ def create_event_returns_tear_sheet(factor_data,
         std_bar=True,
         ax=ax_avg_cumulative_returns_by_q)
 
+    plt.show()
     gf.close()
 
     if by_group:
@@ -672,6 +678,7 @@ def create_event_returns_tear_sheet(factor_data,
                 title=group,
                 ax=gf.next_cell())
 
+        plt.show()
         gf.close()
 
 
@@ -703,6 +710,7 @@ def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
     gf = GridFigure(rows=1, cols=1)
     plotting.plot_events_distribution(events=factor_data['factor'],
                                       ax=gf.next_row())
+    plt.show()
     gf.close()
 
     if prices is not None and avgretplot is not None:
@@ -751,4 +759,5 @@ def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
                                                      period=c,
                                                      ax=gf.next_row())
 
+    plt.show()
     gf.close()
