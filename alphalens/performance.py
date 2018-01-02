@@ -413,7 +413,7 @@ def cumulative_returns(returns, period, freq=None):
 
             subret[pret_idx] = np.nan
 
-            # transform returns as percentage to previous value for later
+            # transform returns as percentage change from previous value
             subret[slice[1:]] = (subret[slice] + 1).pct_change()[slice[1:]]
 
         sub_returns.append(subret)
