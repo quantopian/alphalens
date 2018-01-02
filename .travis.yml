@@ -1,10 +1,20 @@
 language: python
 sudo: false
 
-python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
+python: 
+  - 2.7
+  - 3.5
+  - 3.6
+
+env:
+  - PANDAS_VERSION=0.18.1
+  - PANDAS_VERSION=0.19.2
+  - PANDAS_VERSION=0.20.3
+
+matrix:
+  exclude:
+  - python: 3.6
+    env: PANDAS_VERSION=0.18.1
 
 before_install:
   # We do this conditionally because it saves us some downloading if the
@@ -24,7 +34,7 @@ before_install:
   - cp alphalens/tests/matplotlibrc .
 
 install:
-  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython flake8 numpy scipy nose matplotlib pandas statsmodels seaborn
+  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython flake8 numpy scipy nose matplotlib pandas=$PANDAS_VERSION statsmodels seaborn
   - source activate testenv
   - pip install nose_parameterized
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes mock; fi
