@@ -395,6 +395,10 @@ def create_returns_tear_sheet(factor_data,
                                            ylim_percentiles=(5, 95),
                                            ax=ax_quantile_returns_bar_by_group)
 
+    if factor_returns.index.tzinfo is None:
+        warnings.warn("to do a risk factor performance attribution,"
+                      "you must pass in a tz-aware Series")
+        return
     ff_factors = ep.utils.load_portfolio_risk_factors() \
         .drop(['RF'], axis='columns')
     hierarchy = OrderedDict([
@@ -402,10 +406,6 @@ def create_returns_tear_sheet(factor_data,
         ('Market', ['Mkt-RF']),
         ('Style', ['SMB', 'HML', 'Mom'])
     ])
-    if factor_returns.index.tzinfo is None:
-        factor_returns.index = factor_returns.index.tz_localize('UTC')
-    else:
-        factor_returns.tz_convert('UTC')
     for i, period in enumerate(factor_returns.columns.values):
         returns_decomposition = \
             perf.decompose_returns(factor_returns.iloc[:, i],
