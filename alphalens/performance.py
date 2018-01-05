@@ -26,6 +26,7 @@ from . import utils
 
 
 def factor_information_coefficient(factor_data,
+                                   group_adjust=False,
                                    by_group=False):
     """
     Computes the Spearman Rank Correlation based Information Coefficient (IC)
@@ -40,6 +41,8 @@ def factor_information_coefficient(factor_data,
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
+    group_adjust : bool
+        Demean forward returns by group before computing IC.
     by_group : bool
         If True, compute period wise IC separately for each group.
 
@@ -60,16 +63,19 @@ def factor_information_coefficient(factor_data,
 
     grouper = [factor_data.index.get_level_values('date')]
 
+    if group_adjust:
+        factor_data = utils.demean_forward_returns(factor_data,
+                                                   grouper + ['group'])
     if by_group:
         grouper.append('group')
 
     ic = factor_data.groupby(grouper).apply(src_ic)
-    ic.columns = pd.Int64Index(ic.columns)
 
     return ic
 
 
 def mean_information_coefficient(factor_data,
+                                 group_adjust=False,
                                  by_group=False,
                                  by_time=None):
     """
@@ -87,6 +93,8 @@ def mean_information_coefficient(factor_data,
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
+    group_adjust : bool
+        Demean forward returns by group before computing IC.
     by_group : bool
         If True, take the mean IC for each group.
     by_time : str (pd time_rule), optional
@@ -101,11 +109,11 @@ def mean_information_coefficient(factor_data,
         forward price movement windows.
     """
 
-    ic = factor_information_coefficient(factor_data, by_group)
+    ic = factor_information_coefficient(factor_data, group_adjust, by_group)
 
     grouper = []
     if by_time is not None:
-        grouper.append(pd.TimeGrouper(by_time))
+        grouper.append(pd.Grouper(freq=by_time))
     if by_group:
         grouper.append('group')
 
@@ -115,12 +123,66 @@ def mean_information_coefficient(factor_data,
     else:
         ic = (ic.reset_index().set_index('date').groupby(grouper).mean())
 
-    ic.columns = pd.Int64Index(ic.columns)
-
     return ic
 
 
-def factor_returns(factor_data, demeaned=True, group_adjust=False):
+def factor_weights(factor_data,
+                   demeaned=True,
+                   group_adjust=False):
+    """
+    Computes asset weights by factor values. Weights are computed by demeaning
+    factors and dividing by the sum of their absolute value (achieving gross
+    leverage of 1).
+
+    Parameters
+    ----------
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for
+        each period, the factor quantile/bin that factor value belongs to, and
+        (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
+    demeaned : bool
+        Should this computation happen on a long short portfolio? if True,
+        then factor values will be demeaned across factor universe when
+        factor weighting the portfolio.
+    group_adjust : bool
+        Should this computation happen on a group neutral portfolio? If True,
+        compute group neutral weights: each group will weight the same and
+        factor values demeaning will occur on the group level.
+
+    Returns
+    -------
+    returns : pd.DataFrame
+        Assets weighted by factor value.
+    """
+
+    def to_weights(group, is_long_short):
+        if is_long_short:
+            demeaned_vals = group - group.mean()
+            return demeaned_vals / demeaned_vals.abs().sum()
+        else:
+            return group / group.abs().sum()
+
+    grouper = [factor_data.index.get_level_values('date')]
+    if group_adjust:
+        grouper.append('group')
+
+    weights = factor_data.groupby(grouper)['factor'] \
+        .apply(to_weights, demeaned)
+
+    if group_adjust:
+        weights = weights.groupby(level='date').apply(to_weights, False)
+
+    # preserve freq, which contains trading calendar information
+    weights.index.levels[0].freq = factor_data.index.levels[0].freq
+    return weights
+
+
+def factor_returns(factor_data,
+                   demeaned=True,
+                   group_adjust=False,
+                   by_asset=False):
     """
     Computes period wise returns for portfolio weighted by factor
     values. Weights are computed by demeaning factors and dividing
@@ -142,6 +204,8 @@ def factor_returns(factor_data, demeaned=True, group_adjust=False):
         Should this computation happen on a group neutral portfolio? If True,
         compute group neutral returns: each group will weight the same and
         returns demeaning will occur on the group level.
+    by_asset: bool, optional
+        If True, returns are reported separately for each esset.
 
     Returns
     -------
@@ -150,29 +214,19 @@ def factor_returns(factor_data, demeaned=True, group_adjust=False):
         value.
     """
 
-    def to_weights(group, is_long_short):
-        if is_long_short:
-            demeaned_vals = group - group.mean()
-            return demeaned_vals / demeaned_vals.abs().sum()
-        else:
-            return group / group.abs().sum()
-
-    grouper = [factor_data.index.get_level_values('date')]
-    if group_adjust:
-        grouper.append('group')
-
-    weights = factor_data.groupby(grouper)['factor'] \
-        .apply(to_weights, demeaned)
-
-    if group_adjust:
-        weights = weights.groupby(level='date').apply(to_weights, False)
+    weights = factor_weights(factor_data, demeaned, group_adjust)
 
     weighted_returns = \
         factor_data[utils.get_forward_returns_columns(factor_data.columns)] \
         .multiply(weights, axis=0)
 
-    returns = weighted_returns.groupby(level='date').sum()
+    if by_asset:
+        returns = weighted_returns
+    else:
+        returns = weighted_returns.groupby(level='date').sum()
 
+    # preserve freq, which contains trading calendar information
+    returns.index.freq = factor_data.index.levels[0].freq
     return returns
 
 
@@ -223,13 +277,175 @@ def factor_alpha_beta(factor_data, demeaned=True, group_adjust=False):
         x = add_constant(x)
 
         reg_fit = OLS(y, x).fit()
-        alpha, beta = reg_fit.params
+        try:
+            alpha, beta = reg_fit.params
+        except ValueError:
+            alpha_beta.loc['Ann. alpha', period] = np.nan
+            alpha_beta.loc['beta', period] = np.nan
+        else:
+            freq_adjust = pd.Timedelta('252Days') / pd.Timedelta(period)
 
-        alpha_beta.loc['Ann. alpha', period] = \
-            (1 + alpha) ** (252.0 / period) - 1
-        alpha_beta.loc['beta', period] = beta
+            alpha_beta.loc['Ann. alpha', period] = \
+                (1 + alpha) ** freq_adjust - 1
+            alpha_beta.loc['beta', period] = beta
 
     return alpha_beta
+
+
+def cumulative_returns(returns, period, freq=None):
+    """
+    Builds cumulative returns from 'period' returns. This function simulate the
+    cumulative effect that a series of gains or losses (the 'retuns') have on
+    an original amount of capital over a period of time.
+
+    if F is the frequency at which returns are computed (e.g. 1 day if
+    'returns' contains daily values) and N is the period for which the retuns
+    are computed (e.g. returns after 1 day, 5 hours or 3 days) then:
+    - if N <= F the cumulative retuns are trivially computed as Compound Return
+    - if N > F (e.g. F 1 day, and N is 3 days) then the returns overlap and the
+      cumulative returns are computed building and averaging N interleaved sub
+      portfolios (started at subsequent periods 1,2,..,N) each one rebalancing
+      every N periods. This correspond to an algorithm which trades the factor
+      every single time it is computed, which is statistically more robust and
+      with a lower volatity compared to an algorithm that trades the factor
+      every N periods and whose returns depend on the specific starting day of
+      trading.
+
+    Also note that when the factor is not computed at a specific frequency, for
+    exaple a factor representing a random event, it is not efficient to create
+    multiples sub-portfolios as it is not certain when the factor will be
+    traded and this would result in an underleveraged portfolio. In this case
+    the simulated portfolio is fully invested whenever an event happens and if
+    a subsequent event occur while the portfolio is still invested in a
+    previous event then the portfolio is rebalanced and split equally among the
+    active events.
+
+    Parameters
+    ----------
+    returns: pd.Series
+        pd.Series containing factor 'period' forward returns, the index
+        contains timestamps at which the trades are computed and the values
+        correspond to returns after 'period' time
+    period: pandas.Timedelta or string
+        Length of period for which the returns are computed (1 day, 2 mins,
+        3 hours etc). It can be a Timedelta or a string in the format accepted
+        by Timedelta constructor ('1 days', '1D', '30m', '3h', '1D1h', etc)
+    freq : pandas DateOffset, optional
+        Used to specify a particular trading calendar. If not present
+        returns.index.freq will be used
+
+    Returns
+    -------
+    pd.Series
+        Cumulative returns series
+    """
+
+    if not isinstance(period, pd.Timedelta):
+        period = pd.Timedelta(period)
+
+    if freq is None:
+        freq = returns.index.freq
+
+    #
+    # index contains factor computation timestamps, then add returns timestamps
+    # too (factor timestamps + period) and save them to 'full_idx'
+    # Cumulative returns will use 'full_idx' index,because we want a cumulative
+    # returns value for each entry in 'full_idx'
+    #
+    trades_idx = returns.index.copy()
+    returns_idx = utils.add_custom_calendar_timedelta(trades_idx, period, freq)
+    full_idx = trades_idx.union(returns_idx)
+
+    #
+    # Build N sub_returns from the single returns Series. Each sub_retuns
+    # stream will contain non overlapping retuns.
+    # In the next step we'll compute the portfolio returns averaging the
+    # returns happening on those overlapping returns streams
+    #
+    sub_returns = []
+    while len(trades_idx) > 0:
+
+        #
+        # select non-overlapping returns starting with first timestamp in index
+        #
+        sub_index = []
+        next = trades_idx.min()
+        while next <= trades_idx.max():
+            sub_index.append(next)
+            next = utils.add_custom_calendar_timedelta(next, period, freq)
+            # make sure to fetch the next available entry after 'period'
+            try:
+                i = trades_idx.get_loc(next, method='bfill')
+                next = trades_idx[i]
+            except KeyError:
+                break
+
+        sub_index = pd.DatetimeIndex(sub_index, tz=full_idx.tz)
+        subret = returns[sub_index]
+
+        # make the index to have all entries in 'full_idx'
+        subret = subret.reindex(full_idx)
+
+        #
+        # compute intermediate returns values for each index in subret that are
+        # in between the timestaps at which the factors are computed and the
+        # timestamps at which the 'period' actually returns happen
+        #
+        for pret_idx in reversed(sub_index):
+
+            pret = subret[pret_idx]
+
+            # get all timestamps between factor computation and period returns
+            pret_end_idx = \
+                utils.add_custom_calendar_timedelta(pret_idx, period, freq)
+            slice = subret[(subret.index > pret_idx) & (
+                subret.index <= pret_end_idx)].index
+
+            if pd.isnull(pret):
+                continue
+
+            def rate_of_returns(ret, period):
+                return ((np.nansum(ret) + 1)**(1. / period)) - 1
+
+            # compute intermediate 'period' returns values, note that this also
+            # moves the final 'period' returns value from trading timestamp to
+            # trading timestamp + 'period'
+            for slice_idx in slice:
+                sub_period = (pret_end_idx - pret_idx) / (slice_idx - pret_idx)
+                subret[slice_idx] = rate_of_returns(pret, sub_period)
+
+            subret[pret_idx] = np.nan
+
+            # transform returns as percentage to previous value for later
+            subret[slice[1:]] = (subret[slice] + 1).pct_change()[slice[1:]]
+
+        sub_returns.append(subret)
+        trades_idx = trades_idx.difference(sub_index)
+
+    #
+    # Compute portfolio cumulative returns averaging the returns happening on
+    # overlapping returns streams. Please note that the below algorithm keeps
+    # into consideration the scenario where a factor is not computed at a fixed
+    # frequency (e.g. every day) and consequently the returns appears randomly
+    #
+    sub_portfolios = pd.concat(sub_returns, axis=1)
+    portfolio = pd.Series(index=sub_portfolios.index)
+
+    for i, (index, row) in enumerate(sub_portfolios.iterrows()):
+
+        # check the active portfolios, count() returns non-nans elements
+        active_subfolios = row.count()
+
+        # fill forward portfolio value
+        portfolio.iloc[i] = portfolio.iloc[i - 1] if i > 0 else 1.
+
+        if active_subfolios <= 0:
+            continue
+
+        # current portfolio is the average of active sub_portfolios
+        portfolio.iloc[i] *= (row + 1).mean(skipna=True)
+
+    return portfolio
 
 
 def mean_return_by_quantile(factor_data,
@@ -348,8 +564,10 @@ def quantile_turnover(quantile_factor, quantile, period=1):
         DataFrame with date, asset and factor quantile.
     quantile : int
         Quantile on which to perform turnover analysis.
-    period: int, optional
-        Period over which to calculate the turnover
+    period: string or int, optional
+        Period over which to calculate the turnover. If it is a string it must
+        follow pandas.Timedelta constructor format (e.g. '1 days', '1D', '30m',
+        '3h', '1D1h', etc).
     Returns
     -------
     quant_turnover : pd.Series
@@ -359,7 +577,16 @@ def quantile_turnover(quantile_factor, quantile, period=1):
     quant_names = quantile_factor[quantile_factor == quantile]
     quant_name_sets = quant_names.groupby(level=['date']).apply(
         lambda x: set(x.index.get_level_values('asset')))
-    new_names = (quant_name_sets - quant_name_sets.shift(period)).dropna()
+
+    if isinstance(period, int):
+        shift = period
+    else:
+        # find the frequency at which the factor is computed
+        idx = quant_name_sets.index
+        freq = min([idx[i] - idx[i-1] for i in range(1, min(10, len(idx)))])
+        shift = int(pd.Timedelta(period) / freq)
+
+    new_names = (quant_name_sets - quant_name_sets.shift(shift)).dropna()
     quant_turnover = new_names.apply(
         lambda x: len(x)) / quant_name_sets.apply(lambda x: len(x))
     quant_turnover.name = quantile
@@ -383,9 +610,10 @@ def factor_rank_autocorrelation(factor_data, period=1):
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
-    period: int, optional
-        Period over which to calculate the autocorrelation
-
+    period: string or int, optional
+        Period over which to calculate the turnover. If it is a string it must
+        follow pandas.Timedelta constructor format (e.g. '1 days', '1D', '30m',
+        '3h', '1D1h', etc).
     Returns
     -------
     autocorr : pd.Series
@@ -402,7 +630,15 @@ def factor_rank_autocorrelation(factor_data, period=1):
                                                   columns='asset',
                                                   values='factor')
 
-    autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(period),
+    if isinstance(period, int):
+        shift = period
+    else:
+        # find the frequency at which the factor is computed
+        idx = asset_factor_rank.index
+        freq = min([idx[i] - idx[i-1] for i in range(1, min(10, len(idx)))])
+        shift = int(pd.Timedelta(period) / freq)
+
+    autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(shift),
                                           axis=1)
     autocorr.name = period
     return autocorr
@@ -635,3 +871,96 @@ def decompose_returns(algo_returns, risk_factors, hierarchy=None):
                       Warning)
 
     return returns_decomposition, betas, t_stats, vifs
+
+def create_pyfolio_input(factor_data,
+                         period,
+                         long_short=True,
+                         group_neutral=False,
+                         quantiles=None,
+                         groups=None):
+    """
+
+    WARNING: this API is still in experimental phase and input/output
+             paramenters might change in the future
+
+    Simulate a portfolio using the factor in input and returns a DataFrames
+    containing the portfolio returns formatted for pyfolio.
+
+    For more details on how this portfolio is built see:
+    - performance.factor_returns (how assets weights are computed)
+    - performance.cumulative_returns (how the portfolio returns are computed)
+
+    Parameters
+    ----------
+    factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for
+        each period, the factor quantile/bin that factor value belongs to,
+        and (optionally) the group the asset belongs to.
+        - See full explanation in utils.get_clean_factor_and_forward_returns
+    period : string
+        'factor_data' column name corresponding to the 'period' returns to be
+        used in the computation of porfolio returns
+    long_short : bool, optional
+        Should this computation happen on a long short portfolio? if so, then
+        factor values will be demeaned across the factor universe when factor
+        weighting the portfolio for cumulative returns plots
+    group_neutral : bool, optional
+        Should this computation happen on a group neutral portfolio? if so,
+        factor values demeaning will occur on the group level.
+        Additionally each group will weight the same in cumulative returns
+        plots
+    quantiles: sequence[int], optional
+        Use only specific quantiles in the computation. By default all
+        quantiles are used
+    groups: sequence[string], optional
+        Use only specific groups in the computation. By default all groups
+        are used
+
+
+    Returns
+    -------
+     returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+
+     benchmark : pd.Series
+        Benchmark returns computed as the factor universe mean daily returns.
+        If '1D' period column is not present in the factor_data the beanchmark
+        returns is not computed and returned as 'None'
+    """
+
+    portfolio_data = factor_data
+
+    if quantiles is not None:
+        portfolio_data = portfolio_data[portfolio_data['factor_quantile'].isin(
+            quantiles)]
+
+    if groups is not None:
+        portfolio_data = portfolio_data[portfolio_data['group'].isin(groups)]
+
+    #
+    # Build returns:
+    # we don't know the frequency at which the factor returns are computed but
+    # pyfolio wants daily returns. So we compute the cumulative returns of the
+    # factor, then resample it at 1 day frequency and finally compute daily
+    # returns
+    #
+    returns = factor_returns(portfolio_data, long_short, group_neutral)
+    returns = cumulative_returns(returns[period], period)
+    returns = returns.resample('1D').last()
+    returns = returns.pct_change().fillna(0)
+
+    #
+    #
+    #
+    # Build benchmark returns as the factor universe mean daily return
+    #
+    if '1D' in utils.get_forward_returns_columns(factor_data.columns):
+        benchmark_rets = factor_data.groupby(level='date')['1D'] \
+                                    .mean().loc[returns.index]
+    else:
+        benchmark_rets = None
+        print("Cannot computed benchmark daily returns: '1D' not present"
+              " in 'factor_data' periods column")
+
+    return returns, benchmark_rets

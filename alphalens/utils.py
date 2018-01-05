@@ -15,10 +15,13 @@
 
 import pandas as pd
 import numpy as np
-from IPython.display import display
 import warnings
+import re
 
+from IPython.display import display
 from functools import wraps
+from pandas.tseries.offsets import BDay, Day
+from scipy.stats import mode
 
 
 class NonMatchingTimezoneError(Exception):
@@ -143,13 +146,18 @@ def quantize_factor(factor_data,
     return factor_quantile.dropna()
 
 
-def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
+def compute_forward_returns(factor_idx,
+                            prices,
+                            periods=(1, 5, 10),
+                            filter_zscore=None):
     """
     Finds the N period forward returns (as percent change) for each asset
     provided.
 
     Parameters
     ----------
+    factor_idx : pd.DatetimeIndex
+        The factor datetimes for which we are computing the forward returns
     prices : pd.DataFrame
         Pricing data to use in forward price calculation.
         Assets as columns, dates as index. Pricing data must
@@ -158,9 +166,9 @@ def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
         in the forward returns calculations.
     periods : sequence[int]
         periods to compute forward returns on.
-    filter_zscore : int or float
+    filter_zscore : int or float, optional
         Sets forward returns greater than X standard deviations
-        from the the mean to nan.
+        from the the mean to nan. Set it to 'None' to avoid filtering.
         Caution: this outlier filtering incorporates lookahead bias.
 
     Returns
@@ -170,19 +178,66 @@ def compute_forward_returns(prices, periods=(1, 5, 10), filter_zscore=None):
         Separate column for each forward return window.
     """
 
+    factor_idx = factor_idx.intersection(prices.index)
+
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
-        [prices.index, prices.columns], names=['date', 'asset']))
+        [factor_idx, prices.columns], names=['date', 'asset']))
+
+    custom_calendar = False
 
     for period in periods:
-        delta = prices.pct_change(period).shift(-period)
+
+        #
+        # build forward returns
+        #
+        delta = prices.pct_change(period).shift(-period).reindex(factor_idx)
 
         if filter_zscore is not None:
             mask = abs(delta - delta.mean()) > (filter_zscore * delta.std())
             delta[mask] = np.nan
 
-        forward_returns[period] = delta.stack()
+        #
+        # if the period length is not consistent across the factor index then
+        # it must be a trading/business day calendar
+        #
+        time_diffs = prices.index.to_series().diff(period)
+        time_diffs = time_diffs.reindex(factor_idx)
+        if time_diffs.min() != time_diffs.max():
+            custom_calendar = True
+
+        #
+        # find the period length that will be the column name
+        #
+        p_idx = prices.index.get_loc(delta.index[0])
+        period_len = prices.index[p_idx+period] - prices.index[p_idx]
+
+        #
+        # use business days as an approximation to trading calendar
+        #
+        if custom_calendar and period_len.components.days > 0:
+            entries_to_test = min(50, len(delta.index)-period)
+            days_diffs = []
+            for i in range(entries_to_test):
+                p_idx = prices.index.get_loc(delta.index[i])
+                days = len(pd.bdate_range(prices.index[p_idx],
+                                          prices.index[p_idx+period])) - 1
+                days_diffs.append(days)
+
+            delta_days = period_len.components.days - mode(days_diffs).mode[0]
+            period_len -= pd.Timedelta(days=delta_days)
+
+        column_name = timedelta_to_string(period_len)
+        forward_returns[column_name] = delta.stack()
 
     forward_returns.index = forward_returns.index.rename(['date', 'asset'])
+
+    # use business days as an approximation to trading calendar, if this will
+    # be proven to be a poor approximation then we could build a pandas
+    # AbstractHolidayCalendar inferring non-trading days from price DataFrame
+    # and use it to build a CustomBusinessDay DateOffset that we can finally
+    # set it as index 'freq'
+    freq = BDay() if custom_calendar else Day()
+    forward_returns.index.levels[0].freq = freq
 
     return forward_returns
 
@@ -313,17 +368,17 @@ def get_clean_factor_and_forward_returns(factor,
                                          periods=(1, 5, 10),
                                          filter_zscore=20,
                                          groupby_labels=None,
-                                         max_loss=0.25):
+                                         max_loss=0.35):
     """
     Formats the factor data, pricing data, and group mappings
     into a DataFrame that contains aligned MultiIndex
-    indices of date and asset.
+    indices of timestamp and asset.
 
     Parameters
     ----------
     factor : pd.Series - MultiIndex
-        A MultiIndex Series indexed by date (level 0) and asset (level 1),
-        containing the values for a single alpha factor.
+        A MultiIndex Series indexed by timestamp (level 0) and asset
+        (level 1), containing the values for a single alpha factor.
         ::
             -----------------------------------
                 date    |    asset   |
@@ -340,7 +395,7 @@ def get_clean_factor_and_forward_returns(factor,
                         -----------------------
 
     prices : pd.DataFrame
-        A wide form Pandas DataFrame indexed by date with assets
+        A wide form Pandas DataFrame indexed by timestamp with assets
         in the columns. It is important to pass the
         correct pricing data in depending on what time of period your
         signal was generated so to avoid lookahead bias, or
@@ -348,14 +403,14 @@ def get_clean_factor_and_forward_returns(factor,
         analysis time period plus an additional buffer window
         that is greater than the maximum number of expected periods
         in the forward returns calculations.
-        'Prices' must contain at least an entry for each date/asset
+        'Prices' must contain at least an entry for each timestamp/asset
         combination in 'factor'. This entry must be the asset price
         at the time the asset factor value is computed and it will be
-        considered the buy price for that asset at that date.
-        'Prices' must also contain entries for dates following each
-        date/asset combination in 'factor', as many more dates as the
-        maximum value in 'periods'. The asset price after 'period'
-        dates will be considered the sell price for that asset when
+        considered the buy price for that asset at that timestamp.
+        'Prices' must also contain entries for timestamps following each
+        timestamp/asset combination in 'factor', as many more timestamps
+        as the maximum value in 'periods'. The asset price after 'period'
+        timestamps will be considered the sell price for that asset when
         computing 'period' forward returns.
         ::
             ----------------------------------------------------
@@ -396,9 +451,9 @@ def get_clean_factor_and_forward_returns(factor,
         Only one of 'quantiles' or 'bins' can be not-None
     periods : sequence[int]
         periods to compute forward returns on.
-    filter_zscore : int or float
+    filter_zscore : int or float, optional
         Sets forward returns greater than X standard deviations
-        from the the mean to nan.
+        from the the mean to nan. Set it to 'None' to avoid filtering.
         Caution: this outlier filtering incorporates lookahead bias.
     groupby_labels : dict
         A dictionary keyed by group code with values corresponding
@@ -422,7 +477,7 @@ def get_clean_factor_and_forward_returns(factor,
         (optionally) the group the asset belongs to.
         ::
            -------------------------------------------------------------------
-                      |       |  1  |  5  |  10  |factor|group|factor_quantile
+                      |       | 1D  | 5D  | 10D  |factor|group|factor_quantile
            -------------------------------------------------------------------
                date   | asset |     |     |      |      |     |
            -------------------------------------------------------------------
@@ -444,12 +499,16 @@ def get_clean_factor_and_forward_returns(factor,
                                        "the pandas methods tz_localize and "
                                        "tz_convert.")
 
-    initial_amount = float(len(factor.index))
+    periods = sorted(periods)
 
-    merged_data = compute_forward_returns(prices, periods, filter_zscore)
+    initial_amount = float(len(factor.index))
 
     factor = factor.copy()
     factor.index = factor.index.rename(['date', 'asset'])
+    factor_dateindex = factor.index.get_level_values('date').unique()
+
+    merged_data = compute_forward_returns(factor_dateindex, prices, periods,
+                                          filter_zscore)
     merged_data['factor'] = factor
 
     if groupby is not None:
@@ -498,15 +557,17 @@ def get_clean_factor_and_forward_returns(factor,
     fwdret_loss = (initial_amount - fwdret_amount) / initial_amount
     bin_loss = tot_loss - fwdret_loss
 
-    print("Dropped %.1f%% entries from factor data (%.1f%% after "
-          "in forward returns computation and %.1f%% in binning phase). "
-          "Set max_loss=0 to see potentially suppressed Exceptions." %
+    print("Dropped %.1f%% entries from factor data: %.1f%% in forward "
+          "returns computation and %.1f%% in binning phase "
+          "(set max_loss=0 to see potentially suppressed Exceptions)." %
           (tot_loss * 100, fwdret_loss * 100,  bin_loss * 100))
 
     if tot_loss > max_loss:
         message = ("max_loss (%.1f%%) exceeded %.1f%%, consider increasing it."
                    % (max_loss * 100, tot_loss * 100))
         raise MaxLossExceededError(message)
+    else:
+        print("max_loss is %.1f%% -> not exceeded: OK!" % (max_loss * 100))
 
     return merged_data
 
@@ -604,74 +665,47 @@ def common_start_returns(factor,
     return pd.concat(all_returns, axis=1)
 
 
-def cumulative_returns(returns, period):
+def rate_of_return(period_ret, base_period):
     """
-    Builds cumulative returns from N-periods returns.
-
-    When 'period' N is greater than 1 the cumulative returns plot is computed
-    building and averaging the cumulative returns of N interleaved portfolios
-    (started at subsequent periods 1,2,3,...,N) each one rebalancing every N
-    periods.
+    Convert returns to 'one_period_len' rate of returns: that is the value the
+    returns would have every 'one_period_len' if they had grown at a steady
+    rate
 
     Parameters
     ----------
-    returns: pd.Series
-        pd.Series containing N-periods returns
-    period: integer
-        Period for which the returns are computed
+    period_ret: pd.DataFrame
+        DataFrame containing returns values with column headings representing
+        the return period.
+    base_period: string
+        The base period length used in the conversion
+        It must follow pandas.Timedelta constructor format (e.g. '1 days',
+        '1D', '30m', '3h', '1D1h', etc)
+
     Returns
     -------
-    pd.Series
-        Cumulative returns series
+    pd.DataFrame
+        DataFrame in same format as input but with 'one_period_len' rate of
+        returns values.
     """
-
-    returns = returns.fillna(0)
-
-    if period == 1:
-        return returns.add(1).cumprod()
-    #
-    # build N portfolios from the single returns Series
-    #
-
-    def split_portfolio(ret, period): return pd.DataFrame(np.diag(ret))
-
-    sub_portfolios = returns.groupby(np.arange(len(returns.index)) // period,
-                                     axis=0).apply(split_portfolio, period)
-    sub_portfolios.index = returns.index
-
-    #
-    # compute 1 period returns so that we can average the N portfolios
-    #
-
-    def rate_of_returns(ret, period): return (
-        (np.nansum(ret) + 1)**(1. / period)) - 1
-
-    sub_portfolios = sub_portfolios.rolling(window=period, min_periods=1) \
-                                   .apply(rate_of_returns, args=(period,))
-    sub_portfolios = sub_portfolios.add(1).cumprod()
-
-    #
-    # average the N portfolios
-    #
-    return sub_portfolios.mean(axis=1)
+    period_len = period_ret.name
+    conversion_factor = (pd.Timedelta(base_period) /
+                         pd.Timedelta(period_len))
+    return period_ret.add(1).pow(conversion_factor).sub(1)
 
 
-def rate_of_return(period_ret):
+def std_conversion(period_std, base_period):
     """
-    1-period Growth Rate: the average rate of 1-period returns
-    """
-    return period_ret.add(1).pow(1. / period_ret.name).sub(1)
-
-
-def std_conversion(period_std):
-    """
-    1-period standard deviation (or standard error) approximation
+    one_period_len standard deviation (or standard error) approximation
 
     Parameters
     ----------
     period_std: pd.DataFrame
         DataFrame containing standard deviation or standard error values
         with column headings representing the return period.
+    base_period: string
+        The base period length used in the conversion
+        It must follow pandas.Timedelta constructor format (e.g. '1 days',
+        '1D', '30m', '3h', '1D1h', etc)
 
     Returns
     -------
@@ -680,8 +714,69 @@ def std_conversion(period_std):
         standard deviation/error values.
     """
     period_len = period_std.name
-    return period_std / np.sqrt(period_len)
+    conversion_factor = (pd.Timedelta(period_len) /
+                         pd.Timedelta(base_period))
+    return period_std / np.sqrt(conversion_factor)
 
 
 def get_forward_returns_columns(columns):
-    return columns[columns.astype('str').str.isdigit()]
+    """
+    Utility that detects and returns the columns that are forward returns
+    """
+    pattern = re.compile(r"^(\d+([Dhms]|ms|us|ns))+$", re.IGNORECASE)
+    valid_columns = [(pattern.match(col) is not None) for col in columns]
+    return columns[valid_columns]
+
+
+def timedelta_to_string(timedelta):
+    """
+    Utility that converts a pandas.Timedelta to a string representation
+    compatible with pandas.Timedelta constructor format
+
+    Parameters
+    ----------
+    timedelta: pd.Timedelta
+
+    Returns
+    -------
+    string
+        string representation of 'timedelta'
+    """
+    c = timedelta.components
+    format = ''
+    if c.days != 0:
+        format += '%dD' % c.days
+    if c.hours > 0:
+        format += '%dh' % c.hours
+    if c.minutes > 0:
+        format += '%dm' % c.minutes
+    if c.seconds > 0:
+        format += '%ds' % c.seconds
+    if c.milliseconds > 0:
+        format += '%dms' % c.milliseconds
+    if c.microseconds > 0:
+        format += '%dus' % c.microseconds
+    if c.nanoseconds > 0:
+        format += '%dns' % c.nanoseconds
+    return format
+
+
+def add_custom_calendar_timedelta(input, timedelta, freq):
+    """
+    Add timedelta to 'input' taking into consideration custom frequency, which
+    is used to deal with custom calendars, such as a trading calendar
+
+    Parameters
+    ----------
+    input : pd.DatetimeIndex or pd.Timestamp
+    timedelta : pd.Timedelta
+    freq : DateOffset, optional
+
+    Returns
+    -------
+    pd.DatetimeIndex or pd.Timestamp
+        input + timedelta
+    """
+    days = timedelta.components.days
+    offset = timedelta - pd.Timedelta(days=days)
+    return input + freq * days + offset
