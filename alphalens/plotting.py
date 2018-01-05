@@ -13,10 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import matplotlib
-matplotlib.use('Agg')
 import numpy as np
 import pandas as pd
+import matplotlib
 from scipy import stats
 import statsmodels.api as sm
 
@@ -30,7 +29,6 @@ from functools import wraps
 from . import utils
 from . import performance as perf
 
-sns.set_palette('colorblind')
 DECIMAL_TO_BPS = 10000
 
 
