@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import matplotlib
+matplotlib.use('Agg')
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -28,6 +30,7 @@ from functools import wraps
 from . import utils
 from . import performance as perf
 
+sns.set_palette('colorblind')
 DECIMAL_TO_BPS = 10000
 
 
@@ -823,7 +826,6 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
 
     avg_cumulative_returns = avg_cumulative_returns.multiply(DECIMAL_TO_BPS)
     quantiles = len(avg_cumulative_returns.index.levels[0].unique())
-    palette = [cm.RdYlGn_r(i) for i in np.linspace(0, 1, quantiles)]
 
     if by_quantile:
 
@@ -839,13 +841,13 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
 
             mean = q_ret.loc[(quantile, 'mean')]
             mean.name = 'Quantile ' + str(quantile)
-            mean.plot(ax=ax[i], color=palette[i])
+            mean.plot(ax=ax[i])
             ax[i].set_ylabel('Mean Return (bps)')
 
             if std_bar:
                 std = q_ret.loc[(quantile, 'std')]
                 ax[i].errorbar(std.index, mean, yerr=std,
-                               fmt=None, ecolor=palette[i], label=None)
+                               fmt=None, label=None)
 
             ax[i].axvline(x=0, color='k', linestyle='--')
             ax[i].legend()
@@ -862,12 +864,12 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
 
             mean = q_ret.loc[(quantile, 'mean')]
             mean.name = 'Quantile ' + str(quantile)
-            mean.plot(ax=ax, color=palette[i])
+            mean.plot(ax=ax)
 
             if std_bar:
                 std = q_ret.loc[(quantile, 'std')]
                 ax.errorbar(std.index, mean, yerr=std,
-                            fmt=None, ecolor=palette[i], label='none')
+                            fmt=None, label='none')
             i += 1
 
         ax.axvline(x=0, color='k', linestyle='--')
