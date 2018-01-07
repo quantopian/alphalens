@@ -232,8 +232,8 @@ def create_summary_tear_sheet(factor_data,
     )
 
     alpha_beta = perf.factor_alpha_beta(factor_data,
-                                        long_short,
-                                        group_neutral)
+                                        demeaned=long_short,
+                                        group_adjust=group_neutral)
 
     mean_ret_spread_quant, std_spread_quant = perf.compute_mean_returns_spread(
         mean_quant_rateret_bydate,
@@ -342,6 +342,7 @@ def create_returns_tear_sheet(factor_data,
                               base_period=std_quant_daily.columns[0])
 
     alpha_beta = perf.factor_alpha_beta(factor_data,
+                                        factor_returns,
                                         long_short,
                                         group_neutral)
 

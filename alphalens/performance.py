@@ -155,7 +155,7 @@ def factor_weights(factor_data,
 
     Returns
     -------
-    returns : pd.DataFrame
+    returns : pd.Series
         Assets weighted by factor value.
     """
 
@@ -249,7 +249,11 @@ def factor_returns(factor_data,
     return returns
 
 
-def factor_alpha_beta(factor_data, demeaned=True, group_adjust=False):
+def factor_alpha_beta(factor_data,
+                      returns=None,
+                      demeaned=True,
+                      group_adjust=False,
+                      equal_weight=False):
     """
     Compute the alpha (excess returns), alpha t-stat (alpha significance),
     and beta (market exposure) of a factor. A regression is run with
@@ -265,11 +269,18 @@ def factor_alpha_beta(factor_data, demeaned=True, group_adjust=False):
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
+    returns : pd.DataFrame, optional
+        Period wise factor returns. If this is None then it will be computed
+        with 'factor_returns' function and the passed flags: 'demeaned',
+        'group_adjust', 'equal_weight'
     demeaned : bool
         Control how to build factor returns used for alpha/beta computation
         -- see performance.factor_return for a full explanation
     group_adjust : bool
         Control how to build factor returns used for alpha/beta computation
+        -- see performance.factor_return for a full explanation
+    equal_weight : bool, optional
+        if True the assets will be equal-weighted instead of factor-weighted
         -- see performance.factor_return for a full explanation
 
     Returns
@@ -279,7 +290,9 @@ def factor_alpha_beta(factor_data, demeaned=True, group_adjust=False):
         for the given factor and forward returns.
     """
 
-    returns = factor_returns(factor_data, demeaned, group_adjust)
+    if returns is None:
+        returns = \
+            factor_returns(factor_data, demeaned, group_adjust, equal_weight)
 
     universe_ret = factor_data.groupby(level='date')[
         utils.get_forward_returns_columns(factor_data.columns)] \
