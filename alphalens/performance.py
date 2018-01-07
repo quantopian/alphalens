@@ -125,7 +125,8 @@ def mean_information_coefficient(factor_data,
 
 def factor_weights(factor_data,
                    demeaned=True,
-                   group_adjust=False):
+                   group_adjust=False,
+                   equal_weight=False):
     """
     Computes asset weights by factor values. Weights are computed by demeaning
     factors and dividing by the sum of their absolute value (achieving gross
@@ -142,11 +143,15 @@ def factor_weights(factor_data,
     demeaned : bool
         Should this computation happen on a long short portfolio? if True,
         then factor values will be demeaned across factor universe when
-        factor weighting the portfolio.
+        factor weighting the portfolio resulting in positive and negative
+        weights suitable for a dollar neutral long-short portfolio.
     group_adjust : bool
         Should this computation happen on a group neutral portfolio? If True,
         compute group neutral weights: each group will weight the same and
-        factor values demeaning will occur on the group level.
+        if 'demeaned' is enabled the factor values demeaning will occur on the
+        group level.
+    equal_weight : bool, optional
+        if True the assets will be equal-weighted instead of factor-weighted
 
     Returns
     -------
@@ -154,22 +159,34 @@ def factor_weights(factor_data,
         Assets weighted by factor value.
     """
 
-    def to_weights(group, is_long_short):
-        if is_long_short:
-            demeaned_vals = group - group.mean()
-            return demeaned_vals / demeaned_vals.abs().sum()
+    def to_weights(group, _demeaned, _equal_weight):
+
+        if _demeaned:
+            group = group - group.mean()
         else:
-            return group / group.abs().sum()
+            group = group.copy()
+
+        if _equal_weight:
+
+            negative = group < 0
+            if negative.sum() > 0:
+                group[negative] = -1.0 / negative.sum()
+
+            positive = group > 0
+            if positive.sum() > 0:
+                group[positive] = 1.0 / positive.sum()
+
+        return group / group.abs().sum()
 
     grouper = [factor_data.index.get_level_values('date')]
     if group_adjust:
         grouper.append('group')
 
     weights = factor_data.groupby(grouper)['factor'] \
-        .apply(to_weights, demeaned)
+        .apply(to_weights, demeaned, equal_weight)
 
     if group_adjust:
-        weights = weights.groupby(level='date').apply(to_weights, False)
+        weights = weights.groupby(level='date').apply(to_weights, False, False)
 
     # preserve freq, which contains trading calendar information
     weights.index.levels[0].freq = factor_data.index.levels[0].freq
@@ -179,6 +196,7 @@ def factor_weights(factor_data,
 def factor_returns(factor_data,
                    demeaned=True,
                    group_adjust=False,
+                   equal_weight=False,
                    by_asset=False):
     """
     Computes period wise returns for portfolio weighted by factor
@@ -196,22 +214,26 @@ def factor_returns(factor_data,
     demeaned : bool
         Should this computation happen on a long short portfolio? if True,
         then factor values will be demeaned across factor universe when
-        factor weighting the portfolio.
+        factor weighting the portfolio resulting in positive and negative
+        weights suitable for a dollar neutral long-short portfolio.
     group_adjust : bool
         Should this computation happen on a group neutral portfolio? If True,
-        compute group neutral returns: each group will weight the same and
-        returns demeaning will occur on the group level.
+        compute group neutral weights: each group will weight the same and
+        if 'demeaned' is enabled the factor values demeaning will occur on the
+        group level.
+    equal_weight : bool, optional
+        if True the assets will be equal-weighted instead of factor-weighted
     by_asset: bool, optional
         If True, returns are reported separately for each esset.
 
     Returns
     -------
     returns : pd.DataFrame
-        Period wise returns of dollar neutral portfolio weighted by factor
-        value.
+        Period wise factor returns
     """
 
-    weights = factor_weights(factor_data, demeaned, group_adjust)
+    weights = \
+        factor_weights(factor_data, demeaned, group_adjust, equal_weight)
 
     weighted_returns = \
         factor_data[utils.get_forward_returns_columns(factor_data.columns)] \
