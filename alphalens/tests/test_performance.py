@@ -36,7 +36,7 @@ from .. performance import (factor_information_coefficient,
                             quantile_turnover,
                             factor_rank_autocorrelation,
                             factor_returns, factor_alpha_beta,
-                            cumulative_returns,
+                            cumulative_returns, factor_weights,
                             average_cumulative_return_by_quantile)
 
 from .. utils import (get_forward_returns_columns,
@@ -348,6 +348,103 @@ class PerformanceTestCase(TestCase):
         expected.name = test_quantile
 
         assert_series_equal(to, expected)
+
+    @parameterized.expand([([[3, 4,   2,   1, nan],
+                             [3, nan, nan, 1, 4]],
+                            ['A', 'B', 'C', 'D', 'E'],
+                            {'A': 'Group1', 'B': 'Group2', 'C': 'Group1',
+                             'D': 'Group2', 'E': 'Group1'},
+                            False, False, False,
+                            [0.30, 0.40, 0.20, 0.10,
+                             0.375, 0.125, 0.50]),
+                           ([[3, 4,   2,   1, nan],
+                             [3, nan, nan, 1, 4]],
+                            ['A', 'B', 'C', 'D', 'E'],
+                            {'A': 'Group1', 'B': 'Group2', 'C': 'Group1',
+                             'D': 'Group2', 'E': 'Group1'},
+                            True, False, False,
+                            [0.125, 0.375, -0.125, -0.375,
+                             0.10, -0.50, 0.40]),
+                           ([[3, 4,  2, 1, nan],
+                             [2, 2,  2, 3, 1]],
+                            ['A', 'B', 'C', 'D', 'E'],
+                            {'A': 'Group1', 'B': 'Group2', 'C': 'Group1',
+                             'D': 'Group2', 'E': 'Group1'},
+                            False, True, False,
+                            [0.30, 0.40, 0.20, 0.10,
+                             0.20, 0.20, 0.20, 0.30, 0.10]),
+                           ([[3, 4,   2,   1, nan],
+                             [3, nan, nan, 1, 4]],
+                            ['A', 'B', 'C', 'D', 'E'],
+                            {'A': 'Group1', 'B': 'Group2', 'C': 'Group1',
+                             'D': 'Group2', 'E': 'Group1'},
+                            True, True, False,
+                            [0.25,  0.25, -0.25, -0.25,
+                             -0.50, nan, 0.50]),
+                           ([[3, 4,   2,   1, 5],
+                             [3, nan, nan, 1, nan]],
+                            ['A', 'B', 'C', 'D', 'E'],
+                            {'A': 'Group1', 'B': 'Group2', 'C': 'Group1',
+                             'D': 'Group2', 'E': 'Group1'},
+                            False, False, True,
+                            [0.20, 0.20, 0.20, 0.20, 0.20,
+                             0.50, 0.50]),
+                           ([[1, 4,   2,   3, nan],
+                             [3, nan, nan, 2, 7]],
+                            ['A', 'B', 'C', 'D', 'E'],
+                            {'A': 'Group1', 'B': 'Group2', 'C': 'Group1',
+                             'D': 'Group2', 'E': 'Group1'},
+                            True, False, True,
+                            [-0.25, 0.25, -0.25, 0.25,
+                             -0.25, -0.25, 0.50]),
+                           ([[3, 4,   2,   1, nan],
+                             [3, nan, nan, 1, 4]],
+                            ['A', 'B', 'C', 'D', 'E'],
+                            {'A': 'Group1', 'B': 'Group2', 'C': 'Group1',
+                             'D': 'Group2', 'E': 'Group1'},
+                            False, True, True,
+                            [0.25, 0.25, 0.25, 0.25,
+                             0.25, 0.50, 0.25]),
+                           ([[1, 4,   2,   3, nan],
+                             [3, nan, nan, 2, 7]],
+                            ['A', 'B', 'C', 'D', 'E'],
+                            {'A': 'Group1', 'B': 'Group2', 'C': 'Group1',
+                             'D': 'Group2', 'E': 'Group1'},
+                            True, True, True,
+                            [-0.25, 0.25, 0.25, -0.25,
+                             -0.50, nan, 0.50]),
+                           ])
+    def test_factor_weights(self,
+                            factor_vals,
+                            tickers,
+                            groups,
+                            demeaned,
+                            group_adjust,
+                            equal_weight,
+                            expected_vals):
+
+        index = date_range('1/12/2000', periods=len(factor_vals))
+        factor = DataFrame(index=index,
+                           columns=tickers,
+                           data=factor_vals).stack()
+        factor.index = factor.index.set_names(['date', 'asset'])
+        factor.name = 'factor'
+
+        factor_data = DataFrame()
+        factor_data['factor'] = factor
+        groups = Series(groups)
+        factor_data['group'] = \
+            Series(index=factor.index,
+                   data=groups[factor.index.get_level_values('asset')].values)
+
+        weights = \
+            factor_weights(factor_data, demeaned, group_adjust, equal_weight)
+
+        expected = Series(data=expected_vals,
+                          index=factor_data.index,
+                          name='factor')
+
+        assert_series_equal(weights, expected)
 
     @parameterized.expand([([1, 2, 3, 4, 4, 3, 2, 1],
                             [4, 3, 2, 1, 1, 2, 3, 4],
