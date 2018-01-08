@@ -218,17 +218,14 @@ def factor_returns(factor_data,
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
     demeaned : bool
-        Should this computation happen on a long short portfolio? if True,
-        then factor values will be demeaned across factor universe when
-        factor weighting the portfolio resulting in positive and negative
-        weights suitable for a dollar neutral long-short portfolio.
+        Control how to build factor wieghts
+        -- see performance.factor_weights for a full explanation
     group_adjust : bool
-        Should this computation happen on a group neutral portfolio? If True,
-        compute group neutral weights: each group will weight the same and
-        if 'demeaned' is enabled the factor values demeaning will occur on the
-        group level.
+        Control how to build factor wieghts
+        -- see performance.factor_weights for a full explanation
     equal_weight : bool, optional
-        if True the assets will be equal-weighted instead of factor-weighted
+        Control how to build factor wieghts
+        -- see performance.factor_weights for a full explanation
     by_asset: bool, optional
         If True, returns are reported separately for each esset.
 
@@ -286,7 +283,7 @@ def factor_alpha_beta(factor_data,
         Control how to build factor returns used for alpha/beta computation
         -- see performance.factor_return for a full explanation
     equal_weight : bool, optional
-        if True the assets will be equal-weighted instead of factor-weighted
+        Control how to build factor returns used for alpha/beta computation
         -- see performance.factor_return for a full explanation
 
     Returns
@@ -385,8 +382,8 @@ def cumulative_returns(returns, period, freq=None):
         freq = returns.index.freq
 
     #
-    # index contains factor computation timestamps, then add returns timestamps
-    # too (factor timestamps + period) and save them to 'full_idx'
+    # returns index contains factor computation timestamps, then add returns
+    # timestamps too (factor timestamps + period) and save them to 'full_idx'
     # Cumulative returns will use 'full_idx' index,because we want a cumulative
     # returns value for each entry in 'full_idx'
     #
