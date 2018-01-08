@@ -28,6 +28,7 @@ from functools import wraps
 from . import utils
 from . import performance as perf
 
+sns.set_palette('colorblind')
 DECIMAL_TO_BPS = 10000
 
 
