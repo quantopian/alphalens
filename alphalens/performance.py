@@ -152,6 +152,8 @@ def factor_weights(factor_data,
         group level.
     equal_weight : bool, optional
         if True the assets will be equal-weighted instead of factor-weighted
+        if demeaned is True then the sum of positive weights will be the same
+        as the negative weights (absolute value)
 
     Returns
     -------
@@ -168,13 +170,17 @@ def factor_weights(factor_data,
 
         if _equal_weight:
 
-            negative = group < 0
-            if negative.sum() > 0:
-                group[negative] = -1.0 / negative.sum()
+            negative_mask = group < 0
+            group[negative_mask] = -1.0
+            neg_amount = negative_mask.sum()
+            if _demeaned and neg_amount > 0:
+                group[negative_mask] /= neg_amount
 
-            positive = group > 0
-            if positive.sum() > 0:
-                group[positive] = 1.0 / positive.sum()
+            positive_mask = group > 0
+            group[positive_mask] = 1.0
+            pos_amount = positive_mask.sum()
+            if _demeaned and pos_amount > 0:
+                group[positive_mask] /= pos_amount
 
         return group / group.abs().sum()
 
