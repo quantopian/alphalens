@@ -679,6 +679,99 @@ def factor_rank_autocorrelation(factor_data, period=1):
     return autocorr
 
 
+def common_start_returns(factor,
+                         prices,
+                         before,
+                         after,
+                         cumulative=False,
+                         mean_by_date=False,
+                         demean_by=None):
+    """
+    A date and equity pair is extracted from each index row in the factor
+    dataframe and for each of these pairs a return series is built starting
+    from 'before' the date and ending 'after' the date specified in the pair.
+    All those returns series are then aligned to a common index (-before to
+    after) and returned as a single DataFrame
+
+    Parameters
+    ----------
+    factor : pd.DataFrame
+        DataFrame with at least date and equity as index, the columns are
+        irrelevant
+    prices : pd.DataFrame
+        A wide form Pandas DataFrame indexed by date with assets
+        in the columns. Pricing data should span the factor
+        analysis time period plus/minus an additional buffer window
+        corresponding to after/before period parameters.
+    before:
+        How many returns to load before factor date
+    after:
+        How many returns to load after factor date
+    cumulative: bool, optional
+        Return cumulative returns
+    mean_by_date: bool, optional
+        If True, compute mean returns for each date and return that
+        instead of a return series for each asset
+    demean_by: pd.DataFrame, optional
+        DataFrame with at least date and equity as index, the columns are
+        irrelevant. For each date a list of equities is extracted from
+        'demean_by' index and used as universe to compute demeaned mean
+        returns (long short portfolio)
+
+    Returns
+    -------
+    aligned_returns : pd.DataFrame
+        Dataframe containing returns series for each factor aligned to the same
+        index: -before to after
+    """
+
+    if cumulative:
+        returns = prices
+    else:
+        returns = prices.pct_change(axis=0)
+
+    all_returns = []
+
+    for timestamp, df in factor.groupby(level='date'):
+
+        equities = df.index.get_level_values('asset')
+
+        try:
+            day_zero_index = returns.index.get_loc(timestamp)
+        except KeyError:
+            continue
+
+        starting_index = max(day_zero_index - before, 0)
+        ending_index = min(day_zero_index + after + 1,
+                           len(returns.index))
+
+        equities_slice = set(equities)
+        if demean_by is not None:
+            demean_equities = demean_by.loc[timestamp] \
+                .index.get_level_values('asset')
+            equities_slice |= set(demean_equities)
+
+        series = returns.loc[returns.index[starting_index:ending_index],
+                             equities_slice]
+        series.index = range(starting_index - day_zero_index,
+                             ending_index - day_zero_index)
+
+        if cumulative:
+            series = (series / series.loc[0, :]) - 1
+
+        if demean_by is not None:
+            mean = series.loc[:, demean_equities].mean(axis=1)
+            series = series.loc[:, equities]
+            series = series.sub(mean, axis=0)
+
+        if mean_by_date:
+            series = series.mean(axis=1)
+
+        all_returns.append(series)
+
+    return pd.concat(all_returns, axis=1)
+
+
 def average_cumulative_return_by_quantile(factor_data,
                                           prices,
                                           periods_before=10,
@@ -740,10 +833,10 @@ def average_cumulative_return_by_quantile(factor_data,
     """
 
     def cumulative_return(q_fact, demean_by):
-        return utils.common_start_returns(q_fact, prices,
-                                          periods_before,
-                                          periods_after,
-                                          True, True, demean_by)
+        return common_start_returns(q_fact, prices,
+                                    periods_before,
+                                    periods_after,
+                                    True, True, demean_by)
 
     def average_cumulative_return(q_fact, demean_by):
         q_returns = cumulative_return(q_fact, demean_by)

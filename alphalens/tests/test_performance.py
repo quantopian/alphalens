@@ -37,6 +37,7 @@ from .. performance import (factor_information_coefficient,
                             factor_rank_autocorrelation,
                             factor_returns, factor_alpha_beta,
                             cumulative_returns, factor_weights,
+                            common_start_returns,
                             average_cumulative_return_by_quantile)
 
 from .. utils import (get_forward_returns_columns,
@@ -697,6 +698,97 @@ class PerformanceTestCase(TestCase):
         expected.name = period
 
         assert_series_equal(fa, expected)
+
+    @parameterized.expand([(2, 3, False, False,
+                            [[0.075, 0.241868], [0.075, 0.241868],
+                             [0.075, 0.241868], [0.075, 0.241868],
+                             [0.075, 0.241868], [0.075, 0.241868]]),
+                           (3, 2, False, True,
+                            [[0.0, 0.241868], [0.0, 0.241868],
+                             [0.0, 0.241868], [0.0, 0.241868],
+                             [0.0, 0.241868], [0.0, 0.241868]]),
+                           (3, 5, True, False,
+                            [[0.075, 0.0], [0.075, 0.0], [0.075, 0.0],
+                             [0.075, 0.0], [0.075, 0.0], [0.075, 0.0],
+                             [0.075, 0.0], [0.075, 0.0], [0.075, 0.0]]),
+                           (1, 4, True, True,
+                            [[0., 0.], [0., 0.], [0., 0.],
+                             [0., 0.], [0., 0.], [0., 0.]]),
+                           (6, 6, False, False,
+                            [[0.075, 0.243614], [0.075, 0.242861],
+                             [0.075, 0.242301], [0.075, 0.241868],
+                             [0.075, 0.241868], [0.075, 0.241868],
+                             [0.075, 0.241868], [0.075, 0.241868],
+                             [0.075, 0.241868], [0.075, 0.241868],
+                             [0.075, 0.241868], [0.075, 0.242301],
+                             [0.075, 0.242861]]),
+                           (6, 6, False, True,
+                            [[0.0, 0.243614], [0.0, 0.242861], [0.0, 0.242301],
+                             [0.0, 0.241868], [0.0, 0.241868], [0.0, 0.241868],
+                             [0.0, 0.241868], [0.0, 0.241868], [0.0, 0.241868],
+                             [0.0, 0.241868], [0.0, 0.241868], [0.0, 0.242301],
+                             [0.0, 0.242861]]),
+                           (6, 6, True, False,
+                            [[0.075, 0.0], [0.075, 0.0], [0.075, 0.0],
+                             [0.075, 0.0], [0.075, 0.0], [0.075, 0.0],
+                             [0.075, 0.0], [0.075, 0.0], [0.075, 0.0],
+                             [0.075, 0.0], [0.075, 0.0], [0.075, 0.0],
+                             [0.075, 0.0]]),
+                           (6, 6, True, True,
+                            [[0., 0.], [0., 0.], [0., 0.], [0., 0.], [0., 0.],
+                             [0., 0.], [0., 0.], [0., 0.], [0., 0.], [0., 0.],
+                             [0., 0.], [0., 0.], [0., 0.]]),
+                           ])
+    def test_common_start_returns(self, before, after, mean_by_date, demeaned,
+                                  expected_vals):
+        dr = date_range(start='2015-1-17', end='2015-2-2')
+        dr.name = 'date'
+        tickers = ['A', 'B', 'C', 'D']
+        r1, r2, r3, r4 = (1.20, 1.40, 0.90, 0.80)
+        prices = DataFrame(index=dr, columns=tickers,
+                           data=[[r1**1, r2**1, r3**1, r4**1],
+                                 [r1**2, r2**2, r3**2, r4**2],
+                                 [r1**3, r2**3, r3**3, r4**3],
+                                 [r1**4, r2**4, r3**4, r4**4],
+                                 [r1**5, r2**5, r3**5, r4**5],
+                                 [r1**6, r2**6, r3**6, r4**6],
+                                 [r1**7, r2**7, r3**7, r4**7],
+                                 [r1**8, r2**8, r3**8, r4**8],
+                                 [r1**9, r2**9, r3**9, r4**9],
+                                 [r1**10, r2**10, r3**10, r4**10],
+                                 [r1**11, r2**11, r3**11, r4**11],
+                                 [r1**12, r2**12, r3**12, r4**12],
+                                 [r1**13, r2**13, r3**13, r4**13],
+                                 [r1**14, r2**14, r3**14, r4**14],
+                                 [r1**15, r2**15, r3**15, r4**15],
+                                 [r1**16, r2**16, r3**16, r4**16],
+                                 [r1**17, r2**17, r3**17, r4**17]])
+        dr2 = date_range(start='2015-1-21', end='2015-1-29')
+        factor = DataFrame(index=dr2, columns=tickers,
+                           data=[[3, 4, 2, 1],
+                                 [3, 4, 2, 1],
+                                 [3, 4, 2, 1],
+                                 [3, 4, 2, 1],
+                                 [3, 4, 2, 1],
+                                 [3, 4, 2, 1],
+                                 [3, 4, 2, 1],
+                                 [3, 4, 2, 1],
+                                 [3, 4, 2, 1]]).stack()
+        factor.index = factor.index.set_names(['date', 'asset'])
+        factor.name = 'factor'
+
+        cmrt = common_start_returns(
+            factor,
+            prices,
+            before,
+            after,
+            False,
+            mean_by_date,
+            factor if demeaned else None)
+        cmrt = DataFrame({'mean': cmrt.mean(axis=1), 'std': cmrt.std(axis=1)})
+        expected = DataFrame(index=range(-before, after + 1),
+                             columns=['mean', 'std'], data=expected_vals)
+        assert_frame_equal(cmrt, expected)
 
     @parameterized.expand([(1, 2, False, 4,
                             [[1.00, 0.0, -0.50, -0.75],
