@@ -697,7 +697,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
             annot_kws={"size": 7},
             linewidths=0.01,
             linecolor='white',
-            cmap=cm.RdYlGn,
+            cmap=cm.coolwarm,
             cbar=False,
             ax=a)
         a.set(ylabel='', xlabel='')
@@ -776,7 +776,7 @@ def plot_cumulative_returns_by_quantile(quantile_returns,
     cum_ret = ret_wide.apply(perf.cumulative_returns, period=period)
     cum_ret = cum_ret.loc[:, ::-1]
 
-    cum_ret.plot(lw=2, ax=ax, cmap=cm.RdYlGn_r)
+    cum_ret.plot(lw=2, ax=ax, cmap=cm.coolwarm)
     ax.legend()
     ymin, ymax = cum_ret.min().min(), cum_ret.max().max()
     ax.set(ylabel='Log Cumulative Returns',
@@ -823,7 +823,7 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
 
     avg_cumulative_returns = avg_cumulative_returns.multiply(DECIMAL_TO_BPS)
     quantiles = len(avg_cumulative_returns.index.levels[0].unique())
-    palette = [cm.RdYlGn_r(i) for i in np.linspace(0, 1, quantiles)]
+    palette = [cm.coolwarm(i) for i in np.linspace(0, 1, quantiles)]
 
     if by_quantile:
 
