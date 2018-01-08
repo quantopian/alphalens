@@ -697,7 +697,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
             annot_kws={"size": 7},
             linewidths=0.01,
             linecolor='white',
-            cmap=cm.RdYlGn,
+            cmap=cm.coolwarm,
             cbar=False,
             ax=a)
         a.set(ylabel='', xlabel='')
@@ -776,7 +776,7 @@ def plot_cumulative_returns_by_quantile(quantile_returns,
     cum_ret = ret_wide.apply(perf.cumulative_returns, period=period)
     cum_ret = cum_ret.loc[:, ::-1]
 
-    cum_ret.plot(lw=2, ax=ax, cmap=cm.RdYlGn_r)
+    cum_ret.plot(lw=2, ax=ax, cmap=cm.coolwarm)
     ax.legend()
     ymin, ymax = cum_ret.min().min(), cum_ret.max().max()
     ax.set(ylabel='Log Cumulative Returns',
@@ -823,6 +823,7 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
 
     avg_cumulative_returns = avg_cumulative_returns.multiply(DECIMAL_TO_BPS)
     quantiles = len(avg_cumulative_returns.index.levels[0].unique())
+    palette = [cm.coolwarm(i) for i in np.linspace(0, 1, quantiles)]
 
     if by_quantile:
 
@@ -838,13 +839,13 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
 
             mean = q_ret.loc[(quantile, 'mean')]
             mean.name = 'Quantile ' + str(quantile)
-            mean.plot(ax=ax[i])
+            mean.plot(ax=ax[i], color=palette[i])
             ax[i].set_ylabel('Mean Return (bps)')
 
             if std_bar:
                 std = q_ret.loc[(quantile, 'std')]
                 ax[i].errorbar(std.index, mean, yerr=std,
-                               fmt=None, label=None)
+                               fmt=None, ecolor=palette[i], label=None)
 
             ax[i].axvline(x=0, color='k', linestyle='--')
             ax[i].legend()
@@ -861,12 +862,12 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
 
             mean = q_ret.loc[(quantile, 'mean')]
             mean.name = 'Quantile ' + str(quantile)
-            mean.plot(ax=ax)
+            mean.plot(ax=ax, color=palette[i])
 
             if std_bar:
                 std = q_ret.loc[(quantile, 'std')]
                 ax.errorbar(std.index, mean, yerr=std,
-                            fmt=None, label='none')
+                            fmt=None, ecolor=palette[i], label='none')
             i += 1
 
         ax.axvline(x=0, color='k', linestyle='--')
