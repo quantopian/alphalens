@@ -218,13 +218,13 @@ def factor_returns(factor_data,
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
     demeaned : bool
-        Control how to build factor wieghts
+        Control how to build factor weights
         -- see performance.factor_weights for a full explanation
     group_adjust : bool
-        Control how to build factor wieghts
+        Control how to build factor weights
         -- see performance.factor_weights for a full explanation
     equal_weight : bool, optional
-        Control how to build factor wieghts
+        Control how to build factor weights
         -- see performance.factor_weights for a full explanation
     by_asset: bool, optional
         If True, returns are reported separately for each esset.
