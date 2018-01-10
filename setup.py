@@ -22,7 +22,7 @@ install_reqs = [
 extra_reqs = {
     'test': [
         "nose>=1.3.7",
-        "nose_parameterized>=0.5.0",
+        "parameterized>=0.5.0",
         "tox>=2.3.1",
     ],
 }
