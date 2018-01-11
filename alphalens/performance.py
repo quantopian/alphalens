@@ -130,7 +130,7 @@ def factor_weights(factor_data,
     """
     Computes asset weights by factor values and dividing by the sum of their
     absolute value (achieving gross leverage of 1). Positive factor values will
-    results in positive weights and negative values in negative weights. 
+    results in positive weights and negative values in negative weights.
 
     Parameters
     ----------

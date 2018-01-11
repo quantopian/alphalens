@@ -710,7 +710,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     return ax
 
 
-def plot_cumulative_returns(factor_returns, period, ax=None):
+def plot_cumulative_returns(factor_returns, period, title=None, ax=None):
     """
     Plots the cumulative returns of the returns series passed in.
 
@@ -723,6 +723,8 @@ def plot_cumulative_returns(factor_returns, period, ax=None):
         Length of period for which the returns are computed (e.g. 1 day)
         if 'period' is a string it must follow pandas.Timedelta constructor
         format (e.g. '1 days', '1D', '30m', '3h', '1D1h', etc)
+    title: string, optional
+        Custom title
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -738,8 +740,8 @@ def plot_cumulative_returns(factor_returns, period, ax=None):
 
     factor_returns.plot(ax=ax, lw=3, color='forestgreen', alpha=0.6)
     ax.set(ylabel='Cumulative Returns',
-           title='''Factor Weighted Long/Short Portfolio Cumulative Return
-                    ({} Fwd Period)'''.format(period),
+           title=("Portfolio Cumulative Return ({} Fwd Period)".format(period)
+                  if title is None else title),
            xlabel='')
     ax.axhline(1.0, linestyle='-', color='black', lw=1)
 
