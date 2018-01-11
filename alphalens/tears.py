@@ -257,8 +257,6 @@ def create_summary_tear_sheet(factor_data,
                                        by_group=False,
                                        ylim_percentiles=None,
                                        ax=gf.next_row())
-    plt.show()
-    gf.close()
 
     # Information Analysis
     ic = perf.factor_information_coefficient(factor_data)
@@ -278,6 +276,9 @@ def create_summary_tear_sheet(factor_data,
          periods], axis=1)
 
     plotting.plot_turnover_table(autocorrelation, quantile_turnover)
+
+    plt.show()
+    gf.close()
 
 
 @create_returns_tear_sheet_api_change_warning
