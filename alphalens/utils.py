@@ -370,9 +370,13 @@ def get_clean_factor_and_forward_returns(factor,
                                          groupby_labels=None,
                                          max_loss=0.35):
     """
-    Formats the factor data, pricing data, and group mappings
-    into a DataFrame that contains aligned MultiIndex
-    indices of timestamp and asset.
+    Formats the factor data, pricing data, and group mappings into a DataFrame
+    that contains aligned MultiIndex indices of timestamp and asset. The
+    returned data will be formatted to be suitable for Alphalens functions.
+
+    It is safe to skip a call to this function and still make use of Alphalens
+    functionalities as long as the factor data conforms to the format returned
+    from get_clean_factor_and_forward_returns and documented here
 
     Parameters
     ----------
@@ -475,6 +479,14 @@ def get_clean_factor_and_forward_returns(factor,
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+        - forward returns column names follow  the format accepted by
+          pd.Timedelta (e.g. '1D', '30m', '3h15m', '1D1h', etc)
+        - 'date' index freq property (merged_data.index.levels[0].freq) will be
+          set to Calendar day or Business day (pandas DateOffset) depending on
+          what was inferred from the input data. This is currently used only in
+          cumulative returns computation but it can be later set to any
+          pd.DateOffset (e.g. US trading calendar) to increase the accuracy
+          of the results
         ::
            -------------------------------------------------------------------
                       |       | 1D  | 5D  | 10D  |factor|group|factor_quantile
