@@ -128,9 +128,9 @@ def factor_weights(factor_data,
                    group_adjust=False,
                    equal_weight=False):
     """
-    Computes asset weights by factor values. Weights are computed by demeaning
-    factors and dividing by the sum of their absolute value (achieving gross
-    leverage of 1).
+    Computes asset weights by factor values and dividing by the sum of their
+    absolute value (achieving gross leverage of 1). Positive factor values will
+    results in positive weights and negative values in negative weights. 
 
     Parameters
     ----------
@@ -142,9 +142,10 @@ def factor_weights(factor_data,
         - See full explanation in utils.get_clean_factor_and_forward_returns
     demeaned : bool
         Should this computation happen on a long short portfolio? if True,
-        then factor values will be demeaned across factor universe when
-        factor weighting the portfolio resulting in positive and negative
-        weights suitable for a dollar neutral long-short portfolio.
+        weights are computed by demeaning factor values and dividing by the sum
+        of their absolute value (achieving gross leverage of 1). The sum of
+        positive weights will be the same as the negative weights (absolute
+        value), suitable for a dollar neutral long-short portfolio
     group_adjust : bool
         Should this computation happen on a group neutral portfolio? If True,
         compute group neutral weights: each group will weight the same and
@@ -152,8 +153,6 @@ def factor_weights(factor_data,
         group level.
     equal_weight : bool, optional
         if True the assets will be equal-weighted instead of factor-weighted
-        if demeaned is True then the sum of positive weights will be the same
-        as the negative weights (absolute value)
 
     Returns
     -------
@@ -206,8 +205,7 @@ def factor_returns(factor_data,
                    by_asset=False):
     """
     Computes period wise returns for portfolio weighted by factor
-    values. Weights are computed by demeaning factors and dividing
-    by the sum of their absolute value (achieving gross leverage of 1).
+    values.
 
     Parameters
     ----------
