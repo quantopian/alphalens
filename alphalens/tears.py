@@ -371,8 +371,15 @@ def create_returns_tear_sheet(factor_data,
                                           ax=gf.next_row())
 
     for p in factor_returns:
+
+        title = ('Factor Weighted '
+                 + ('Group Neutral ' if group_neutral else '')
+                 + ('Long/Short ' if long_short else '')
+                 + "Portfolio Cumulative Return ({} Period)".format(p))
+
         plotting.plot_cumulative_returns(factor_returns[p],
                                          period=p,
+                                         title=title,
                                          ax=gf.next_row())
 
         plotting.plot_cumulative_returns_by_quantile(mean_quant_ret_bydate[p],
@@ -685,7 +692,9 @@ def create_event_returns_tear_sheet(factor_data,
 
 
 @plotting.customize
-def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
+def create_event_study_tear_sheet(factor_data,
+                                  prices=None,
+                                  avgretplot=(5, 15)):
     """
     Creates an event study tear sheet for analysis of a specific event.
 
@@ -723,6 +732,10 @@ def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
                                         long_short=long_short,
                                         by_group=False)
 
+    factor_returns = perf.factor_returns(factor_data,
+                                         demeaned=False,
+                                         equal_weight=True)
+
     mean_quant_ret, std_quantile = \
         perf.mean_return_by_quantile(factor_data,
                                      by_group=False,
@@ -742,8 +755,8 @@ def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
         base_period=mean_quant_ret_bydate.columns[0]
     )
 
-    fr_cols = len(mean_quant_ret.columns)
-    vertical_sections = 2 + fr_cols * 3
+    fr_cols = len(factor_returns.columns)
+    vertical_sections = 2 + fr_cols * 1
     gf = GridFigure(rows=vertical_sections, cols=1)
 
     plotting.plot_quantile_returns_bar(mean_quant_ret,
@@ -755,11 +768,11 @@ def create_event_study_tear_sheet(factor_data, prices, avgretplot=(5, 15)):
                                           ylim_percentiles=(1, 99),
                                           ax=gf.next_row())
 
-    for c in mean_quant_ret_bydate:
+    for p in factor_returns:
 
-        plotting.plot_cumulative_returns_by_quantile(mean_quant_ret_bydate[c],
-                                                     period=c,
-                                                     ax=gf.next_row())
+        plotting.plot_cumulative_returns(factor_returns[p],
+                                         period=p,
+                                         ax=gf.next_row())
 
     plt.show()
     gf.close()
