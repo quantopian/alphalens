@@ -28,7 +28,6 @@ from functools import wraps
 from . import utils
 from . import performance as perf
 
-sns.set_palette('colorblind')
 DECIMAL_TO_BPS = 10000
 
 
@@ -40,7 +39,8 @@ def customize(func):
     def call_w_context(*args, **kwargs):
         set_context = kwargs.pop('set_context', True)
         if set_context:
-            with plotting_context(), axes_style():
+            color_palette = sns.color_palette('colorblind')
+            with plotting_context(), axes_style(), color_palette:
                 sns.despine(left=True)
                 return func(*args, **kwargs)
         else:
