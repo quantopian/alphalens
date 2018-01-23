@@ -675,16 +675,13 @@ def join_factor_with_factor_and_forward_returns(factor_data,
     # Quantize Factor 2
     factor_2 = factor_2.copy()
     factor_2.index.rename(['date', 'asset'], inplace=True)
-
     multi_factor_data['factor'] = factor_2
-
     multi_factor_data['factor_2_quantile'] = \
         quantize_factor(multi_factor_data,
                         quantiles,
                         bins,
                         binning_by_group)
 
-    #Join with dataframe
     multi_factor_data.rename({'factor': 'factor_2',
                               'factor_quantile': 'factor_2_quantile'},
                              inplace=True, axis=1)
