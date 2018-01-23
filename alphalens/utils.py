@@ -504,7 +504,6 @@ def get_clean_factor_and_forward_returns(factor,
                       | LULU  |-0.03| 0.05|-0.009|  2.7 |  G1 |      2
                       --------------------------------------------------------
     """
-
     if factor.index.levels[0].tz != prices.index.tz:
         raise NonMatchingTimezoneError("The timezone of 'factor' is not the "
                                        "same as the timezone of 'prices'. See "
@@ -582,6 +581,115 @@ def get_clean_factor_and_forward_returns(factor,
         print("max_loss is %.1f%%, not exceeded: OK!" % (max_loss * 100))
 
     return merged_data
+
+
+def join_factor_with_factor_and_forward_returns(factor_data,
+                                                factor_2,
+                                                binning_by_group=False,
+                                                quantiles=5,
+                                                bins=None):
+    """
+    Adds and additional factor to the formatted DataFrame returned
+    by get_clean_factor_and_forward_returns to allow for
+    multi-factor analysis.
+
+    Parameters
+    ----------
+     factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for
+        each period, the factor quantile/bin that factor value belongs to, and
+        (optionally) the group the asset belongs to.
+        - forward returns column names follow  the format accepted by
+          pd.Timedelta (e.g. '1D', '30m', '3h15m', '1D1h', etc)
+        - 'date' index freq property (merged_data.index.levels[0].freq) will be
+          set to Calendar day or Business day (pandas DateOffset) depending on
+          what was inferred from the input data. This is currently used only in
+          cumulative returns computation but it can be later set to any
+          pd.DateOffset (e.g. US trading calendar) to increase the accuracy
+          of the results
+        ::
+           -------------------------------------------------------------------
+                      |       | 1D  | 5D  | 10D  |factor|group|factor_quantile
+           -------------------------------------------------------------------
+               date   | asset |     |     |      |      |     |
+           -------------------------------------------------------------------
+                      | AAPL  | 0.09|-0.01|-0.079|  0.5 |  G1 |      3
+                      --------------------------------------------------------
+                      | BA    | 0.02| 0.06| 0.020| -1.1 |  G2 |      5
+                      --------------------------------------------------------
+           2014-01-01 | CMG   | 0.03| 0.09| 0.036|  1.7 |  G2 |      1
+                      --------------------------------------------------------
+                      | DAL   |-0.02|-0.06|-0.029| -0.1 |  G3 |      5
+                      --------------------------------------------------------
+                      | LULU  |-0.03| 0.05|-0.009|  2.7 |  G1 |      2
+                      --------------------------------------------------------
+    factor_2 : pd.Series - MultiIndex
+        A MultiIndex Series indexed by timestamp (level 0) and asset
+        (level 1), containing the values for a single alpha factor.
+        ::
+            -----------------------------------
+                date    |    asset   |
+            -----------------------------------
+                        |   AAPL     |   0.5
+                        -----------------------
+                        |   BA       |  -1.1
+                        -----------------------
+            2014-01-01  |   CMG      |   1.7
+                        -----------------------
+                        |   DAL      |  -0.1
+                        -----------------------
+                        |   LULU     |   2.7
+                        -----------------------
+    binning_by_group : bool
+        If True, compute quantile buckets separately for each group.
+        This is useful when the factor values range vary considerably
+        across groups so that it is wise to make the binning group relative.
+        You should probably enable this if the factor is intended
+        to be analyzed for a group neutral portfolio
+    quantiles : int or sequence[float]
+        Number of equal-sized quantile buckets to use in factor bucketing.
+        Alternately sequence of quantiles, allowing non-equal-sized buckets
+        e.g. [0, .10, .5, .90, 1.] or [.05, .5, .95]
+        Only one of 'quantiles' or 'bins' can be not-None
+    bins : int or sequence[float]
+        Number of equal-width (valuewise) bins to use in factor bucketing.
+        Alternately sequence of bin edges allowing for non-uniform bin width
+        e.g. [-4, -2, -0.5, 0, 10]
+        Chooses the buckets to be evenly spaced according to the values
+        themselves. Useful when the factor contains discrete values.
+        Only one of 'quantiles' or 'bins' can be not-None
+    Returns
+    -------
+    multi_factor_data : pd.DataFrame - MultiIndex
+        A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the original factor_data DataFrame with new columns
+        for the additional factor.
+    """
+    multi_factor_data = factor_data.copy()
+
+    multi_factor_data.rename({'factor': 'factor_1',
+                              'factor_quantile' : 'factor_1_quantile'},
+                             inplace=True, axis=1)
+
+    # Quantize Factor 2
+    factor_2 = factor_2.copy()
+    factor_2.index.rename(['date', 'asset'], inplace=True)
+
+    multi_factor_data['factor'] = factor_2
+
+    multi_factor_data['factor_2_quantile'] = \
+        quantize_factor(multi_factor_data,
+                        quantiles,
+                        bins,
+                        binning_by_group)
+
+    #Join with dataframe
+    multi_factor_data.rename({'factor': 'factor_2',
+                              'factor_quantile': 'factor_2_quantile'},
+                             inplace=True, axis=1)
+
+    return multi_factor_data
 
 
 def rate_of_return(period_ret, base_period):
