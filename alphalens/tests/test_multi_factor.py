@@ -63,9 +63,11 @@ class MultiFactorTestCase(TestCase):
                        data=factor_2_data).stack()
     factor_2.name = 'factor_2'
 
-    @parameterized.expand([(2, (1, 5, 10), None),
-                           (3, (1, 2, 3, 7), 20)])
+    @parameterized.expand([(False, 2, (1, 5, 10), None),
+                           (False, 3, (1, 2, 3, 7), 20),
+                           (True, 2, (1, 5, 10), None)])
     def test_create_multi_factor_data(self,
+                                      binning_by_group,
                                       quantiles,
                                       periods,
                                       filter_zscore):
@@ -73,17 +75,19 @@ class MultiFactorTestCase(TestCase):
         Test no exceptions are thrown when creating multi_factor_data
         DataFrame
         """
-        factor_data = get_clean_factor_and_forward_returns(
-            self.factor_1,
-            self.prices,
-            quantiles=quantiles,
-            periods=periods,
-            filter_zscore=filter_zscore)
+        factor_data = \
+            get_clean_factor_and_forward_returns(self.factor_1,
+                                                 self.prices,
+                                                 self.factor_groups,
+                                                 binning_by_group,
+                                                 quantiles=quantiles,
+                                                 periods=periods,
+                                                 filter_zscore=filter_zscore)
 
         multi_factor_data = \
             join_factor_with_factor_and_forward_returns(factor_data,
                                                         self.factor_2,
-                                                        False,
+                                                        binning_by_group,
                                                         quantiles)
 
         print multi_factor_data.head()
