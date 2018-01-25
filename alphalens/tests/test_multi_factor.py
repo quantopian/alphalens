@@ -31,7 +31,21 @@ class MultiFactorTestCase(TestCase):
                    [3, 4, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
                    [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2]]
 
-    factor_2_data = factor_1_data[::-1]
+    factor_2_data = [[2, 3, 4, 1, nan, nan], [1, 2, 3, 4, nan, nan],
+                   [4, 3, 2, 1, nan, nan], [3, 4, 2, 1, nan, nan],
+                   [4, 2, 1, 3, nan, nan], [2, 1, 3, 4, nan, nan],
+                   [1, nan, nan, 2, 3, 4], [2, nan, nan, 4, 1, 3],
+                   [1, 4, 3, 2, nan, nan], [2, 3, 4, 1, nan, nan],
+                   [1, nan, nan, 2, 4, 3], [1, nan, nan, 2, 4, 3],
+                   [3, nan, nan, 1, 4, 2], [3, nan, nan, 1, 4, 2],
+                   [1, nan, nan, 4, 3, 2], [4, nan, nan, 3, 2, 1],
+                   [2, nan, nan, 3, 1, 4], [2, nan, nan, 1, 3, 4],
+                   [1, nan, nan, 2, 3, 4], [1, nan, nan, 3, 2, 4],
+                   [4, 3, 2, 1, nan, nan], [3, 4, 1, 2, nan, nan],
+                   [4, 1, 2, 3, nan, nan], [3, 4, 1, 2, nan, nan],
+                   [1, 2, 3, 4, nan, nan], [2, 1, 3, 4, nan, nan],
+                   [2, 3, 4, 1, nan, nan], [3, 4, 2, 1, nan, nan],
+                   [4, nan, nan, 1, 2, 3], [1, nan, nan, 2, 3, 4]]
 
     #
     # full calendar
