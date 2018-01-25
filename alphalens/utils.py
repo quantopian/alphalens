@@ -686,7 +686,7 @@ def join_factor_with_factor_and_forward_returns(factor_data,
                               'factor_quantile': 'factor_2_quantile'},
                              inplace=True, axis=1)
 
-    return multi_factor_data
+    return multi_factor_data.dropna()
 
 
 def rate_of_return(period_ret, base_period):
