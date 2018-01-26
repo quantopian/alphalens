@@ -90,4 +90,4 @@ class MultiFactorTestCase(TestCase):
                                                         binning_by_group,
                                                         quantiles)
 
-        print multi_factor_data.head()
+        create_factors_interaction_tear_sheet(multi_factor_data)
