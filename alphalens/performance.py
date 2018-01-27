@@ -486,7 +486,8 @@ def mean_return_by_quantile(factor_data,
                             by_date=False,
                             by_group=False,
                             demeaned=True,
-                            group_adjust=False):
+                            group_adjust=False,
+                            factor_groupers=['factor_quantile']):
     """
     Computes mean returns for factor quantiles across
     provided forward returns columns.
@@ -507,6 +508,8 @@ def mean_return_by_quantile(factor_data,
         Compute demeaned mean returns (long short portfolio)
     group_adjust : bool
         Returns demeaning will occur on the group level.
+    factor_groupers: list
+        list of column names (strings) for the factor quantiles to group by
 
     Returns
     -------
@@ -524,7 +527,7 @@ def mean_return_by_quantile(factor_data,
     else:
         factor_data = factor_data.copy()
 
-    grouper = ['factor_quantile']
+    grouper = factor_groupers
     if by_date:
         grouper.append(factor_data.index.get_level_values('date'))
 
