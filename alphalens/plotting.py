@@ -939,7 +939,8 @@ def plot_multi_factor_quantile_returns(mean_ret_by_quantile, ax=None):
     num_plots = len(return_cols)
     if ax is None:
         v_spaces = ((num_plots - 1) // MAX_COLS + 1)
-        fig, ax = plt.subplots(v_spaces, min(num_plots, MAX_COLS))
+        fig, ax = plt.subplots(v_spaces, min(num_plots, MAX_COLS),
+                               figsize=(18, v_spaces * 6))
         ax = ax.flatten()
 
     for a, ret_period in zip(ax, return_cols):
