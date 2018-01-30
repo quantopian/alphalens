@@ -776,3 +776,31 @@ def create_event_study_tear_sheet(factor_data,
 
     plt.show()
     gf.close()
+
+
+def create_factors_interaction_tear_sheet(multi_factor_data):
+    """
+    Create a tear sheet with analysis on the interaction of multiple
+    factors.
+
+    Parameters
+    ----------
+    multi_factor_data: pd.DataFrame - Multi-Index
+         A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
+        containing the values for multiple alpha factor (labeled factor_1,
+        factor_2, ..., factor_n), forward returns for each period, the
+        factor quantile/bin that factor value belongs to, and (optionally)
+        the group the asset belongs to.
+    """
+    # Generate Rolling Correlation plot of two factors
+    mean_ret_by_quantile, _ = \
+        perf.mean_return_by_quantile(multi_factor_data,
+                                     by_date=False,
+                                     by_group=False,
+                                     demeaned=True,
+                                     group_adjust=False,
+                                     factor_groupers=['factor_1_quantile',
+                                                      'factor_2_quantile'])
+
+    plotting.plot_multi_factor_quantile_returns(mean_ret_by_quantile)
+

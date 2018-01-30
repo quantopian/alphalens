@@ -914,3 +914,46 @@ def plot_events_distribution(events, num_bars=50, ax=None):
            xlabel='Date')
 
     return ax
+
+
+def plot_multi_factor_quantile_returns(mean_ret_by_quantile, ax=None):
+    """
+    Plots mean period wise returns for factor quantiles.
+
+    Parameters
+    ----------
+    mean_ret_by_q : pd.DataFrame
+        DataFrame with quantiles, (group) and mean period wise return values.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+    """
+    return_cols = \
+        utils.get_forward_returns_columns(mean_ret_by_quantile.columns)
+
+    # Set max number of columns in the plot grid to 3
+    MAX_COLS = 3
+    num_plots = len(return_cols)
+    if ax is None:
+        v_spaces = ((num_plots - 1) // MAX_COLS + 1)
+        fig, ax = plt.subplots(v_spaces, min(num_plots, MAX_COLS),
+                               figsize=(18, v_spaces * 6))
+        ax = ax.flatten()
+
+    for a, ret_period in zip(ax, return_cols):
+        sns.heatmap(mean_ret_by_quantile[ret_period].unstack(), annot=True,
+                    cmap="RdYlGn", ax=a, center=0)
+        a.set(title="Mean {} Returns".format(ret_period))
+    plt.tight_layout()
+
+    # Hide unused subplots
+    if num_plots < len(ax):
+        num_plots_to_hide = MAX_COLS - num_plots % MAX_COLS
+        for i in range(1, num_plots_to_hide + 1):
+            ax[-i].set_visible(False)
+
+    plt.show()
+
