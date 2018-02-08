@@ -162,6 +162,7 @@ def create_event_returns_tear_sheet_api_change_warning(func):
                                         avgretplot=(5, 15),
                                         long_short=True,
                                         group_neutral=False,
+                                        std_bar=True,
                                         by_group=False)
 
     Eventually this function can be deleted
@@ -169,10 +170,10 @@ def create_event_returns_tear_sheet_api_change_warning(func):
     @wraps(func)
     def call_w_context(*args, **kwargs):
         if len(args) == 5 and args[4] is True:
-            warnings.warn("create_event_returns_tear_sheet: a new argument "
-                          "'group_neutral' has been added. Please consider "
-                          "using keyword arguments instead of positional ones "
-                          " to avoid unexpected behaviour.",
+            warnings.warn("create_event_returns_tear_sheet: two new arguments"
+                          " has been added: 'group_neutral' and 'std_bar'. "
+                          "Please consider using keyword arguments instead "
+                          "of positional ones to avoid unexpected behaviour.",
                           category=DeprecationWarning, stacklevel=2)
         return func(*args, **kwargs)
     return call_w_context
@@ -601,6 +602,7 @@ def create_event_returns_tear_sheet(factor_data,
                                     avgretplot=(5, 15),
                                     long_short=True,
                                     group_neutral=False,
+                                    std_bar=True,
                                     by_group=False):
     """
     Creates a tear sheet to view the average cumulative returns for a
@@ -626,6 +628,8 @@ def create_event_returns_tear_sheet(factor_data,
     group_neutral : bool
         Should this computation happen on a group neutral portfolio? if so,
         returns demeaning will occur on the group level.
+    std_bar : boolean, optional
+        Show plots with standard deviation bars, one for each quantile
     by_group : bool
         If True, display graphs separately for each group.
     """
@@ -643,21 +647,23 @@ def create_event_returns_tear_sheet(factor_data,
 
     num_quantiles = int(factor_data['factor_quantile'].max())
 
-    vertical_sections = 1 + (((num_quantiles - 1) // 2) + 1)
+    vertical_sections = 1
+    if std_bar:
+        vertical_sections += (((num_quantiles - 1) // 2) + 1)
     cols = 2 if num_quantiles != 1 else 1
     gf = GridFigure(rows=vertical_sections, cols=cols)
     plotting.plot_quantile_average_cumulative_return(avg_cumulative_returns,
                                                      by_quantile=False,
                                                      std_bar=False,
                                                      ax=gf.next_row())
-
-    ax_avg_cumulative_returns_by_q = [gf.next_cell()
-                                      for _ in range(num_quantiles)]
-    plotting.plot_quantile_average_cumulative_return(
-        avg_cumulative_returns,
-        by_quantile=True,
-        std_bar=True,
-        ax=ax_avg_cumulative_returns_by_q)
+    if std_bar:
+        ax_avg_cumulative_returns_by_q = [gf.next_cell()
+                                          for _ in range(num_quantiles)]
+        plotting.plot_quantile_average_cumulative_return(
+            avg_cumulative_returns,
+            by_quantile=True,
+            std_bar=True,
+            ax=ax_avg_cumulative_returns_by_q)
 
     plt.show()
     gf.close()
@@ -730,6 +736,8 @@ def create_event_study_tear_sheet(factor_data,
                                         prices=prices,
                                         avgretplot=avgretplot,
                                         long_short=long_short,
+                                        group_neutral=False,
+                                        std_bar=True,
                                         by_group=False)
 
     factor_returns = perf.factor_returns(factor_data,
