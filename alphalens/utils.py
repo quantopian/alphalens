@@ -20,7 +20,7 @@ import re
 
 from IPython.display import display
 from functools import wraps
-from pandas.tseries.offsets import BDay, Day
+from pandas.tseries.offsets import CustomBusinessDay
 from scipy.stats import mode
 
 
@@ -146,6 +146,37 @@ def quantize_factor(factor_data,
     return factor_quantile.dropna()
 
 
+def infer_trading_calendar(factor_idx, prices_idx):
+    """
+    Infer the trading calendar from factor and price information.
+
+    Parameters
+    ----------
+    factor_idx : pd.DatetimeIndex
+        The factor datetimes for which we are computing the forward returns
+    prices_idx : pd.DatetimeIndex
+        The prices datetimes associated withthe factor data
+
+    Returns
+    -------
+    calendar : pd.DateOffset
+    """
+    full_idx = factor_idx.union(prices_idx)
+
+    # drop days of the week that are not used
+    days_to_keep = []
+    days_of_the_week = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    for day, day_str in enumerate(days_of_the_week):
+        if (full_idx.dayofweek == day).any():
+            days_to_keep.append(day_str)
+
+    days_to_keep = ' '.join(days_to_keep)
+
+    # we currently don't infer holidays, but CustomBusinessDay class supports
+    # custom holidays. So holidays could be inferred too eventually
+    return CustomBusinessDay(weekmask=days_to_keep)
+
+
 def compute_forward_returns(factor_idx,
                             prices,
                             periods=(1, 5, 10),
@@ -183,61 +214,42 @@ def compute_forward_returns(factor_idx,
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
         [factor_idx, prices.columns], names=['date', 'asset']))
 
-    custom_calendar = False
+    freq = infer_trading_calendar(factor_idx, prices.index)
+    forward_returns.index.levels[0].freq = freq
 
     for period in periods:
 
         #
         # build forward returns
         #
-        delta = prices.pct_change(period).shift(-period).reindex(factor_idx)
+        fwdret = prices.pct_change(period).shift(-period).reindex(factor_idx)
 
         if filter_zscore is not None:
-            mask = abs(delta - delta.mean()) > (filter_zscore * delta.std())
-            delta[mask] = np.nan
+            mask = abs(fwdret - fwdret.mean()) > (filter_zscore * fwdret.std())
+            fwdret[mask] = np.nan
 
         #
-        # if the period length is not consistent across the factor index then
-        # it must be a trading/business day calendar
+        # Find the period length, which will be the column name
+        # Becase there could be non-trading days in between some of the trades
+        # we'll test several entries to find the actual period length
         #
-        time_diffs = prices.index.to_series().diff(period)
-        time_diffs = time_diffs.reindex(factor_idx)
-        if time_diffs.min() != time_diffs.max():
-            custom_calendar = True
+        entries_to_test = min(50, len(fwdret.index)-period)
+        days_diffs = []
+        for i in range(entries_to_test):
+            p_idx = prices.index.get_loc(fwdret.index[i])
+            start = prices.index[p_idx]
+            end = prices.index[p_idx+period]
+            period_len = diff_custom_calendar_timedeltas(start, end, freq)
+            days_diffs.append(period_len.components.days)
 
-        #
-        # find the period length that will be the column name
-        #
-        p_idx = prices.index.get_loc(delta.index[0])
-        period_len = prices.index[p_idx+period] - prices.index[p_idx]
+        delta_days = period_len.components.days - mode(days_diffs).mode[0]
+        period_len -= pd.Timedelta(days=delta_days)
 
-        #
-        # use business days as an approximation to trading calendar
-        #
-        if custom_calendar and period_len.components.days > 0:
-            entries_to_test = min(50, len(delta.index)-period)
-            days_diffs = []
-            for i in range(entries_to_test):
-                p_idx = prices.index.get_loc(delta.index[i])
-                days = len(pd.bdate_range(prices.index[p_idx],
-                                          prices.index[p_idx+period])) - 1
-                days_diffs.append(days)
-
-            delta_days = period_len.components.days - mode(days_diffs).mode[0]
-            period_len -= pd.Timedelta(days=delta_days)
-
+        # Finally use period_len as column name
         column_name = timedelta_to_string(period_len)
-        forward_returns[column_name] = delta.stack()
+        forward_returns[column_name] = fwdret.stack()
 
     forward_returns.index = forward_returns.index.rename(['date', 'asset'])
-
-    # use business days as an approximation to trading calendar, if this will
-    # be proven to be a poor approximation then we could build a pandas
-    # AbstractHolidayCalendar inferring non-trading days from price DataFrame
-    # and use it to build a CustomBusinessDay DateOffset that we can finally
-    # set it as index 'freq'
-    freq = BDay() if custom_calendar else Day()
-    forward_returns.index.levels[0].freq = freq
 
     return forward_returns
 
