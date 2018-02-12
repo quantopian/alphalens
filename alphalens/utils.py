@@ -230,10 +230,12 @@ def compute_forward_returns(factor_idx,
 
         #
         # Find the period length, which will be the column name
-        # Becase there could be non-trading days in between some of the trades
-        # we'll test several entries to find the actual period length
+        # Becase the calendar inferred from factor and prices doesn't take
+        # into consideration holidays yet, there could be some non-trading days
+        # in between the trades so we'll test several entries to find out the
+        # correct period length
         #
-        entries_to_test = min(50, len(fwdret.index)-period)
+        entries_to_test = min(10, len(fwdret.index)-period)
         days_diffs = []
         for i in range(entries_to_test):
             p_idx = prices.index.get_loc(fwdret.index[i])
@@ -494,11 +496,9 @@ def get_clean_factor_and_forward_returns(factor,
         - forward returns column names follow  the format accepted by
           pd.Timedelta (e.g. '1D', '30m', '3h15m', '1D1h', etc)
         - 'date' index freq property (merged_data.index.levels[0].freq) will be
-          set to Calendar day or Business day (pandas DateOffset) depending on
-          what was inferred from the input data. This is currently used only in
-          cumulative returns computation but it can be later set to any
-          pd.DateOffset (e.g. US trading calendar) to increase the accuracy
-          of the results
+          set to a trading calendar (pandas DateOffset) inferred from the input
+          data (see infer_trading_calendar for more details). This is currently
+          used only in cumulative returns computation
         ::
            -------------------------------------------------------------------
                       |       | 1D  | 5D  | 10D  |factor|group|factor_quantile
