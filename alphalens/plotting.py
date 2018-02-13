@@ -914,3 +914,47 @@ def plot_events_distribution(events, num_bars=50, ax=None):
            xlabel='Date')
 
     return ax
+
+
+def plot_returns_decomposition(returns_decomposition,
+                               period=None,
+                               ax=None):
+    """
+    Plots the returns decomposition of the alpha factor's returns.
+    Parameters
+    ----------
+    returns_decomposition : pd.DataFrame
+        DataFrame with returns decomposition of alpha factor's returns
+        - Exact output of performance.returns_decomposition
+    period : int, optional
+        Number of periods of forward returns. Defaults to 1 (i.e., plots
+        decomposition of one-period forward returns)
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    Returns
+    -------
+    ax : matplotlib.Axes
+    """
+    if period is None:
+        period = 1
+
+    if ax is None:
+        _, ax = plt.subplots(figsize=[18, 6])
+
+    returns_decomposition.T.plot(kind='bar', stacked=True, ax=ax, rot=0,
+                                 colormap=plt.cm.Set3)
+
+    algo_returns_ann = returns_decomposition.sum()[0]
+    ax.axhline(0, color='black')
+    ax.axhline(algo_returns_ann, linestyle='--', color='black',
+               label='Algo Returns\n={: 0.2f}%'.format(100*algo_returns_ann))
+
+    ax.set_xticklabels(['Model {0}: Added {1}'.format(i, x) for i, x
+                        in enumerate(returns_decomposition.columns.values)])
+    ax.set_yticklabels(['{: 0.0f}%'.format(100*y) for y in ax.get_yticks()])
+    ax.legend(bbox_to_anchor=(1.0, 0.5))
+    ax.set_ylabel('Returns')
+    ax.set_title('Returns Decomposition: {} Forward Period Returns'
+                 .format(period))
+
+    return ax

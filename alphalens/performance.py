@@ -15,10 +15,13 @@
 
 import pandas as pd
 import numpy as np
-
 from scipy import stats
+from collections import OrderedDict
+import warnings
+
 from statsmodels.regression.linear_model import OLS
 from statsmodels.tools.tools import add_constant
+
 from . import utils
 
 
@@ -893,6 +896,111 @@ def average_cumulative_return_by_quantile(factor_data,
             fq = factor_data['factor_quantile']
             return fq.groupby(fq).apply(average_cumulative_return, None)
 
+
+def calc_vifs(data):
+    '''
+    Computes variance inflation factors (VIFs) for a set of random variables.
+    For more information, see
+    https://en.wikipedia.org/wiki/Variance_inflation_factor
+    Parameters
+    ----------
+    data : pd.DataFrame
+        DataFrame with observations of random variables.
+        - Columns are observations of a random variable, and each row makes up
+        one observation for each random variable.
+    '''
+    vifs = np.zeros(len(data.columns))
+    for i in range(len(data.columns)):
+        r2 = (OLS(data.iloc[:, i],
+                  add_constant(data.drop(data.columns[i], axis='columns')))
+              .fit()
+              .rsquared)
+        vifs[i] = 1/(1-r2)
+    return pd.Series(index=data.columns, data=vifs)
+
+
+def decompose_returns(algo_returns, risk_factors, hierarchy=None):
+    '''
+    Decomposes returns into returns attributable to common risk factors.
+    Parameters
+    ----------
+    algo_returns : pd.Series
+        Algorithm's daily returns, with a tz-localized index
+        - Example:
+        2010-01-01 00:00:00+00:00    0.812385
+        2010-01-04 00:00:00+00:00    0.468386
+        2010-01-05 00:00:00+00:00    0.680892
+    risk_factors : pd.DataFrame
+        Daily common risk factors. Index is tz-localized DatetimeIndex,
+        columns are common factor names
+        - Example:
+                                        Mkt       SMB       HML       UMD
+        2017-06-26 00:00:00+00:00    0.0004   -0.0008    0.0069   -0.0057
+        2017-06-27 00:00:00+00:00   -0.0084   -0.0043    0.0130   -0.0030
+        2017-06-28 00:00:00+00:00    0.0102    0.0077    0.0021    0.0091
+    hierarchy : OrderedDict
+        Hierarchy of common factors, for use in plotting the bar chart.
+        If None, defaults to a hierarchy in which each column of risk_factors
+        forms a 'level' of the hierarchy.
+        - Example:
+        OrderedDict([('Market', ['Mkt']),
+                     ('Style', ['SMB', 'HML', 'UMD'])])
+    Returns
+    -------
+    returns_decomposition : pd.DataFrame
+        Decomposed returns
+    betas : pd.DataFrame
+        Betas to the common factors
+    t_stats : pd.DataFrame
+        t-statistics for the betas to the common factors. Computed by dividing
+        betas by White's (1980) heteroskedasticity standard errors.
+    vifs : pd.Series
+        Variance inflation factors for the common factors
+        - For more information, see
+        https://en.wikipedia.org/wiki/Variance_inflation_factor
+    '''
+    if hierarchy is None:
+        hierarchy = risk_factors.columns.values
+
+    # construct a cumulative hierarchy
+    cum_tiers = []
+    for i in range(len(hierarchy.values())):
+        cum_tiers.append([item for a in range(0, i+1)
+                          for item in list(hierarchy.values())[a]])
+    cum_hierarchy = OrderedDict()
+    cum_hierarchy.update((list(hierarchy.keys())[i], cum_tiers[i])
+                         for i in range(len(hierarchy)))
+
+    # ensure that risk_factors and algo_rets_over_rf have the same index
+    idx = algo_returns.index.intersection(risk_factors.index)
+    risk_factors = risk_factors.loc[idx]
+    algo_returns = algo_returns.loc[idx]
+
+    idx = np.append(['Alpha'], risk_factors.columns.values)
+    betas = pd.DataFrame(index=idx, columns=hierarchy.keys())
+    returns_decomposition = pd.DataFrame(index=idx, columns=hierarchy.keys())
+    t_stats = pd.DataFrame(index=idx, columns=hierarchy.keys())
+
+    for tier, factors in cum_hierarchy.items():
+        model_factors = add_constant(risk_factors.loc[:, factors]) \
+            .rename(columns={'const': 'Alpha'})
+        model = OLS(algo_returns, model_factors).fit()
+
+        betas.loc[:, tier] = model.params
+        betas.loc['Alpha', tier] *= 252
+        t_stats.loc[:, tier] = model.params / model.HC0_se
+
+        returns_decomposition.loc[:, tier] = model.params.drop('Alpha') \
+            * risk_factors.mean() * 252
+        returns_decomposition.loc['Alpha', tier] = betas.loc['Alpha', tier]
+
+    vifs = calc_vifs(risk_factors)
+    if any(vifs > 5):
+        warnings.warn('Factors with VIFs over 5: {}'
+                      .format(', '.join(vifs[vifs > 5].index.values)),
+                      Warning)
+
+    return returns_decomposition, betas, t_stats, vifs
 
 def create_pyfolio_input(factor_data,
                          period,
