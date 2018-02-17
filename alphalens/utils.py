@@ -98,7 +98,9 @@ def quantize_factor(factor_data,
         containing the values for a single alpha factor, forward returns for
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
+
         - See full explanation in utils.get_clean_factor_and_forward_returns
+
     quantiles : int or sequence[float]
         Number of equal-sized quantile buckets to use in factor bucketing.
         Alternately sequence of quantiles, allowing non-equal-sized buckets
@@ -177,7 +179,7 @@ def infer_trading_calendar(factor_idx, prices_idx):
     return CustomBusinessDay(weekmask=days_to_keep)
 
 
-def compute_forward_returns(factor_idx,
+def compute_forward_returns(factor,
                             prices,
                             periods=(1, 5, 10),
                             filter_zscore=None):
@@ -187,8 +189,12 @@ def compute_forward_returns(factor_idx,
 
     Parameters
     ----------
-    factor_idx : pd.DatetimeIndex
-        The factor datetimes for which we are computing the forward returns
+    factor : pd.Series - MultiIndex
+        A MultiIndex Series indexed by timestamp (level 0) and asset
+        (level 1), containing the values for a single alpha factor.
+
+        - See full explanation in utils.get_clean_factor_and_forward_returns
+
     prices : pd.DataFrame
         Pricing data to use in forward price calculation.
         Assets as columns, dates as index. Pricing data must
@@ -209,25 +215,28 @@ def compute_forward_returns(factor_idx,
         Separate column for each forward return window.
     """
 
-    factor_idx = factor_idx.intersection(prices.index)
+    factor_dateindex = factor.index.levels[0]
+    if factor_dateindex.tz != prices.index.tz:
+        raise NonMatchingTimezoneError("The timezone of 'factor' is not the "
+                                       "same as the timezone of 'prices'. See "
+                                       "the pandas methods tz_localize and "
+                                       "tz_convert.")
 
-    if len(factor_idx) == 0:
-        raise ValueError("Factor and prices indices don't match: make sure "
-                         "they have the same convention in terms of datetimes "
-                         "and symbol-names")
-
+    factor_dateindex = factor_dateindex.intersection(prices.index)
+    
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
-        [factor_idx, prices.columns], names=['date', 'asset']))
+        [factor_dateindex, prices.columns], names=['date', 'asset']))
 
-    freq = infer_trading_calendar(factor_idx, prices.index)
+    freq = infer_trading_calendar(factor_dateindex, prices.index)
     forward_returns.index.levels[0].freq = freq
 
+    periods = sorted(periods)
     for period in periods:
 
         #
         # build forward returns
         #
-        fwdret = prices.pct_change(period).shift(-period).reindex(factor_idx)
+        fwdret = prices.pct_change(period).shift(-period).reindex(factor_dateindex)
 
         if filter_zscore is not None:
             mask = abs(fwdret - fwdret.mean()) > (filter_zscore * fwdret.std())
@@ -333,6 +342,201 @@ def print_table(table, name=None, fmt=None):
 
     if fmt is not None:
         pd.set_option('display.float_format', prev_option)
+
+
+def get_clean_factor(factor,
+                     forward_returns,
+                     groupby=None,
+                     binning_by_group=False,
+                     quantiles=5,
+                     bins=None,
+                     groupby_labels=None,
+                     max_loss=0.35):
+    """
+    Formats the factor data, forward return data, and group mappings into a DataFrame
+    that contains aligned MultiIndex indices of timestamp and asset. The
+    returned data will be formatted to be suitable for Alphalens functions.
+
+    It is safe to skip a call to this function and still make use of Alphalens
+    functionalities as long as the factor data conforms to the format returned
+    from get_clean_factor_and_forward_returns and documented here
+
+    Parameters
+    ----------
+    factor : pd.Series - MultiIndex
+        A MultiIndex Series indexed by timestamp (level 0) and asset
+        (level 1), containing the values for a single alpha factor.
+        ::
+            -----------------------------------
+                date    |    asset   |
+            -----------------------------------
+                        |   AAPL     |   0.5
+                        -----------------------
+                        |   BA       |  -1.1
+                        -----------------------
+            2014-01-01  |   CMG      |   1.7
+                        -----------------------
+                        |   DAL      |  -0.1
+                        -----------------------
+                        |   LULU     |   2.7
+                        -----------------------
+
+    forward_returns : pd.DataFrame - MultiIndex
+        Forward returns in indexed by date and asset.
+        ::
+            ---------------------------------------
+                       |       | 1D  | 5D  | 10D
+            ---------------------------------------
+                date   | asset |     |     |
+            ---------------------------------------
+                       | AAPL  | 0.09|-0.01|-0.079
+                       ----------------------------
+                       | BA    | 0.02| 0.06| 0.020
+                       ----------------------------
+            2014-01-01 | CMG   | 0.03| 0.09| 0.036
+                       ----------------------------
+                       | DAL   |-0.02|-0.06|-0.029
+                       ----------------------------
+                       | LULU  |-0.03| 0.05|-0.009
+                       ----------------------------
+
+    groupby : pd.Series - MultiIndex or dict
+        Either A MultiIndex Series indexed by date and asset,
+        containing the period wise group codes for each asset, or
+        a dict of asset to group mappings. If a dict is passed,
+        it is assumed that group mappings are unchanged for the
+        entire time period of the passed factor data.
+    binning_by_group : bool
+        If True, compute quantile buckets separately for each group.
+        This is useful when the factor values range vary considerably
+        across gorups so that it is wise to make the binning group relative.
+        You should probably enable this if the factor is intended
+        to be analyzed for a group neutral portfolio
+    quantiles : int or sequence[float]
+        Number of equal-sized quantile buckets to use in factor bucketing.
+        Alternately sequence of quantiles, allowing non-equal-sized buckets
+        e.g. [0, .10, .5, .90, 1.] or [.05, .5, .95]
+        Only one of 'quantiles' or 'bins' can be not-None
+    bins : int or sequence[float]
+        Number of equal-width (valuewise) bins to use in factor bucketing.
+        Alternately sequence of bin edges allowing for non-uniform bin width
+        e.g. [-4, -2, -0.5, 0, 10]
+        Chooses the buckets to be evenly spaced according to the values
+        themselves. Useful when the factor contains discrete values.
+        Only one of 'quantiles' or 'bins' can be not-None
+    groupby_labels : dict
+        A dictionary keyed by group code with values corresponding
+        to the display name for each group.
+    max_loss : float, optional
+        Maximum percentage (0.00 to 1.00) of factor data dropping allowed,
+        computed comparing the number of items in the input factor index and
+        the number of items in the output DataFrame index.
+        Factor data can be partially dropped due to being flawed itself
+        (e.g. NaNs), not having provided enough price data to compute
+        forward returns for all factor values, or because it is not possible
+        to perform binning.
+        Set max_loss=0 to avoid Exceptions suppression.
+
+    Returns
+    -------
+    merged_data : pd.DataFrame - MultiIndex
+        A MultiIndex Series indexed by date (level 0) and asset (level 1),
+        containing the values for a single alpha factor, forward returns for
+        each period, the factor quantile/bin that factor value belongs to, and
+        (optionally) the group the asset belongs to.
+
+        - forward returns column names follow  the format accepted by
+          pd.Timedelta (e.g. '1D', '30m', '3h15m', '1D1h', etc)
+
+        - 'date' index freq property (merged_data.index.levels[0].freq) will be
+          set to a trading calendar (pandas DateOffset) inferred from the input
+          data (see infer_trading_calendar for more details). This is currently
+          used only in cumulative returns computation
+        ::
+           -------------------------------------------------------------------
+                      |       | 1D  | 5D  | 10D  |factor|group|factor_quantile
+           -------------------------------------------------------------------
+               date   | asset |     |     |      |      |     |
+           -------------------------------------------------------------------
+                      | AAPL  | 0.09|-0.01|-0.079|  0.5 |  G1 |      3
+                      --------------------------------------------------------
+                      | BA    | 0.02| 0.06| 0.020| -1.1 |  G2 |      5
+                      --------------------------------------------------------
+           2014-01-01 | CMG   | 0.03| 0.09| 0.036|  1.7 |  G2 |      1
+                      --------------------------------------------------------
+                      | DAL   |-0.02|-0.06|-0.029| -0.1 |  G3 |      5
+                      --------------------------------------------------------
+                      | LULU  |-0.03| 0.05|-0.009|  2.7 |  G1 |      2
+                      --------------------------------------------------------
+    """
+
+    initial_amount = float(len(factor.index))
+
+    factor = factor.copy()
+    factor.index = factor.index.rename(['date', 'asset'])
+
+    merged_data = forward_returns.copy()
+    merged_data['factor'] = factor
+
+    if groupby is not None:
+        if isinstance(groupby, dict):
+            diff = set(factor.index.get_level_values(
+                'asset')) - set(groupby.keys())
+            if len(diff) > 0:
+                raise KeyError(
+                    "Assets {} not in group mapping".format(
+                        list(diff)))
+
+            ss = pd.Series(groupby)
+            groupby = pd.Series(index=factor.index,
+                                data=ss[factor.index.get_level_values(
+                                    'asset')].values)
+
+        if groupby_labels is not None:
+            diff = set(groupby.values) - set(groupby_labels.keys())
+            if len(diff) > 0:
+                raise KeyError(
+                    "groups {} not in passed group names".format(
+                        list(diff)))
+
+            sn = pd.Series(groupby_labels)
+            groupby = pd.Series(index=factor.index,
+                                data=sn[groupby.values].values)
+
+        merged_data['group'] = groupby.astype('category')
+
+    merged_data = merged_data.dropna()
+
+    fwdret_amount = float(len(merged_data.index))
+
+    no_raise = False if max_loss == 0 else True
+    merged_data['factor_quantile'] = quantize_factor(merged_data,
+                                                     quantiles,
+                                                     bins,
+                                                     binning_by_group,
+                                                     no_raise)
+
+    merged_data = merged_data.dropna()
+
+    binning_amount = float(len(merged_data.index))
+
+    tot_loss = (initial_amount - binning_amount) / initial_amount
+    fwdret_loss = (initial_amount - fwdret_amount) / initial_amount
+    bin_loss = tot_loss - fwdret_loss
+
+    print("Dropped %.1f%% entries from factor data: %.1f%% in forward "
+          "returns computation and %.1f%% in binning phase "
+          "(set max_loss=0 to see potentially suppressed Exceptions)." %
+          (tot_loss * 100, fwdret_loss * 100,  bin_loss * 100))
+
+    if tot_loss > max_loss:
+        message = ("max_loss (%.1f%%) exceeded %.1f%%, consider increasing it."
+                   % (max_loss * 100, tot_loss * 100))
+        raise MaxLossExceededError(message)
+    else:
+        print("max_loss is %.1f%%, not exceeded: OK!" % (max_loss * 100))
+
+    return merged_data
 
 
 def get_clean_factor_and_forward_returns_api_change_warning(func):
@@ -522,83 +726,17 @@ def get_clean_factor_and_forward_returns(factor,
                       --------------------------------------------------------
     """
 
-    if factor.index.levels[0].tz != prices.index.tz:
-        raise NonMatchingTimezoneError("The timezone of 'factor' is not the "
-                                       "same as the timezone of 'prices'. See "
-                                       "the pandas methods tz_localize and "
-                                       "tz_convert.")
-
-    periods = sorted(periods)
-
-    initial_amount = float(len(factor.index))
-
     factor = factor.copy()
-    factor.index = factor.index.rename(['date', 'asset'])
-    factor_dateindex = factor.index.get_level_values('date').unique()
-
-    merged_data = compute_forward_returns(factor_dateindex, prices, periods,
-                                          filter_zscore)
-    merged_data['factor'] = factor
-
-    if groupby is not None:
-        if isinstance(groupby, dict):
-            diff = set(factor.index.get_level_values(
-                'asset')) - set(groupby.keys())
-            if len(diff) > 0:
-                raise KeyError(
-                    "Assets {} not in group mapping".format(
-                        list(diff)))
-
-            ss = pd.Series(groupby)
-            groupby = pd.Series(index=factor.index,
-                                data=ss[factor.index.get_level_values(
-                                    'asset')].values)
-
-        if groupby_labels is not None:
-            diff = set(groupby.values) - set(groupby_labels.keys())
-            if len(diff) > 0:
-                raise KeyError(
-                    "groups {} not in passed group names".format(
-                        list(diff)))
-
-            sn = pd.Series(groupby_labels)
-            groupby = pd.Series(index=factor.index,
-                                data=sn[groupby.values].values)
-
-        merged_data['group'] = groupby.astype('category')
-
-    merged_data = merged_data.dropna()
-
-    fwdret_amount = float(len(merged_data.index))
-
-    no_raise = False if max_loss == 0 else True
-    merged_data['factor_quantile'] = quantize_factor(merged_data,
-                                                     quantiles,
-                                                     bins,
-                                                     binning_by_group,
-                                                     no_raise)
-
-    merged_data = merged_data.dropna()
-
-    binning_amount = float(len(merged_data.index))
-
-    tot_loss = (initial_amount - binning_amount) / initial_amount
-    fwdret_loss = (initial_amount - fwdret_amount) / initial_amount
-    bin_loss = tot_loss - fwdret_loss
-
-    print("Dropped %.1f%% entries from factor data: %.1f%% in forward "
-          "returns computation and %.1f%% in binning phase "
-          "(set max_loss=0 to see potentially suppressed Exceptions)." %
-          (tot_loss * 100, fwdret_loss * 100,  bin_loss * 100))
-
-    if tot_loss > max_loss:
-        message = ("max_loss (%.1f%%) exceeded %.1f%%, consider increasing it."
-                   % (max_loss * 100, tot_loss * 100))
-        raise MaxLossExceededError(message)
-    else:
-        print("max_loss is %.1f%%, not exceeded: OK!" % (max_loss * 100))
-
-    return merged_data
+    forward_returns = compute_forward_returns(factor, prices, periods,
+                                              filter_zscore)
+    
+    factor_data = get_clean_factor(factor, forward_returns, groupby=groupby,
+                                   groupby_labels=groupby_labels,
+                                   quantiles=quantiles, bins=bins,
+                                   binning_by_group=binning_by_group,
+                                   max_loss=max_loss)
+    
+    return factor_data
 
 
 def rate_of_return(period_ret, base_period):
