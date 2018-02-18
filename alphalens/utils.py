@@ -222,15 +222,15 @@ def compute_forward_returns(factor,
                                        "the pandas methods tz_localize and "
                                        "tz_convert.")
 
-    factor_dateindex = factor_dateindex.intersection(prices.index)
+    freq = infer_trading_calendar(factor_dateindex, prices.index)
     
+    factor_dateindex = factor_dateindex.intersection(prices.index)
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
         [factor_dateindex, prices.columns], names=['date', 'asset']))
 
-    freq = infer_trading_calendar(factor_dateindex, prices.index)
     forward_returns.index.levels[0].freq = freq
 
-    for period in sortedp(periods):
+    for period in sorted(periods):
         #
         # build forward returns
         #
