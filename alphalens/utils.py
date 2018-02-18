@@ -211,7 +211,7 @@ def compute_forward_returns(factor,
     Returns
     -------
     forward_returns : pd.DataFrame - MultiIndex
-        Forward returns in indexed by date and asset.
+        Forward returns indexed by date and asset.
         Separate column for each forward return window.
     """
 
@@ -230,9 +230,7 @@ def compute_forward_returns(factor,
     freq = infer_trading_calendar(factor_dateindex, prices.index)
     forward_returns.index.levels[0].freq = freq
 
-    periods = sorted(periods)
-    for period in periods:
-
+    for period in sortedp(periods):
         #
         # build forward returns
         #
@@ -286,7 +284,7 @@ def demean_forward_returns(factor_data, grouper=None):
     Parameters
     ----------
     factor_data : pd.DataFrame - MultiIndex
-        Forward returns in indexed by date and asset.
+        Forward returns indexed by date and asset.
         Separate column for each forward return window.
     grouper : list
         If True, demean according to group.
@@ -382,7 +380,7 @@ def get_clean_factor(factor,
                         -----------------------
 
     forward_returns : pd.DataFrame - MultiIndex
-        Forward returns in indexed by date and asset.
+        Forward returns indexed by date and asset.
         ::
             ---------------------------------------
                        |       | 1D  | 5D  | 10D
@@ -726,7 +724,6 @@ def get_clean_factor_and_forward_returns(factor,
                       --------------------------------------------------------
     """
 
-    factor = factor.copy()
     forward_returns = compute_forward_returns(factor, prices, periods,
                                               filter_zscore)
     
