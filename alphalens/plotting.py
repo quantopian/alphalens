@@ -939,10 +939,10 @@ def plot_multi_factor_quantile_returns(mean_ret_by_quantile, period, ax=None):
         fig, ax = plt.subplots(figsize=(6, 6))
 
         sns.heatmap(mean_ret_by_quantile[period].unstack(), annot=True,
-                    cmap="RdYlGn", ax=ax, center=0)
+                    cmap=cm.coolwarm, ax=ax, center=0)
         ax.set(title="Mean {} Returns".format(period))
     else:
         sns.heatmap(mean_ret_by_quantile[period].unstack(), annot=True,
-                    cmap="RdYlGn", ax=ax, center=0)
+                    cmap=cm.coolwarm, ax=ax, center=0)
         ax.set(title="Mean {} Returns".format(period))
 
