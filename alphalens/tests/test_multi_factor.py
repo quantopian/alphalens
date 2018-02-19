@@ -65,6 +65,7 @@ class MultiFactorTestCase(TestCase):
 
     @parameterized.expand([(False, 2, (1, 5, 10), None),
                            (False, 3, (1, 2, 3, 7), 20),
+                           (False, 3, (1,), None),
                            (True, 2, (1, 5, 10), None)])
     def test_create_multi_factor_data(self,
                                       binning_by_group,
