@@ -777,7 +777,7 @@ def create_event_study_tear_sheet(factor_data,
     plt.show()
     gf.close()
 
-
+@plotting.customize
 def create_factors_interaction_tear_sheet(multi_factor_data):
     """
     Create a tear sheet with analysis on the interaction of multiple
