@@ -792,7 +792,6 @@ def create_factors_interaction_tear_sheet(multi_factor_data):
         factor quantile/bin that factor value belongs to, and (optionally)
         the group the asset belongs to.
     """
-    # Generate Rolling Correlation plot of two factors
     mean_ret_by_quantile, _ = \
         perf.mean_return_by_quantile(multi_factor_data,
                                      by_date=False,
@@ -801,6 +800,17 @@ def create_factors_interaction_tear_sheet(multi_factor_data):
                                      group_adjust=False,
                                      factor_groupers=['factor_1_quantile',
                                                       'factor_2_quantile'])
+    MAX_COLS = 3
+    return_cols = \
+        utils.get_forward_returns_columns(mean_ret_by_quantile.columns)
+    num_plots = len(return_cols)
+    v_spaces = ((num_plots - 1) // MAX_COLS + 1)
 
-    plotting.plot_multi_factor_quantile_returns(mean_ret_by_quantile)
+    gf = GridFigure(v_spaces, min(num_plots, MAX_COLS))
 
+    for period in mean_ret_by_quantile:
+        plotting.plot_multi_factor_quantile_returns(mean_ret_by_quantile,
+                                                    period,
+                                                    gf.next_cell())
+    plt.show()
+    gf.close()
