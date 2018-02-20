@@ -23,11 +23,14 @@ from pandas import (
     DataFrame,
     date_range,
     MultiIndex,
+    Timedelta,
+    concat,
 )
 from pandas.util.testing import (assert_frame_equal,
                                  assert_series_equal)
 
-from .. utils import (compute_forward_returns,
+from .. utils import (get_clean_factor_and_forward_returns,
+                      compute_forward_returns,
                       quantize_factor)
 
 
@@ -114,3 +117,215 @@ class UtilsTestCase(TestCase):
                           data=expected_vals,
                           name='factor_quantile').dropna()
         assert_series_equal(quantized_factor, expected)
+
+    def test_get_clean_factor_and_forward_returns_1(self):
+        """
+        Test get_clean_factor_and_forward_returns with a daily factor
+        """
+        tickers = ['A', 'B', 'C', 'D', 'E', 'F']
+
+        factor_groups = {'A': 1, 'B': 2, 'C': 1, 'D': 2, 'E': 1, 'F': 2}
+
+        price_data = [[1.10**i, 0.50**i, 3.00**i, 0.90**i, 0.50**i, 1.00**i]
+                      for i in range(1, 7)]
+
+        factor_data = [[3, 4, 2, 1, nan, nan],
+                       [3, nan, nan, 1, 4, 2],
+                       [3, 4, 2, 1, nan, nan]]
+
+        price_index = date_range(start='2015-1-10', end='2015-1-15')
+        price_index.name = 'date'
+        prices = DataFrame(index=price_index, columns=tickers, data=price_data)
+
+        factor_index = date_range(start='2015-1-10', end='2015-1-12')
+        factor_index.name = 'date'
+        factor = DataFrame(index=factor_index, columns=tickers,
+                           data=factor_data).stack()
+
+        factor_data = get_clean_factor_and_forward_returns(
+            factor, prices,
+            groupby=factor_groups,
+            quantiles=4,
+            periods=(1, 2, 3))
+
+        expected_idx = factor.index.rename(['date', 'asset'])
+        expected_cols = ['1D', '2D', '3D',
+                         'factor', 'group', 'factor_quantile']
+        expected_data = [[0.1,  0.21,  0.331, 3.0, 1, 3],
+                         [-0.5, -0.75, -0.875, 4.0, 2, 4],
+                         [2.0,  8.00, 26.000, 2.0, 1, 2],
+                         [-0.1, -0.19, -0.271, 1.0, 2, 1],
+                         [0.1,  0.21,  0.331, 3.0, 1, 3],
+                         [-0.1, -0.19, -0.271, 1.0, 2, 1],
+                         [-0.5, -0.75, -0.875, 4.0, 1, 4],
+                         [0.0,  0.00,  0.000, 2.0, 2, 2],
+                         [0.1,  0.21,  0.331, 3.0, 1, 3],
+                         [-0.5, -0.75, -0.875, 4.0, 2, 4],
+                         [2.0,  8.00, 26.000, 2.0, 1, 2],
+                         [-0.1, -0.19, -0.271, 1.0, 2, 1]]
+        expected = DataFrame(index=expected_idx,
+                             columns=expected_cols, data=expected_data)
+        expected['group'] = expected['group'].astype('category')
+
+        assert_frame_equal(factor_data, expected)
+
+    def test_get_clean_factor_and_forward_returns_2(self):
+        """
+        Test get_clean_factor_and_forward_returns with a daily factor
+        on a business day calendar
+        """
+        tickers = ['A', 'B', 'C', 'D', 'E', 'F']
+
+        factor_groups = {'A': 1, 'B': 2, 'C': 1, 'D': 2, 'E': 1, 'F': 2}
+
+        price_data = [[1.10**i, 0.50**i, 3.00**i, 0.90**i, 0.50**i, 1.00**i]
+                      for i in range(1, 7)]
+
+        factor_data = [[3, 4, 2, 1, nan, nan],
+                       [3, nan, nan, 1, 4, 2],
+                       [3, 4, 2, 1, nan, nan]]
+
+        price_index = date_range(start='2017-1-12', end='2017-1-19', freq='B')
+        price_index.name = 'date'
+        prices = DataFrame(index=price_index, columns=tickers, data=price_data)
+
+        factor_index = date_range(start='2017-1-12', end='2017-1-16', freq='B')
+        factor_index.name = 'date'
+        factor = DataFrame(index=factor_index, columns=tickers,
+                           data=factor_data).stack()
+
+        factor_data = get_clean_factor_and_forward_returns(
+            factor, prices,
+            groupby=factor_groups,
+            quantiles=4,
+            periods=(1, 2, 3))
+
+        expected_idx = factor.index.rename(['date', 'asset'])
+        expected_cols = ['1D', '2D', '3D',
+                         'factor', 'group', 'factor_quantile']
+        expected_data = [[0.1,  0.21,  0.331, 3.0, 1, 3],
+                         [-0.5, -0.75, -0.875, 4.0, 2, 4],
+                         [2.0,  8.00, 26.000, 2.0, 1, 2],
+                         [-0.1, -0.19, -0.271, 1.0, 2, 1],
+                         [0.1,  0.21,  0.331, 3.0, 1, 3],
+                         [-0.1, -0.19, -0.271, 1.0, 2, 1],
+                         [-0.5, -0.75, -0.875, 4.0, 1, 4],
+                         [0.0,  0.00,  0.000, 2.0, 2, 2],
+                         [0.1,  0.21,  0.331, 3.0, 1, 3],
+                         [-0.5, -0.75, -0.875, 4.0, 2, 4],
+                         [2.0,  8.00, 26.000, 2.0, 1, 2],
+                         [-0.1, -0.19, -0.271, 1.0, 2, 1]]
+        expected = DataFrame(index=expected_idx,
+                             columns=expected_cols, data=expected_data)
+        expected['group'] = expected['group'].astype('category')
+
+        assert_frame_equal(factor_data, expected)
+
+    def test_get_clean_factor_and_forward_returns_3(self):
+        """
+        Test get_clean_factor_and_forward_returns with and intraday factor
+        """
+        tickers = ['A', 'B', 'C', 'D', 'E', 'F']
+
+        factor_groups = {'A': 1, 'B': 2, 'C': 1, 'D': 2, 'E': 1, 'F': 2}
+
+        price_data = [[1.10**i, 0.50**i, 3.00**i, 0.90**i, 0.50**i, 1.00**i]
+                      for i in range(1, 7)]
+
+        factor_data = [[3, 4, 2, 1, nan, nan],
+                       [3, nan, nan, 1, 4, 2],
+                       [3, 4, 2, 1, nan, nan]]
+
+        price_index = date_range(start='2017-1-12', end='2017-1-19', freq='B')
+        price_index.name = 'date'
+        today_open = DataFrame(index=price_index + Timedelta('9h30m'),
+                               columns=tickers, data=price_data)
+        today_open_1h = DataFrame(index=price_index + Timedelta('10h30m'),
+                                  columns=tickers, data=price_data)
+        today_open_1h += today_open_1h * 0.001
+        today_open_3h = DataFrame(index=price_index + Timedelta('12h30m'),
+                                  columns=tickers, data=price_data)
+        today_open_3h -= today_open_3h * 0.002
+        prices = concat([today_open, today_open_1h, today_open_3h]) \
+            .sort_index()
+
+        factor_index = date_range(start='2017-1-12', end='2017-1-16', freq='B')
+        factor_index.name = 'date'
+        factor = DataFrame(index=factor_index + Timedelta('9h30m'),
+                           columns=tickers, data=factor_data).stack()
+
+        factor_data = get_clean_factor_and_forward_returns(
+            factor, prices,
+            groupby=factor_groups,
+            quantiles=4,
+            periods=(1, 2, 3))
+
+        expected_idx = factor.index.rename(['date', 'asset'])
+        expected_cols = ['1h', '3h', '1D',
+                         'factor', 'group', 'factor_quantile']
+        expected_data = [[0.001, -0.002, 0.1, 3.0, 1, 3],
+                         [0.001, -0.002, -0.5, 4.0, 2, 4],
+                         [0.001, -0.002, 2.0, 2.0, 1, 2],
+                         [0.001, -0.002, -0.1, 1.0, 2, 1],
+                         [0.001, -0.002, 0.1, 3.0, 1, 3],
+                         [0.001, -0.002, -0.1, 1.0, 2, 1],
+                         [0.001, -0.002, -0.5, 4.0, 1, 4],
+                         [0.001, -0.002, 0.0, 2.0, 2, 2],
+                         [0.001, -0.002, 0.1, 3.0, 1, 3],
+                         [0.001, -0.002, -0.5, 4.0, 2, 4],
+                         [0.001, -0.002, 2.0, 2.0, 1, 2],
+                         [0.001, -0.002, -0.1, 1.0, 2, 1]]
+        expected = DataFrame(index=expected_idx,
+                             columns=expected_cols, data=expected_data)
+        expected['group'] = expected['group'].astype('category')
+
+        assert_frame_equal(factor_data, expected)
+
+    def test_get_clean_factor_and_forward_returns_4(self):
+        """
+        Test get_clean_factor_and_forward_returns on an event
+        """
+        tickers = ['A', 'B', 'C', 'D', 'E', 'F']
+
+        factor_groups = {'A': 1, 'B': 2, 'C': 1, 'D': 2, 'E': 1, 'F': 2}
+
+        price_data = [[1.10**i, 0.50**i, 3.00**i, 0.90**i, 0.50**i, 1.00**i]
+                      for i in range(1, 9)]
+
+        factor_data = [[1, nan, nan, nan, nan, 6],
+                       [4, nan, nan, 7, nan, nan],
+                       [nan, nan, nan, nan, nan, nan],
+                       [nan, 3, nan, 2, nan, nan],
+                       [nan, nan, 1, nan, 3, nan]]
+
+        price_index = date_range(start='2017-1-12', end='2017-1-23', freq='B')
+        price_index.name = 'date'
+        prices = DataFrame(index=price_index, columns=tickers, data=price_data)
+
+        factor_index = date_range(start='2017-1-12', end='2017-1-18', freq='B')
+        factor_index.name = 'date'
+        factor = DataFrame(index=factor_index, columns=tickers,
+                           data=factor_data).stack()
+
+        factor_data = get_clean_factor_and_forward_returns(
+            factor, prices,
+            groupby=factor_groups,
+            quantiles=4,
+            periods=(1, 2, 3))
+
+        expected_idx = factor.index.rename(['date', 'asset'])
+        expected_cols = ['1D', '2D', '3D',
+                         'factor', 'group', 'factor_quantile']
+        expected_data = [[0.1,  0.21,  0.331, 1.0, 1, 1],
+                         [0.0,   0.00,  0.000, 6.0, 2, 4],
+                         [0.1,  0.21,  0.331, 4.0, 1, 1],
+                         [-0.1, -0.19, -0.271, 7.0, 2, 4],
+                         [-0.5, -0.75, -0.875, 3.0, 2, 4],
+                         [-0.1, -0.19, -0.271, 2.0, 2, 1],
+                         [2.0,  8.00, 26.000, 1.0, 1, 1],
+                         [-0.5, -0.75, -0.875, 3.0, 1, 4]]
+        expected = DataFrame(index=expected_idx,
+                             columns=expected_cols, data=expected_data)
+        expected['group'] = expected['group'].astype('category')
+
+        assert_frame_equal(factor_data, expected)
