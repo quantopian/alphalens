@@ -235,7 +235,7 @@ def compute_forward_returns(factor_idx,
         # in between the trades so we'll test several entries to find out the
         # correct period length
         #
-        entries_to_test = min(10, len(fwdret.index)-period)
+        entries_to_test = min(10, len(fwdret.index), len(prices.index)-period)
         days_diffs = []
         for i in range(entries_to_test):
             p_idx = prices.index.get_loc(fwdret.index[i])
