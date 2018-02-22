@@ -50,13 +50,19 @@ the factor tear sheet.
 Installation
 ------------
 
-Stable release
+Install with pip:
 
 ::
 
     pip install alphalens
 
-Development code
+Install with conda: 
+
+::
+
+    conda install -c conda-forge alphalens
+
+Install from the master branch of Alphalens repository (development code):
 
 ::
 
