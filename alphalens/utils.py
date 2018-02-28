@@ -211,6 +211,11 @@ def compute_forward_returns(factor_idx,
 
     factor_idx = factor_idx.intersection(prices.index)
 
+    if len(factor_idx) == 0:
+        raise ValueError("Factor and prices indices don't match: make sure "
+                         "they have the same convention in terms of datetimes "
+                         "and symbol-names")
+
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
         [factor_idx, prices.columns], names=['date', 'asset']))
 
