@@ -211,8 +211,13 @@ def compute_forward_returns(factor,
     Returns
     -------
     forward_returns : pd.DataFrame - MultiIndex
-        Forward returns indexed by date and asset.
-        Separate column for each forward return window.
+        A MultiIndex DataFrame indexed by timestamp (level 0) and asset
+        (level 1), containing the forward returns for assets.
+        Forward returns column names must follow the format accepted by
+        pd.Timedelta (e.g. '1D', '30m', '3h15m', '1D1h', etc).
+        'date' index freq property must be set to a trading calendar (pandas
+        DateOffset), see infer_trading_calendar for more details.
+        This information is currently used only in cumulative returns computation
     """
 
     factor_dateindex = factor.index.levels[0]
@@ -446,9 +451,8 @@ def get_clean_factor(factor,
         - forward returns column names follow  the format accepted by
           pd.Timedelta (e.g. '1D', '30m', '3h15m', '1D1h', etc)
 
-        - 'date' index freq property (merged_data.index.levels[0].freq) will be
-          set to a trading calendar (pandas DateOffset) inferred from the input
-          data (see infer_trading_calendar for more details). This is currently
+        - 'date' index freq property (merged_data.index.levels[0].freq) is the
+          same as that of the input forward returns data. This is currently
           used only in cumulative returns computation
         ::
            -------------------------------------------------------------------
