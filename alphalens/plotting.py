@@ -849,7 +849,7 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
             if std_bar:
                 std = q_ret.loc[(quantile, 'std')]
                 ax[i].errorbar(std.index, mean, yerr=std,
-                               fmt=None, ecolor=palette[i], label=None)
+                               fmt='none', ecolor=palette[i], label='none')
 
             ax[i].axvline(x=0, color='k', linestyle='--')
             ax[i].legend()
@@ -871,7 +871,7 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
             if std_bar:
                 std = q_ret.loc[(quantile, 'std')]
                 ax.errorbar(std.index, mean, yerr=std,
-                            fmt=None, ecolor=palette[i], label='none')
+                            fmt='none', ecolor=palette[i], label='none')
             i += 1
 
         ax.axvline(x=0, color='k', linestyle='--')
