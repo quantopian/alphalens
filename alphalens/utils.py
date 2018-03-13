@@ -217,7 +217,8 @@ def compute_forward_returns(factor,
         pd.Timedelta (e.g. '1D', '30m', '3h15m', '1D1h', etc).
         'date' index freq property must be set to a trading calendar (pandas
         DateOffset), see infer_trading_calendar for more details.
-        This information is currently used only in cumulative returns computation
+        This information is currently used only in cumulative returns
+        computation
     """
 
     factor_dateindex = factor.index.levels[0]
@@ -228,7 +229,7 @@ def compute_forward_returns(factor,
                                        "tz_convert.")
 
     freq = infer_trading_calendar(factor_dateindex, prices.index)
-    
+
     factor_dateindex = factor_dateindex.intersection(prices.index)
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
         [factor_dateindex, prices.columns], names=['date', 'asset']))
@@ -239,7 +240,11 @@ def compute_forward_returns(factor,
         #
         # build forward returns
         #
-        fwdret = prices.pct_change(period).shift(-period).reindex(factor_dateindex)
+        fwdret = (prices
+                  .pct_change(period)
+                  .shift(-period)
+                  .reindex(factor_dateindex)
+                  )
 
         if filter_zscore is not None:
             mask = abs(fwdret - fwdret.mean()) > (filter_zscore * fwdret.std())
@@ -356,9 +361,9 @@ def get_clean_factor(factor,
                      groupby_labels=None,
                      max_loss=0.35):
     """
-    Formats the factor data, forward return data, and group mappings into a DataFrame
-    that contains aligned MultiIndex indices of timestamp and asset. The
-    returned data will be formatted to be suitable for Alphalens functions.
+    Formats the factor data, forward return data, and group mappings into a
+    DataFrame that contains aligned MultiIndex indices of timestamp and asset.
+    The returned data will be formatted to be suitable for Alphalens functions.
 
     It is safe to skip a call to this function and still make use of Alphalens
     functionalities as long as the factor data conforms to the format returned
@@ -730,13 +735,13 @@ def get_clean_factor_and_forward_returns(factor,
 
     forward_returns = compute_forward_returns(factor, prices, periods,
                                               filter_zscore)
-    
+
     factor_data = get_clean_factor(factor, forward_returns, groupby=groupby,
                                    groupby_labels=groupby_labels,
                                    quantiles=quantiles, bins=bins,
                                    binning_by_group=binning_by_group,
                                    max_loss=max_loss)
-    
+
     return factor_data
 
 
