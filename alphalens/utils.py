@@ -213,12 +213,11 @@ def compute_forward_returns(factor,
     forward_returns : pd.DataFrame - MultiIndex
         A MultiIndex DataFrame indexed by timestamp (level 0) and asset
         (level 1), containing the forward returns for assets.
-        Forward returns column names must follow the format accepted by
+        Forward returns column names follow the format accepted by
         pd.Timedelta (e.g. '1D', '30m', '3h15m', '1D1h', etc).
-        'date' index freq property must be set to a trading calendar (pandas
-        DateOffset), see infer_trading_calendar for more details.
-        This information is currently used only in cumulative returns
-        computation
+        'date' index freq property (forward_returns.index.levels[0].freq)
+        will be set to a trading calendar (pandas DateOffset) inferred
+        from the input data (see infer_trading_calendar for more details).
     """
 
     factor_dateindex = factor.index.levels[0]
@@ -231,6 +230,12 @@ def compute_forward_returns(factor,
     freq = infer_trading_calendar(factor_dateindex, prices.index)
 
     factor_dateindex = factor_dateindex.intersection(prices.index)
+
+    if len(factor_dateindex) == 0:
+        raise ValueError("Factor and prices indices don't match: make sure "
+                         "they have the same convention in terms of datetimes "
+                         "and symbol-names")
+
     forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
         [factor_dateindex, prices.columns], names=['date', 'asset']))
 
@@ -390,7 +395,14 @@ def get_clean_factor(factor,
                         -----------------------
 
     forward_returns : pd.DataFrame - MultiIndex
-        Forward returns indexed by date and asset.
+        A MultiIndex DataFrame indexed by timestamp (level 0) and asset
+        (level 1), containing the forward returns for assets.
+        Forward returns column names must follow the format accepted by
+        pd.Timedelta (e.g. '1D', '30m', '3h15m', '1D1h', etc).
+        'date' index freq property must be set to a trading calendar
+        (pandas DateOffset), see infer_trading_calendar for more details.
+        This information is currently used only in cumulative returns
+        computation
         ::
             ---------------------------------------
                        |       | 1D  | 5D  | 10D
@@ -453,7 +465,7 @@ def get_clean_factor(factor,
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
 
-        - forward returns column names follow  the format accepted by
+        - forward returns column names follow the format accepted by
           pd.Timedelta (e.g. '1D', '30m', '3h15m', '1D1h', etc)
 
         - 'date' index freq property (merged_data.index.levels[0].freq) is the
