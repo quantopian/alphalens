@@ -54,8 +54,9 @@ class UtilsTestCase(TestCase):
         dr = date_range(start='2015-1-1', end='2015-1-3')
         prices = DataFrame(index=dr, columns=['A', 'B'],
                            data=[[1, 1], [1, 2], [2, 1]])
+        factor = prices.stack()
 
-        fp = compute_forward_returns(prices.index, prices, periods=[1, 2])
+        fp = compute_forward_returns(factor, prices, periods=[1, 2])
 
         ix = MultiIndex.from_product([dr, ['A', 'B']],
                                      names=['date', 'asset'])
