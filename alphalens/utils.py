@@ -15,11 +15,9 @@
 
 import pandas as pd
 import numpy as np
-import warnings
 import re
 
 from IPython.display import display
-from functools import wraps
 from pandas.tseries.offsets import CustomBusinessDay, Day, BusinessDay
 from scipy.stats import mode
 
@@ -570,49 +568,6 @@ def get_clean_factor(factor,
     return merged_data
 
 
-def get_clean_factor_and_forward_returns_api_change_warning(func):
-    """
-    Decorator used to help API transition: maintain the function backward
-    compatible and warn the user about the API change.
-    Old API:
-        get_clean_factor_and_forward_returns(factor,
-                                             prices,
-                                             groupby=None,
-                                             by_group=False,
-                                             quantiles=5,
-                                             bins=None,
-                                             periods=(1, 5, 10),
-                                             filter_zscore=20,
-                                             groupby_labels=None,
-                                             max_loss=0.25)
-    New API:
-        get_clean_factor_and_forward_returns(factor,
-                                             prices,
-                                             groupby=None,
-                                             binning_by_group=False,
-                                             quantiles=5,
-                                             bins=None,
-                                             periods=(1, 5, 10),
-                                             filter_zscore=20,
-                                             groupby_labels=None,
-                                             max_loss=0.25)
-
-    Eventually this function can be deleted
-    """
-    @wraps(func)
-    def call_w_context(*args, **kwargs):
-        by_group = kwargs.pop('by_group', None)
-        if by_group is not None:
-            kwargs['binning_by_group'] = by_group
-            warnings.warn("get_clean_factor_and_forward_returns: "
-                          "'by_group' argument is now deprecated and "
-                          "replaced by 'binning_by_group'",
-                          category=DeprecationWarning, stacklevel=3)
-        return func(*args, **kwargs)
-    return call_w_context
-
-
-@get_clean_factor_and_forward_returns_api_change_warning
 def get_clean_factor_and_forward_returns(factor,
                                          prices,
                                          groupby=None,
