@@ -519,7 +519,7 @@ def get_clean_factor(factor,
                         list(diff)))
 
             sn = pd.Series(groupby_labels)
-            groupby = pd.Series(index=factor.index,
+            groupby = pd.Series(index=groupby.index,
                                 data=sn[groupby.values].values)
 
         merged_data['group'] = groupby.astype('category')
