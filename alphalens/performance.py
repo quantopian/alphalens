@@ -966,6 +966,9 @@ def average_cumulative_return_by_quantile(factor_data,
             #
             avgcumret = g_fq.groupby(g_fq).apply(average_cumulative_return,
                                                  demean_by)
+            if len(avgcumret) == 0:
+                continue
+
             avgcumret['group'] = group
             avgcumret.set_index('group', append=True, inplace=True)
             returns_bygroup.append(avgcumret)
