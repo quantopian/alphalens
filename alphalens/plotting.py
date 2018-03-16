@@ -698,7 +698,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
             annot_kws={"size": 7},
             linewidths=0.01,
             linecolor='white',
-            cmap=cm.coolwarm,
+            cmap=cm.coolwarm_r,
             cbar=False,
             ax=a)
         a.set(ylabel='', xlabel='')
