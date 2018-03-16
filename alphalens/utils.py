@@ -642,17 +642,20 @@ def get_clean_factor_and_forward_returns(factor,
 
     prices : pd.DataFrame
         A wide form Pandas DataFrame indexed by timestamp with assets
-        in the columns. It is important to pass the
-        correct pricing data in depending on what time of period your
-        signal was generated so to avoid lookahead bias, or
-        delayed calculations. Pricing data must span the factor
-        analysis time period plus an additional buffer window
-        that is greater than the maximum number of expected periods
-        in the forward returns calculations.
+        in the columns.
+        Pricing data must span the factor analysis time period plus an
+        additional buffer window that is greater than the maximum number
+        of expected periods in the forward returns calculations.
+        It is important to pass the correct pricing data in depending on
+        what time of period your signal was generated so to avoid lookahead
+        bias, or  delayed calculations.
         'Prices' must contain at least an entry for each timestamp/asset
-        combination in 'factor'. This entry must be the asset price
-        at the time the asset factor value is computed and it will be
-        considered the buy price for that asset at that timestamp.
+        combination in 'factor'. This entry should reflect the buy price
+        for the assets and usually it is the next available price after the
+        factor is computed but it can also be a later price if the factor is
+        meant to be traded later (e.g. if the factor is computed at market
+        open but traded 1 hour after market open the price information should
+        be 1 hour after market open).
         'Prices' must also contain entries for timestamps following each
         timestamp/asset combination in 'factor', as many more timestamps
         as the maximum value in 'periods'. The asset price after 'period'
