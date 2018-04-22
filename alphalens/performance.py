@@ -434,7 +434,7 @@ def cumulative_returns(returns, period, freq=None):
         #
         # compute intermediate returns values for each index in subret that are
         # in between the timestaps at which the factors are computed and the
-        # timestamps at which the 'period' actually returns happen
+        # timestamps at which the 'period' returns actually happen
         #
         for pret_idx in reversed(sub_index):
 

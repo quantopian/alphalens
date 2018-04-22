@@ -20,7 +20,7 @@ import re
 
 from IPython.display import display
 from functools import wraps
-from pandas.tseries.offsets import CustomBusinessDay
+from pandas.tseries.offsets import CustomBusinessDay, Day, BusinessDay
 from scipy.stats import mode
 
 
@@ -894,7 +894,26 @@ def diff_custom_calendar_timedeltas(start, end, freq):
     pd.Timedelta
         end - start
     """
-    actual_days = pd.date_range(start, end, freq=freq).shape[0] - 1
+    weekmask = getattr(freq, 'weekmask', None)
+    holidays = getattr(freq, 'holidays', None)
+
+    if weekmask is None and holidays is None:
+        if isinstance(freq, Day):
+            weekmask = 'Mon Tue Wed Thu Fri Sat Sun'
+            holidays = []
+        elif isinstance(freq, BusinessDay):
+            weekmask = 'Mon Tue Wed Thu Fri'
+            holidays = []
+
+    if weekmask is not None and holidays is not None:
+        # we prefer this method as it is faster
+        actual_days = np.busday_count(start, end, weekmask, holidays)
+    else:
+        # default, it is slow
+        actual_days = pd.date_range(start, end, freq=freq).shape[0] - 1
+        if not freq.onOffset(start):
+            actual_days -= 1
+
     timediff = end - start
     delta_days = timediff.components.days - actual_days
     return timediff - pd.Timedelta(days=delta_days)
