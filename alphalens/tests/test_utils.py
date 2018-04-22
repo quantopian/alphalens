@@ -134,11 +134,11 @@ class UtilsTestCase(TestCase):
                        [3, nan, nan, 1, 4, 2],
                        [3, 4, 2, 1, nan, nan]]
 
-        price_index = date_range(start='2015-1-10', end='2015-1-15')
+        price_index = date_range(start='2015-1-11', end='2015-1-16')
         price_index.name = 'date'
         prices = DataFrame(index=price_index, columns=tickers, data=price_data)
 
-        factor_index = date_range(start='2015-1-10', end='2015-1-12')
+        factor_index = date_range(start='2015-1-11', end='2015-1-13')
         factor_index.name = 'date'
         factor = DataFrame(index=factor_index, columns=tickers,
                            data=factor_data).stack()

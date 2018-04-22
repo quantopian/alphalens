@@ -28,7 +28,7 @@ from pandas import (
     Timedelta
 )
 
-from pandas.tseries.offsets import (BDay, Day)
+from pandas.tseries.offsets import (BDay, Day, CDay)
 
 from pandas.util.testing import (assert_frame_equal,
                                  assert_series_equal)
@@ -554,6 +554,18 @@ class PerformanceTestCase(TestCase):
                            ([-0.1, -0.1, -0.1, -0.1, -0.1],
                             '1B', '1D',
                             [1.0, 0.9, 0.81, 0.729, 0.6561, 0.59049]),
+                           ([1.0, 0.5, 1.0, 0.5, 0.5],
+                            '1CD', '1D',
+                            [1.0, 2.0, 3.0, 6.0, 9.0, 13.50]),
+                           ([1.0, 0.5, 1.0, 0.5, 0.5],
+                            '1CD', '45m',
+                            [1., 2., 2., 3., 3.0, 6.0, 6.0, 9.0, 9.0, 13.50]),
+                           ([0.1, 0.1, 0.1, 0.1, 0.1],
+                            '1CD', '1D',
+                            [1.0, 1.1, 1.21, 1.331, 1.4641, 1.61051]),
+                           ([-0.1, -0.1, -0.1, -0.1, -0.1],
+                            '1CD', '1D',
+                            [1.0, 0.9, 0.81, 0.729, 0.6561, 0.59049]),
                            ([1.0, nan, 0.5, nan, 1.0, nan, 0.5, nan, 0.5],
                             '20S', '20s',
                             [1.0, 2., 2., 3., 3.0, 6.0, 6.0, 9.0, 9.0, 13.50]),
@@ -585,6 +597,9 @@ class PerformanceTestCase(TestCase):
                            ([3.0, 3.0, 3.0, 3.0, 3.0],
                             '1B', '2D',
                             [1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0]),
+                           ([3.0, 3.0, 3.0, 3.0, 3.0],
+                            '1CD', '2D',
+                            [1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0]),
                            ([3.0, -0.75, 3.0, -0.75, 3.0],
                             '1H', '2h',
                             [1.0, 2.0, 2.5, 3.125, 3.90625, 4.88281, 9.76562]),
@@ -600,6 +615,10 @@ class PerformanceTestCase(TestCase):
                              14.0625]),
                            ([7.0, -0.875, 7.0, -0.875, 7.0],
                             '1B', '3D',
+                            [1.0, 2.0, 2.5, 3.75, 3.75, 5.625, 7.03125,
+                             14.0625]),
+                           ([7.0, -0.875, 7.0, -0.875, 7.0],
+                            '1CD', '3D',
                             [1.0, 2.0, 2.5, 3.75, 3.75, 5.625, 7.03125,
                              14.0625]),
                            ([7.0, -0.875, nan, 7.0, -0.875],
@@ -635,10 +654,18 @@ class PerformanceTestCase(TestCase):
     def test_cumulative_returns(self, returns, ret_freq, period_len,
                                 expected_vals):
 
+        if 'CD' in ret_freq:
+            ret_freq_class = CDay(weekmask='Tue Wed Thu Fri Sun')
+            ret_freq = ret_freq_class
+        elif 'B' in ret_freq:
+            ret_freq_class = BDay()
+        else:
+            ret_freq_class = Day()
+
         period_len = Timedelta(period_len)
         index = date_range('1/1/1999', periods=len(returns), freq=ret_freq)
         returns = Series(returns, index=index)
-        returns.index.freq = BDay() if 'B' in ret_freq else Day()
+        returns.index.freq = ret_freq_class
 
         cum_ret = cumulative_returns(returns, period_len)
 
