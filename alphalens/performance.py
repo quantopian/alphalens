@@ -1139,10 +1139,6 @@ def create_pyfolio_input(factor_data,
                          groups=None,
                          benchmark_period='1D'):
     """
-
-    WARNING: this API is still in experimental phase and input/output
-             paramenters might change in the future
-
     Simulate a portfolio using the input factor and returns the portfolio
     performance data properly formatted for Pyfolio analysis.
 
@@ -1243,7 +1239,7 @@ def create_pyfolio_input(factor_data,
                                         equal_weight,
                                         quantiles,
                                         groups)
-    cumrets = cumrets.resample('1D').last().dropna()
+    cumrets = cumrets.resample('1D').last().fillna(method='ffill')
     returns = cumrets.pct_change().fillna(0)
 
     #
@@ -1258,7 +1254,7 @@ def create_pyfolio_input(factor_data,
                                  equal_weight,
                                  quantiles,
                                  groups)
-    positions = positions.resample('1D').sum().dropna(how='all')
+    positions = positions.resample('1D').sum().fillna(method='ffill')
     positions = positions.div(positions.abs().sum(axis=1), axis=0).fillna(0)
     positions['cash'] = 1. - positions.sum(axis=1)
 
@@ -1283,7 +1279,8 @@ def create_pyfolio_input(factor_data,
                                                    long_short=False,
                                                    group_neutral=False,
                                                    equal_weight=True)
-        benchmark_rets = benchmark_rets.resample('1D').last()
+        benchmark_rets = benchmark_rets.resample(
+            '1D').last().fillna(method='ffill')
         benchmark_rets = benchmark_rets.pct_change().fillna(0)
         benchmark_rets.name = 'benchmark'
     else:
