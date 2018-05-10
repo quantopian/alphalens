@@ -700,7 +700,8 @@ def create_event_returns_tear_sheet(factor_data,
 @plotting.customize
 def create_event_study_tear_sheet(factor_data,
                                   prices=None,
-                                  avgretplot=(5, 15)):
+                                  avgretplot=(5, 15),
+                                  rate_of_ret=True):
     """
     Creates an event study tear sheet for analysis of a specific event.
 
@@ -718,6 +719,10 @@ def create_event_study_tear_sheet(factor_data,
     avgretplot: tuple (int, int) - (before, after), optional
         If not None, plot event style average cumulative returns within a
         window (pre and post event).
+    rate_of_ret: bool, optional
+        Display rate of return instead of simple return in 'Mean Period Wise
+        Return By Factor Quantile' and 'Period Wise Return By Factor Quantile'
+        plots
     """
 
     long_short = False
@@ -748,20 +753,21 @@ def create_event_study_tear_sheet(factor_data,
         perf.mean_return_by_quantile(factor_data,
                                      by_group=False,
                                      demeaned=long_short)
-    mean_quant_ret = \
-        mean_quant_ret.apply(utils.rate_of_return, axis=0,
-                             base_period=mean_quant_ret.columns[0])
+    if rate_of_ret:
+        mean_quant_ret = \
+            mean_quant_ret.apply(utils.rate_of_return, axis=0,
+                                 base_period=mean_quant_ret.columns[0])
 
     mean_quant_ret_bydate, std_quant_daily = \
         perf.mean_return_by_quantile(factor_data,
                                      by_date=True,
                                      by_group=False,
                                      demeaned=long_short)
-
-    mean_quant_rateret_bydate = mean_quant_ret_bydate.apply(
-        utils.rate_of_return, axis=0,
-        base_period=mean_quant_ret_bydate.columns[0]
-    )
+    if rate_of_ret:
+        mean_quant_ret_bydate = mean_quant_ret_bydate.apply(
+            utils.rate_of_return, axis=0,
+            base_period=mean_quant_ret_bydate.columns[0]
+        )
 
     fr_cols = len(factor_returns.columns)
     vertical_sections = 2 + fr_cols * 1
@@ -772,7 +778,7 @@ def create_event_study_tear_sheet(factor_data,
                                        ylim_percentiles=None,
                                        ax=gf.next_row())
 
-    plotting.plot_quantile_returns_violin(mean_quant_rateret_bydate,
+    plotting.plot_quantile_returns_violin(mean_quant_ret_bydate,
                                           ylim_percentiles=(1, 99),
                                           ax=gf.next_row())
 
