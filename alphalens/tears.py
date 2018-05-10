@@ -701,7 +701,8 @@ def create_event_returns_tear_sheet(factor_data,
 def create_event_study_tear_sheet(factor_data,
                                   prices=None,
                                   avgretplot=(5, 15),
-                                  rate_of_ret=True):
+                                  rate_of_ret=True,
+                                  n_bars=50):
     """
     Creates an event study tear sheet for analysis of a specific event.
 
@@ -719,10 +720,12 @@ def create_event_study_tear_sheet(factor_data,
     avgretplot: tuple (int, int) - (before, after), optional
         If not None, plot event style average cumulative returns within a
         window (pre and post event).
-    rate_of_ret: bool, optional
+    rate_of_ret : bool, optional
         Display rate of return instead of simple return in 'Mean Period Wise
         Return By Factor Quantile' and 'Period Wise Return By Factor Quantile'
         plots
+    n_bars : int, optional
+        Number of bars in event distribution plot
     """
 
     long_short = False
@@ -731,6 +734,7 @@ def create_event_study_tear_sheet(factor_data,
 
     gf = GridFigure(rows=1, cols=1)
     plotting.plot_events_distribution(events=factor_data['factor'],
+                                      num_bars=n_bars,
                                       ax=gf.next_row())
     plt.show()
     gf.close()
