@@ -378,6 +378,12 @@ def cumulative_returns(returns, period, freq=None):
     Returns
     -------
     Cumulative returns series : pd.Series
+        Example:
+            2015-07-16 09:30:00  -0.012143
+            2015-07-16 12:30:00   0.012546
+            2015-07-17 09:30:00   0.045350
+            2015-07-17 12:30:00   0.065897
+            2015-07-20 09:30:00   0.030957
     """
 
     if not isinstance(period, pd.Timedelta):
@@ -403,7 +409,7 @@ def cumulative_returns(returns, period, freq=None):
 
     #
     # Build N sub_returns from the single returns Series. Each sub_retuns
-    # stream will contain non overlapping retuns.
+    # stream will contain non-overlapping returns.
     # In the next step we'll compute the portfolio returns averaging the
     # returns happening on those overlapping returns streams
     #
@@ -470,9 +476,7 @@ def cumulative_returns(returns, period, freq=None):
 
     #
     # Compute portfolio cumulative returns averaging the returns happening on
-    # overlapping returns streams. Please note that the below algorithm keeps
-    # into consideration the scenario where a factor is not computed at a fixed
-    # frequency (e.g. every day) and consequently the returns appears randomly
+    # overlapping returns streams.
     #
     sub_portfolios = pd.concat(sub_returns, axis=1)
     portfolio = pd.Series(index=sub_portfolios.index)
@@ -518,6 +522,13 @@ def positions(weights, period, freq=None):
     -------
     pd.DataFrame
         Assets positions series, datetime on index, assets on columns.
+        Example:
+            index                 'AAPL'         'MSFT'          cash
+            2004-01-09 10:30:00   13939.3800     -14012.9930     711.5585
+            2004-01-09 15:30:00       0.00       -16012.9930     411.5585
+            2004-01-12 10:30:00   14492.6300     -14624.8700       0.0
+            2004-01-12 15:30:00   14874.5400     -15841.2500       0.0
+            2004-01-13 10:30:00   -13853.2800    13653.6400      -43.6375
     """
 
     weights = weights.unstack()
@@ -1041,6 +1052,12 @@ def factor_cumulative_returns(factor_data,
     Returns
     -------
     Cumulative returns series : pd.Series
+        Example:
+            2015-07-16 09:30:00  -0.012143
+            2015-07-16 12:30:00   0.012546
+            2015-07-17 09:30:00   0.045350
+            2015-07-17 12:30:00   0.065897
+            2015-07-20 09:30:00   0.030957
     """
     fwd_ret_cols = utils.get_forward_returns_columns(factor_data.columns)
 
@@ -1106,6 +1123,13 @@ def factor_positions(factor_data,
     -------
     assets positions : pd.DataFrame
         Assets positions series, datetime on index, assets on columns.
+        Example:
+            index                 'AAPL'         'MSFT'          cash
+            2004-01-09 10:30:00   13939.3800     -14012.9930     711.5585
+            2004-01-09 15:30:00       0.00       -16012.9930     411.5585
+            2004-01-12 10:30:00   14492.6300     -14624.8700       0.0
+            2004-01-12 15:30:00   14874.5400     -15841.2500       0.0
+            2004-01-13 10:30:00   -13853.2800    13653.6400      -43.6375
     """
     fwd_ret_cols = utils.get_forward_returns_columns(factor_data.columns)
 
