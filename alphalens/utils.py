@@ -20,7 +20,7 @@ import re
 
 from IPython.display import display
 from functools import wraps
-from pandas.tseries.offsets import CustomBusinessDay, Day, BusinessDay
+from pandas.tseries.offsets import CustomBusinessDay
 from scipy.stats import mode
 
 
@@ -165,30 +165,18 @@ def infer_trading_calendar(factor_idx, prices_idx):
     """
     full_idx = factor_idx.union(prices_idx)
 
-    traded_weekdays = []
-    holidays = []
-
+    # drop days of the week that are not used
+    days_to_keep = []
     days_of_the_week = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     for day, day_str in enumerate(days_of_the_week):
+        if (full_idx.dayofweek == day).any():
+            days_to_keep.append(day_str)
 
-        weekday_mask = (full_idx.dayofweek == day)
+    days_to_keep = ' '.join(days_to_keep)
 
-        # drop days of the week that are not traded at all
-        if not weekday_mask.any():
-            continue
-        traded_weekdays.append(day_str)
-
-        # look for holidays
-        used_weekdays = full_idx[weekday_mask].normalize()
-        all_weekdays = pd.date_range(full_idx.min(), full_idx.max(),
-                                     freq=CustomBusinessDay(weekmask=day_str)
-                                     ).normalize()
-        _holidays = all_weekdays.difference(used_weekdays)
-        _holidays = [timestamp.date() for timestamp in _holidays]
-        holidays.extend(_holidays)
-
-    traded_weekdays = ' '.join(traded_weekdays)
-    return CustomBusinessDay(weekmask=traded_weekdays, holidays=holidays)
+    # we currently don't infer holidays, but CustomBusinessDay class supports
+    # custom holidays. So holidays could be inferred too eventually
+    return CustomBusinessDay(weekmask=days_to_keep)
 
 
 def compute_forward_returns(factor,
@@ -268,18 +256,18 @@ def compute_forward_returns(factor,
             fwdret[mask] = np.nan
 
         #
-        # Find the period length, which will be the column name. We'll test
-        # several entries in order to find out the correct period length as
-        # there could be non-trading days which would make the computation
-        # wrong if made only one test
+        # Find the period length, which will be the column name
+        # Becase the calendar inferred from factor and prices doesn't take
+        # into consideration holidays yet, there could be some non-trading days
+        # in between the trades so we'll test several entries to find out the
+        # correct period length
         #
-        entries_to_test = min(30, len(fwdret.index),
-                              len(prices.index) - period)
+        entries_to_test = min(10, len(fwdret.index), len(prices.index)-period)
         days_diffs = []
         for i in range(entries_to_test):
             p_idx = prices.index.get_loc(fwdret.index[i])
             start = prices.index[p_idx]
-            end = prices.index[p_idx + period]
+            end = prices.index[p_idx+period]
             period_len = diff_custom_calendar_timedeltas(start, end, freq)
             days_diffs.append(period_len.components.days)
 
@@ -536,7 +524,7 @@ def get_clean_factor(factor,
 
         merged_data['group'] = groupby.astype('category')
 
-    merged_data = merged_data.dropna()
+    merged_data = merged_data.dropna(subset=['factor'])
 
     fwdret_amount = float(len(merged_data.index))
 
@@ -547,7 +535,7 @@ def get_clean_factor(factor,
                                                      binning_by_group,
                                                      no_raise)
 
-    merged_data = merged_data.dropna()
+    merged_data = merged_data.dropna(subset=['factor', 'factor_quantile'])
 
     binning_amount = float(len(merged_data.index))
 
@@ -906,26 +894,7 @@ def diff_custom_calendar_timedeltas(start, end, freq):
     pd.Timedelta
         end - start
     """
-    weekmask = getattr(freq, 'weekmask', None)
-    holidays = getattr(freq, 'holidays', None)
-
-    if weekmask is None and holidays is None:
-        if isinstance(freq, Day):
-            weekmask = 'Mon Tue Wed Thu Fri Sat Sun'
-            holidays = []
-        elif isinstance(freq, BusinessDay):
-            weekmask = 'Mon Tue Wed Thu Fri'
-            holidays = []
-
-    if weekmask is not None and holidays is not None:
-        # we prefer this method as it is faster
-        actual_days = np.busday_count(start, end, weekmask, holidays)
-    else:
-        # default, it is slow
-        actual_days = pd.date_range(start, end, freq=freq).shape[0] - 1
-        if not freq.onOffset(start):
-            actual_days -= 1
-
+    actual_days = pd.date_range(start, end, freq=freq).shape[0] - 1
     timediff = end - start
     delta_days = timediff.components.days - actual_days
     return timediff - pd.Timedelta(days=delta_days)
