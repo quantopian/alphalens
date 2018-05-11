@@ -678,7 +678,7 @@ def compute_mean_returns_spread(mean_returns,
     lower_quant : int
         Quantile of mean return we wish to subtract
         from upper quantile mean return.
-    std_err : pd.DataFrame
+    std_err : pd.DataFrame, optional
         Period wise standard error in mean return by quantile.
         Takes the same form as mean_returns.
 
@@ -688,15 +688,19 @@ def compute_mean_returns_spread(mean_returns,
         Period wise difference in quantile returns.
     joint_std_err : pd.Series
         Period wise standard error of the difference in quantile returns.
+        if std_err is None, this will be None
     """
 
     mean_return_difference = mean_returns.xs(upper_quant,
                                              level='factor_quantile') \
         - mean_returns.xs(lower_quant, level='factor_quantile')
 
-    std1 = std_err.xs(upper_quant, level='factor_quantile')
-    std2 = std_err.xs(lower_quant, level='factor_quantile')
-    joint_std_err = np.sqrt(std1**2 + std2**2)
+    if std_err is None:
+        joint_std_err = None
+    else:
+        std1 = std_err.xs(upper_quant, level='factor_quantile')
+        std2 = std_err.xs(lower_quant, level='factor_quantile')
+        joint_std_err = np.sqrt(std1**2 + std2**2)
 
     return mean_return_difference, joint_std_err
 
