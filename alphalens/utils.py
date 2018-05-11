@@ -536,7 +536,7 @@ def get_clean_factor(factor,
 
         merged_data['group'] = groupby.astype('category')
 
-    merged_data = merged_data.dropna()
+    merged_data = merged_data.dropna(subset=['factor'])
 
     fwdret_amount = float(len(merged_data.index))
 
@@ -547,7 +547,7 @@ def get_clean_factor(factor,
                                                      binning_by_group,
                                                      no_raise)
 
-    merged_data = merged_data.dropna()
+    merged_data = merged_data.dropna(subset=['factor', 'factor_quantile'])
 
     binning_amount = float(len(merged_data.index))
 
