@@ -87,7 +87,9 @@ def quantize_factor(factor_data,
                     quantiles=5,
                     bins=None,
                     by_group=False,
-                    no_raise=False):
+                    no_raise=False,
+                    zero_aware=False,
+    ):
     """
     Computes period wise factor quantiles.
 
@@ -126,10 +128,14 @@ def quantize_factor(factor_data,
             (quantiles is None and bins is not None)):
         raise ValueError('Either quantiles or bins should be provided')
 
-    def quantile_calc(x, _quantiles, _bins, _no_raise):
+    def quantile_calc(x, _quantiles, _bins, _zero_aware, _no_raise):
         try:
-            if _quantiles is not None and _bins is None:
+            if _quantiles is not None and _bins is None and not _zero_aware:
                 return pd.qcut(x, _quantiles, labels=False) + 1
+            elif _quantiles is not None and _bins is None and _zero_aware:
+                pos_quantiles = pd.qcut(x[x > 0], _quantiles // 2, labels=False) + _quantiles // 2
+                neg_quantiles = pd.qcut(x[x < 0], _quantiles // 2, labels=False) + 1
+                return pd.concat([pos_quantiles, neg_quantiles])
             elif _bins is not None and _quantiles is None:
                 return pd.cut(x, _bins, labels=False) + 1
         except Exception as e:
@@ -142,7 +148,7 @@ def quantize_factor(factor_data,
         grouper.append('group')
 
     factor_quantile = factor_data.groupby(grouper)['factor'] \
-        .apply(quantile_calc, quantiles, bins, no_raise)
+        .apply(quantile_calc, quantiles, bins, zero_aware, no_raise)
     factor_quantile.name = 'factor_quantile'
 
     return factor_quantile.dropna()
