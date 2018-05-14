@@ -50,6 +50,13 @@ class UtilsTestCase(TestCase):
                                   data=[1, 1, 2, 2, 1, 1, 2, 2],
                                   dtype="category")
 
+
+    factor_data_biased = factor.copy()
+    factor_data_biased[['A', 'B', 'C','D']] = [
+        [-1, 1, 2, 3],
+        [-3, -2, 1, 2],
+    ]
+
     def test_compute_forward_returns(self):
         dr = date_range(start='2015-1-1', end='2015-1-3')
         prices = DataFrame(index=dr, columns=['A', 'B'],
