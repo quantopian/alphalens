@@ -57,9 +57,9 @@ class UtilsTestCase(TestCase):
                               data=[[-1, -2, 3, 4],
                                     [-4, -3, 2, 1]]).stack()
     biased_factor.index = biased_factor.index.set_names(['date', 'asset'])
-    biased_factor.name = 'biased_factor'
+    biased_factor.name = 'factor'
     biased_factor_data = DataFrame()
-    biased_factor_data['biased_factor'] = biased_factor
+    biased_factor_data['factor'] = biased_factor
     biased_factor_data['group'] = Series(index=biased_factor.index,
                                          data=[1, 1, 2, 2, 1, 1, 2, 2],
                                          dtype="category")
@@ -86,6 +86,14 @@ class UtilsTestCase(TestCase):
                             [1, 1, 2, 2, 2, 2, 1, 1]),
                            (factor_data, 2, None, True, False,
                             [1, 2, 1, 2, 2, 1, 2, 1]),
+                           # FIXME the next 3 tests must test for biased factors!
+                           (biased_factor_data, 4, None, False, False,
+                            [1, 2, 3, 4, 4, 3, 2, 1]),
+                           (biased_factor_data, 2, None, False, False,
+                            [1, 1, 2, 2, 2, 2, 1, 1]),
+                           (biased_factor_data, 2, None, True, False,
+                            [1, 2, 1, 2, 2, 1, 2, 1]),
+                           # ======
                            (factor_data, [0, .25, .5, .75, 1.], None, False, False,
                             [1, 2, 3, 4, 4, 3, 2, 1]),
                            (factor_data, [0, .5, .75, 1.], None, False, False,
