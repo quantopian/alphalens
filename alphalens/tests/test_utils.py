@@ -39,6 +39,7 @@ class UtilsTestCase(TestCase):
     dr = date_range(start='2015-1-1', end='2015-1-2')
     dr.name = 'date'
     tickers = ['A', 'B', 'C', 'D']
+
     factor = DataFrame(index=dr,
                        columns=tickers,
                        data=[[1, 2, 3, 4],
@@ -50,6 +51,18 @@ class UtilsTestCase(TestCase):
     factor_data['group'] = Series(index=factor.index,
                                   data=[1, 1, 2, 2, 1, 1, 2, 2],
                                   dtype="category")
+
+    biased_factor = DataFrame(index=dr,
+                              columns=tickers,
+                              data=[[-1, -2, 3, 4],
+                                    [-4, -3, 2, 1]]).stack()
+    biased_factor.index = biased_factor.index.set_names(['date', 'asset'])
+    biased_factor.name = 'biased_factor'
+    biased_factor_data = DataFrame()
+    biased_factor_data['biased_factor'] = biased_factor
+    biased_factor_data['group'] = Series(index=biased_factor.index,
+                                         data=[1, 1, 2, 2, 1, 1, 2, 2],
+                                         dtype="category")
 
     def test_compute_forward_returns(self):
         dr = date_range(start='2015-1-1', end='2015-1-3')
@@ -67,54 +80,55 @@ class UtilsTestCase(TestCase):
 
         assert_frame_equal(fp, expected)
 
-    @parameterized.expand([(factor_data, 4, None, False,
+    @parameterized.expand([(factor_data, 4, None, False, False,
                             [1, 2, 3, 4, 4, 3, 2, 1]),
-                           (factor_data, 2, None, False,
+                           (factor_data, 2, None, False, False,
                             [1, 1, 2, 2, 2, 2, 1, 1]),
-                           (factor_data, 2, None, True,
+                           (factor_data, 2, None, True, False,
                             [1, 2, 1, 2, 2, 1, 2, 1]),
-                           (factor_data, [0, .25, .5, .75, 1.], None, False,
+                           (factor_data, [0, .25, .5, .75, 1.], None, False, False,
                             [1, 2, 3, 4, 4, 3, 2, 1]),
-                           (factor_data, [0, .5, .75, 1.], None, False,
+                           (factor_data, [0, .5, .75, 1.], None, False, False,
                             [1, 1, 2, 3, 3, 2, 1, 1]),
-                           (factor_data, [0, .25, .5, 1.], None, False,
+                           (factor_data, [0, .25, .5, 1.], None, False, False,
                             [1, 2, 3, 3, 3, 3, 2, 1]),
-                           (factor_data, [0, .5, 1.], None, False,
+                           (factor_data, [0, .5, 1.], None, False, False,
                             [1, 1, 2, 2, 2, 2, 1, 1]),
-                           (factor_data, [.25, .5, .75], None, False,
+                           (factor_data, [.25, .5, .75], None, False, False,
                             [nan, 1, 2, nan, nan, 2, 1, nan]),
-                           (factor_data, [0, .5, 1.], None, True,
+                           (factor_data, [0, .5, 1.], None, True, False,
                             [1, 2, 1, 2, 2, 1, 2, 1]),
-                           (factor_data, [.5, 1.], None, True,
+                           (factor_data, [.5, 1.], None, True, False,
                             [nan, 1, nan, 1, 1, nan, 1, nan]),
-                           (factor_data, [0, 1.], None, True,
+                           (factor_data, [0, 1.], None, True, False,
                             [1, 1, 1, 1, 1, 1, 1, 1]),
-                           (factor_data, None, 4, False,
+                           (factor_data, None, 4, False, False,
                             [1, 2, 3, 4, 4, 3, 2, 1]),
-                           (factor_data, None, 2, False,
+                           (factor_data, None, 2, False, False,
                             [1, 1, 2, 2, 2, 2, 1, 1]),
-                           (factor_data, None, 3, False,
+                           (factor_data, None, 3, False, False,
                             [1, 1, 2, 3, 3, 2, 1, 1]),
-                           (factor_data, None, 8, False,
+                           (factor_data, None, 8, False, False,
                             [1, 3, 6, 8, 8, 6, 3, 1]),
-                           (factor_data, None, [0, 1, 2, 3, 5], False,
+                           (factor_data, None, [0, 1, 2, 3, 5], False, False,
                             [1, 2, 3, 4, 4, 3, 2, 1]),
-                           (factor_data, None, [1, 2, 3], False,
+                           (factor_data, None, [1, 2, 3], False, False,
                             [nan, 1, 2, nan, nan, 2, 1, nan]),
-                           (factor_data, None, [0, 2, 5], False,
+                           (factor_data, None, [0, 2, 5], False, False,
                             [1, 1, 2, 2, 2, 2, 1, 1]),
-                           (factor_data, None, [0.5, 2.5, 4.5], False,
+                           (factor_data, None, [0.5, 2.5, 4.5], False, False,
                             [1, 1, 2, 2, 2, 2, 1, 1]),
-                           (factor_data, None, [0.5, 2.5], True,
+                           (factor_data, None, [0.5, 2.5], True, False,
                             [1, 1, nan, nan, nan, nan, 1, 1]),
-                           (factor_data, None, 2, True,
+                           (factor_data, None, 2, True, False,
                             [1, 2, 1, 2, 2, 1, 2, 1])])
     def test_quantize_factor(self, factor, quantiles, bins, by_group,
-                             expected_vals):
+                             zero_aware, expected_vals):
         quantized_factor = quantize_factor(factor,
                                            quantiles=quantiles,
                                            bins=bins,
-                                           by_group=by_group)
+                                           by_group=by_group,
+                                           zero_aware=zero_aware)
         expected = Series(index=factor.index,
                           data=expected_vals,
                           name='factor_quantile').dropna()
