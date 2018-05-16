@@ -142,8 +142,14 @@ def quantize_factor(factor_data,
                 neg_quantiles = pd.qcut(x[x < 0], _quantiles // 2,
                                         labels=False) + 1
                 return pd.concat([pos_quantiles, neg_quantiles]).sort_index()
-            elif _bins is not None and _quantiles is None:
+            elif _bins is not None and _quantiles is None and not _zero_aware:
                 return pd.cut(x, _bins, labels=False) + 1
+            elif _bins is not None and _quantiles is None and _zero_aware:
+                pos_bins = pd.cut(x[x >= 0], _bins // 2,
+                                  labels=False) + _quantiles // 2 + 1
+                neg_bins = pd.cut(x[x < 0], _bins // 2,
+                                  labels=False) + 1
+                return pd.concat([pos_bins, neg_bins]).sort_index()
         except Exception as e:
             if _no_raise:
                 return pd.Series(index=x.index)
