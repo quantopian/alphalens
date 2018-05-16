@@ -131,6 +131,12 @@ def quantize_factor(factor_data,
             (quantiles is None and bins is not None)):
         raise ValueError('Either quantiles or bins should be provided')
 
+    if ((not isinstance(quantiles, int) and zero_aware) or
+            (not isinstance(bins, int) and zero_aware)):
+        msg = ("zero_aware should only be True when quantiles or bins is an"
+               " integer")
+        raise ValueError(msg)
+
     def quantile_calc(x, _quantiles, _bins, _zero_aware, _no_raise):
         try:
             if _quantiles is not None and _bins is None and not _zero_aware:
