@@ -138,12 +138,10 @@ def quantize_factor(factor_data,
                 return pd.qcut(x, _quantiles, labels=False) + 1
             elif _quantiles is not None and _bins is None and _zero_aware:
                 pos_quantiles = pd.qcut(x[x >= 0], _quantiles // 2,
-                                        labels=False) + _quantiles // 2
+                                        labels=False) + _quantiles // 2 + 1
                 neg_quantiles = pd.qcut(x[x < 0], _quantiles // 2,
                                         labels=False) + 1
-                # FIXME this should not be concat... Perhaps an outer merge?
-                # See https://stackoverflow.com/questions/28174752/pandas-merge-dataframe-fill-in-missing-values
-                return pd.concat([pos_quantiles, neg_quantiles])
+                return pd.concat([pos_quantiles, neg_quantiles]).sort_index()
             elif _bins is not None and _quantiles is None:
                 return pd.cut(x, _bins, labels=False) + 1
         except Exception as e:
