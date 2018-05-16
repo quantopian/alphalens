@@ -54,8 +54,8 @@ class UtilsTestCase(TestCase):
 
     biased_factor = DataFrame(index=dr,
                               columns=tickers,
-                              data=[[-1, -2, 3, 4],
-                                    [-4, -3, 2, 1]]).stack()
+                              data=[[-1, 3, -2, 4],
+                                    [-4, 2, -3, 1]]).stack()
     biased_factor.index = biased_factor.index.set_names(['date', 'asset'])
     biased_factor.name = 'factor'
     biased_factor_data = DataFrame()
