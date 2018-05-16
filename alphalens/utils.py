@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Quantopian, Inc.
+# Copyright 2018 Quantopian, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -87,7 +87,8 @@ def quantize_factor(factor_data,
                     quantiles=5,
                     bins=None,
                     by_group=False,
-                    no_raise=False):
+                    no_raise=False,
+                    zero_aware=False):
     """
     Computes period wise factor quantiles.
 
@@ -111,11 +112,15 @@ def quantize_factor(factor_data,
         Alternately sequence of bin edges allowing for non-uniform bin width
         e.g. [-4, -2, -0.5, 0, 10]
         Only one of 'quantiles' or 'bins' can be not-None
-    by_group : bool
+    by_group : bool, optional
         If True, compute quantile buckets separately for each group.
     no_raise: bool, optional
         If True, no exceptions are thrown and the values for which the
         exception would have been thrown are set to np.NaN
+    zero_aware : bool, optional
+        If True, compute quantile buckets separately for positive and negative
+        signal values. This is useful if your signal is centered and zero is
+        the separation between long and short signals, respectively.
 
     Returns
     -------
@@ -126,12 +131,30 @@ def quantize_factor(factor_data,
             (quantiles is None and bins is not None)):
         raise ValueError('Either quantiles or bins should be provided')
 
-    def quantile_calc(x, _quantiles, _bins, _no_raise):
+    if zero_aware and not (isinstance(quantiles, int)
+                           or isinstance(bins, int)):
+        msg = ("zero_aware should only be True when quantiles or bins is an"
+               " integer")
+        raise ValueError(msg)
+
+    def quantile_calc(x, _quantiles, _bins, _zero_aware, _no_raise):
         try:
-            if _quantiles is not None and _bins is None:
+            if _quantiles is not None and _bins is None and not _zero_aware:
                 return pd.qcut(x, _quantiles, labels=False) + 1
-            elif _bins is not None and _quantiles is None:
+            elif _quantiles is not None and _bins is None and _zero_aware:
+                pos_quantiles = pd.qcut(x[x >= 0], _quantiles // 2,
+                                        labels=False) + _quantiles // 2 + 1
+                neg_quantiles = pd.qcut(x[x < 0], _quantiles // 2,
+                                        labels=False) + 1
+                return pd.concat([pos_quantiles, neg_quantiles]).sort_index()
+            elif _bins is not None and _quantiles is None and not _zero_aware:
                 return pd.cut(x, _bins, labels=False) + 1
+            elif _bins is not None and _quantiles is None and _zero_aware:
+                pos_bins = pd.cut(x[x >= 0], _bins // 2,
+                                  labels=False) + _bins // 2 + 1
+                neg_bins = pd.cut(x[x < 0], _bins // 2,
+                                  labels=False) + 1
+                return pd.concat([pos_bins, neg_bins]).sort_index()
         except Exception as e:
             if _no_raise:
                 return pd.Series(index=x.index)
@@ -142,7 +165,7 @@ def quantize_factor(factor_data,
         grouper.append('group')
 
     factor_quantile = factor_data.groupby(grouper)['factor'] \
-        .apply(quantile_calc, quantiles, bins, no_raise)
+        .apply(quantile_calc, quantiles, bins, zero_aware, no_raise)
     factor_quantile.name = 'factor_quantile'
 
     return factor_quantile.dropna()
@@ -376,7 +399,8 @@ def get_clean_factor(factor,
                      quantiles=5,
                      bins=None,
                      groupby_labels=None,
-                     max_loss=0.35):
+                     max_loss=0.35,
+                     zero_aware=False):
     """
     Formats the factor data, forward return data, and group mappings into a
     DataFrame that contains aligned MultiIndex indices of timestamp and asset.
@@ -468,6 +492,11 @@ def get_clean_factor(factor,
         forward returns for all factor values, or because it is not possible
         to perform binning.
         Set max_loss=0 to avoid Exceptions suppression.
+    zero_aware : bool, optional
+        If True, compute quantile buckets separately for positive and negative
+        signal values. This is useful if your signal is centered and zero is
+        the separation between long and short signals, respectively.
+        'quantiles' is None.
 
     Returns
     -------
@@ -545,7 +574,8 @@ def get_clean_factor(factor,
                                                      quantiles,
                                                      bins,
                                                      binning_by_group,
-                                                     no_raise)
+                                                     no_raise,
+                                                     zero_aware)
 
     merged_data = merged_data.dropna()
 
@@ -622,7 +652,8 @@ def get_clean_factor_and_forward_returns(factor,
                                          periods=(1, 5, 10),
                                          filter_zscore=20,
                                          groupby_labels=None,
-                                         max_loss=0.35):
+                                         max_loss=0.35,
+                                         zero_aware=False):
     """
     Formats the factor data, pricing data, and group mappings into a DataFrame
     that contains aligned MultiIndex indices of timestamp and asset. The
@@ -728,6 +759,10 @@ def get_clean_factor_and_forward_returns(factor,
         forward returns for all factor values, or because it is not possible
         to perform binning.
         Set max_loss=0 to avoid Exceptions suppression.
+    zero_aware : bool, optional
+        If True, compute quantile buckets separately for positive and negative
+        signal values. This is useful if your signal is centered and zero is
+        the separation between long and short signals, respectively.
 
     Returns
     -------
@@ -767,7 +802,7 @@ def get_clean_factor_and_forward_returns(factor,
                                    groupby_labels=groupby_labels,
                                    quantiles=quantiles, bins=bins,
                                    binning_by_group=binning_by_group,
-                                   max_loss=max_loss)
+                                   max_loss=max_loss, zero_aware=zero_aware)
 
     return factor_data
 
