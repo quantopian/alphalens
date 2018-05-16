@@ -116,8 +116,8 @@ def quantize_factor(factor_data,
         If True, compute quantile buckets separately for each group.
     zero_aware : bool
         If True, compute quantile buckets separately for positive and negative
-        signal values. This is useful if your signal is centered and zero is the
-        separation between long and short signals, respectively. Ignored if
+        signal values. This is useful if your signal is centered and zero is
+        the separation between long and short signals, respectively. Ignored if
         'quantiles' is None.
     no_raise: bool, optional
         If True, no exceptions are thrown and the values for which the
