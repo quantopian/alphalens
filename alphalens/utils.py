@@ -87,8 +87,8 @@ def quantize_factor(factor_data,
                     quantiles=5,
                     bins=None,
                     by_group=False,
-                    zero_aware=False,
-                    no_raise=False):
+                    no_raise=False,
+                    zero_aware=False)
     """
     Computes period wise factor quantiles.
 
