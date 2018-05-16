@@ -112,16 +112,16 @@ def quantize_factor(factor_data,
         Alternately sequence of bin edges allowing for non-uniform bin width
         e.g. [-4, -2, -0.5, 0, 10]
         Only one of 'quantiles' or 'bins' can be not-None
-    by_group : bool
+    by_group : bool, optional
         If True, compute quantile buckets separately for each group.
-    zero_aware : bool
+    no_raise: bool, optional
+        If True, no exceptions are thrown and the values for which the
+        exception would have been thrown are set to np.NaN
+    zero_aware : bool, optional
         If True, compute quantile buckets separately for positive and negative
         signal values. This is useful if your signal is centered and zero is
         the separation between long and short signals, respectively. Ignored if
         'quantiles' is None.
-    no_raise: bool, optional
-        If True, no exceptions are thrown and the values for which the
-        exception would have been thrown are set to np.NaN
 
     Returns
     -------
@@ -388,7 +388,8 @@ def get_clean_factor(factor,
                      quantiles=5,
                      bins=None,
                      groupby_labels=None,
-                     max_loss=0.35):
+                     max_loss=0.35,
+                     zero_aware=False):
     """
     Formats the factor data, forward return data, and group mappings into a
     DataFrame that contains aligned MultiIndex indices of timestamp and asset.
@@ -480,6 +481,11 @@ def get_clean_factor(factor,
         forward returns for all factor values, or because it is not possible
         to perform binning.
         Set max_loss=0 to avoid Exceptions suppression.
+    zero_aware : bool, optional
+        If True, compute quantile buckets separately for positive and negative
+        signal values. This is useful if your signal is centered and zero is
+        the separation between long and short signals, respectively. Ignored if
+        'quantiles' is None.
 
     Returns
     -------
@@ -557,7 +563,8 @@ def get_clean_factor(factor,
                                                      quantiles,
                                                      bins,
                                                      binning_by_group,
-                                                     no_raise)
+                                                     no_raise,
+                                                     zero_aware)
 
     merged_data = merged_data.dropna()
 
@@ -634,7 +641,8 @@ def get_clean_factor_and_forward_returns(factor,
                                          periods=(1, 5, 10),
                                          filter_zscore=20,
                                          groupby_labels=None,
-                                         max_loss=0.35):
+                                         max_loss=0.35,
+                                         zero_aware=False):
     """
     Formats the factor data, pricing data, and group mappings into a DataFrame
     that contains aligned MultiIndex indices of timestamp and asset. The
@@ -740,6 +748,11 @@ def get_clean_factor_and_forward_returns(factor,
         forward returns for all factor values, or because it is not possible
         to perform binning.
         Set max_loss=0 to avoid Exceptions suppression.
+    zero_aware : bool, optional
+        If True, compute quantile buckets separately for positive and negative
+        signal values. This is useful if your signal is centered and zero is
+        the separation between long and short signals, respectively. Ignored if
+        'quantiles' is None.
 
     Returns
     -------
@@ -779,7 +792,7 @@ def get_clean_factor_and_forward_returns(factor,
                                    groupby_labels=groupby_labels,
                                    quantiles=quantiles, bins=bins,
                                    binning_by_group=binning_by_group,
-                                   max_loss=max_loss)
+                                   max_loss=max_loss, zero_aware=zero_aware)
 
     return factor_data
 
