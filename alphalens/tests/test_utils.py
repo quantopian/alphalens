@@ -53,15 +53,16 @@ class UtilsTestCase(TestCase):
                                   dtype="category")
 
     biased_factor = DataFrame(index=dr,
-                              columns=tickers,
-                              data=[[-1, 3, -2, 4],
-                                    [-4, 2, -3, 1]]).stack()
+                              columns=tickers.extend(['E', 'F', 'G', 'H']),
+                              data=[[-1, 3, -2, 4, -5, 7, -6, 8],
+                                    [-4, 2, -3, 1, -8, 6, -7, 5]]).stack()
     biased_factor.index = biased_factor.index.set_names(['date', 'asset'])
     biased_factor.name = 'factor'
     biased_factor_data = DataFrame()
     biased_factor_data['factor'] = biased_factor
     biased_factor_data['group'] = Series(index=biased_factor.index,
-                                         data=[1, 1, 2, 2, 1, 1, 2, 2],
+                                         data=[1, 1, 2, 2, 1, 1, 2, 2,
+                                               1, 1, 2, 2, 1, 1, 2, 2],
                                          dtype="category")
 
     def test_compute_forward_returns(self):
@@ -87,17 +88,17 @@ class UtilsTestCase(TestCase):
                            (factor_data, 2, None, True, False,
                             [1, 2, 1, 2, 2, 1, 2, 1]),
                            (biased_factor_data, 4, None, False, True,
-                            [2, 3, 1, 4, 1, 4, 2, 3]),
+                            [2, 3, 2, 3, 1, 4, 1, 4, 2, 3, 2, 3, 1, 4, 1, 4]),
                            (biased_factor_data, 2, None, False, True,
-                            [1, 2, 1, 2, 1, 2, 1, 2]),
+                            [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]),
                            (biased_factor_data, 2, None, True, True,
-                            [1, 2, 1, 2, 1, 2, 1, 2]),
+                            [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]),
                            (biased_factor_data, None, 4, False, True,
-                            [2, 3, 1, 4, 1, 4, 2, 3]),
+                            [2, 3, 2, 3, 1, 4, 1, 4, 2, 3, 2, 3, 1, 4, 1, 4]),
                            (biased_factor_data, None, 2, False, True,
-                            [1, 2, 1, 2, 1, 2, 1, 2]),
+                            [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]),
                            (biased_factor_data, None, 2, True, True,
-                            [1, 2, 1, 2, 1, 2, 1, 2]),
+                            [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]),
                            (factor_data, [0, .25, .5, .75, 1.], None, False,
                             False, [1, 2, 3, 4, 4, 3, 2, 1]),
                            (factor_data, [0, .5, .75, 1.], None, False, False,
