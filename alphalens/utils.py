@@ -131,8 +131,8 @@ def quantize_factor(factor_data,
             (quantiles is None and bins is not None)):
         raise ValueError('Either quantiles or bins should be provided')
 
-    if ((not isinstance(quantiles, int) and zero_aware) or
-            (not isinstance(bins, int) and zero_aware)):
+    if zero_aware and not (isinstance(quantiles, int)
+                           or isinstance(bins, int)):
         msg = ("zero_aware should only be True when quantiles or bins is an"
                " integer")
         raise ValueError(msg)
@@ -151,7 +151,7 @@ def quantize_factor(factor_data,
                 return pd.cut(x, _bins, labels=False) + 1
             elif _bins is not None and _quantiles is None and _zero_aware:
                 pos_bins = pd.cut(x[x >= 0], _bins // 2,
-                                  labels=False) + _quantiles // 2 + 1
+                                  labels=False) + _bins // 2 + 1
                 neg_bins = pd.cut(x[x < 0], _bins // 2,
                                   labels=False) + 1
                 return pd.concat([pos_bins, neg_bins]).sort_index()
