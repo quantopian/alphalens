@@ -638,9 +638,7 @@ def mean_return_by_quantile(factor_data,
     else:
         factor_data = factor_data.copy()
 
-    grouper = ['factor_quantile']
-    if by_date:
-        grouper.append(factor_data.index.get_level_values('date'))
+    grouper = ['factor_quantile', factor_data.index.get_level_values('date')]
 
     if by_group:
         grouper.append('group')
@@ -650,6 +648,11 @@ def mean_return_by_quantile(factor_data,
         .agg(['mean', 'std', 'count'])
 
     mean_ret = group_stats.T.xs('mean', level=1).T
+
+    if not by_date:
+        group_stats = mean_ret.groupby(level='factor_quantile')\
+            .agg(['mean', 'std', 'count'])
+        mean_ret = group_stats.T.xs('mean', level=1).T
 
     std_error_ret = group_stats.T.xs('std', level=1).T \
         / np.sqrt(group_stats.T.xs('count', level=1).T)
