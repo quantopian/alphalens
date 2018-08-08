@@ -650,7 +650,10 @@ def mean_return_by_quantile(factor_data,
     mean_ret = group_stats.T.xs('mean', level=1).T
 
     if not by_date:
-        group_stats = mean_ret.groupby(level='factor_quantile')\
+        grouper = [mean_ret.index.get_level_values('factor_quantile')]
+        if by_group:
+            grouper.append(mean_ret.index.get_level_values('group'))
+        group_stats = mean_ret.groupby(grouper)\
             .agg(['mean', 'std', 'count'])
         mean_ret = group_stats.T.xs('mean', level=1).T
 
