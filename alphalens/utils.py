@@ -909,7 +909,9 @@ def diff_custom_calendar_timedeltas(start, end, freq):
 
     if weekmask is not None and holidays is not None:
         # we prefer this method as it is faster
-        actual_days = np.busday_count(start, end, weekmask, holidays)
+        actual_days = np.busday_count(np.array(start).astype('datetime64[D]'),
+                                      np.array(end).astype('datetime64[D]'),
+                                      weekmask, holidays)
     else:
         # default, it is slow
         actual_days = pd.date_range(start, end, freq=freq).shape[0] - 1
