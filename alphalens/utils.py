@@ -215,7 +215,9 @@ def infer_trading_calendar(factor_idx, prices_idx):
 def compute_forward_returns(factor,
                             prices,
                             periods=(1, 5, 10),
-                            filter_zscore=None):
+                            filter_zscore=None,
+                            cumulative=True,
+    ):
     """
     Finds the N period forward returns (as percent change) for each asset
     provided.
@@ -240,6 +242,9 @@ def compute_forward_returns(factor,
         Sets forward returns greater than X standard deviations
         from the the mean to nan. Set it to 'None' to avoid filtering.
         Caution: this outlier filtering incorporates lookahead bias.
+    cumulative : bool, optional
+        Whether to compute cumulative returns over the period, or
+        just returns relative to the previous time-point.
 
     Returns
     -------
@@ -275,14 +280,17 @@ def compute_forward_returns(factor,
     forward_returns.index.levels[0].freq = freq
 
     for period in sorted(periods):
-        #
+        if cumulative:
+            pct_change_period = period
+        else:
+            pct_change_period = 1
+
         # build forward returns
-        #
         fwdret = (prices
-                  .pct_change(period)
+                  .pct_change(pct_change_period)
                   .shift(-period)
                   .reindex(factor_dateindex)
-                  )
+        )
 
         if filter_zscore is not None:
             mask = abs(fwdret - fwdret.mean()) > (filter_zscore * fwdret.std())
@@ -608,7 +616,9 @@ def get_clean_factor_and_forward_returns(factor,
                                          filter_zscore=20,
                                          groupby_labels=None,
                                          max_loss=0.35,
-                                         zero_aware=False):
+                                         zero_aware=False,
+                                         cumulative=True,
+    ):
     """
     Formats the factor data, pricing data, and group mappings into a DataFrame
     that contains aligned MultiIndex indices of timestamp and asset. The
@@ -718,6 +728,9 @@ def get_clean_factor_and_forward_returns(factor,
         If True, compute quantile buckets separately for positive and negative
         signal values. This is useful if your signal is centered and zero is
         the separation between long and short signals, respectively.
+    cumulative : bool, optional
+        Whether to compute cumulative returns over the period, or
+        just returns relative to the previous time-point.
 
     Returns
     -------
@@ -751,7 +764,7 @@ def get_clean_factor_and_forward_returns(factor,
     """
 
     forward_returns = compute_forward_returns(factor, prices, periods,
-                                              filter_zscore)
+                                              filter_zscore, cumulative)
 
     factor_data = get_clean_factor(factor, forward_returns, groupby=groupby,
                                    groupby_labels=groupby_labels,
