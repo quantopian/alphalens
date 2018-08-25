@@ -35,6 +35,7 @@ from pandas.util.testing import (assert_frame_equal,
 
 from .. performance import (factor_information_coefficient,
                             mean_information_coefficient,
+                            mean_return_by_quantile,
                             quantile_turnover,
                             factor_rank_autocorrelation,
                             factor_returns, factor_alpha_beta,
@@ -161,6 +162,105 @@ class PerformanceTestCase(TestCase):
                                    data=expected_ic_val)
 
         assert_frame_equal(ic, expected_ic_df)
+
+    @parameterized.expand([([1.1, 1.2, 1.1, 1.2, 1.1, 1.2],
+                            [[1, 2, 1, 2, 1, 2],
+                             [1, 2, 1, 2, 1, 2],
+                             [1, 2, 1, 2, 1, 2]],
+                            2, False,
+                            [0.1, 0.2]),
+                           ([1.1, 1.2, 1.1, 1.2, 1.1, 1.2],
+                            [[1, 2, 1, 2, 1, 2],
+                             [1, 2, 1, 2, 1, 2],
+                             [1, 2, 1, 2, 1, 2]],
+                            2, True,
+                            [0.1, 0.1, 0.2, 0.2]),
+                           ([1.1, 1.1, 1.1, 1.2, 1.2, 1.2],
+                            [[1, 2, 3, 1, 2, 3],
+                             [1, 2, 3, 1, 2, 3],
+                             [1, 2, 3, 1, 2, 3]],
+                            3, False,
+                            [0.15, 0.15, 0.15]),
+                           ([1.1, 1.1, 1.1, 1.2, 1.2, 1.2],
+                            [[1, 2, 3, 1, 2, 3],
+                             [1, 2, 3, 1, 2, 3],
+                             [1, 2, 3, 1, 2, 3]],
+                            3, True,
+                            [0.1, 0.2, 0.1, 0.2, 0.1, 0.2]),
+                           ([1.5, 1.5, 1.2, 1.0, 1.0, 1.0],
+                            [[1, 1, 2, 2, 2, 2],
+                             [2, 2, 1, 2, 2, 2],
+                             [2, 2, 1, 2, 2, 2]],
+                            2, False,
+                            [0.3, 0.15]),
+                           ([1.5, 1.5, 1.2, 1.0, 1.0, 1.0],
+                            [[1, 1, 3, 2, 2, 2],
+                             [3, 3, 1, 2, 2, 2],
+                             [3, 3, 1, 2, 2, 2]],
+                            3, False,
+                            [0.3, 0.0, 0.4]),
+                           ([1.6, 1.6, 1.0, 1.0, 1.0, 1.0],
+                            [[1, 1, 2, 2, 2, 2],
+                             [2, 2, 1, 1, 1, 1],
+                             [2, 2, 1, 1, 1, 1]],
+                            2, False,
+                            [0.2, 0.4]),
+                           ([1.6, 1.6, 1.0, 1.6, 1.6, 1.0],
+                            [[1, 1, 2, 1, 1, 2],
+                             [2, 2, 1, 2, 2, 1],
+                             [2, 2, 1, 2, 2, 1]],
+                            2, True,
+                            [0.2, 0.2, 0.4, 0.4])])
+    def test_mean_return_by_quantile(self,
+                                     daily_rets,
+                                     factor,
+                                     bins,
+                                     by_group,
+                                     expected_data):
+        """
+        Test mean_return_by_quantile
+        """
+        tickers = ['A', 'B', 'C', 'D', 'E', 'F']
+
+        factor_groups = {'A': 1, 'B': 1, 'C': 1, 'D': 2, 'E': 2, 'F': 2}
+
+        price_data = [[daily_rets[0]**i, daily_rets[1]**i, daily_rets[2]**i,
+                       daily_rets[3]**i, daily_rets[4]**i, daily_rets[5]**i]
+                      for i in range(1, 5)]  # 4 days
+
+        start = '2015-1-11'
+        factor_end = '2015-1-13'
+        price_end = '2015-1-14'  # 1D fwd returns
+
+        price_index = date_range(start=start, end=price_end)
+        price_index.name = 'date'
+        prices = DataFrame(index=price_index, columns=tickers, data=price_data)
+
+        factor_index = date_range(start=start, end=factor_end)
+        factor_index.name = 'date'
+        factor = DataFrame(index=factor_index, columns=tickers,
+                           data=factor).stack()
+
+        factor_data = get_clean_factor_and_forward_returns(
+            factor, prices,
+            groupby=factor_groups,
+            quantiles=None,
+            bins=bins,
+            periods=(1,))
+
+        mean_quant_ret, std_quantile = \
+            mean_return_by_quantile(factor_data,
+                                    by_date=False,
+                                    by_group=by_group,
+                                    demeaned=False,
+                                    group_adjust=False)
+
+        expected = DataFrame(index=mean_quant_ret.index.copy(),
+                             columns=mean_quant_ret.columns.copy(),
+                             data=expected_data)
+        expected.index.name = 'factor_quantile'
+
+        assert_frame_equal(mean_quant_ret, expected)
 
     @parameterized.expand([([[1.0, 2.0, 3.0, 4.0],
                              [4.0, 3.0, 2.0, 1.0],
@@ -422,7 +522,7 @@ class PerformanceTestCase(TestCase):
                              'D': 'Group2', 'E': 'Group1'},
                             False, True, True,
                             [0.25, 0.25, 0.25, 0.25,
-                            -0.25, 0.25, -0.25, 0.25,
+                             -0.25, 0.25, -0.25, 0.25,
                              0.25, 0.50, 0.25,
                              0.25, -0.50, 0.25,
                              0.25, 0.50, -0.25]),
