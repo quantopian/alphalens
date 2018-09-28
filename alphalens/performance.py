@@ -335,9 +335,9 @@ def factor_alpha_beta(factor_data,
 
 def cumulative_returns(returns, period, freq=None):
     """
-    Builds cumulative returns from 'period' returns. This function simulate the
-    cumulative effect that a series of gains or losses (the 'retuns') have on
-    an original amount of capital over a period of time.
+    Builds cumulative returns from 'period' returns. This function simulates
+    the cumulative effect that a series of gains or losses (the 'returns')
+    have on an original amount of capital over a period of time.
 
     if F is the frequency at which returns are computed (e.g. 1 day if
     'returns' contains daily values) and N is the period for which the retuns
