@@ -414,11 +414,15 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None):
     gf = GridFigure(rows=vertical_sections, cols=columns_wide)
 
     for period in turnover_periods:
+        if quantile_turnover[period].isnull().all().all():
+            continue
         plotting.plot_top_bottom_quantile_turnover(quantile_turnover[period],
                                                    period=period,
                                                    ax=gf.next_row())
 
     for period in autocorrelation:
+        if autocorrelation[period].isnull().all():
+            continue
         plotting.plot_factor_rank_auto_correlation(autocorrelation[period],
                                                    period=period,
                                                    ax=gf.next_row())
