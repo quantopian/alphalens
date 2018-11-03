@@ -737,14 +737,15 @@ def quantile_turnover(quantile_factor, quantile, period=1):
         lambda x: set(x.index.get_level_values('asset')))
 
     if isinstance(period, int):
-        shift = period
+        name_shifted = quant_name_sets.shift(period)
     else:
-        # find the frequency at which the factor is computed
-        idx = quant_name_sets.index
-        freq = min([idx[i] - idx[i-1] for i in range(1, min(10, len(idx)))])
-        shift = int(pd.Timedelta(period) / freq)
+        shifted_idx = utils.add_custom_calendar_timedelta(
+                quant_name_sets.index, -pd.Timedelta(period),
+                quantile_factor.index.levels[0].freq)
+        name_shifted = quant_name_sets.reindex(shifted_idx)
+        name_shifted.index = quant_name_sets.index
 
-    new_names = (quant_name_sets - quant_name_sets.shift(shift)).dropna()
+    new_names = (quant_name_sets - name_shifted).dropna()
     quant_turnover = new_names.apply(
         lambda x: len(x)) / quant_name_sets.apply(lambda x: len(x))
     quant_turnover.name = quantile
@@ -789,15 +790,15 @@ def factor_rank_autocorrelation(factor_data, period=1):
                                                   values='factor')
 
     if isinstance(period, int):
-        shift = period
+        asset_shifted = asset_factor_rank.shift(period)
     else:
-        # find the frequency at which the factor is computed
-        idx = asset_factor_rank.index
-        freq = min([idx[i] - idx[i-1] for i in range(1, min(10, len(idx)))])
-        shift = int(pd.Timedelta(period) / freq)
+        shifted_idx = utils.add_custom_calendar_timedelta(
+                asset_factor_rank.index, -pd.Timedelta(period),
+                factor_data.index.levels[0].freq)
+        asset_shifted = asset_factor_rank.reindex(shifted_idx)
+        asset_shifted.index = asset_factor_rank.index
 
-    autocorr = asset_factor_rank.corrwith(asset_factor_rank.shift(shift),
-                                          axis=1)
+    autocorr = asset_factor_rank.corrwith(asset_shifted, axis=1)
     autocorr.name = period
     return autocorr
 
