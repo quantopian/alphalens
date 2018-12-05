@@ -278,11 +278,8 @@ def compute_forward_returns(factor,
         #
         # build forward returns
         #
-        fwdret = (prices
-                  .pct_change(period)
-                  .shift(-period)
-                  .reindex(factor_dateindex)
-                  )
+        fwdret = prices.shift(-period) / prices - 1
+        fwdret = fwdret.reindex(factor_dateindex)
 
         if filter_zscore is not None:
             mask = abs(fwdret - fwdret.mean()) > (filter_zscore * fwdret.std())
