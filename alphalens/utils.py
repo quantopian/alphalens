@@ -269,21 +269,23 @@ def compute_forward_returns(factor,
                          "they have the same convention in terms of datetimes "
                          "and symbol-names")
 
-    forward_returns = pd.DataFrame(index=pd.MultiIndex.from_product(
-        [factor_dateindex, prices.columns], names=['date', 'asset']))
+    # chop prices down to only the assets we care about (= unique assets in
+    # `factor`).  we could modify `prices` in place, but that might confuse
+    # the caller.
+    prices = prices.filter(items=factor.index.levels[1])
 
-    forward_returns.index.levels[0].freq = freq
+    raw_values_dict = {}
+    column_list = []
 
     for period in sorted(periods):
-        #
-        # build forward returns
-        #
-        fwdret = prices.shift(-period) / prices - 1
-        fwdret = fwdret.reindex(factor_dateindex)
+        forward_returns = \
+            prices.pct_change(period).shift(-period).reindex(factor_dateindex)
 
         if filter_zscore is not None:
-            mask = abs(fwdret - fwdret.mean()) > (filter_zscore * fwdret.std())
-            fwdret[mask] = np.nan
+            mask = abs(
+                forward_returns - forward_returns.mean()
+            ) > (filter_zscore * forward_returns.std())
+            forward_returns[mask] = np.nan
 
         #
         # Find the period length, which will be the column name. We'll test
@@ -291,11 +293,15 @@ def compute_forward_returns(factor,
         # there could be non-trading days which would make the computation
         # wrong if made only one test
         #
-        entries_to_test = min(30, len(fwdret.index),
-                              len(prices.index) - period)
+        entries_to_test = min(
+            30,
+            len(forward_returns.index),
+            len(prices.index) - period
+        )
+
         days_diffs = []
         for i in range(entries_to_test):
-            p_idx = prices.index.get_loc(fwdret.index[i])
+            p_idx = prices.index.get_loc(forward_returns.index[i])
             start = prices.index[p_idx]
             end = prices.index[p_idx + period]
             period_len = diff_custom_calendar_timedeltas(start, end, freq)
@@ -303,14 +309,30 @@ def compute_forward_returns(factor,
 
         delta_days = period_len.components.days - mode(days_diffs).mode[0]
         period_len -= pd.Timedelta(days=delta_days)
+        label = timedelta_to_string(period_len)
 
-        # Finally use period_len as column name
-        column_name = timedelta_to_string(period_len)
-        forward_returns[column_name] = fwdret.stack()
+        column_list.append(label)
 
-    forward_returns.index = forward_returns.index.rename(['date', 'asset'])
+        raw_values_dict[label] = np.concatenate(forward_returns.values)
 
-    return forward_returns
+    df = pd.DataFrame.from_dict(raw_values_dict)
+    df.set_index(
+        pd.MultiIndex.from_product(
+            [factor_dateindex, prices.columns],
+            names=['date', 'asset']
+        ),
+        inplace=True
+    )
+    df = df.reindex(factor.index)
+
+    # now set the columns correctly
+    df = df[column_list]
+
+    df.index.levels[0].freq = freq
+    df.index.levels[0].name = "date"
+    df.index.levels[1].name = "asset"
+
+    return df
 
 
 def demean_forward_returns(factor_data, grouper=None):
@@ -527,15 +549,15 @@ def get_clean_factor(factor,
 
     initial_amount = float(len(factor.index))
 
-    factor = factor.copy()
-    factor.index = factor.index.rename(['date', 'asset'])
+    factor_copy = factor.copy()
+    factor_copy.index = factor_copy.index.rename(['date', 'asset'])
 
     merged_data = forward_returns.copy()
-    merged_data['factor'] = factor
+    merged_data['factor'] = factor_copy
 
     if groupby is not None:
         if isinstance(groupby, dict):
-            diff = set(factor.index.get_level_values(
+            diff = set(factor_copy.index.get_level_values(
                 'asset')) - set(groupby.keys())
             if len(diff) > 0:
                 raise KeyError(
@@ -543,8 +565,8 @@ def get_clean_factor(factor,
                         list(diff)))
 
             ss = pd.Series(groupby)
-            groupby = pd.Series(index=factor.index,
-                                data=ss[factor.index.get_level_values(
+            groupby = pd.Series(index=factor_copy.index,
+                                data=ss[factor_copy.index.get_level_values(
                                     'asset')].values)
 
         if groupby_labels is not None:
@@ -565,12 +587,16 @@ def get_clean_factor(factor,
     fwdret_amount = float(len(merged_data.index))
 
     no_raise = False if max_loss == 0 else True
-    merged_data['factor_quantile'] = quantize_factor(merged_data,
-                                                     quantiles,
-                                                     bins,
-                                                     binning_by_group,
-                                                     no_raise,
-                                                     zero_aware)
+    quantile_data = quantize_factor(
+        merged_data,
+        quantiles,
+        bins,
+        binning_by_group,
+        no_raise,
+        zero_aware
+    )
+
+    merged_data['factor_quantile'] = quantile_data
 
     merged_data = merged_data.dropna()
 
