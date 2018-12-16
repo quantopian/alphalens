@@ -711,7 +711,7 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     return ax
 
 
-def plot_cumulative_returns(factor_returns, period, title=None, ax=None):
+def plot_cumulative_returns(factor_returns, period, freq, title=None, ax=None):
     """
     Plots the cumulative returns of the returns series passed in.
 
@@ -724,6 +724,11 @@ def plot_cumulative_returns(factor_returns, period, title=None, ax=None):
         Length of period for which the returns are computed (e.g. 1 day)
         if 'period' is a string it must follow pandas.Timedelta constructor
         format (e.g. '1 days', '1D', '30m', '3h', '1D1h', etc)
+    freq : pandas DateOffset
+        Used to specify a particular trading calendar e.g. BusinessDay or Day
+        Usually this is inferred from utils.infer_trading_calendar, which is
+        called by either get_clean_factor_and_forward_returns or
+        compute_forward_returns
     title: string, optional
         Custom title
     ax : matplotlib.Axes, optional
@@ -737,7 +742,7 @@ def plot_cumulative_returns(factor_returns, period, title=None, ax=None):
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    factor_returns = perf.cumulative_returns(factor_returns, period)
+    factor_returns = perf.cumulative_returns(factor_returns, period, freq)
 
     factor_returns.plot(ax=ax, lw=3, color='forestgreen', alpha=0.6)
     ax.set(ylabel='Cumulative Returns',
@@ -751,6 +756,7 @@ def plot_cumulative_returns(factor_returns, period, title=None, ax=None):
 
 def plot_cumulative_returns_by_quantile(quantile_returns,
                                         period,
+                                        freq,
                                         ax=None):
     """
     Plots the cumulative returns of various factor quantiles.
@@ -763,6 +769,11 @@ def plot_cumulative_returns_by_quantile(quantile_returns,
         Length of period for which the returns are computed (e.g. 1 day)
         if 'period' is a string it must follow pandas.Timedelta constructor
         format (e.g. '1 days', '1D', '30m', '3h', '1D1h', etc)
+    freq : pandas DateOffset
+        Used to specify a particular trading calendar e.g. BusinessDay or Day
+        Usually this is inferred from utils.infer_trading_calendar, which is
+        called by either get_clean_factor_and_forward_returns or
+        compute_forward_returns
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
@@ -776,7 +787,7 @@ def plot_cumulative_returns_by_quantile(quantile_returns,
 
     ret_wide = quantile_returns.unstack('factor_quantile')
 
-    cum_ret = ret_wide.apply(perf.cumulative_returns, period=period)
+    cum_ret = ret_wide.apply(perf.cumulative_returns, period=period, freq=freq)
     cum_ret = cum_ret.loc[:, ::-1]  # we want negative quantiles as 'red'
 
     cum_ret.plot(lw=2, ax=ax, cmap=cm.coolwarm)

@@ -747,9 +747,8 @@ class PerformanceTestCase(TestCase):
         period_len = Timedelta(period_len)
         index = date_range('1/1/1999', periods=len(returns), freq=ret_freq)
         returns = Series(returns, index=index)
-        returns.index.freq = ret_freq_class
 
-        cum_ret = cumulative_returns(returns, period_len)
+        cum_ret = cumulative_returns(returns, period_len, ret_freq_class)
 
         expected = Series(expected_vals, index=cum_ret.index)
 
