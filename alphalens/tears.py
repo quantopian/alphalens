@@ -17,6 +17,7 @@
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import pandas as pd
+import warnings
 
 from . import plotting
 from . import performance as perf
@@ -249,6 +250,14 @@ def create_returns_tear_sheet(factor_data,
                                           ylim_percentiles=(1, 99),
                                           ax=gf.next_row())
 
+    trading_calendar = factor_data.index.levels[0].freq
+    if trading_calendar is None:
+        trading_calendar = pd.tseries.offsets.BDay()
+        warnings.warn(
+            "'freq' not set in factor_data index: assuming business day",
+            UserWarning
+        )
+
     for p in factor_returns:
 
         title = ('Factor Weighted '
@@ -256,14 +265,20 @@ def create_returns_tear_sheet(factor_data,
                  + ('Long/Short ' if long_short else '')
                  + "Portfolio Cumulative Return ({} Period)".format(p))
 
-        plotting.plot_cumulative_returns(factor_returns[p],
-                                         period=p,
-                                         title=title,
-                                         ax=gf.next_row())
+        plotting.plot_cumulative_returns(
+            factor_returns[p],
+            period=p,
+            freq=trading_calendar,
+            title=title,
+            ax=gf.next_row()
+        )
 
-        plotting.plot_cumulative_returns_by_quantile(mean_quant_ret_bydate[p],
-                                                     period=p,
-                                                     ax=gf.next_row())
+        plotting.plot_cumulative_returns_by_quantile(
+            mean_quant_ret_bydate[p],
+            period=p,
+            freq=trading_calendar,
+            ax=gf.next_row()
+        )
 
     ax_mean_quantile_returns_spread_ts = [gf.next_row()
                                           for x in range(fr_cols)]
@@ -665,11 +680,22 @@ def create_event_study_tear_sheet(factor_data,
                                           ylim_percentiles=(1, 99),
                                           ax=gf.next_row())
 
+    trading_calendar = factor_data.index.levels[0].freq
+    if trading_calendar is None:
+        trading_calendar = pd.tseries.offsets.BDay()
+        warnings.warn(
+            "'freq' not set in factor_data index: assuming business day",
+            UserWarning
+        )
+
     for p in factor_returns:
 
-        plotting.plot_cumulative_returns(factor_returns[p],
-                                         period=p,
-                                         ax=gf.next_row())
+        plotting.plot_cumulative_returns(
+            factor_returns[p],
+            period=p,
+            freq=trading_calendar,
+            ax=gf.next_row()
+        )
 
     plt.show()
     gf.close()

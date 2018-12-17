@@ -201,8 +201,6 @@ def factor_weights(factor_data,
     if group_adjust:
         weights = weights.groupby(level='date').apply(to_weights, False, False)
 
-    # preserve freq, which contains trading calendar information
-    weights.index.levels[0].freq = factor_data.index.levels[0].freq
     return weights
 
 
@@ -253,8 +251,6 @@ def factor_returns(factor_data,
     else:
         returns = weighted_returns.groupby(level='date').sum()
 
-    # preserve freq, which contains trading calendar information
-    returns.index.freq = factor_data.index.levels[0].freq
     return returns
 
 
