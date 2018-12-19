@@ -215,7 +215,9 @@ def infer_trading_calendar(factor_idx, prices_idx):
 def compute_forward_returns(factor,
                             prices,
                             periods=(1, 5, 10),
-                            filter_zscore=None):
+                            filter_zscore=None,
+                            cumulative_returns=True,
+    ):
     """
     Finds the N period forward returns (as percent change) for each asset
     provided.
@@ -278,8 +280,13 @@ def compute_forward_returns(factor,
     column_list = []
 
     for period in sorted(periods):
+        if cumulative_returns:
+            returns = prices.pct_change(period)
+        else:
+            returns = prices.pct_change()
+
         forward_returns = \
-            prices.pct_change(period).shift(-period).reindex(factor_dateindex)
+            returns.shift(-period).reindex(factor_dateindex)
 
         if filter_zscore is not None:
             mask = abs(
@@ -631,7 +638,8 @@ def get_clean_factor_and_forward_returns(factor,
                                          filter_zscore=20,
                                          groupby_labels=None,
                                          max_loss=0.35,
-                                         zero_aware=False):
+                                         zero_aware=False,
+                                         cumulative_returns=True):
     """
     Formats the factor data, pricing data, and group mappings into a DataFrame
     that contains aligned MultiIndex indices of timestamp and asset. The
@@ -774,7 +782,7 @@ def get_clean_factor_and_forward_returns(factor,
     """
 
     forward_returns = compute_forward_returns(factor, prices, periods,
-                                              filter_zscore)
+                                              filter_zscore, cumulative_returns)
 
     factor_data = get_clean_factor(factor, forward_returns, groupby=groupby,
                                    groupby_labels=groupby_labels,
