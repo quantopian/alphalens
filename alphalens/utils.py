@@ -242,6 +242,10 @@ def compute_forward_returns(factor,
         Sets forward returns greater than X standard deviations
         from the the mean to nan. Set it to 'None' to avoid filtering.
         Caution: this outlier filtering incorporates lookahead bias.
+    cumulative_returns : bool, optional
+        If True, forward returns columns will contain cumulative returns.
+        Setting this to False is useful if you want to analyze how predictive
+        a factor is for a single forward day.
 
     Returns
     -------
@@ -749,6 +753,10 @@ def get_clean_factor_and_forward_returns(factor,
         If True, compute quantile buckets separately for positive and negative
         signal values. This is useful if your signal is centered and zero is
         the separation between long and short signals, respectively.
+    cumulative_returns : bool, optional
+        If True, forward returns columns will contain cumulative returns.
+        Setting this to False is useful if you want to analyze how predictive
+        a factor is for a single forward day.
 
     Returns
     -------
