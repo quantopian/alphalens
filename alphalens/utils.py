@@ -216,8 +216,7 @@ def compute_forward_returns(factor,
                             prices,
                             periods=(1, 5, 10),
                             filter_zscore=None,
-                            cumulative_returns=True,
-    ):
+                            cumulative_returns=True):
     """
     Finds the N period forward returns (as percent change) for each asset
     provided.
@@ -790,7 +789,8 @@ def get_clean_factor_and_forward_returns(factor,
     """
 
     forward_returns = compute_forward_returns(factor, prices, periods,
-                                              filter_zscore, cumulative_returns)
+                                              filter_zscore,
+                                              cumulative_returns)
 
     factor_data = get_clean_factor(factor, forward_returns, groupby=groupby,
                                    groupby_labels=groupby_labels,
