@@ -81,6 +81,23 @@ class UtilsTestCase(TestCase):
 
         assert_frame_equal(fp, expected)
 
+    def test_compute_forward_returns_non_cum(self):
+        dr = date_range(start='2015-1-1', end='2015-1-3')
+        prices = DataFrame(index=dr, columns=['A', 'B'],
+                           data=[[1, 1], [1, 2], [2, 1]])
+        factor = prices.stack()
+
+        fp = compute_forward_returns(factor, prices, periods=[1, 2],
+                                     cumulative_returns=False)
+
+        ix = MultiIndex.from_product([dr, ['A', 'B']],
+                                     names=['date', 'asset'])
+        expected = DataFrame(index=ix, columns=['1D', '2D'])
+        expected['1D'] = [0., 1., 1., -0.5, nan, nan]
+        expected['2D'] = [1., -0.5, nan, nan, nan, nan]
+
+        assert_frame_equal(fp, expected)
+
     @parameterized.expand([(factor_data, 4, None, False, False,
                             [1, 2, 3, 4, 4, 3, 2, 1]),
                            (factor_data, 2, None, False, False,
