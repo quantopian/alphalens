@@ -15,6 +15,7 @@
 
 ## Versions
 
-* Alphalens version:
-* Python version:
-* Matplotlib version:
+* Alphalens version: 
+* Python version: 
+* Pandas version: 
+* Matplotlib version: 
