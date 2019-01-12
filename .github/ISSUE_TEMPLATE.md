@@ -1,16 +1,16 @@
-## Description of your problem
+## Problem Description
 
-**Please provide a minimal, self-contained, and reproducible example.**
+**Please provide a minimal, self-contained, and reproducible example:**
 ```python
-[Your code here]
+[Paste code here]
 ```
 
-**Please provide the full traceback.**
+**Please provide the full traceback:**
 ```python
-[The error output here]
+[Paste traceback here]
 ```
 
-**Please provide any additional information below.**
+**Please provide any additional information below:**
 
 
 ## Versions
