@@ -81,6 +81,27 @@ class UtilsTestCase(TestCase):
 
         assert_frame_equal(fp, expected)
 
+    def test_compute_forward_returns_index_out_of_bound(self):
+        dr = date_range(start='2014-12-29', end='2015-1-3')
+        prices = DataFrame(index=dr, columns=['A', 'B'],
+                           data=[[nan, nan], [nan, nan], [nan, nan],
+                                 [1, 1], [1, 2], [2, 1]])
+
+        dr = date_range(start='2015-1-1', end='2015-1-3')
+        factor = DataFrame(index=dr, columns=['A', 'B'],
+                           data=[[1, 1], [1, 2], [2, 1]])
+        factor = factor.stack()
+
+        fp = compute_forward_returns(factor, prices, periods=[1, 2])
+
+        ix = MultiIndex.from_product([dr, ['A', 'B']],
+                                     names=['date', 'asset'])
+        expected = DataFrame(index=ix, columns=['1D', '2D'])
+        expected['1D'] = [0., 1., 1., -0.5, nan, nan]
+        expected['2D'] = [1., 0., nan, nan, nan, nan]
+
+        assert_frame_equal(fp, expected)
+
     def test_compute_forward_returns_non_cum(self):
         dr = date_range(start='2015-1-1', end='2015-1-3')
         prices = DataFrame(index=dr, columns=['A', 'B'],
