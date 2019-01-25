@@ -299,19 +299,17 @@ def compute_forward_returns(factor,
 
         #
         # Find the period length, which will be the column name. We'll test
-        # several entries in order to find out the correct period length as
-        # there could be non-trading days which would make the computation
-        # wrong if made only one test
+        # several entries in order to find out the most likely period length
+        # (in case the user passed inconsinstent data)
         #
-        entries_to_test = min(
-            30,
-            len(forward_returns.index),
-            len(prices.index) - period
-        )
-
         days_diffs = []
-        for i in range(entries_to_test):
+        for i in range(30):
+            if i >= len(forward_returns.index):
+                break
             p_idx = prices.index.get_loc(forward_returns.index[i])
+            if p_idx is None or p_idx < 0 or (
+                    p_idx + period) >= len(prices.index):
+                continue
             start = prices.index[p_idx]
             end = prices.index[p_idx + period]
             period_len = diff_custom_calendar_timedeltas(start, end, freq)
@@ -619,7 +617,7 @@ def get_clean_factor(factor,
     print("Dropped %.1f%% entries from factor data: %.1f%% in forward "
           "returns computation and %.1f%% in binning phase "
           "(set max_loss=0 to see potentially suppressed Exceptions)." %
-          (tot_loss * 100, fwdret_loss * 100,  bin_loss * 100))
+          (tot_loss * 100, fwdret_loss * 100, bin_loss * 100))
 
     if tot_loss > max_loss:
         message = ("max_loss (%.1f%%) exceeded %.1f%%, consider increasing it."
