@@ -9,7 +9,7 @@ Alphalens
     
 Alphalens is a Python Library for performance analysis of predictive
 (alpha) stock factors. Alphalens works great with the
-`Zipline <http://zipline.io/>`__ open source backtesting library, and
+`Zipline <https://www.zipline.io/>`__ open source backtesting library, and
 `Pyfolio <https://github.com/quantopian/pyfolio>`__ which provides
 performance and risk analysis of financial portfolios.
 
@@ -72,7 +72,7 @@ Alphalens depends on:
 
 -  `matplotlib <https://github.com/matplotlib/matplotlib>`__
 -  `numpy <https://github.com/numpy/numpy>`__
--  `pandas <https://github.com/pydata/pandas>`__
+-  `pandas <https://github.com/pandas-dev/pandas>`__
 -  `scipy <https://github.com/scipy/scipy>`__
 -  `seaborn <https://github.com/mwaskom/seaborn>`__
 -  `statsmodels <https://github.com/statsmodels/statsmodels>`__
@@ -81,7 +81,7 @@ Usage
 -----
 
 A good way to get started is to run the examples in a `Jupyter
-notebook <http://jupyter.org/>`__.
+notebook <https://jupyter.org/>`__.
 
 To get set up with an example, you can:
 
@@ -126,7 +126,7 @@ For a full list of contributors see the `contributors page. <https://github.com/
 Example Tear Sheet
 ------------------
 
-Example factor courtesy of `ExtractAlpha <http://extractalpha.com/>`_
+Example factor courtesy of `ExtractAlpha <https://extractalpha.com/>`_
 
 .. image:: https://github.com/quantopian/alphalens/raw/master/alphalens/examples/table_tear.png
 .. image:: https://github.com/quantopian/alphalens/raw/master/alphalens/examples/returns_tear.png
