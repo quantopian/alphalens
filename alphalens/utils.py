@@ -95,20 +95,24 @@ def quantize_factor(factor_data,
     factor_data : pd.DataFrame - MultiIndex
         A MultiIndex DataFrame indexed by date (level 0) and asset (level 1),
         containing the values for a single alpha factor, forward returns for
-        each period, the factor quantile/bin that factor value belongs to, and
-        (optionally) the group the asset belongs to.
+        each period, the factor quantile/bin to which the factor value belongs,
+        and (optionally) the group to which the asset belongs.
 
-        - See full explanation in utils.get_clean_factor_and_forward_returns
+        See full explanation in utils.get_clean_factor_and_forward_returns.
 
     quantiles : int or sequence[float]
         Number of equal-sized quantile buckets to use in factor bucketing.
         Alternately sequence of quantiles, allowing non-equal-sized buckets
+
         e.g. [0, .10, .5, .90, 1.] or [.05, .5, .95]
+
         Only one of 'quantiles' or 'bins' can be not-None
     bins : int or sequence[float]
         Number of equal-width (valuewise) bins to use in factor bucketing.
         Alternately sequence of bin edges allowing for non-uniform bin width
+
         e.g. [-4, -2, -0.5, 0, 10]
+
         Only one of 'quantiles' or 'bins' can be not-None
     by_group : bool, optional
         If True, compute quantile buckets separately for each group.
@@ -460,8 +464,10 @@ def get_clean_factor(factor,
     forward_returns : pd.DataFrame - MultiIndex
         A MultiIndex DataFrame indexed by timestamp (level 0) and asset
         (level 1), containing the forward returns for assets.
+
         Forward returns column names must follow the format accepted by
         pd.Timedelta (e.g. '1D', '30m', '3h15m', '1D1h', etc).
+
         'date' index freq property must be set to a trading calendar
         (pandas DateOffset), see infer_trading_calendar for more details.
         This information is currently used only in cumulative returns
@@ -514,10 +520,12 @@ def get_clean_factor(factor,
         Maximum percentage (0.00 to 1.00) of factor data dropping allowed,
         computed comparing the number of items in the input factor index and
         the number of items in the output DataFrame index.
+
         Factor data can be partially dropped due to being flawed itself
         (e.g. NaNs), not having provided enough price data to compute
         forward returns for all factor values, or because it is not possible
         to perform binning.
+
         Set max_loss=0 to avoid Exceptions suppression.
     zero_aware : bool, optional
         If True, compute quantile buckets separately for positive and negative
@@ -530,15 +538,15 @@ def get_clean_factor(factor,
     merged_data : pd.DataFrame - MultiIndex
         A MultiIndex Series indexed by date (level 0) and asset (level 1),
         containing the values for a single alpha factor, forward returns for
-        each period, the factor quantile/bin that factor value belongs to, and
-        (optionally) the group the asset belongs to.
+        each period, the factor quantile/bin to which that factor belongs, and
+        (optionally) the group to which the asset belongs.
 
-        - forward returns column names follow the format accepted by
-          pd.Timedelta (e.g. '1D', '30m', '3h15m', '1D1h', etc)
+        Forward returns column names follow the format accepted by
+        pd.Timedelta (e.g. '1D', '30m', '3h15m', '1D1h', etc).
 
-        - 'date' index freq property (merged_data.index.levels[0].freq) is the
-          same as that of the input forward returns data. This is currently
-          used only in cumulative returns computation
+        date' index freq property (merged_data.index.levels[0].freq) is the
+        same as that of the input forward returns data. This is currently
+        used only in cumulative returns computation.
         ::
            -------------------------------------------------------------------
                       |       | 1D  | 5D  | 10D  |factor|group|factor_quantile
@@ -650,7 +658,7 @@ def get_clean_factor_and_forward_returns(factor,
 
     It is safe to skip a call to this function and still make use of Alphalens
     functionalities as long as the factor data conforms to the format returned
-    from get_clean_factor_and_forward_returns and documented here
+    from get_clean_factor_and_forward_returns and documented here.
 
     Parameters
     ----------
@@ -675,12 +683,14 @@ def get_clean_factor_and_forward_returns(factor,
     prices : pd.DataFrame
         A wide form Pandas DataFrame indexed by timestamp with assets
         in the columns.
+        
         Pricing data must span the factor analysis time period plus an
         additional buffer window that is greater than the maximum number
         of expected periods in the forward returns calculations.
         It is important to pass the correct pricing data in depending on
         what time of period your signal was generated so to avoid lookahead
         bias, or  delayed calculations.
+        
         'Prices' must contain at least an entry for each timestamp/asset
         combination in 'factor'. This entry should reflect the buy price
         for the assets and usually it is the next available price after the
@@ -688,6 +698,7 @@ def get_clean_factor_and_forward_returns(factor,
         meant to be traded later (e.g. if the factor is computed at market
         open but traded 1 hour after market open the price information should
         be 1 hour after market open).
+        
         'Prices' must also contain entries for timestamps following each
         timestamp/asset combination in 'factor', as many more timestamps
         as the maximum value in 'periods'. The asset price after 'period'
@@ -743,10 +754,12 @@ def get_clean_factor_and_forward_returns(factor,
         Maximum percentage (0.00 to 1.00) of factor data dropping allowed,
         computed comparing the number of items in the input factor index and
         the number of items in the output DataFrame index.
+        
         Factor data can be partially dropped due to being flawed itself
         (e.g. NaNs), not having provided enough price data to compute
         forward returns for all factor values, or because it is not possible
         to perform binning.
+        
         Set max_loss=0 to avoid Exceptions suppression.
     zero_aware : bool, optional
         If True, compute quantile buckets separately for positive and negative
@@ -762,14 +775,16 @@ def get_clean_factor_and_forward_returns(factor,
     merged_data : pd.DataFrame - MultiIndex
         A MultiIndex Series indexed by date (level 0) and asset (level 1),
         containing the values for a single alpha factor, forward returns for
-        each period, the factor quantile/bin that factor value belongs to, and
-        (optionally) the group the asset belongs to.
-        - forward returns column names follow  the format accepted by
-          pd.Timedelta (e.g. '1D', '30m', '3h15m', '1D1h', etc)
-        - 'date' index freq property (merged_data.index.levels[0].freq) will be
-          set to a trading calendar (pandas DateOffset) inferred from the input
-          data (see infer_trading_calendar for more details). This is currently
-          used only in cumulative returns computation
+        each period, the factor quantile/bin to which the factor value belongs,
+        and (optionally) the group to which the asset belongs.
+        
+        Forward returns column names follow the format accepted by pd.Timedelta
+        (e.g. '1D', '30m', '3h15m', '1D1h', etc).
+        
+        'date' index freq property (merged_data.index.levels[0].freq) will be
+        set to a trading calendar (pandas DateOffset) inferred from the input
+        data (see infer_trading_calendar for more details). This is currently
+        used only in cumulative returns computation.
         ::
            -------------------------------------------------------------------
                       |       | 1D  | 5D  | 10D  |factor|group|factor_quantile
