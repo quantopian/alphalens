@@ -21,6 +21,8 @@ from IPython.display import display
 from pandas.tseries.offsets import CustomBusinessDay, Day, BusinessDay
 from scipy.stats import mode
 
+import warnings
+
 
 class NonMatchingTimezoneError(Exception):
     pass
@@ -568,9 +570,10 @@ def get_clean_factor(factor,
             diff = set(factor_copy.index.get_level_values(
                 'asset')) - set(groupby.keys())
             if len(diff) > 0:
-                raise KeyError(
-                    "Assets {} not in group mapping".format(
-                        list(diff)))
+                warnings.warn(
+                    "Assets {} ... not in group mapping".format(
+                        list(diff)[:5])
+                )
 
             ss = pd.Series(groupby)
             groupby = pd.Series(index=factor_copy.index,
@@ -578,7 +581,7 @@ def get_clean_factor(factor,
                                     'asset')].values)
 
         if groupby_labels is not None:
-            diff = set(groupby.values) - set(groupby_labels.keys())
+            diff = set(groupby.dropna().values) - set(groupby_labels.keys())
             if len(diff) > 0:
                 raise KeyError(
                     "groups {} not in passed group names".format(
