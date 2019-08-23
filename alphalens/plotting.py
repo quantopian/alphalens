@@ -35,6 +35,7 @@ def customize(func):
     """
     Decorator to set plotting context and axes style during function call.
     """
+
     @wraps(func)
     def call_w_context(*args, **kwargs):
         set_context = kwargs.pop('set_context', True)
@@ -45,6 +46,7 @@ def customize(func):
                 return func(*args, **kwargs)
         else:
             return func(*args, **kwargs)
+
     return call_w_context
 
 
@@ -133,7 +135,8 @@ def axes_style(style='darkgrid', rc=None):
 
 def plot_returns_table(alpha_beta,
                        mean_ret_quantile,
-                       mean_ret_spread_quantile):
+                       mean_ret_spread_quantile,
+                       return_table=False):
     returns_table = pd.DataFrame()
     returns_table = returns_table.append(alpha_beta)
     returns_table.loc["Mean Period Wise Return Top Quantile (bps)"] = \
@@ -145,9 +148,12 @@ def plot_returns_table(alpha_beta,
 
     print("Returns Analysis")
     utils.print_table(returns_table.apply(lambda x: x.round(3)))
+    if return_table:
+        return returns_table
 
 
-def plot_turnover_table(autocorrelation_data, quantile_turnover):
+def plot_turnover_table(autocorrelation_data, quantile_turnover,
+                        return_table=False):
     turnover_table = pd.DataFrame()
     for period in sorted(quantile_turnover.keys()):
         for quantile, p_data in quantile_turnover[period].iteritems():
@@ -161,9 +167,12 @@ def plot_turnover_table(autocorrelation_data, quantile_turnover):
     print("Turnover Analysis")
     utils.print_table(turnover_table.apply(lambda x: x.round(3)))
     utils.print_table(auto_corr.apply(lambda x: x.round(3)))
+    if return_table:
+        return [turnover_table, auto_corr]
 
 
-def plot_information_table(ic_data):
+def plot_information_table(ic_data,
+                           return_table=False):
     ic_summary_table = pd.DataFrame()
     ic_summary_table["IC Mean"] = ic_data.mean()
     ic_summary_table["IC Std."] = ic_data.std()
@@ -177,19 +186,25 @@ def plot_information_table(ic_data):
 
     print("Information Analysis")
     utils.print_table(ic_summary_table.apply(lambda x: x.round(3)).T)
+    if return_table:
+        return ic_summary_table
 
 
-def plot_quantile_statistics_table(factor_data):
+def plot_quantile_statistics_table(factor_data,
+                                   return_table=False):
     quantile_stats = factor_data.groupby('factor_quantile') \
         .agg(['min', 'max', 'mean', 'std', 'count'])['factor']
     quantile_stats['count %'] = quantile_stats['count'] \
-        / quantile_stats['count'].sum() * 100.
+                                / quantile_stats['count'].sum() * 100.
 
     print("Quantiles Statistics")
     utils.print_table(quantile_stats)
+    if return_table:
+        return quantile_stats
 
 
-def plot_ic_ts(ic, ax=None):
+def plot_ic_ts(ic, ax=None,
+               return_fig=False):
     """
     Plots Spearman Rank Information Coefficient and IC moving
     average for a given factor.
@@ -209,6 +224,7 @@ def plot_ic_ts(ic, ax=None):
     ic = ic.copy()
 
     num_plots = len(ic.columns)
+    f = None
     if ax is None:
         f, ax = plt.subplots(num_plots, 1, figsize=(18, num_plots * 7))
         ax = np.asarray([ax]).flatten()
@@ -226,7 +242,7 @@ def plot_ic_ts(ic, ax=None):
         a.set(ylabel='IC', xlabel="")
         a.set_title(
             "{} Period Forward Return Information Coefficient (IC)"
-            .format(period_num))
+                .format(period_num))
         a.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
         a.legend(['IC', '1 month moving avg'], loc='upper right')
         a.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
@@ -241,11 +257,14 @@ def plot_ic_ts(ic, ax=None):
 
     for a in ax:
         a.set_ylim([ymin, ymax])
+    if return_fig:
+        return f, ax
+    else:
+        return ax
 
-    return ax
 
-
-def plot_ic_hist(ic, ax=None):
+def plot_ic_hist(ic, ax=None,
+                 return_fig=False):
     """
     Plots Spearman Rank Information Coefficient histogram for a given factor.
 
@@ -267,7 +286,7 @@ def plot_ic_hist(ic, ax=None):
     num_plots = len(ic.columns)
 
     v_spaces = ((num_plots - 1) // 3) + 1
-
+    f = None
     if ax is None:
         f, ax = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
         ax = ax.flatten()
@@ -286,10 +305,14 @@ def plot_ic_hist(ic, ax=None):
     if num_plots < len(ax):
         ax[-1].set_visible(False)
 
-    return ax
+    if return_fig:
+        return f, ax
+    else:
+        return ax
 
 
-def plot_ic_qq(ic, theoretical_dist=stats.norm, ax=None):
+def plot_ic_qq(ic, theoretical_dist=stats.norm, ax=None,
+               return_fig=False):
     """
     Plots Spearman Rank Information Coefficient "Q-Q" plot relative to
     a theoretical distribution.
@@ -315,7 +338,7 @@ def plot_ic_qq(ic, theoretical_dist=stats.norm, ax=None):
     num_plots = len(ic.columns)
 
     v_spaces = ((num_plots - 1) // 3) + 1
-
+    f = None
     if ax is None:
         f, ax = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
         ax = ax.flatten()
@@ -331,17 +354,21 @@ def plot_ic_qq(ic, theoretical_dist=stats.norm, ax=None):
         sm.qqplot(ic.replace(np.nan, 0.).values, theoretical_dist, fit=True,
                   line='45', ax=a)
         a.set(title="{} Period IC {} Dist. Q-Q".format(
-              period_num, dist_name),
-              ylabel='Observed Quantile',
-              xlabel='{} Distribution Quantile'.format(dist_name))
+            period_num, dist_name),
+            ylabel='Observed Quantile',
+            xlabel='{} Distribution Quantile'.format(dist_name))
 
-    return ax
+    if return_fig:
+        return f, ax
+    else:
+        return ax
 
 
 def plot_quantile_returns_bar(mean_ret_by_q,
                               by_group=False,
                               ylim_percentiles=None,
-                              ax=None):
+                              ax=None,
+                              return_fig=False):
     """
     Plots mean period wise returns for factor quantiles.
 
@@ -361,7 +388,9 @@ def plot_quantile_returns_bar(mean_ret_by_q,
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
-
+    if ax is not None and return_fig:
+        print("Error argument combination: ax should be None if return_fig")
+        return
     mean_ret_by_q = mean_ret_by_q.copy()
 
     if ylim_percentiles is not None:
@@ -372,11 +401,10 @@ def plot_quantile_returns_bar(mean_ret_by_q,
     else:
         ymin = None
         ymax = None
-
+    f = None
     if by_group:
         num_group = len(
             mean_ret_by_q.index.get_level_values('group').unique())
-
         if ax is None:
             v_spaces = ((num_group - 1) // 2) + 1
             f, ax = plt.subplots(v_spaces, 2, sharex=False,
@@ -385,8 +413,8 @@ def plot_quantile_returns_bar(mean_ret_by_q,
 
         for a, (sc, cor) in zip(ax, mean_ret_by_q.groupby(level='group')):
             (cor.xs(sc, level='group')
-                .multiply(DECIMAL_TO_BPS)
-                .plot(kind='bar', title=sc, ax=a))
+             .multiply(DECIMAL_TO_BPS)
+             .plot(kind='bar', title=sc, ax=a))
 
             a.set(xlabel='', ylabel='Mean Return (bps)',
                   ylim=(ymin, ymax))
@@ -394,24 +422,31 @@ def plot_quantile_returns_bar(mean_ret_by_q,
         if num_group < len(ax):
             ax[-1].set_visible(False)
 
-        return ax
+        if return_fig:
+            return f, ax
+        else:
+            return ax
 
     else:
         if ax is None:
             f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
         (mean_ret_by_q.multiply(DECIMAL_TO_BPS)
-            .plot(kind='bar',
-                  title="Mean Period Wise Return By Factor Quantile", ax=ax))
+         .plot(kind='bar',
+               title="Mean Period Wise Return By Factor Quantile", ax=ax))
         ax.set(xlabel='', ylabel='Mean Return (bps)',
                ylim=(ymin, ymax))
 
-        return ax
+        if return_fig:
+            return f, ax
+        else:
+            return ax
 
 
 def plot_quantile_returns_violin(return_by_q,
                                  ylim_percentiles=None,
-                                 ax=None):
+                                 ax=None,
+                                 return_fig=False):
     """
     Plots a violin box plot of period wise returns for factor quantiles.
 
@@ -430,7 +465,9 @@ def plot_quantile_returns_violin(return_by_q,
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
-
+    if ax is not None and return_fig:
+        print("Error argument combination: ax should be None if return_fig")
+        return
     return_by_q = return_by_q.copy()
 
     if ylim_percentiles is not None:
@@ -441,7 +478,7 @@ def plot_quantile_returns_violin(return_by_q,
     else:
         ymin = None
         ymax = None
-
+    f = None
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
@@ -466,13 +503,17 @@ def plot_quantile_returns_violin(return_by_q,
 
     ax.axhline(0.0, linestyle='-', color='black', lw=0.7, alpha=0.6)
 
-    return ax
+    if return_fig:
+        return f, ax
+    else:
+        return ax
 
 
 def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
                                                   std_err=None,
                                                   bandwidth=1,
-                                                  ax=None):
+                                                  ax=None,
+                                                  return_fig=False):
     """
     Plots mean period wise returns for factor quantiles.
 
@@ -493,7 +534,10 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
-
+    if ax is not None and return_fig:
+        print("Error argument combination: ax should be None if return_fig")
+        return
+    f = None
     if isinstance(mean_returns_spread, pd.DataFrame):
         if ax is None:
             ax = [None for a in mean_returns_spread.columns]
@@ -552,10 +596,14 @@ def plot_mean_quantile_returns_spread_time_series(mean_returns_spread,
            ylim=(-ylim, ylim))
     ax.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
 
-    return ax
+    if return_fig:
+        return f, ax
+    else:
+        return ax
 
 
-def plot_ic_by_group(ic_group, ax=None):
+def plot_ic_by_group(ic_group, ax=None,
+                     return_fig=False):
     """
     Plots Spearman Rank Information Coefficient for a given factor over
     provided forward returns. Separates by group.
@@ -572,6 +620,10 @@ def plot_ic_by_group(ic_group, ax=None):
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
+    if ax is not None and return_fig:
+        print("Error argument combination: ax should be None if return_fig")
+        return
+    f = None
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
     ic_group.plot(kind='bar', ax=ax)
@@ -579,12 +631,16 @@ def plot_ic_by_group(ic_group, ax=None):
     ax.set(title="Information Coefficient By Group", xlabel="")
     ax.set_xticklabels(ic_group.index, rotation=45)
 
-    return ax
+    if return_fig:
+        return f, ax
+    else:
+        return ax
 
 
 def plot_factor_rank_auto_correlation(factor_autocorrelation,
                                       period=1,
-                                      ax=None):
+                                      ax=None,
+                                      return_fig=False):
     """
     Plots factor rank autocorrelation over time.
     See factor_rank_autocorrelation for more details.
@@ -604,6 +660,10 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation,
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
+    if ax is not None and return_fig:
+        print("Error argument combination: ax should be None if return_fig")
+        return
+    f = None
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
@@ -617,10 +677,14 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation,
             transform=ax.transAxes,
             verticalalignment='top')
 
-    return ax
+    if return_fig:
+        return f, ax
+    else:
+        return ax
 
 
-def plot_top_bottom_quantile_turnover(quantile_turnover, period=1, ax=None):
+def plot_top_bottom_quantile_turnover(quantile_turnover, period=1, ax=None,
+                                      return_fig=False):
     """
     Plots period wise top and bottom quantile factor turnover.
 
@@ -638,6 +702,10 @@ def plot_top_bottom_quantile_turnover(quantile_turnover, period=1, ax=None):
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
+    if ax is not None and return_fig:
+        print("Error argument combination: ax should be None if return_fig")
+        return
+    f = None
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
@@ -650,10 +718,14 @@ def plot_top_bottom_quantile_turnover(quantile_turnover, period=1, ax=None):
                   .format(period), ax=ax, alpha=0.6, lw=0.8)
     ax.set(ylabel='Proportion Of Names New To Quantile', xlabel="")
 
-    return ax
+    if return_fig:
+        return f, ax
+    else:
+        return ax
 
 
-def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
+def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None,
+                            return_fig=False):
     """
     Plots a heatmap of the information coefficient or returns by month.
 
@@ -667,13 +739,15 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
-
+    if ax is not None and return_fig:
+        print("Error argument combination: ax should be None if return_fig")
+        return
     mean_monthly_ic = mean_monthly_ic.copy()
 
     num_plots = len(mean_monthly_ic.columns)
 
     v_spaces = ((num_plots - 1) // 3) + 1
-
+    f = None
     if ax is None:
         f, ax = plt.subplots(v_spaces, 3, figsize=(18, v_spaces * 6))
         ax = ax.flatten()
@@ -689,7 +763,6 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
         names=["year", "month"])
 
     for a, (periods_num, ic) in zip(ax, mean_monthly_ic.iteritems()):
-
         sns.heatmap(
             ic.unstack(),
             annot=True,
@@ -708,10 +781,14 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     if num_plots < len(ax):
         ax[-1].set_visible(False)
 
-    return ax
+    if return_fig:
+        return f, ax
+    else:
+        return ax
 
 
-def plot_cumulative_returns(factor_returns, period, freq, title=None, ax=None):
+def plot_cumulative_returns(factor_returns, period, freq, title=None, ax=None,
+                            return_fig=False):
     """
     Plots the cumulative returns of the returns series passed in.
 
@@ -739,6 +816,10 @@ def plot_cumulative_returns(factor_returns, period, freq, title=None, ax=None):
     ax : matplotlib.Axes
         The axes that were plotted on.
     """
+    if ax is not None and return_fig:
+        print("Error argument combination: ax should be None if return_fig")
+        return
+    f = None
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
@@ -751,13 +832,17 @@ def plot_cumulative_returns(factor_returns, period, freq, title=None, ax=None):
            xlabel='')
     ax.axhline(1.0, linestyle='-', color='black', lw=1)
 
-    return ax
+    if return_fig:
+        return f, ax
+    else:
+        return ax
 
 
 def plot_cumulative_returns_by_quantile(quantile_returns,
                                         period,
                                         freq,
-                                        ax=None):
+                                        ax=None,
+                                        return_fig=False):
     """
     Plots the cumulative returns of various factor quantiles.
 
@@ -781,7 +866,10 @@ def plot_cumulative_returns_by_quantile(quantile_returns,
     -------
     ax : matplotlib.Axes
     """
-
+    if ax is not None and return_fig:
+        print("Error argument combination: ax should be None if return_fig")
+        return
+    f = None
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
@@ -804,14 +892,18 @@ def plot_cumulative_returns_by_quantile(quantile_returns,
     ax.yaxis.set_major_formatter(ScalarFormatter())
     ax.axhline(1.0, linestyle='-', color='black', lw=1)
 
-    return ax
+    if return_fig:
+        return f, ax
+    else:
+        return ax
 
 
 def plot_quantile_average_cumulative_return(avg_cumulative_returns,
                                             by_quantile=False,
                                             std_bar=False,
                                             title=None,
-                                            ax=None):
+                                            ax=None,
+                                            return_fig=False):
     """
     Plots sector-wise mean daily returns for factor quantiles
     across provided forward price movement columns.
@@ -834,12 +926,14 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
     -------
     ax : matplotlib.Axes
     """
-
+    if ax is not None and return_fig:
+        print("Error argument combination: ax should be None if return_fig")
+        return
     avg_cumulative_returns = avg_cumulative_returns.multiply(DECIMAL_TO_BPS)
     quantiles = len(avg_cumulative_returns.index.levels[0].unique())
     palette = [cm.coolwarm(i) for i in np.linspace(0, 1, quantiles)]
     palette = palette[::-1]  # we want negative quantiles as 'red'
-
+    f = None
     if by_quantile:
 
         if ax is None:
@@ -849,7 +943,7 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
             ax = ax.flatten()
 
         for i, (quantile, q_ret) in enumerate(avg_cumulative_returns
-                                              .groupby(level='factor_quantile')
+                                                      .groupby(level='factor_quantile')
                                               ):
 
             mean = q_ret.loc[(quantile, 'mean')]
@@ -872,7 +966,7 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
             f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
         for i, (quantile, q_ret) in enumerate(avg_cumulative_returns
-                                              .groupby(level='factor_quantile')
+                                                      .groupby(level='factor_quantile')
                                               ):
 
             mean = q_ret.loc[(quantile, 'mean')]
@@ -892,10 +986,14 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
                       if title is None else title),
                xlabel='Periods')
 
-    return ax
+    if return_fig:
+        return f, ax
+    else:
+        return ax
 
 
-def plot_events_distribution(events, num_bars=50, ax=None):
+def plot_events_distribution(events, num_bars=50, ax=None,
+                             return_fig=False):
     """
     Plots the distribution of events in time.
 
@@ -912,7 +1010,10 @@ def plot_events_distribution(events, num_bars=50, ax=None):
     -------
     ax : matplotlib.Axes
     """
-
+    if ax is not None and return_fig:
+        print("Error argument combination: ax should be None if return_fig")
+        return
+    f = None
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
@@ -925,4 +1026,7 @@ def plot_events_distribution(events, num_bars=50, ax=None):
            title='Distribution of events in time',
            xlabel='Date')
 
-    return ax
+    if return_fig:
+        return f, ax
+    else:
+        return ax

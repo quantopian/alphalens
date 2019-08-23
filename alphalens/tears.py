@@ -62,7 +62,8 @@ class GridFigure(object):
 @plotting.customize
 def create_summary_tear_sheet(factor_data,
                               long_short=True,
-                              group_neutral=False):
+                              group_neutral=False,
+                              return_tf=False):
     """
     Creates a small summary tear sheet with returns, information, and turnover
     analysis.
@@ -128,21 +129,28 @@ def create_summary_tear_sheet(factor_data,
     vertical_sections = 2 + fr_cols * 3
     gf = GridFigure(rows=vertical_sections, cols=1)
 
-    plotting.plot_quantile_statistics_table(factor_data)
+    result_tables = {}
+    result_figs = []
+    quantile_statistics_table = plotting.plot_quantile_statistics_table(factor_data, return_table=return_tf)
+    if quantile_statistics_table is not None:
+        result_tables["quantile_statistics_table"] = quantile_statistics_table
+    returns_table = plotting.plot_returns_table(alpha_beta,
+                                                mean_quant_rateret,
+                                                mean_ret_spread_quant,
+                                                return_table=return_tf)
+    if returns_table is not None:
+        result_tables["returns_table"] = returns_table
 
-    plotting.plot_returns_table(alpha_beta,
-                                mean_quant_rateret,
-                                mean_ret_spread_quant)
-
-    plotting.plot_quantile_returns_bar(mean_quant_rateret,
-                                       by_group=False,
-                                       ylim_percentiles=None,
-                                       ax=gf.next_row())
+    ax = plotting.plot_quantile_returns_bar(mean_quant_rateret,
+                                            by_group=False,
+                                            ylim_percentiles=None,
+                                            ax=gf.next_row())
 
     # Information Analysis
     ic = perf.factor_information_coefficient(factor_data)
-    plotting.plot_information_table(ic)
-
+    ic_summary_table = plotting.plot_information_table(ic, return_table=return_tf)
+    if ic_summary_table is not None:
+        result_tables["summary_ic_summary_table"] = ic_summary_table
     # Turnover Analysis
     quantile_factor = factor_data['factor_quantile']
 
@@ -150,23 +158,32 @@ def create_summary_tear_sheet(factor_data,
         {p: pd.concat([perf.quantile_turnover(quantile_factor, q, p)
                        for q in range(1, int(quantile_factor.max()) + 1)],
                       axis=1)
-            for p in periods}
+         for p in periods}
 
     autocorrelation = pd.concat(
         [perf.factor_rank_autocorrelation(factor_data, period) for period in
          periods], axis=1)
 
-    plotting.plot_turnover_table(autocorrelation, quantile_turnover)
+    turnover_table_results = plotting.plot_turnover_table(autocorrelation, quantile_turnover, return_table=return_tf)
+    if turnover_table_results is not None:
+        result_tables["summary_turnover_table"] = turnover_table_results[0]
+        result_tables["summary_auto_corr"] = turnover_table_results[1]
 
     plt.show()
+    if return_tf:
+        fig = gf.fig
+        result_figs.append(fig)
     gf.close()
+    if return_tf:
+        return result_tables, result_figs
 
 
 @plotting.customize
 def create_returns_tear_sheet(factor_data,
                               long_short=True,
                               group_neutral=False,
-                              by_group=False):
+                              by_group=False,
+                              return_tf=False):
     """
     Creates a tear sheet for returns analysis of a factor.
 
@@ -237,9 +254,14 @@ def create_returns_tear_sheet(factor_data,
     vertical_sections = 2 + fr_cols * 3
     gf = GridFigure(rows=vertical_sections, cols=1)
 
-    plotting.plot_returns_table(alpha_beta,
+    result_tables = {}
+    result_figs = []
+    returns_table = plotting.plot_returns_table(alpha_beta,
                                 mean_quant_rateret,
-                                mean_ret_spread_quant)
+                                mean_ret_spread_quant,
+                                return_table=return_tf)
+    if returns_table:
+        result_tables["returns_table"] = returns_table
 
     plotting.plot_quantile_returns_bar(mean_quant_rateret,
                                        by_group=False,
@@ -259,7 +281,6 @@ def create_returns_tear_sheet(factor_data,
         )
 
     for p in factor_returns:
-
         title = ('Factor Weighted '
                  + ('Group Neutral ' if group_neutral else '')
                  + ('Long/Short ' if long_short else '')
@@ -290,6 +311,9 @@ def create_returns_tear_sheet(factor_data,
     )
 
     plt.show()
+    if return_tf:
+        res_fig = gf.fig
+        result_figs.append(res_fig)
     gf.close()
 
     if by_group:
@@ -318,13 +342,19 @@ def create_returns_tear_sheet(factor_data,
                                            ylim_percentiles=(5, 95),
                                            ax=ax_quantile_returns_bar_by_group)
         plt.show()
+        if return_tf:
+            res_group_fig = gf.fig
+            result_figs.append(res_group_fig)
         gf.close()
+    if return_tf:
+        return result_tables, result_figs
 
 
 @plotting.customize
 def create_information_tear_sheet(factor_data,
                                   group_neutral=False,
-                                  by_group=False):
+                                  by_group=False,
+                                  return_tf=False):
     """
     Creates a tear sheet for information analysis of a factor.
 
@@ -341,10 +371,13 @@ def create_information_tear_sheet(factor_data,
     by_group : bool
         If True, display graphs separately for each group.
     """
-
+    result_tables = {}
+    result_figs = []
     ic = perf.factor_information_coefficient(factor_data, group_neutral)
 
-    plotting.plot_information_table(ic)
+    ic_summary_table = plotting.plot_information_table(ic, return_table=return_tf)
+    if ic_summary_table:
+        result_tables["information_ic_summary_table"] = ic_summary_table
 
     columns_wide = 2
     fr_cols = len(ic.columns)
@@ -360,7 +393,6 @@ def create_information_tear_sheet(factor_data,
     plotting.plot_ic_qq(ic, ax=ax_ic_hqq[1::2])
 
     if not by_group:
-
         mean_monthly_ic = \
             perf.mean_information_coefficient(factor_data,
                                               group_adjust=group_neutral,
@@ -379,11 +411,17 @@ def create_information_tear_sheet(factor_data,
         plotting.plot_ic_by_group(mean_group_ic, ax=gf.next_row())
 
     plt.show()
+    if return_tf:
+        fig = gf.fig
+        result_figs.append(fig)
     gf.close()
+    if return_tf:
+        return result_tables, result_figs
 
 
 @plotting.customize
-def create_turnover_tear_sheet(factor_data, turnover_periods=None):
+def create_turnover_tear_sheet(factor_data, turnover_periods=None,
+                               return_tf=False):
     """
     Creates a tear sheet for analyzing the turnover properties of a factor.
 
@@ -403,7 +441,8 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None):
         are 2h and 4h and the factor is computed daily and so values like
         ['1D', '2D'] could be used instead
     """
-
+    result_tables = {}
+    result_figs = []
     if turnover_periods is None:
         turnover_periods = utils.get_forward_returns_columns(
             factor_data.columns)
@@ -414,13 +453,16 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None):
         {p: pd.concat([perf.quantile_turnover(quantile_factor, q, p)
                        for q in range(1, int(quantile_factor.max()) + 1)],
                       axis=1)
-            for p in turnover_periods}
+         for p in turnover_periods}
 
     autocorrelation = pd.concat(
         [perf.factor_rank_autocorrelation(factor_data, period) for period in
          turnover_periods], axis=1)
 
-    plotting.plot_turnover_table(autocorrelation, quantile_turnover)
+    turnover_tables = plotting.plot_turnover_table(autocorrelation, quantile_turnover, return_table=return_tf)
+    if turnover_tables:
+        result_tables["turnover_turnover_table"] = turnover_tables[0]
+        result_tables["turnover_auto_corr"] = turnover_tables[1]
 
     fr_cols = len(turnover_periods)
     columns_wide = 1
@@ -443,14 +485,20 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None):
                                                    ax=gf.next_row())
 
     plt.show()
+    if return_tf:
+        fig = gf.fig
+        result_figs.append(fig)
     gf.close()
+    if return_tf:
+        return result_tables, result_figs
 
 
 @plotting.customize
 def create_full_tear_sheet(factor_data,
                            long_short=True,
                            group_neutral=False,
-                           by_group=False):
+                           by_group=False,
+                           return_tf=False):
     """
     Creates a full tear sheet for analysis and evaluating single
     return predicting (alpha) factor.
@@ -476,7 +524,8 @@ def create_full_tear_sheet(factor_data,
     by_group : bool
         If True, display graphs separately for each group.
     """
-
+    result_tables = {}
+    result_figs = []
     plotting.plot_quantile_statistics_table(factor_data)
     create_returns_tear_sheet(factor_data,
                               long_short,
@@ -497,7 +546,8 @@ def create_event_returns_tear_sheet(factor_data,
                                     long_short=True,
                                     group_neutral=False,
                                     std_bar=True,
-                                    by_group=False):
+                                    by_group=False,
+                                    return_tf=False):
     """
     Creates a tear sheet to view the average cumulative returns for a
     factor within a window (pre and post event).
@@ -527,7 +577,8 @@ def create_event_returns_tear_sheet(factor_data,
     by_group : bool
         If True, display graphs separately for each group.
     """
-
+    result_tables = {}
+    result_figs = []
     before, after = avgretplot
 
     avg_cumulative_returns = \
@@ -560,6 +611,9 @@ def create_event_returns_tear_sheet(factor_data,
             ax=ax_avg_cumulative_returns_by_q)
 
     plt.show()
+    if return_tf:
+        fig1 = gf.fig
+        result_figs.append(fig1)
     gf.close()
 
     if by_group:
@@ -588,7 +642,12 @@ def create_event_returns_tear_sheet(factor_data,
                 ax=gf.next_cell())
 
         plt.show()
+        if return_tf:
+            fig2 = gf.fig
+            result_figs.append(fig2)
         gf.close()
+    if return_tf:
+        return result_tables, result_figs
 
 
 @plotting.customize
@@ -596,7 +655,8 @@ def create_event_study_tear_sheet(factor_data,
                                   prices=None,
                                   avgretplot=(5, 15),
                                   rate_of_ret=True,
-                                  n_bars=50):
+                                  n_bars=50,
+                                  return_tf=False):
     """
     Creates an event study tear sheet for analysis of a specific event.
 
@@ -621,7 +681,8 @@ def create_event_study_tear_sheet(factor_data,
     n_bars : int, optional
         Number of bars in event distribution plot
     """
-
+    result_tables = {}
+    result_figs = []
     long_short = False
 
     plotting.plot_quantile_statistics_table(factor_data)
@@ -631,10 +692,12 @@ def create_event_study_tear_sheet(factor_data,
                                       num_bars=n_bars,
                                       ax=gf.next_row())
     plt.show()
+    if return_tf:
+        fig = gf.fig
+        result_figs.append(fig)
     gf.close()
 
     if prices is not None and avgretplot is not None:
-
         create_event_returns_tear_sheet(factor_data=factor_data,
                                         prices=prices,
                                         avgretplot=avgretplot,
@@ -689,7 +752,6 @@ def create_event_study_tear_sheet(factor_data,
         )
 
     for p in factor_returns:
-
         plotting.plot_cumulative_returns(
             factor_returns[p],
             period=p,
@@ -698,4 +760,9 @@ def create_event_study_tear_sheet(factor_data,
         )
 
     plt.show()
+    if return_tf:
+        fig = gf.fig
+        result_figs.append(fig)
     gf.close()
+    if return_tf:
+        return result_tables, result_figs
