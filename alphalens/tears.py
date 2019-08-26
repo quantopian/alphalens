@@ -63,7 +63,8 @@ class GridFigure(object):
 def create_summary_tear_sheet(factor_data,
                               long_short=True,
                               group_neutral=False,
-                              return_tf=False):
+                              return_tf=False,
+                              show=True):
     """
     Creates a small summary tear sheet with returns, information, and turnover
     analysis.
@@ -150,7 +151,6 @@ def create_summary_tear_sheet(factor_data,
     ic = perf.factor_information_coefficient(factor_data)
     ic_summary_table = plotting.plot_information_table(ic, return_table=return_tf)
     if ic_summary_table is not None:
-
         result_tables["summary_ic_summary_table"] = ic_summary_table
     # Turnover Analysis
     quantile_factor = factor_data['factor_quantile']
@@ -169,8 +169,8 @@ def create_summary_tear_sheet(factor_data,
     if turnover_table_results is not None:
         result_tables["summary_turnover_table"] = turnover_table_results[0]
         result_tables["summary_auto_corr"] = turnover_table_results[1]
-
-    plt.show()
+    if show:
+        plt.show()
     if return_tf:
         fig = gf.fig
         result_figs.append(fig)
@@ -184,7 +184,8 @@ def create_returns_tear_sheet(factor_data,
                               long_short=True,
                               group_neutral=False,
                               by_group=False,
-                              return_tf=False):
+                              return_tf=False,
+                              show=True):
     """
     Creates a tear sheet for returns analysis of a factor.
 
@@ -258,10 +259,10 @@ def create_returns_tear_sheet(factor_data,
     result_tables = {}
     result_figs = []
     returns_table = plotting.plot_returns_table(alpha_beta,
-                                mean_quant_rateret,
-                                mean_ret_spread_quant,
-                                return_table=return_tf)
-    if returns_table:
+                                                mean_quant_rateret,
+                                                mean_ret_spread_quant,
+                                                return_table=return_tf)
+    if returns_table is not None:
         result_tables["returns_table"] = returns_table
 
     plotting.plot_quantile_returns_bar(mean_quant_rateret,
@@ -310,8 +311,8 @@ def create_returns_tear_sheet(factor_data,
         bandwidth=0.5,
         ax=ax_mean_quantile_returns_spread_ts
     )
-
-    plt.show()
+    if show:
+        plt.show()
     if return_tf:
         res_fig = gf.fig
         result_figs.append(res_fig)
@@ -423,7 +424,7 @@ def create_information_tear_sheet(factor_data,
 
 @plotting.customize
 def create_turnover_tear_sheet(factor_data, turnover_periods=None,
-                               return_tf=False):
+                               return_tf=False, show=True):
     """
     Creates a tear sheet for analyzing the turnover properties of a factor.
 
@@ -485,8 +486,8 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None,
         plotting.plot_factor_rank_auto_correlation(autocorrelation[period],
                                                    period=period,
                                                    ax=gf.next_row())
-
-    plt.show()
+    if show:
+        plt.show()
     if return_tf:
         fig = gf.fig
         result_figs.append(fig)
@@ -499,8 +500,7 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None,
 def create_full_tear_sheet(factor_data,
                            long_short=True,
                            group_neutral=False,
-                           by_group=False,
-                           return_tf=False):
+                           by_group=False):
     """
     Creates a full tear sheet for analysis and evaluating single
     return predicting (alpha) factor.
@@ -526,8 +526,6 @@ def create_full_tear_sheet(factor_data,
     by_group : bool
         If True, display graphs separately for each group.
     """
-    result_tables = {}
-    result_figs = []
     plotting.plot_quantile_statistics_table(factor_data)
     create_returns_tear_sheet(factor_data,
                               long_short,
@@ -549,7 +547,8 @@ def create_event_returns_tear_sheet(factor_data,
                                     group_neutral=False,
                                     std_bar=True,
                                     by_group=False,
-                                    return_tf=False):
+                                    return_tf=False,
+                                    show=True):
     """
     Creates a tear sheet to view the average cumulative returns for a
     factor within a window (pre and post event).
@@ -611,8 +610,8 @@ def create_event_returns_tear_sheet(factor_data,
             by_quantile=True,
             std_bar=True,
             ax=ax_avg_cumulative_returns_by_q)
-
-    plt.show()
+    if show:
+        plt.show()
     if return_tf:
         fig1 = gf.fig
         result_figs.append(fig1)
@@ -642,8 +641,8 @@ def create_event_returns_tear_sheet(factor_data,
                 std_bar=False,
                 title=group,
                 ax=gf.next_cell())
-
-        plt.show()
+        if show:
+            plt.show()
         if return_tf:
             fig2 = gf.fig
             result_figs.append(fig2)
@@ -658,7 +657,8 @@ def create_event_study_tear_sheet(factor_data,
                                   avgretplot=(5, 15),
                                   rate_of_ret=True,
                                   n_bars=50,
-                                  return_tf=False):
+                                  return_tf=False,
+                                  show=True):
     """
     Creates an event study tear sheet for analysis of a specific event.
 
@@ -693,7 +693,8 @@ def create_event_study_tear_sheet(factor_data,
     plotting.plot_events_distribution(events=factor_data['factor'],
                                       num_bars=n_bars,
                                       ax=gf.next_row())
-    plt.show()
+    if show:
+        plt.show()
     if return_tf:
         fig = gf.fig
         result_figs.append(fig)
@@ -760,8 +761,8 @@ def create_event_study_tear_sheet(factor_data,
             freq=trading_calendar,
             ax=gf.next_row()
         )
-
-    plt.show()
+    if show:
+        plt.show()
     if return_tf:
         fig = gf.fig
         result_figs.append(fig)
