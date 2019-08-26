@@ -150,6 +150,7 @@ def create_summary_tear_sheet(factor_data,
     ic = perf.factor_information_coefficient(factor_data)
     ic_summary_table = plotting.plot_information_table(ic, return_table=return_tf)
     if ic_summary_table is not None:
+
         result_tables["summary_ic_summary_table"] = ic_summary_table
     # Turnover Analysis
     quantile_factor = factor_data['factor_quantile']
@@ -354,7 +355,8 @@ def create_returns_tear_sheet(factor_data,
 def create_information_tear_sheet(factor_data,
                                   group_neutral=False,
                                   by_group=False,
-                                  return_tf=False):
+                                  return_tf=False,
+                                  show=True):
     """
     Creates a tear sheet for information analysis of a factor.
 
@@ -376,7 +378,7 @@ def create_information_tear_sheet(factor_data,
     ic = perf.factor_information_coefficient(factor_data, group_neutral)
 
     ic_summary_table = plotting.plot_information_table(ic, return_table=return_tf)
-    if ic_summary_table:
+    if ic_summary_table is not None:
         result_tables["information_ic_summary_table"] = ic_summary_table
 
     columns_wide = 2
@@ -409,8 +411,8 @@ def create_information_tear_sheet(factor_data,
                                               by_group=True)
 
         plotting.plot_ic_by_group(mean_group_ic, ax=gf.next_row())
-
-    plt.show()
+    if show:
+        plt.show()
     if return_tf:
         fig = gf.fig
         result_figs.append(fig)
@@ -460,7 +462,7 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None,
          turnover_periods], axis=1)
 
     turnover_tables = plotting.plot_turnover_table(autocorrelation, quantile_turnover, return_table=return_tf)
-    if turnover_tables:
+    if turnover_tables is not None:
         result_tables["turnover_turnover_table"] = turnover_tables[0]
         result_tables["turnover_auto_corr"] = turnover_tables[1]
 
