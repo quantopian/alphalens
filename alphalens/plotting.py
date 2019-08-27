@@ -194,8 +194,8 @@ def plot_quantile_statistics_table(factor_data,
                                    return_table=False):
     quantile_stats = factor_data.groupby('factor_quantile') \
         .agg(['min', 'max', 'mean', 'std', 'count'])['factor']
-    quantile_stats['count %'] = quantile_stats['count'] \
-                                / quantile_stats['count'].sum() * 100.
+    quantile_stats['count %'] = \
+        quantile_stats['count'] / quantile_stats['count'].sum() * 100.
 
     print("Quantiles Statistics")
     utils.print_table(quantile_stats)
@@ -242,7 +242,7 @@ def plot_ic_ts(ic, ax=None,
         a.set(ylabel='IC', xlabel="")
         a.set_title(
             "{} Period Forward Return Information Coefficient (IC)"
-                .format(period_num))
+            .format(period_num))
         a.axhline(0.0, linestyle='-', color='black', lw=1, alpha=0.8)
         a.legend(['IC', '1 month moving avg'], loc='upper right')
         a.text(.05, .95, "Mean %.3f \n Std. %.3f" % (ic.mean(), ic.std()),
@@ -942,10 +942,9 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
                                  sharey=False, figsize=(18, 6 * v_spaces))
             ax = ax.flatten()
 
-        for i, (quantile, q_ret) in enumerate(avg_cumulative_returns
-                                                      .groupby(level='factor_quantile')
-                                              ):
-
+        for i, (quantile, q_ret) in \
+                enumerate(avg_cumulative_returns
+                          .groupby(level='factor_quantile')):
             mean = q_ret.loc[(quantile, 'mean')]
             mean.name = 'Quantile ' + str(quantile)
             mean.plot(ax=ax[i], color=palette[i])
@@ -965,10 +964,9 @@ def plot_quantile_average_cumulative_return(avg_cumulative_returns,
         if ax is None:
             f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-        for i, (quantile, q_ret) in enumerate(avg_cumulative_returns
-                                                      .groupby(level='factor_quantile')
-                                              ):
-
+        for i, (quantile, q_ret) in \
+                enumerate(avg_cumulative_returns
+                          .groupby(level='factor_quantile')):
             mean = q_ret.loc[(quantile, 'mean')]
             mean.name = 'Quantile ' + str(quantile)
             mean.plot(ax=ax, color=palette[i])
