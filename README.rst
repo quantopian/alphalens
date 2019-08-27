@@ -15,7 +15,7 @@ performance and risk analysis of financial portfolios. You can try Alphalens
 at  `Quantopian <https://www.quantopian.com>`_ -- a free,
 community-centered, hosted platform for researching and testing alpha ideas. 
 Quantopian also offers a `fully managed service for professionals <https://factset.quantopian.com>`_ 
-that includes zipline, alphalens, pyfolio, FactSet data, and more.
+that includes Zipline, Alphalens, Pyfolio, FactSet data, and more.
 
 The main function of Alphalens is to surface the most relevant statistics
 and plots about an alpha factor, including:
