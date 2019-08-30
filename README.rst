@@ -11,7 +11,11 @@ Alphalens is a Python Library for performance analysis of predictive
 (alpha) stock factors. Alphalens works great with the
 `Zipline <https://www.zipline.io/>`__ open source backtesting library, and
 `Pyfolio <https://github.com/quantopian/pyfolio>`__ which provides
-performance and risk analysis of financial portfolios.
+performance and risk analysis of financial portfolios. You can try Alphalens
+at  `Quantopian <https://www.quantopian.com>`_ -- a free,
+community-centered, hosted platform for researching and testing alpha ideas. 
+Quantopian also offers a `fully managed service for professionals <https://factset.quantopian.com>`_ 
+that includes Zipline, Alphalens, Pyfolio, FactSet data, and more.
 
 The main function of Alphalens is to surface the most relevant statistics
 and plots about an alpha factor, including:
