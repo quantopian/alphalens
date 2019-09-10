@@ -49,7 +49,7 @@ Learn more
 ----------
 
 Check out the `example notebooks <https://github.com/quantopian/alphalens/tree/master/alphalens/examples>`__ for more on how to read and use
-the factor tear sheet.
+the factor tear sheet.  A good starting point could be `this <https://github.com/quantopian/alphalens/tree/master/alphalens/examples/alphalens_tutorial_on_quantopian.ipynb>`__
 
 Installation
 ------------
