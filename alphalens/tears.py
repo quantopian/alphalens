@@ -412,7 +412,7 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None):
 
     quantile_turnover = \
         {p: pd.concat([perf.quantile_turnover(quantile_factor, q, p)
-                       for q in range(1, int(quantile_factor.max()) + 1)],
+                       for q in quantile_factor.sort_values().unique().tolist()],
                       axis=1)
             for p in turnover_periods}
 
