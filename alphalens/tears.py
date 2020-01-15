@@ -410,11 +410,16 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None):
 
     quantile_factor = factor_data['factor_quantile']
 
-    quantile_turnover = \
-        {p: pd.concat([perf.quantile_turnover(quantile_factor, q, p)
-                       for q in range(1, int(quantile_factor.max()) + 1)],
-                      axis=1)
-            for p in turnover_periods}
+    quantile_turnover = {
+        p: pd.concat(
+            [
+                perf.quantile_turnover(quantile_factor, q, p)
+                for q in quantile_factor.sort_values().unique().tolist()
+            ],
+            axis=1,
+        )
+        for p in turnover_periods
+    }
 
     autocorrelation = pd.concat(
         [perf.factor_rank_autocorrelation(factor_data, period) for period in
