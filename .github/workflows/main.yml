@@ -43,4 +43,4 @@ jobs:
         flake8
     - name: Test with nose
       run: |
-        nosetests tests
+        nosetests alphalens/tests
