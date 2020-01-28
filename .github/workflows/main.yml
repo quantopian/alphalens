@@ -1,0 +1,46 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [2.7, 3.5, 3.7, 3.8]
+        include:
+          - python-version: 2.7
+            pandas: 0.18.1
+            numpy: 1.11.3
+          - python-version: 3.5
+            pandas: 0.18.1
+            numpy: 1.11.3
+          - python-version: 3.7
+            pandas: 0.25.3
+            numpy: 1.17.4
+          - python-version: 3.8
+            pandas: 0.25.3
+            numpy: 1.17.4
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      env:
+        PYTHONWARNINGS: ignore:DEPRECATION::pip._internal.cli.base_command
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas==${{ matrix.pandas }} numpy==${{ matrix.numpy }}
+        pip install -e .[test]
+    - name: Lint with flake8
+      run: |
+        flake8
+    - name: Test with nose
+      run: |
+        nosetests tests
