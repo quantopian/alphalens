@@ -16,6 +16,7 @@
 import pandas as pd
 import numpy as np
 import re
+import warnings
 
 from IPython.display import display
 from pandas.tseries.offsets import CustomBusinessDay, Day, BusinessDay
@@ -342,6 +343,37 @@ def compute_forward_returns(factor,
     return df
 
 
+def backshift_returns_series(series, N):
+    """Shift a multi-indexed series backwards by N observations in the first level.
+    
+    This can be used to convert backward-looking returns into a forward-returns series.
+    """
+    ix = series.index
+    dates, sids = ix.levels
+    date_labels, sid_labels = map(np.array, ix.labels)
+
+    # Output date labels will contain the all but the last N dates.
+    new_dates = dates[:-N]
+
+    # Output data will remove the first M rows, where M is the index of the
+    # last record with one of the first N dates.
+    cutoff = date_labels.searchsorted(N)
+    new_date_labels = date_labels[cutoff:] - N
+    new_sid_labels = sid_labels[cutoff:]
+    new_values = series.values[cutoff:]
+
+    assert new_date_labels[0] == 0
+
+    new_index = pd.MultiIndex(
+        levels=[new_dates, sids],
+        labels=[new_date_labels, new_sid_labels],
+        sortorder=1,
+        names=ix.names,
+    )
+
+    return pd.Series(data=new_values, index=new_index)
+
+
 def demean_forward_returns(factor_data, grouper=None):
     """
     Convert forward returns to returns relative to mean
@@ -558,6 +590,7 @@ def get_clean_factor(factor,
 
     factor_copy = factor.copy()
     factor_copy.index = factor_copy.index.rename(['date', 'asset'])
+    factor_copy = factor_copy[np.isfinite(factor_copy)]
 
     merged_data = forward_returns.copy()
     merged_data['factor'] = factor_copy
@@ -639,7 +672,8 @@ def get_clean_factor_and_forward_returns(factor,
                                          groupby_labels=None,
                                          max_loss=0.35,
                                          zero_aware=False,
-                                         cumulative_returns=True):
+                                         cumulative_returns=True,
+                                         is_returns=False):
     """
     Formats the factor data, pricing data, and group mappings into a DataFrame
     that contains aligned MultiIndex indices of timestamp and asset. The
@@ -785,9 +819,14 @@ def get_clean_factor_and_forward_returns(factor,
                       --------------------------------------------------------
     """
 
-    forward_returns = compute_forward_returns(factor, prices, periods,
-                                              filter_zscore,
-                                              cumulative_returns)
+    if not is_returns:
+        forward_returns = compute_forward_returns(factor, prices, periods,
+                                                  filter_zscore,
+                                                  cumulative_returns)
+    else:
+        forward_returns = prices
+        forward_returns.index.levels[0].name = "date"
+        forward_returns.index.levels[1].name = "asset"
 
     factor_data = get_clean_factor(factor, forward_returns, groupby=groupby,
                                    groupby_labels=groupby_labels,
@@ -852,12 +891,26 @@ def std_conversion(period_std, base_period):
     return period_std / np.sqrt(conversion_factor)
 
 
-def get_forward_returns_columns(columns):
+def get_forward_returns_columns(columns, require_exact_day_multiple=False):
     """
     Utility that detects and returns the columns that are forward returns
     """
-    pattern = re.compile(r"^(\d+([Dhms]|ms|us|ns))+$", re.IGNORECASE)
-    valid_columns = [(pattern.match(col) is not None) for col in columns]
+
+    # If exact day multiples are required in the forward return periods,
+    # drop all other columns (e.g. drop 3D12h).
+    if require_exact_day_multiple:
+        pattern = re.compile(r"^(\d+([D]))+$", re.IGNORECASE)
+        valid_columns = [(pattern.match(col) is not None) for col in columns]
+        
+        if sum(valid_columns) < len(valid_columns):
+            warnings.warn(
+                "Skipping return periods that aren't exact multiples" \
+                + " of days."
+            )
+    else:
+        pattern = re.compile(r"^(\d+([Dhms]|ms|us|ns]))+$", re.IGNORECASE)
+        valid_columns = [(pattern.match(col) is not None) for col in columns]
+
     return columns[valid_columns]
 
 
@@ -963,3 +1016,168 @@ def diff_custom_calendar_timedeltas(start, end, freq):
     timediff = end - start
     delta_days = timediff.components.days - actual_days
     return timediff - pd.Timedelta(days=delta_days)
+
+def subportfolio_cumulative_returns(returns, period, freq=None):
+    """
+    Builds cumulative returns from 'period' returns. This function simulates
+    the cumulative effect that a series of gains or losses (the 'returns')
+    have on an original amount of capital over a period of time.
+
+    if F is the frequency at which returns are computed (e.g. 1 day if
+    'returns' contains daily values) and N is the period for which the retuns
+    are computed (e.g. returns after 1 day, 5 hours or 3 days) then:
+    - if N <= F the cumulative retuns are trivially computed as Compound Return
+    - if N > F (e.g. F 1 day, and N is 3 days) then the returns overlap and the
+      cumulative returns are computed building and averaging N interleaved sub
+      portfolios (started at subsequent periods 1,2,..,N) each one rebalancing
+      every N periods. This correspond to an algorithm which trades the factor
+      every single time it is computed, which is statistically more robust and
+      with a lower volatity compared to an algorithm that trades the factor
+      every N periods and whose returns depend on the specific starting day of
+      trading.
+
+    Also note that when the factor is not computed at a specific frequency, for
+    exaple a factor representing a random event, it is not efficient to create
+    multiples sub-portfolios as it is not certain when the factor will be
+    traded and this would result in an underleveraged portfolio. In this case
+    the simulated portfolio is fully invested whenever an event happens and if
+    a subsequent event occur while the portfolio is still invested in a
+    previous event then the portfolio is rebalanced and split equally among the
+    active events.
+
+    Parameters
+    ----------
+    returns: pd.Series
+        pd.Series containing factor 'period' forward returns, the index
+        contains timestamps at which the trades are computed and the values
+        correspond to returns after 'period' time
+    period: pandas.Timedelta or string
+        Length of period for which the returns are computed (1 day, 2 mins,
+        3 hours etc). It can be a Timedelta or a string in the format accepted
+        by Timedelta constructor ('1 days', '1D', '30m', '3h', '1D1h', etc)
+    freq : pandas DateOffset, optional
+        Used to specify a particular trading calendar. If not present
+        returns.index.freq will be used
+
+    Returns
+    -------
+    Cumulative returns series : pd.Series
+        Example:
+            2015-07-16 09:30:00  -0.012143
+            2015-07-16 12:30:00   0.012546
+            2015-07-17 09:30:00   0.045350
+            2015-07-17 12:30:00   0.065897
+            2015-07-20 09:30:00   0.030957
+    """
+
+    if not isinstance(period, pd.Timedelta):
+        period = pd.Timedelta(period)
+
+    if freq is None:
+        freq = returns.index.freq
+
+    if freq is None:
+        freq = BDay()
+        warnings.warn("'freq' not set, using business day calendar",
+                      UserWarning)
+
+    #
+    # returns index contains factor computation timestamps, then add returns
+    # timestamps too (factor timestamps + period) and save them to 'full_idx'
+    # Cumulative returns will use 'full_idx' index,because we want a cumulative
+    # returns value for each entry in 'full_idx'
+    #
+    trades_idx = returns.index.copy()
+    returns_idx = utils.add_custom_calendar_timedelta(trades_idx, period, freq)
+    full_idx = trades_idx.union(returns_idx)
+
+    #
+    # Build N sub_returns from the single returns Series. Each sub_retuns
+    # stream will contain non-overlapping returns.
+    # In the next step we'll compute the portfolio returns averaging the
+    # returns happening on those overlapping returns streams
+    #
+    sub_returns = []
+    print(returns.shape)
+    while len(trades_idx) > 0:
+
+        #
+        # select non-overlapping returns starting with first timestamp in index
+        #
+        sub_index = []
+        next = trades_idx.min()
+        while next <= trades_idx.max():
+            sub_index.append(next)
+            next = utils.add_custom_calendar_timedelta(next, period, freq)
+            # make sure to fetch the next available entry after 'period'
+            try:
+                i = trades_idx.get_loc(next, method='bfill')
+                next = trades_idx[i]
+            except KeyError:
+                break
+
+        sub_index = pd.DatetimeIndex(sub_index, tz=full_idx.tz)
+        subret = returns[sub_index]
+
+        # make the index to have all entries in 'full_idx'
+        subret = subret.reindex(full_idx)
+
+        #
+        # compute intermediate returns values for each index in subret that are
+        # in between the timestaps at which the factors are computed and the
+        # timestamps at which the 'period' returns actually happen
+        #
+        for pret_idx in reversed(sub_index):
+
+            pret = subret[pret_idx]
+
+            # get all timestamps between factor computation and period returns
+            pret_end_idx = \
+                utils.add_custom_calendar_timedelta(pret_idx, period, freq)
+            slice = subret[(subret.index > pret_idx) & (
+                subret.index <= pret_end_idx)].index
+
+            if pd.isnull(pret):
+                continue
+
+            def rate_of_returns(ret, period):
+                return ((np.nansum(ret) + 1)**(1. / period)) - 1
+
+            # compute intermediate 'period' returns values, note that this also
+            # moves the final 'period' returns value from trading timestamp to
+            # trading timestamp + 'period'
+            for slice_idx in slice:
+                sub_period = utils.diff_custom_calendar_timedeltas(
+                    pret_idx, slice_idx, freq)
+                subret[slice_idx] = rate_of_returns(pret, period / sub_period)
+
+            subret[pret_idx] = np.nan
+
+            # transform returns as percentage change from previous value
+            subret[slice[1:]] = (subret[slice] + 1).pct_change()[slice[1:]]
+
+        sub_returns.append(subret)
+        trades_idx = trades_idx.difference(sub_index)
+
+    #
+    # Compute portfolio cumulative returns averaging the returns happening on
+    # overlapping returns streams.
+    #
+    sub_portfolios = pd.concat(sub_returns, axis=1)
+    portfolio = pd.Series(index=sub_portfolios.index)
+
+    for i, (index, row) in enumerate(sub_portfolios.iterrows()):
+
+        # check the active portfolios, count() returns non-nans elements
+        active_subfolios = row.count()
+
+        # fill forward portfolio value
+        portfolio.iloc[i] = portfolio.iloc[i - 1] if i > 0 else 1.
+
+        if active_subfolios <= 0:
+            continue
+
+        # current portfolio is the average of active sub_portfolios
+        portfolio.iloc[i] *= (row + 1).mean(skipna=True)
+
+    return portfolio

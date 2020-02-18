@@ -152,11 +152,11 @@ def plot_turnover_table(autocorrelation_data, quantile_turnover):
     for period in sorted(quantile_turnover.keys()):
         for quantile, p_data in quantile_turnover[period].iteritems():
             turnover_table.loc["Quantile {} Mean Turnover ".format(quantile),
-                               "{}".format(period)] = p_data.mean()
+                               "{}D".format(period)] = p_data.mean()
     auto_corr = pd.DataFrame()
     for period, p_data in autocorrelation_data.iteritems():
         auto_corr.loc["Mean Factor Rank Autocorrelation",
-                      "{}".format(period)] = p_data.mean()
+                      "{}D".format(period)] = p_data.mean()
 
     print("Turnover Analysis")
     utils.print_table(turnover_table.apply(lambda x: x.round(3)))
@@ -607,7 +607,7 @@ def plot_factor_rank_auto_correlation(factor_autocorrelation,
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    factor_autocorrelation.plot(title='{} Period Factor Rank Autocorrelation'
+    factor_autocorrelation.plot(title='{}D Period Factor Rank Autocorrelation'
                                 .format(period), ax=ax)
     ax.set(ylabel='Autocorrelation Coefficient', xlabel='')
     ax.axhline(0.0, linestyle='-', color='black', lw=1)
@@ -646,7 +646,7 @@ def plot_top_bottom_quantile_turnover(quantile_turnover, period=1, ax=None):
     turnover = pd.DataFrame()
     turnover['top quantile turnover'] = quantile_turnover[max_quantile]
     turnover['bottom quantile turnover'] = quantile_turnover[min_quantile]
-    turnover.plot(title='{} Period Top and Bottom Quantile Turnover'
+    turnover.plot(title='{}D Period Top and Bottom Quantile Turnover'
                   .format(period), ax=ax, alpha=0.6, lw=0.8)
     ax.set(ylabel='Proportion Of Names New To Quantile', xlabel="")
 
@@ -711,7 +711,11 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     return ax
 
 
-def plot_cumulative_returns(factor_returns, period, freq, title=None, ax=None):
+def plot_cumulative_returns(factor_returns, 
+                            period,
+                            freq=None, 
+                            title=None, 
+                            ax=None):
     """
     Plots the cumulative returns of the returns series passed in.
 
@@ -720,7 +724,7 @@ def plot_cumulative_returns(factor_returns, period, freq, title=None, ax=None):
     factor_returns : pd.Series
         Period wise returns of dollar neutral portfolio weighted by factor
         value.
-    period: pandas.Timedelta or string
+    period : pandas.Timedelta or string
         Length of period for which the returns are computed (e.g. 1 day)
         if 'period' is a string it must follow pandas.Timedelta constructor
         format (e.g. '1 days', '1D', '30m', '3h', '1D1h', etc)
@@ -742,7 +746,7 @@ def plot_cumulative_returns(factor_returns, period, freq, title=None, ax=None):
     if ax is None:
         f, ax = plt.subplots(1, 1, figsize=(18, 6))
 
-    factor_returns = perf.cumulative_returns(factor_returns, period, freq)
+    factor_returns = perf.cumulative_returns(factor_returns)
 
     factor_returns.plot(ax=ax, lw=3, color='forestgreen', alpha=0.6)
     ax.set(ylabel='Cumulative Returns',
@@ -756,7 +760,7 @@ def plot_cumulative_returns(factor_returns, period, freq, title=None, ax=None):
 
 def plot_cumulative_returns_by_quantile(quantile_returns,
                                         period,
-                                        freq,
+                                        freq=None,
                                         ax=None):
     """
     Plots the cumulative returns of various factor quantiles.
@@ -765,7 +769,7 @@ def plot_cumulative_returns_by_quantile(quantile_returns,
     ----------
     quantile_returns : pd.DataFrame
         Returns by factor quantile
-    period: pandas.Timedelta or string
+    period : pandas.Timedelta or string
         Length of period for which the returns are computed (e.g. 1 day)
         if 'period' is a string it must follow pandas.Timedelta constructor
         format (e.g. '1 days', '1D', '30m', '3h', '1D1h', etc)
@@ -787,7 +791,9 @@ def plot_cumulative_returns_by_quantile(quantile_returns,
 
     ret_wide = quantile_returns.unstack('factor_quantile')
 
-    cum_ret = ret_wide.apply(perf.cumulative_returns, period=period, freq=freq)
+    cum_ret = ret_wide.apply(perf.cumulative_returns)
+
+
     cum_ret = cum_ret.loc[:, ::-1]  # we want negative quantiles as 'red'
 
     cum_ret.plot(lw=2, ax=ax, cmap=cm.coolwarm)

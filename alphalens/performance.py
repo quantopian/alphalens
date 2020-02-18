@@ -17,6 +17,7 @@ import pandas as pd
 import numpy as np
 import warnings
 
+import empyrical as ep
 from pandas.tseries.offsets import BDay
 from scipy import stats
 from statsmodels.regression.linear_model import OLS
@@ -329,169 +330,27 @@ def factor_alpha_beta(factor_data,
     return alpha_beta
 
 
-def cumulative_returns(returns, period, freq=None):
+def cumulative_returns(returns):
     """
-    Builds cumulative returns from 'period' returns. This function simulates
-    the cumulative effect that a series of gains or losses (the 'returns')
-    have on an original amount of capital over a period of time.
-
-    if F is the frequency at which returns are computed (e.g. 1 day if
-    'returns' contains daily values) and N is the period for which the retuns
-    are computed (e.g. returns after 1 day, 5 hours or 3 days) then:
-    - if N <= F the cumulative retuns are trivially computed as Compound Return
-    - if N > F (e.g. F 1 day, and N is 3 days) then the returns overlap and the
-      cumulative returns are computed building and averaging N interleaved sub
-      portfolios (started at subsequent periods 1,2,..,N) each one rebalancing
-      every N periods. This correspond to an algorithm which trades the factor
-      every single time it is computed, which is statistically more robust and
-      with a lower volatity compared to an algorithm that trades the factor
-      every N periods and whose returns depend on the specific starting day of
-      trading.
-
-    Also note that when the factor is not computed at a specific frequency, for
-    exaple a factor representing a random event, it is not efficient to create
-    multiples sub-portfolios as it is not certain when the factor will be
-    traded and this would result in an underleveraged portfolio. In this case
-    the simulated portfolio is fully invested whenever an event happens and if
-    a subsequent event occur while the portfolio is still invested in a
-    previous event then the portfolio is rebalanced and split equally among the
-    active events.
+    Computes cumulative returns from simple daily returns.
 
     Parameters
     ----------
     returns: pd.Series
-        pd.Series containing factor 'period' forward returns, the index
-        contains timestamps at which the trades are computed and the values
-        correspond to returns after 'period' time
-    period: pandas.Timedelta or string
-        Length of period for which the returns are computed (1 day, 2 mins,
-        3 hours etc). It can be a Timedelta or a string in the format accepted
-        by Timedelta constructor ('1 days', '1D', '30m', '3h', '1D1h', etc)
-    freq : pandas DateOffset, optional
-        Used to specify a particular trading calendar. If not present
-        returns.index.freq will be used
+        pd.Series containing daily factor returns (i.e. '1D' returns).
 
     Returns
     -------
     Cumulative returns series : pd.Series
         Example:
-            2015-07-16 09:30:00  -0.012143
-            2015-07-16 12:30:00   0.012546
-            2015-07-17 09:30:00   0.045350
-            2015-07-17 12:30:00   0.065897
-            2015-07-20 09:30:00   0.030957
+            2015-01-05   1.001310
+            2015-01-06   1.000805
+            2015-01-07   1.001092
+            2015-01-08   0.999200    
     """
 
-    if not isinstance(period, pd.Timedelta):
-        period = pd.Timedelta(period)
+    return ep.cum_returns(returns, starting_value=1)
 
-    if freq is None:
-        freq = returns.index.freq
-
-    if freq is None:
-        freq = BDay()
-        warnings.warn("'freq' not set, using business day calendar",
-                      UserWarning)
-
-    #
-    # returns index contains factor computation timestamps, then add returns
-    # timestamps too (factor timestamps + period) and save them to 'full_idx'
-    # Cumulative returns will use 'full_idx' index,because we want a cumulative
-    # returns value for each entry in 'full_idx'
-    #
-    trades_idx = returns.index.copy()
-    returns_idx = utils.add_custom_calendar_timedelta(trades_idx, period, freq)
-    full_idx = trades_idx.union(returns_idx)
-
-    #
-    # Build N sub_returns from the single returns Series. Each sub_retuns
-    # stream will contain non-overlapping returns.
-    # In the next step we'll compute the portfolio returns averaging the
-    # returns happening on those overlapping returns streams
-    #
-    sub_returns = []
-    while len(trades_idx) > 0:
-
-        #
-        # select non-overlapping returns starting with first timestamp in index
-        #
-        sub_index = []
-        next = trades_idx.min()
-        while next <= trades_idx.max():
-            sub_index.append(next)
-            next = utils.add_custom_calendar_timedelta(next, period, freq)
-            # make sure to fetch the next available entry after 'period'
-            try:
-                i = trades_idx.get_loc(next, method='bfill')
-                next = trades_idx[i]
-            except KeyError:
-                break
-
-        sub_index = pd.DatetimeIndex(sub_index, tz=full_idx.tz)
-        subret = returns[sub_index]
-
-        # make the index to have all entries in 'full_idx'
-        subret = subret.reindex(full_idx)
-
-        #
-        # compute intermediate returns values for each index in subret that are
-        # in between the timestaps at which the factors are computed and the
-        # timestamps at which the 'period' returns actually happen
-        #
-        for pret_idx in reversed(sub_index):
-
-            pret = subret[pret_idx]
-
-            # get all timestamps between factor computation and period returns
-            pret_end_idx = \
-                utils.add_custom_calendar_timedelta(pret_idx, period, freq)
-            slice = subret[(subret.index > pret_idx) & (
-                subret.index <= pret_end_idx)].index
-
-            if pd.isnull(pret):
-                continue
-
-            def rate_of_returns(ret, period):
-                return ((np.nansum(ret) + 1)**(1. / period)) - 1
-
-            # compute intermediate 'period' returns values, note that this also
-            # moves the final 'period' returns value from trading timestamp to
-            # trading timestamp + 'period'
-            for slice_idx in slice:
-                sub_period = utils.diff_custom_calendar_timedeltas(
-                    pret_idx, slice_idx, freq)
-                subret[slice_idx] = rate_of_returns(pret, period / sub_period)
-
-            subret[pret_idx] = np.nan
-
-            # transform returns as percentage change from previous value
-            subret[slice[1:]] = (subret[slice] + 1).pct_change()[slice[1:]]
-
-        sub_returns.append(subret)
-        trades_idx = trades_idx.difference(sub_index)
-
-    #
-    # Compute portfolio cumulative returns averaging the returns happening on
-    # overlapping returns streams.
-    #
-    sub_portfolios = pd.concat(sub_returns, axis=1)
-    portfolio = pd.Series(index=sub_portfolios.index)
-
-    for i, (index, row) in enumerate(sub_portfolios.iterrows()):
-
-        # check the active portfolios, count() returns non-nans elements
-        active_subfolios = row.count()
-
-        # fill forward portfolio value
-        portfolio.iloc[i] = portfolio.iloc[i - 1] if i > 0 else 1.
-
-        if active_subfolios <= 0:
-            continue
-
-        # current portfolio is the average of active sub_portfolios
-        portfolio.iloc[i] *= (row + 1).mean(skipna=True)
-
-    return portfolio
 
 
 def positions(weights, period, freq=None):
@@ -709,7 +568,7 @@ def compute_mean_returns_spread(mean_returns,
 
 def quantile_turnover(quantile_factor, quantile, period=1):
     """
-    Computes the proportion of names in a factor quantile that were
+    Computes the daily proportion of names in a factor quantile that were
     not in that quantile in the previous period.
 
     Parameters
@@ -718,10 +577,8 @@ def quantile_turnover(quantile_factor, quantile, period=1):
         DataFrame with date, asset and factor quantile.
     quantile : int
         Quantile on which to perform turnover analysis.
-    period: string or int, optional
-        Period over which to calculate the turnover. If it is a string it must
-        follow pandas.Timedelta constructor format (e.g. '1 days', '1D', '30m',
-        '3h', '1D1h', etc).
+    period: int, optional
+        Number of days over which to calculate the turnover.
     Returns
     -------
     quant_turnover : pd.Series
@@ -732,14 +589,7 @@ def quantile_turnover(quantile_factor, quantile, period=1):
     quant_name_sets = quant_names.groupby(level=['date']).apply(
         lambda x: set(x.index.get_level_values('asset')))
 
-    if isinstance(period, int):
-        name_shifted = quant_name_sets.shift(period)
-    else:
-        shifted_idx = utils.add_custom_calendar_timedelta(
-                quant_name_sets.index, -pd.Timedelta(period),
-                quantile_factor.index.levels[0].freq)
-        name_shifted = quant_name_sets.reindex(shifted_idx)
-        name_shifted.index = quant_name_sets.index
+    name_shifted = quant_name_sets.shift(period)
 
     new_names = (quant_name_sets - name_shifted).dropna()
     quant_turnover = new_names.apply(
@@ -765,10 +615,8 @@ def factor_rank_autocorrelation(factor_data, period=1):
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
-    period: string or int, optional
-        Period over which to calculate the turnover. If it is a string it must
-        follow pandas.Timedelta constructor format (e.g. '1 days', '1D', '30m',
-        '3h', '1D1h', etc).
+    period: int, optional
+        Number of days over which to calculate the turnover.
     Returns
     -------
     autocorr : pd.Series
@@ -785,14 +633,7 @@ def factor_rank_autocorrelation(factor_data, period=1):
                                                   columns='asset',
                                                   values='factor')
 
-    if isinstance(period, int):
-        asset_shifted = asset_factor_rank.shift(period)
-    else:
-        shifted_idx = utils.add_custom_calendar_timedelta(
-                asset_factor_rank.index, -pd.Timedelta(period),
-                factor_data.index.levels[0].freq)
-        asset_shifted = asset_factor_rank.reindex(shifted_idx)
-        asset_shifted.index = asset_factor_rank.index
+    asset_shifted = asset_factor_rank.shift(period)
 
     autocorr = asset_factor_rank.corrwith(asset_shifted, axis=1)
     autocorr.name = period
@@ -800,7 +641,7 @@ def factor_rank_autocorrelation(factor_data, period=1):
 
 
 def common_start_returns(factor,
-                         prices,
+                         returns,
                          before,
                          after,
                          cumulative=False,
@@ -845,10 +686,8 @@ def common_start_returns(factor,
         index: -before to after
     """
 
-    if cumulative:
-        returns = prices
-    else:
-        returns = prices.pct_change(axis=0)
+    if not cumulative:
+        returns = returns.apply(cumulative_returns, axis=0)
 
     all_returns = []
 
@@ -893,7 +732,7 @@ def common_start_returns(factor,
 
 
 def average_cumulative_return_by_quantile(factor_data,
-                                          prices,
+                                          returns,
                                           periods_before=10,
                                           periods_after=15,
                                           demeaned=True,
@@ -952,16 +791,18 @@ def average_cumulative_return_by_quantile(factor_data,
             ---------------------------------------------------
     """
 
-    def cumulative_return(q_fact, demean_by):
-        return common_start_returns(q_fact, prices,
+    def cumulative_return_around_event(q_fact, demean_by):
+        return common_start_returns(q_fact, returns,
                                     periods_before,
                                     periods_after,
                                     True, True, demean_by)
 
     def average_cumulative_return(q_fact, demean_by):
-        q_returns = cumulative_return(q_fact, demean_by)
-        return pd.DataFrame({'mean': q_returns.mean(axis=1),
-                             'std': q_returns.std(axis=1)}).T
+        q_returns = cumulative_return_around_event(q_fact, demean_by)
+        q_returns.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+        return pd.DataFrame({'mean': q_returns.mean(skipna=True, axis=1),
+                             'std': q_returns.std(skipna=True, axis=1)}).T
 
     if by_group:
         #
