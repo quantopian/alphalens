@@ -1,18 +1,15 @@
 language: python
 sudo: false
 
-python: 
+python:
   - 2.7
   - 3.5
   - 3.6
 
 env:
-  global:
-    - STATSMODELS=statsmodels
-  jobs:
-    - PANDAS_VERSION=0.18.1
-    - PANDAS_VERSION=0.19.2
-    - PANDAS_VERSION=0.20.3
+  - PANDAS_VERSION=0.18.1
+  - PANDAS_VERSION=0.19.2
+  - PANDAS_VERSION=0.20.3
 
 matrix:
   exclude:
@@ -27,8 +24,10 @@ before_install:
     else
       wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
     fi
-  - if [[ "$PANDAS_VERSION" == "0.18.1" ]]; then
-      STATSMODELS="statsmodels==0.9.0"
+  - if [[ $PANDAS_VERSION == "0.18.1" ]]; then
+      STATSMODELS="statsmodels==0.9.0";
+    else
+      STATSMODELS="statsmodels";
     fi
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
