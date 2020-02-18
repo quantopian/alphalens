@@ -7,9 +7,12 @@ python:
   - 3.6
 
 env:
-  - PANDAS_VERSION=0.18.1
-  - PANDAS_VERSION=0.19.2
-  - PANDAS_VERSION=0.20.3
+  global:
+    - STATSMODELS=statsmodels
+  jobs:
+    - PANDAS_VERSION=0.18.1
+    - PANDAS_VERSION=0.19.2
+    - PANDAS_VERSION=0.20.3
 
 matrix:
   exclude:
@@ -24,6 +27,9 @@ before_install:
     else
       wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
     fi
+  - if [[ "$PANDAS_VERSION" == "0.18.1" ]]; then
+      STATSMODELS="statsmodels==0.9.0"
+    fi
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
@@ -34,7 +40,7 @@ before_install:
   - cp alphalens/tests/matplotlibrc .
 
 install:
-  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython flake8 numpy scipy nose matplotlib pandas=$PANDAS_VERSION statsmodels seaborn
+  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython flake8 numpy scipy nose matplotlib pandas=$PANDAS_VERSION $STATSMODELS seaborn
   - source activate testenv
   - pip install parameterized
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes mock; fi
