@@ -701,21 +701,5 @@ def create_event_study_tear_sheet(factor_data,
             UserWarning
         )
 
-
-    if '1D' in factor_returns:
-        plotting.plot_cumulative_returns(
-            factor_returns['1D'],
-            period='1D',
-            freq=trading_calendar,
-            ax=gf.next_row(),
-        )
-
-        plotting.plot_cumulative_returns(
-            factor_returns['1D'],
-            period='1D',
-            freq=trading_calendar,
-            ax=gf.next_row(),
-        )
-
     plt.show()
     gf.close()

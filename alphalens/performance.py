@@ -568,7 +568,7 @@ def compute_mean_returns_spread(mean_returns,
 
 def quantile_turnover(quantile_factor, quantile, period=1):
     """
-    Computes the daily proportion of names in a factor quantile that were
+    Computes the proportion of names in a factor quantile that were
     not in that quantile in the previous period.
 
     Parameters
