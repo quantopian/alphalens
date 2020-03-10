@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [2.7, 3.5, 3.7, 3.8]
+        include:
+          - python-version: 2.7
+            pandas: 0.18.1
+            numpy: 1.11.3
+            scipy: 0.17.1
+            statsmodels: 0.6.1
+          - python-version: 3.5
+            pandas: 0.18.1
+            numpy: 1.11.3
+            scipy: 0.17.1
+            statsmodels: 0.6.1
+          - python-version: 3.7
+            pandas: 1.0.1
+            numpy: 1.18.1
+            scipy: 1.4.1
+            statsmodels: 0.11.1
+          - python-version: 3.8
+            pandas: 1.0.1
+            numpy: 1.18.1
+            scipy: 1.4.1
+            statsmodels: 0.11.1
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      env:
+        PYTHONWARNINGS: ignore:DEPRECATION::pip._internal.cli.base_command
+      run: |
+        python -m pip install --upgrade pip
+        pip install numpy==${{ matrix.numpy }}
+        pip install pandas==${{ matrix.pandas }} scipy==${{ matrix.scipy }} statsmodels==${{ matrix.statsmodels}}
+        pip install -e .[test]
+    - name: Lint with flake8
+      run: |
+        flake8
+    - name: Test with nose
+      run: |
+        MATPLOTLIBRC=alphalens/tests/matplotlibrc nosetests alphalens/tests
