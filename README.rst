@@ -3,10 +3,10 @@
 
 Alphalens
 =========
-.. image:: https://travis-ci.org/quantopian/alphalens.svg?branch=master
-    :target: https://travis-ci.org/quantopian/alphalens
-   
-    
+.. image:: https://github.com/quantopian/alphalens/workflows/CI/badge.svg
+    :alt: GitHub Actions status
+    :target: https://github.com/quantopian/alphalens/actions?query=workflow%3ACI+branch%3Amaster
+
 Alphalens is a Python Library for performance analysis of predictive
 (alpha) stock factors. Alphalens works great with the
 `Zipline <https://www.zipline.io/>`__ open source backtesting library, and
