@@ -344,9 +344,11 @@ def compute_forward_returns(factor,
 
 
 def backshift_returns_series(series, N):
-    """Shift a multi-indexed series backwards by N observations in the first level.
-    
-    This can be used to convert backward-looking returns into a forward-returns series.
+    """Shift a multi-indexed series backwards by N observations in
+    the first level.
+
+    This can be used to convert backward-looking returns into a
+    forward-returns series.
     """
     ix = series.index
     dates, sids = ix.levels
@@ -901,10 +903,10 @@ def get_forward_returns_columns(columns, require_exact_day_multiple=False):
     if require_exact_day_multiple:
         pattern = re.compile(r"^(\d+([D]))+$", re.IGNORECASE)
         valid_columns = [(pattern.match(col) is not None) for col in columns]
-        
+
         if sum(valid_columns) < len(valid_columns):
             warnings.warn(
-                "Skipping return periods that aren't exact multiples" \
+                "Skipping return periods that aren't exact multiples"
                 + " of days."
             )
     else:

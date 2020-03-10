@@ -711,10 +711,10 @@ def plot_monthly_ic_heatmap(mean_monthly_ic, ax=None):
     return ax
 
 
-def plot_cumulative_returns(factor_returns, 
+def plot_cumulative_returns(factor_returns,
                             period,
-                            freq=None, 
-                            title=None, 
+                            freq=None,
+                            title=None,
                             ax=None):
     """
     Plots the cumulative returns of the returns series passed in.
@@ -792,7 +792,6 @@ def plot_cumulative_returns_by_quantile(quantile_returns,
     ret_wide = quantile_returns.unstack('factor_quantile')
 
     cum_ret = ret_wide.apply(perf.cumulative_returns)
-
 
     cum_ret = cum_ret.loc[:, ::-1]  # we want negative quantiles as 'red'
 

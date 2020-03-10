@@ -346,11 +346,10 @@ def cumulative_returns(returns):
             2015-01-05   1.001310
             2015-01-06   1.000805
             2015-01-07   1.001092
-            2015-01-08   0.999200    
+            2015-01-08   0.999200
     """
 
     return ep.cum_returns(returns, starting_value=1)
-
 
 
 def positions(weights, period, freq=None):
@@ -845,7 +844,9 @@ def average_cumulative_return_by_quantile(factor_data,
             all_returns = []
             for group, g_data in factor_data.groupby('group'):
                 g_fq = g_data['factor_quantile']
-                avgcumret = g_fq.groupby(g_fq).apply(cumulative_return, g_fq)
+                avgcumret = g_fq.groupby(g_fq).apply(
+                    cumulative_return_around_event, g_fq
+                )
                 all_returns.append(avgcumret)
             q_returns = pd.concat(all_returns, axis=1)
             q_returns = pd.DataFrame({'mean': q_returns.mean(axis=1),
