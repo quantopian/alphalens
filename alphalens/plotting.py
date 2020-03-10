@@ -13,25 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import numpy as np
 import pandas as pd
 from scipy import stats
 import statsmodels.api as sm
 
-import matplotlib
-if os.environ.get('DISPLAY', '') == '':
-    print('no display found. Using non-interactive Agg backend')
-    matplotlib.use('Agg')
-import seaborn as sns  # noqa: E402
-import matplotlib.cm as cm  # noqa: E402
-import matplotlib.pyplot as plt  # noqa: E402
-from matplotlib.ticker import ScalarFormatter  # noqa: E402
+import seaborn as sns
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+from matplotlib.ticker import ScalarFormatter
 
-from functools import wraps  # noqa: E402
+from functools import wraps
 
-from . import utils  # noqa: E402
-from . import performance as perf  # noqa: E402
+from . import utils
+from . import performance as perf
 
 DECIMAL_TO_BPS = 10000
 

@@ -12,19 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
-import matplotlib
-if os.environ.get('DISPLAY', '') == '':
-    print('no display found. Using non-interactive Agg backend')
-    matplotlib.use('Agg')
-import matplotlib.gridspec as gridspec  # noqa: E402
-import matplotlib.pyplot as plt  # noqa: E402
-import pandas as pd  # noqa: E402
-import warnings  # noqa: E402
 
-from . import plotting  # noqa: E402
-from . import performance as perf  # noqa: E402
-from . import utils  # noqa: E402
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
+import pandas as pd
+import warnings
+
+from . import plotting
+from . import performance as perf
+from . import utils
 
 
 class GridFigure(object):
