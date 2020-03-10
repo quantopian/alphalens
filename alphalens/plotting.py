@@ -23,7 +23,7 @@ import matplotlib
 if os.environ.get('DISPLAY', '') == '':
     print('no display found. Using non-interactive Agg backend')
     matplotlib.use('Agg')
-import seaborn as sns
+import seaborn as sns  # noqa: E402
 import matplotlib.cm as cm  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.ticker import ScalarFormatter  # noqa: E402
