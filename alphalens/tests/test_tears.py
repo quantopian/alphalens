@@ -136,8 +136,8 @@ class TearsTestCase(TestCase):
     event_factor = DataFrame(index=factor_index, columns=tickers,
                              data=event_data).stack()
 
-    all_prices = [prices, bprices, intraday_prices]
-    all_factors = [factor, bfactor, intraday_factor]
+    all_prices = [prices, bprices]
+    all_factors = [factor, bfactor]
     all_events = [event_factor, bevent_factor]
 
     def __localize_prices_and_factor(self, prices, factor, tz):
@@ -186,10 +186,12 @@ class TearsTestCase(TestCase):
         create_information_tear_sheet(
             factor_data, group_neutral=False, by_group=False)
 
-    @parameterized.expand([(2, (2, 3, 6),    None, 20),
-                           (4, (1, 2, 3, 7), None, None),
-                           (2, (2, 3, 6),    ['1D', '2D'], 20),
-                           (4, (1, 2, 3, 7), ['1D'], None)])
+    @parameterized.expand([
+        (2, (2, 3, 6), None, 20),
+        (4, (1, 2, 3, 7), None, None),
+        (2, (2, 3, 6), ['1D', '2D'], 20),
+        (4, (1, 2, 3, 7), ['1D'], None),
+    ])
     def test_create_turnover_tear_sheet(
             self,
             quantiles,
@@ -230,10 +232,12 @@ class TearsTestCase(TestCase):
         create_summary_tear_sheet(
             factor_data, long_short=False, group_neutral=False)
 
-    @parameterized.expand([(2, (1, 5, 10), None, None),
-                           (3, (2, 4, 6), 20, 'US/Eastern'),
-                           (4, (1, 8), 20, None),
-                           (4, (1, 2, 3, 7), None, 'US/Eastern')])
+    @parameterized.expand([
+        (2, (1, 5, 10), None, None),
+        (3, (2, 4, 6), 20, 'US/Eastern'),
+        (4, (1, 8), 20, None),
+        (4, (1, 2, 3, 7), None, 'US/Eastern'),
+    ])
     def test_create_full_tear_sheet(
             self,
             quantiles,

@@ -674,8 +674,7 @@ def get_clean_factor_and_forward_returns(factor,
                                          groupby_labels=None,
                                          max_loss=0.35,
                                          zero_aware=False,
-                                         cumulative_returns=True,
-                                         is_returns=False):
+                                         cumulative_returns=True):
     """
     Formats the factor data, pricing data, and group mappings into a DataFrame
     that contains aligned MultiIndex indices of timestamp and asset. The
@@ -819,16 +818,19 @@ def get_clean_factor_and_forward_returns(factor,
                       --------------------------------------------------------
                       | LULU  |-0.03| 0.05|-0.009|  2.7 |  G1 |      2
                       --------------------------------------------------------
-    """
 
-    if not is_returns:
-        forward_returns = compute_forward_returns(factor, prices, periods,
-                                                  filter_zscore,
-                                                  cumulative_returns)
-    else:
-        forward_returns = prices
-        forward_returns.index.levels[0].name = "date"
-        forward_returns.index.levels[1].name = "asset"
+    See Also
+    --------
+    utils.get_clean_factor
+        For use when forward returns are already available.
+    """
+    forward_returns = compute_forward_returns(
+        factor,
+        prices,
+        periods,
+        filter_zscore,
+        cumulative_returns,
+    )
 
     factor_data = get_clean_factor(factor, forward_returns, groupby=groupby,
                                    groupby_labels=groupby_labels,
@@ -947,6 +949,23 @@ def timedelta_to_string(timedelta):
     if c.nanoseconds > 0:
         format += '%dns' % c.nanoseconds
     return format
+
+
+def timedelta_strings_to_integers(sequence):
+    """
+    Converts pandas string representations of timedeltas into integers of days.
+
+    Parameters
+    ----------
+    sequence : iterable
+        List or array of timedelta string representations, e.g. ['1D', '5D'].
+
+    Returns
+    -------
+    sequence : list
+        Integer days corresponding to the input sequence, e.g. [1, 5].
+    """
+    return list(map(lambda x: pd.Timedelta(x).days, sequence))
 
 
 def add_custom_calendar_timedelta(input, timedelta, freq):

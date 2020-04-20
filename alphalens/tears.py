@@ -124,6 +124,7 @@ def create_summary_tear_sheet(
     )
 
     periods = utils.get_forward_returns_columns(factor_data.columns)
+    periods = list(map(lambda p: pd.Timedelta(p).days, periods))
 
     fr_cols = len(periods)
     vertical_sections = 2 + fr_cols * 3
@@ -430,9 +431,11 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None):
     if turnover_periods is None:
         input_periods = utils.get_forward_returns_columns(
             factor_data.columns, require_exact_day_multiple=True,
-        )
-        turnover_periods = list(
-            map((lambda x: pd.Timedelta(x).days), input_periods.get_values())
+        ).get_values()
+        turnover_periods = utils.timedelta_strings_to_integers(input_periods)
+    else:
+        turnover_periods = utils.timedelta_strings_to_integers(
+            turnover_periods,
         )
 
     quantile_factor = factor_data["factor_quantile"]
@@ -483,9 +486,10 @@ def create_turnover_tear_sheet(factor_data, turnover_periods=None):
 
 
 @plotting.customize
-def create_full_tear_sheet(
-    factor_data, long_short=True, group_neutral=False, by_group=False
-):
+def create_full_tear_sheet(factor_data,
+                           long_short=True,
+                           group_neutral=False,
+                           by_group=False):
     """
     Creates a full tear sheet for analysis and evaluating single
     return predicting (alpha) factor.
@@ -523,15 +527,13 @@ def create_full_tear_sheet(
 
 
 @plotting.customize
-def create_event_returns_tear_sheet(
-    factor_data,
-    returns,
-    avgretplot=(5, 15),
-    long_short=True,
-    group_neutral=False,
-    std_bar=True,
-    by_group=False,
-):
+def create_event_returns_tear_sheet(factor_data,
+                                    returns,
+                                    avgretplot=(5, 15),
+                                    long_short=True,
+                                    group_neutral=False,
+                                    std_bar=True,
+                                    by_group=False):
     """
     Creates a tear sheet to view the average cumulative returns for a
     factor within a window (pre and post event).
@@ -544,9 +546,9 @@ def create_event_returns_tear_sheet(
         quantile/bin that factor value belongs to and (optionally) the group
         the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
-    prices : pd.DataFrame
-        A DataFrame indexed by date with assets in the columns containing the
-        pricing data.
+    returns : pd.DataFrame
+        A DataFrame indexed by date with assets in the columns containing daily
+        returns.
         - See full explanation in utils.get_clean_factor_and_forward_returns
     avgretplot: tuple (int, int) - (before, after)
         If not None, plot quantile average cumulative returns
@@ -631,9 +633,11 @@ def create_event_returns_tear_sheet(
 
 
 @plotting.customize
-def create_event_study_tear_sheet(
-    factor_data, returns, avgretplot=(5, 15), rate_of_ret=True, n_bars=50
-):
+def create_event_study_tear_sheet(factor_data,
+                                  returns,
+                                  avgretplot=(5, 15),
+                                  rate_of_ret=True,
+                                  n_bars=50):
     """
     Creates an event study tear sheet for analysis of a specific event.
 
@@ -644,9 +648,9 @@ def create_event_study_tear_sheet(
         containing the values for a single event, forward returns for each
         period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
-    prices : pd.DataFrame, required only if 'avgretplot' is provided
-        A DataFrame indexed by date with assets in the columns containing the
-        pricing data.
+    returns : pd.DataFrame, required only if 'avgretplot' is provided
+        A DataFrame indexed by date with assets in the columns containing daily
+        returns.
         - See full explanation in utils.get_clean_factor_and_forward_returns
     avgretplot: tuple (int, int) - (before, after), optional
         If not None, plot event style average cumulative returns within a

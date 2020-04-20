@@ -578,6 +578,7 @@ def quantile_turnover(quantile_factor, quantile, period=1):
         Quantile on which to perform turnover analysis.
     period: int, optional
         Number of days over which to calculate the turnover.
+
     Returns
     -------
     quant_turnover : pd.Series
@@ -616,14 +617,13 @@ def factor_rank_autocorrelation(factor_data, period=1):
         - See full explanation in utils.get_clean_factor_and_forward_returns
     period: int, optional
         Number of days over which to calculate the turnover.
+
     Returns
     -------
     autocorr : pd.Series
         Rolling 1 period (defined by time_rule) autocorrelation of
         factor values.
-
     """
-
     grouper = [factor_data.index.get_level_values('date')]
 
     ranks = factor_data.groupby(grouper)['factor'].rank()
@@ -658,17 +658,18 @@ def common_start_returns(factor,
     factor : pd.DataFrame
         DataFrame with at least date and equity as index, the columns are
         irrelevant
-    prices : pd.DataFrame
-        A wide form Pandas DataFrame indexed by date with assets
-        in the columns. Pricing data should span the factor
-        analysis time period plus/minus an additional buffer window
-        corresponding to after/before period parameters.
+    returns : pd.DataFrame
+        A wide form Pandas DataFrame indexed by date with assets in the
+        columns. Returns data should span the factor analysis time period
+        plus/minus an additional buffer window corresponding to after/before
+        period parameters.
     before:
         How many returns to load before factor date
     after:
         How many returns to load after factor date
     cumulative: bool, optional
-        Return cumulative returns
+        Whether or not the given returns are cumulative. If False the given
+        returns are assumed to be daily.
     mean_by_date: bool, optional
         If True, compute mean returns for each date and return that
         instead of a return series for each asset
@@ -684,7 +685,6 @@ def common_start_returns(factor,
         Dataframe containing returns series for each factor aligned to the same
         index: -before to after
     """
-
     if not cumulative:
         returns = returns.apply(cumulative_returns, axis=0)
 
@@ -713,9 +713,6 @@ def common_start_returns(factor,
                              equities_slice]
         series.index = range(starting_index - day_zero_index,
                              ending_index - day_zero_index)
-
-        if cumulative:
-            series = (series / series.loc[0, :]) - 1
 
         if demean_by is not None:
             mean = series.loc[:, demean_equities].mean(axis=1)
@@ -749,11 +746,11 @@ def average_cumulative_return_by_quantile(factor_data,
         each period, the factor quantile/bin that factor value belongs to, and
         (optionally) the group the asset belongs to.
         - See full explanation in utils.get_clean_factor_and_forward_returns
-    prices : pd.DataFrame
-        A wide form Pandas DataFrame indexed by date with assets
-        in the columns. Pricing data should span the factor
-        analysis time period plus/minus an additional buffer window
-        corresponding to periods_after/periods_before parameters.
+    returns : pd.DataFrame
+        A wide form Pandas DataFrame indexed by date with assets in the
+        columns. Returns data should span the factor analysis time period
+        plus/minus an additional buffer window corresponding to periods_after/
+        periods_before parameters.
     periods_before : int, optional
         How many periods before factor to plot
     periods_after  : int, optional
@@ -765,6 +762,7 @@ def average_cumulative_return_by_quantile(factor_data,
         neutral portfolio)
     by_group : bool
         If True, compute cumulative returns separately for each group
+
     Returns
     -------
     cumulative returns and std deviation : pd.DataFrame
@@ -791,10 +789,15 @@ def average_cumulative_return_by_quantile(factor_data,
     """
 
     def cumulative_return_around_event(q_fact, demean_by):
-        return common_start_returns(q_fact, returns,
-                                    periods_before,
-                                    periods_after,
-                                    True, True, demean_by)
+        return common_start_returns(
+            q_fact,
+            returns,
+            periods_before,
+            periods_after,
+            cumulative=True,
+            mean_by_date=True,
+            demean_by=demean_by,
+        )
 
     def average_cumulative_return(q_fact, demean_by):
         q_returns = cumulative_return_around_event(q_fact, demean_by)
