@@ -155,8 +155,8 @@ def factor_weights(factor_data,
         if 'demeaned' is enabled the factor values demeaning will occur on the
         group level.
     equal_weight : bool, optional
-        if True the assets will be equal-weighted instead of factor-weighted
-        If demeaned is True then the factor universe will be split in two
+        If True the assets will be equal-weighted instead of factor-weighted
+        if demeaned is True then the factor universe will be split in two
         equal sized groups, top assets with positive weights and bottom assets
         with negative weights
 
@@ -172,7 +172,7 @@ def factor_weights(factor_data,
             group = group.copy()
 
             if _demeaned:
-                # top assets positive weights, bottom ones negative
+                # Top assets positive weights, bottom ones negative
                 group = group - group.median()
 
             negative_mask = group < 0
@@ -181,7 +181,7 @@ def factor_weights(factor_data,
             group[positive_mask] = 1.0
 
             if _demeaned:
-                # positive weights must equal negative weights
+                # Positive weights must equal negative weights
                 if negative_mask.any():
                     group[negative_mask] /= negative_mask.sum()
                 if positive_mask.any():
