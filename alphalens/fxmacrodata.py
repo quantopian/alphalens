@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import urllib.error
 import os
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -142,11 +143,18 @@ def _format_path(path_template, kwargs):
         ) from exc
 
 
+def _check_payload(payload):
+    if not isinstance(payload, (dict, list)):
+        raise ValueError("FXMacroData returned an invalid response")
+    if isinstance(payload, dict) and ("detail" in payload or "error" in payload):
+        raise ValueError("FXMacroData returned an error response")
+    return payload
+
+
 def _payload_rows(payload):
+    payload = _check_payload(payload)
     if isinstance(payload, list):
         return payload
-    if not isinstance(payload, dict):
-        return []
     data = payload.get("data")
     if isinstance(data, list):
         return data
@@ -204,16 +212,28 @@ class FXMacroDataClient:
     """Small client for the public FXMacroData read/data API surface."""
 
     def __init__(self, api_key=None, base_url=FXMACRODATA_BASE_URL, timeout=30):
-        self.api_key = api_key or _env_api_key()
+        self.api_key = (api_key or _env_api_key() or "").strip() or None
+        if self.api_key and any(ch.isspace() or not ch.isprintable() for ch in self.api_key):
+            raise ValueError("FXMacroData API key contains whitespace or control characters")
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
 
     def _headers(self, extra=None):
         headers = {"User-Agent": "fxmacrodata-integration"}
-        if self.api_key:
-            headers["X-API-Key"] = self.api_key
         headers.update(extra or {})
         return headers
+
+    def _open(self, request):
+        if self.api_key:
+            request.add_unredirected_header("X-API-Key", self.api_key)
+        try:
+            with urlopen(request, timeout=self.timeout) as response:  # nosec B310
+                payload = json.loads(response.read().decode("utf-8"))
+        except urllib.error.URLError:
+            raise urllib.error.URLError("FXMacroData request failed") from None
+        except (ValueError, UnicodeError):
+            raise ValueError("FXMacroData returned invalid JSON") from None
+        return payload
 
     def fetch_dataset(self, dataset, **kwargs):
         dataset = _dataset_name(dataset)
@@ -228,8 +248,7 @@ class FXMacroDataClient:
         if query:
             url = "%s?%s" % (url, urlencode(query))
         request = Request(url, headers=self._headers())
-        with urlopen(request, timeout=self.timeout) as response:  # nosec B310
-            return json.loads(response.read().decode("utf-8"))
+        return _check_payload(self._open(request))
 
     def graphql(self, query, variables=None):
         body = json.dumps({"query": query, "variables": variables or {}}).encode(
@@ -241,8 +260,7 @@ class FXMacroDataClient:
             headers=self._headers({"Content-Type": "application/json"}),
             method="POST",
         )
-        with urlopen(request, timeout=self.timeout) as response:  # nosec B310
-            return json.loads(response.read().decode("utf-8"))
+        return _check_payload(self._open(request))
 
     def to_dataframe(self, payload, limit=None, index=True):
         return _frame_from_payload(payload, limit=limit, index=index)
